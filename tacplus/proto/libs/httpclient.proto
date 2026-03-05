@@ -1,0 +1,109 @@
+// Copyright (c) 2024 Second Star Cavalier, LLC.
+
+syntax = "proto3";
+
+package httpclient;
+option go_package = "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/httpclient";
+
+import "libs/x509.proto";
+
+// HttpClientConfig represents configuration for an HTTP client.
+// It provides settings for TLS verification, keep-alive behavior, certificates, and timeouts.
+// This configuration is typically used to create HTTP clients for making outbound requests
+// with specific security and performance requirements.
+message HttpClientConfig {
+  // InsecureSkipVerify controls whether the client verifies the server's certificate chain and host name.
+  // If true, TLS accepts any certificate presented by the server and any host name in that certificate.
+  // This should only be used for testing or in trusted environments.
+  // WARNING: Setting this to true makes TLS susceptible to machine-in-the-middle attacks.
+  bool insecure_skip_verify = 1;
+
+  // DisableKeepAlives, if true, disables HTTP keep-alives and will close the connection
+  // after each request. This can reduce server load but increases latency for repeated requests.
+  // Default is false (keep-alives enabled).
+  bool disable_keep_alives = 2;
+
+  // RootCerts is a list of X.509 certificates to use as root CAs for verifying server certificates.
+  // If empty, the system's default root CAs will be used.
+  // Use this to trust custom or internal certificate authorities.
+  repeated x509.X509Cert root_certs = 3;
+
+  // ClientCert is an X.509 certificate pair (certificate + private key) for client authentication.
+  // Use this when the server requires mutual TLS (mTLS) authentication.
+  // The certificate must include both the public certificate and private key.
+  x509.X509CertPair client_cert = 4;
+
+  // TimeoutSeconds is the maximum time in seconds for the entire HTTP request/response cycle.
+  // This includes connection time, request writing, server processing, and response reading.
+  // A value of 0 means no timeout (wait indefinitely).
+  // Recommended: Set a reasonable timeout (e.g., 30 seconds) to prevent hanging requests.
+  int64 timeout_seconds = 5;
+
+  // MaxIdleConns controls the maximum number of idle (keep-alive) connections across all hosts.
+  // A value of 0 means no limit. Default is typically 100 if not specified.
+  int32 max_idle_conns = 6;
+
+  // MaxIdleConnsPerHost controls the maximum number of idle (keep-alive) connections per host.
+  // A value of 0 means use the default (typically 2). Increase for high-throughput scenarios.
+  int32 max_idle_conns_per_host = 7;
+
+  // IdleConnTimeoutSeconds is the maximum time in seconds an idle connection will remain
+  // in the connection pool before being closed. A value of 0 means no limit.
+  int64 idle_conn_timeout_seconds = 8;
+
+  // TlsHandshakeTimeoutSeconds is the maximum time in seconds to wait for a TLS handshake.
+  // A value of 0 means no timeout. Recommended: 10 seconds.
+  int64 tls_handshake_timeout_seconds = 9;
+
+  // ExpectContinueTimeoutSeconds is the maximum time in seconds to wait for a server's
+  // first response headers after fully writing the request headers if the request has
+  // "Expect: 100-continue" header. A value of 0 means no timeout.
+  int64 expect_continue_timeout_seconds = 10;
+
+  // ResponseHeaderTimeoutSeconds is the maximum time in seconds to wait for a server's
+  // response headers after fully writing the request (including body, if any).
+  // A value of 0 means no timeout.
+  int64 response_header_timeout_seconds = 11;
+
+  // RetryConfig configures retry behavior for HTTP requests.
+  // If not specified, default retry configuration will be used (3 retries, exponential backoff).
+  RetryConfig retry_config = 12;
+
+  // DisableValidation controls whether HTTP client responses are validated after retrieval.
+  // If false (default), responses are validated using ValidateType(*type) after being retrieved.
+  // If true, validation is skipped and raw responses are returned without validation.
+  // WARNING: Disabling validation may allow invalid data to propagate through your system.
+  bool disable_validation = 13;
+}
+
+// RetryConfig configures retry behavior for HTTP requests with exponential backoff.
+// This configuration controls how failed requests are retried, including which errors
+// and status codes trigger retries, and the backoff timing between attempts.
+message RetryConfig {
+  // MaxRetries is the maximum number of retry attempts after the initial request.
+  // A value of 0 means no retries (only the initial request is made).
+  // Default: 3
+  int32 max_retries = 1;
+
+  // InitialBackoffMs is the initial backoff duration in milliseconds before the first retry.
+  // This value is multiplied by BackoffMultiplier for each subsequent retry.
+  // Default: 100ms
+  int64 initial_backoff_ms = 2;
+
+  // MaxBackoffMs is the maximum backoff duration in milliseconds.
+  // The backoff will never exceed this value, even after many retries.
+  // Default: 5000ms (5 seconds)
+  int64 max_backoff_ms = 3;
+
+  // BackoffMultiplier is the multiplier applied to the backoff duration after each retry.
+  // For exponential backoff, use values like 2.0 (doubles each time).
+  // For linear backoff, use 1.0 (stays constant).
+  // Default: 2.0
+  double backoff_multiplier = 4;
+
+  // RetryableStatusCodes are HTTP status codes that should trigger a retry.
+  // Common retryable codes: 429 (Too Many Requests), 500, 502, 503, 504.
+  // If empty, defaults to [429, 500, 502, 503, 504].
+  // Network errors (connection failures, timeouts) are always retried regardless of this setting.
+  repeated int32 retryable_status_codes = 5;
+}

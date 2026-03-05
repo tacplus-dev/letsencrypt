@@ -1,0 +1,176 @@
+// Copyright (c) 2024 Second Star Cavalier, LLC.
+
+// ============================================================================
+// DO NOT MODIFY THIS FILE
+// ============================================================================
+// This file defines JSON Web Key (JWK) structures and JWK Set types used
+// for OAuth/OIDC integration and key discovery.
+// Modifying these definitions will break OAuth provider integration and
+// token validation in all authentication services.
+// ============================================================================
+
+syntax = "proto3";
+
+package jwk;
+option go_package = "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/jwk";
+
+import "libs/key.proto";
+
+// UseType represents the public key use (use) parameter in JWK format
+enum JwkUseType {
+  // JwkUseTypeUndefined represents an unspecified use type
+  JWK_USE_TYPE_UNDEFINED = 0;
+  // JwkUseTypeSig indicates the key is used for digital signatures
+  JWK_USE_TYPE_SIG= 1;
+  // JwkUseTypeEnc indicates the key is used for encryption
+  JWK_USE_TYPE_ENC= 2;
+}
+
+// Jwk represents a JSON Web Key as defined in RFC 7517.
+// It contains the public key parameters for RSA (e, n), EC (crv, x, y), or OKP (crv, x) keys.
+// JWK is used for key distribution and verification in JSON-based protocols like JWT.
+message Jwk {
+  // Kty is the key type parameter (RSA, EC, or OKP)
+  key.KeyType kty = 1;
+  // Alg is the algorithm intended for use with the key (e.g., "RS384", "ES256", "EdDSA")
+  string alg = 2;
+  // Kid is the key ID used to match keys with signatures
+  string kid = 3;
+  // Use indicates the intended use of the key (sig for signatures, enc for encryption)
+  JwkUseType use = 4;
+  // E is the RSA public exponent (base64url encoded without padding)
+  string e = 5;
+  // N is the RSA modulus (base64url encoded without padding)
+  string n = 6;
+  // Crv is the elliptic curve name (e.g., P-256, P-384, P-521, Ed25519)
+  string crv = 7;
+  // X is the x coordinate for EC keys or the public key for OKP (base64url encoded without padding)
+  string x = 8;
+  // Y is the y coordinate for EC keys (base64url encoded without padding, not used for OKP)
+  string y = 9;
+  // Exp is the expiration in epoch seconds. This is not part of the JWK spec as the spec does
+  // not specify how to handle public key expiration.
+  int64 exp = 10;
+  // Created is the Unix epoch timestamp (seconds) when the key was created (optional).
+  // If set, valid range: 1735689600 (2025-01-01) to 8045740800 (2225-01-01)
+  int64 created = 11;
+}
+
+// Jwks represents a JSON Web Key Set (JWKS) as defined in RFC 7517.
+// It contains an array of JWK objects, typically published at a well-known endpoint
+// for key distribution and public key verification.
+message Jwks {
+  // Keys is the array of JWK objects in this key set
+  repeated Jwk keys = 1;
+}
+
+// OpenIdConfiguration represents an OpenID Connect Discovery document as defined in OpenID Connect Discovery 1.0.
+// It contains the configuration metadata of an OpenID Provider, including endpoint URLs and supported capabilities.
+// Typically retrieved from the /.well-known/openid-configuration endpoint.
+message OpenIdConfiguration {
+  // Issuer is the URL of the OpenID Provider
+  string issuer = 1;
+  // AuthorizationEndpoint is the URL of the OAuth 2.0 authorization endpoint
+  string authorization_endpoint = 2;
+  // TokenEndpoint is the URL of the OAuth 2.0 token endpoint
+  string token_endpoint = 3;
+  // UserinfoEndpoint is the URL of the UserInfo endpoint
+  string userinfo_endpoint = 4;
+  // RegistrationEndpoint is the URL of the dynamic client registration endpoint
+  string registration_endpoint = 5;
+  // JwksUri is the URL of the JSON Web Key Set document
+  string jwks_uri = 6;
+  // ResponseTypesSupported lists the OAuth 2.0 response_type values supported
+  repeated string response_types_supported = 7;
+  // ResponseModesSupported lists the OAuth 2.0 response_mode values supported
+  repeated string response_modes_supported = 8;
+  // GrantTypesSupported lists the OAuth 2.0 grant types supported
+  repeated string grant_types_supported = 9;
+  // SubjectTypesSupported lists the subject identifier types supported (public, pairwise)
+  repeated string subject_types_supported = 10;
+  // IdTokenSigningAlgValuesSupported lists the JWS signing algorithms supported for ID tokens
+  repeated string id_token_signing_alg_values_supported = 11;
+  // ScopesSupported lists the OAuth 2.0 scope values supported
+  repeated string scopes_supported = 12;
+  // TokenEndpointAuthMethodsSupported lists the client authentication methods supported at the token endpoint
+  repeated string token_endpoint_auth_methods_supported = 13;
+  // ClaimsSupported lists the claims supported in ID tokens and UserInfo responses
+  repeated string claims_supported = 14;
+  // CodeChallengeMethodsSupported lists the PKCE code challenge methods supported
+  repeated string code_challenge_methods_supported = 15;
+  // IntrospectionEndpoint is the URL of the OAuth 2.0 token introspection endpoint
+  string introspection_endpoint = 16;
+  // IntrospectionEndpointAuthMethodsSupported lists the client authentication methods supported at the introspection endpoint
+  repeated string introspection_endpoint_auth_methods_supported = 17;
+  // RevocationEndpoint is the URL of the OAuth 2.0 token revocation endpoint
+  string revocation_endpoint = 18;
+  // RevocationEndpointAuthMethodsSupported lists the client authentication methods supported at the revocation endpoint
+  repeated string revocation_endpoint_auth_methods_supported = 19;
+  // EndSessionEndpoint is the URL of the RP-initiated logout endpoint
+  string end_session_endpoint = 20;
+  // RequestParameterSupported indicates if the request parameter is supported
+  bool request_parameter_supported = 21;
+  // RequestObjectSigningAlgValuesSupported lists the JWS signing algorithms supported for request objects
+  repeated string request_object_signing_alg_values_supported = 22;
+  // MicrosoftMultiRefreshToken indicates Microsoft-specific multi-refresh token support
+  bool microsoft_multi_refresh_token = 23;
+  // DeviceAuthorizationEndpoint is the URL of the OAuth 2.0 device authorization endpoint
+  string device_authorization_endpoint = 24;
+  // HttpLogoutSupported indicates if HTTP-based logout is supported
+  bool http_logout_supported = 25;
+  // FrontchannelLogoutSupported indicates if front-channel logout is supported
+  bool frontchannel_logout_supported = 26;
+  // CheckSessionIframe is the URL of the OP iframe for session management
+  string check_session_iframe = 27;
+  // KerberosEndpoint is the URL of the Kerberos authentication endpoint (provider-specific)
+  string kerberos_endpoint = 28;
+  // TenantRegionScope is the tenant region scope (provider-specific)
+  string tenant_region_scope = 29;
+  // CloudInstanceName is the cloud instance name (provider-specific)
+  string cloud_instance_name = 30;
+  // CloudGraphHostName is the cloud graph host name (provider-specific)
+  string cloud_graph_host_name = 31;
+  // MsgraphHost is the Microsoft Graph host name (provider-specific)
+  string msgraph_host = 32;
+  // RbacUrl is the RBAC URL (provider-specific)
+  string rbac_url = 33;
+  // MfaChallengeEndpoint is the URL of the MFA challenge endpoint (provider-specific)
+  string mfa_challenge_endpoint = 34;
+  // RequestUriParameterSupported indicates if the request_uri parameter is supported
+  bool request_uri_parameter_supported = 35;
+  // TokenEndpointAuthSigningAlgValuesSupported lists the JWS signing algorithms supported for token endpoint authentication
+  repeated string token_endpoint_auth_signing_alg_values_supported = 36;
+  // BackchannelLogoutSupported indicates if back-channel logout is supported
+  bool backchannel_logout_supported = 37;
+  // BackchannelLogoutSessionSupported indicates if back-channel logout with session ID is supported
+  bool backchannel_logout_session_supported = 38;
+  // DpopSigningAlgValuesSupported lists the JWS signing algorithms supported for DPoP proof JWTs
+  repeated string dpop_signing_alg_values_supported = 39;
+}
+
+// PATH_WELL_KNOWN_OPENID is the path for OpenID Connect discovery endpoint.
+// This endpoint provides metadata about the Hermes service's OpenID Connect configuration.
+// Full path example: "/api/v1/.well-known/openid-configuration"
+
+// ============================================================================
+// Credential Pairs
+// ============================================================================
+
+// CredPair binds a public key to an assigned identity. A service holding
+// the matching private key mints a throwaway JWT (kid + signature only),
+// exchanges it via TokenExchanger for a refresh token bound to the
+// CredPair's identity, then exchanges the refresh token for access tokens.
+//
+// The private key lives only in the client's config (backendclient.proto),
+// never on the server.
+message CredPair {
+  // The public key for signature verification.
+  // kid (public_key.kid) is used as the collection key.
+  Jwk public_key = 1;
+
+  // Field 2 was subject_type — now lives on ServiceEntitlementMapping.
+  reserved 2;
+
+  // The principal name bound to this key.
+  string principal = 3;
+}

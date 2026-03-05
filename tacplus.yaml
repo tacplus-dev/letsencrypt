@@ -1,0 +1,6 @@
+language: go
+src: /Users/jody/workspace/services/proto
+tag: latest
+pkg: gitlab.com/secondstarcavalier/controlplane/services/genesis
+backends:
+  - services/genesis.GenesisState:rw

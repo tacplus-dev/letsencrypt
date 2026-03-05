@@ -1,0 +1,27 @@
+// Copyright (c) 2024 Second Star Cavalier, LLC.
+
+syntax = "proto3";
+
+package opa;
+option go_package = "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/opa";
+
+// OpaPolicy defines an OPA policy bundle for authorization evaluation.
+// The bundle is a base64-encoded tar.gz containing .rego policy files.
+message OpaPolicy {
+  // entry_point specifies the main package/decision point for policy evaluation.
+  string entry_point = 1;
+
+  // bundle contains the base64-encoded OPA policy bundle (tar.gz format).
+  string bundle = 2;
+
+  // created is the Unix epoch timestamp (seconds) when the policy was created.
+  int64 created = 3;
+
+  // version is an optional version string for this policy (e.g., "1.0.0").
+  string version = 4;
+
+  // source is the raw .rego policy source code. A builder can compile this
+  // into the bundle field (base64-encoded tar.gz). It may be a directory or
+  // a file
+  string source = 5;
+}

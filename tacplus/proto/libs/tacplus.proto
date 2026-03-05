@@ -1,0 +1,49 @@
+// Copyright (c) 2024 Second Star Cavalier, LLC.
+
+syntax = "proto3";
+
+package spec;
+option go_package = "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/spec";
+
+// ============================================================================
+// Dependencies Configuration Schema
+// ============================================================================
+// These messages define the schema for dependencies.yaml.
+// The YAML file remains the source of truth; these messages provide
+// a formal definition of its structure.
+
+// LanguageDependencies holds the dependency configuration for a single language.
+message LanguageDependencies {
+  // dependencies maps package identifiers to version strings.
+  // Keys are language-specific: Go module paths, Maven groupId:artifactId,
+  // npm package names, PyPI package names, or Rust crate names.
+  map<string, string> dependencies = 1;
+}
+
+// DependenciesRegistry holds package registry configuration.
+message DependenciesRegistry {
+  // gitlab_project_id is the GitLab project ID for the package registry.
+  string gitlab_project_id = 1;
+
+  // interfaces maps language names to their interfaces package identifier.
+  // Keys: "go", "java", "typescript", "python", "rust"
+  map<string, string> interfaces = 2;
+
+  // imports maps language names to their import base package.
+  // Currently only "java" is used (Maven groupId differs from Java import package).
+  map<string, string> imports = 3;
+}
+
+// DependenciesConfig is the top-level schema for dependencies.yaml.
+message DependenciesConfig {
+  // registry holds package registry configuration.
+  DependenciesRegistry registry = 1;
+
+  // tools maps tool names to minimum version strings.
+  // Example: {"go": "1.23", "java": "17", "node": ">=18.0.0"}
+  map<string, string> tools = 2;
+
+  // lang holds per-language dependency configurations.
+  // Keys: "go", "java", "typescript", "python", "rust"
+  map<string, LanguageDependencies> lang = 3;
+}

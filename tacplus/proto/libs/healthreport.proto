@@ -1,0 +1,57 @@
+// Copyright (c) 2024 Second Star Cavalier, LLC.
+
+syntax = "proto3";
+package healthreport;
+option go_package = "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/healthreport";
+
+import "libs/host.proto";
+
+// InstanceStatus represents the health status of a service instance.
+enum InstanceStatus {
+  INSTANCE_STATUS_STARTING = 0;
+  INSTANCE_STATUS_HEALTHY = 1;
+  INSTANCE_STATUS_DEGRADED = 2;
+  INSTANCE_STATUS_DRAINING = 3;
+  INSTANCE_STATUS_UNHEALTHY = 4;
+}
+
+// ServiceInstanceHealth captures the health, load, and reachability of a
+// single running instance of a microservice. The composite key
+// "service_id@instance_id" is set by the server from the caller's token claims.
+message ServiceInstanceHealth {
+  // Composite key: "service:fleetwood@uuid" — set by server from token claims
+  string id = 1;
+  string service_id = 2;     // from token sub
+  string instance_id = 3;    // from token instance_id
+
+  // Reachability
+  host.Host grpc_endpoint = 4;
+  host.Host http_endpoint = 5;
+
+  // Health
+  InstanceStatus status = 6;
+  string status_message = 7;
+
+  // Load (auto-collected from runtime)
+  double cpu_usage = 8;
+  int64 memory_used_bytes = 9;
+  int64 memory_max_bytes = 10;
+
+  // Load (from frontendserver metrics)
+  int32 active_requests = 11;
+  int32 max_concurrent_requests = 12;
+  double request_rate = 13;
+
+  // Performance (from frontendserver metrics)
+  int64 p50_latency_us = 14;
+  int64 p99_latency_us = 15;
+  double error_rate = 16;
+
+  // Routing metadata
+  string version = 17;
+  map<string, string> labels = 18;
+
+  // Timestamps
+  int64 started_at_ms = 19;
+  int64 timestamp_ms = 20;
+}

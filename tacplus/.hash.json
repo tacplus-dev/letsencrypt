@@ -1,0 +1,20 @@
+{
+  "binary_hash": "e1a2cc23813b7e4c77c1e71af754178c26fb553c5a3b9f1f44046e1936f825e3",
+  "config_hash": "7f9bbf9c8b6240de09679fbe8f170b902f7ba920c81bdf966cad46a38dfc1787",
+  "structure_hash": "0f0a5f30e82a6a413eb01f8ad408ed2fa27ea6e7600e4e8705af272001abdafe",
+  "files": {
+    "dependencies.yaml": "b1e3b41802693b989403f5da77d07c50392cbeb70718fbb6341421ffc1ac2442",
+    "google/api/annotations.proto": "0a1397a2d6c2e9c598b6b7eb55617f5617d5c8151e887aca0e16a019bddc8062",
+    "google/api/http.proto": "d8a9ddccb11a74a2fe48900f76a17d7af0db429ac1df85835e909087cc042449",
+    "services/bowie.proto": "88528a52629f37c56da8d7f3b62806f414778e0ec254d01225439a528dabffae",
+    "services/elvis.proto": "09c5990895221a493e85e779f8fa5495032925b5c8cdbeb1ea8b62e68afbbb34",
+    "services/fleetwood.proto": "3462caba55454229ae7ebf7fd65b707712dd7ac990cac6bbb9845599658e1cd2",
+    "services/genesis.proto": "93764358c5b5ac707d5de2a9e93a4d07c2a62d95e5c9094991b4b8143447f6d3",
+    "services/ironmaiden.proto": "f694d2cdef6e10ed8451eef2088a2fcfe627b86d127171b15eb68233c21a6379",
+    "services/orchestrator.proto": "18a52b9612fb960bde4587a8b82ec2df5f0f143bb45f371dc64aafde1965eda1",
+    "services/presley.proto": "5cd8c9c4a06254817f8fedc3ebfcc8926289b6d13deb5052bc10a91cae016274",
+    "services/snoopy.proto": "ec7dbbc746a8163925c57a7047fa788f4307fc4687542262a2c2d0f28d52989a",
+    "services/springsteen.proto": "6d5298b107c3a688b3012fc73834cad006ff40bfbe23d072bd3ddc23313bb85e",
+    "services/woodstock.proto": "26ecd06a5a99481b7710fcf62d116521fca04511bfafa82652a3c6d8adf2f84a"
+  }
+}

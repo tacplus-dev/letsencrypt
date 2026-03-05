@@ -1,0 +1,25 @@
+// Copyright (c) 2024 Second Star Cavalier, LLC.
+
+// ============================================================================
+// DO NOT MODIFY THIS FILE
+// ============================================================================
+// This file defines constants and types used by the protobuf compiler and
+// code generation tooling (frontendserver).
+// Changes to these definitions will break the compiler's code generation
+// and service scaffolding for all languages.
+// ============================================================================
+
+syntax = "proto3";
+
+package host;
+option go_package = "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/host";
+
+// Host identifies a network endpoint by hostname/IP and port.
+// The host field accepts either an FQDN or an IP address (v4/v6).
+message Host {
+  // Hostname or IP address (e.g. "api.example.com" or "10.0.0.1").
+  string host = 1;
+
+  // TCP port number (1–65535).
+  int32 port = 2;
+}

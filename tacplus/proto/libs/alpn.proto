@@ -1,0 +1,26 @@
+// Copyright (c) 2024 Second Star Cavalier, LLC.
+
+syntax = "proto3";
+
+package alpn;
+option go_package = "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/alpn";
+
+// ALPNProtocol defines the Application-Layer Protocol Negotiation identifiers.
+// Used during TLS handshake to negotiate which protocol to use.
+enum ALPNProtocol {
+  // ALPN_PROTOCOL_UNSPECIFIED is invalid and will cause validation error
+  ALPN_PROTOCOL_UNSPECIFIED = 0;
+
+  // ALPN_PROTOCOL_H2 is HTTP/2, used by gRPC
+  // ALPN identifier: "h2"
+  ALPN_PROTOCOL_H2 = 1;
+
+  // ALPN_PROTOCOL_HTTP_1_1 is HTTP/1.1, used by REST and GraphQL
+  // ALPN identifier: "http/1.1"
+  ALPN_PROTOCOL_HTTP_1_1 = 2;
+
+  // ALPN_PROTOCOL_H2C is HTTP/2 over cleartext (HTTP/2 without TLS)
+  // ALPN identifier: "h2c"
+  // Not commonly used, included for completeness
+  ALPN_PROTOCOL_H2C = 3;
+}

@@ -1,0 +1,30 @@
+// Copyright (c) 2024 Second Star Cavalier, LLC.
+
+syntax = "proto3";
+
+package cloudvendor;
+option go_package = "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/cloudvendor";
+
+// CloudVendor represents the public cloud providers
+enum CloudVendor {
+  // Undefined or unknown cloud vendor
+  CLOUD_VENDOR_UNDEFINED = 0;
+
+  // Amazon Web Services (AWS)
+  CLOUD_VENDOR_AWS = 1;
+
+  // Microsoft Azure
+  CLOUD_VENDOR_AZURE = 2;
+
+  // Google Cloud Platform (GCP)
+  CLOUD_VENDOR_GCP = 3;
+
+  // Oracle Cloud
+  CLOUD_VENDOR_ORACLE = 4;
+
+  // Alibaba Cloud
+  CLOUD_VENDOR_ALIBABA = 5;
+
+  // IBM Cloud
+  CLOUD_VENDOR_IBM = 6;
+}

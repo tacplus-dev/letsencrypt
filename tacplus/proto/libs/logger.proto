@@ -1,0 +1,97 @@
+// Copyright (c) 2024 Second Star Cavalier, LLC.
+
+syntax = "proto3";
+
+package logger;
+option go_package = "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/logger";
+
+// Format represents the output format for log messages.
+// This determines how log entries are structured and displayed.
+enum Format {
+  // FORMAT_UNDEFINED represents an unspecified log format
+  FORMAT_UNDEFINED = 0;
+
+  // FORMAT_JSON outputs logs as JSON objects, ideal for structured logging and log aggregation systems
+  FORMAT_JSON = 1;
+
+  // FORMAT_CONSOLE outputs logs in a human-readable console format, ideal for development and debugging
+  FORMAT_CONSOLE = 2;
+}
+
+// Level represents the severity level for log messages.
+// Higher level values indicate more severe messages.
+enum Level {
+  // LEVEL_UNDEFINED represents an unspecified log level
+  LEVEL_UNDEFINED = 0;
+
+  // LEVEL_TRACE is the most verbose log level, used for detailed debugging information
+  LEVEL_TRACE = 1;
+
+  // LEVEL_DEBUG is used for debugging information, less verbose than trace
+  LEVEL_DEBUG = 2;
+
+  // LEVEL_INFO is used for informational messages about normal operations
+  LEVEL_INFO = 3;
+
+  // LEVEL_WARN is used for warning messages about potentially problematic situations
+  LEVEL_WARN = 4;
+
+  // LEVEL_ERROR is used for error messages about failures and problems
+  LEVEL_ERROR = 5;
+}
+
+// LoggerConfig represents the configuration for a logger instance.
+// It controls the output format, verbosity level, and formatting options.
+//
+// Example usage:
+//   - Development mode with console output and pretty printing for local debugging
+//   - Production mode with JSON output and no pretty printing for log aggregation
+message LoggerConfig {
+  // Name is the logger name/component identifier
+  string name = 1;
+
+  // Format determines the output format for log messages (JSON or console)
+  // Default: FORMAT_JSON in production, FORMAT_CONSOLE in development
+  Format format = 2;
+
+  // Level sets the minimum severity level for log messages to be output
+  // Messages below this level will be filtered out
+  // Default: LEVEL_INFO in production, LEVEL_DEBUG in development
+  Level level = 3;
+
+  // Development enables development mode which:
+  //   - Uses console format by default
+  //   - Enables stack traces for warnings and errors
+  //   - Uses more human-readable timestamps
+  // Default: false (production mode)
+  bool development = 4;
+
+  // PrettyPrint enables pretty-printed output for JSON format
+  // This makes JSON logs more readable but increases output size
+  // Should be disabled in production for performance
+  // Default: false
+  bool pretty_print = 5;
+
+  // OutputPaths is a list of file paths or URLs to write logs to
+  // Use "stdout" or "stderr" for console output
+  // Example: ["stdout", "/var/log/app.log"]
+  repeated string output_paths = 6;
+
+  // ErrorOutputPaths is a list of file paths or URLs to write error logs to
+  // Use "stderr" for console error output
+  // Example: ["stderr", "/var/log/app-errors.log"]
+  repeated string error_output_paths = 7;
+
+  // DisableCaller disables automatic inclusion of caller information (file:line) in log entries
+  // Default: false (caller information is included)
+  bool disable_caller = 8;
+
+  // DisableStacktrace disables automatic stacktraces for error-level and above log entries
+  // Default: false (stacktraces are included for errors)
+  bool disable_stacktrace = 9;
+
+  // InitialFields is a map of fields to include in every log entry
+  // Useful for adding context like service name, version, environment, etc.
+  // Example: {"service": "api", "version": "1.0.0", "environment": "production"}
+  map<string, string> initial_fields = 10;
+}

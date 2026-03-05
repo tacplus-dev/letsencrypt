@@ -1,0 +1,44 @@
+// Copyright (c) 2024 Second Star Cavalier, LLC.
+
+syntax = "proto3";
+
+package auth;
+option go_package = "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/auth";
+
+import "google/protobuf/any.proto";
+import "libs/token.proto";
+
+// AuthRequest is the input passed to rule-based policy evaluation.
+// Contains the gRPC call context (service, method, token, metadata)
+// and optionally the request body.
+message AuthRequest {
+  // service is the fully qualified gRPC service name.
+  // Example: "foobar.FooBarService"
+  // Required.
+  string service = 1;
+
+  // method is the gRPC method name being called.
+  // Example: "GetUser", "ListItems", "UpdateConfig"
+  // Required.
+  string method = 2;
+
+  // token is the parsed JWT from the request metadata.
+  // Contains claims (subject, issuer, audience, expiration, etc.)
+  // used for rule evaluation.
+  token.Token token = 3;
+
+  // request is the gRPC request message, wrapped as Any.
+  // Only populated when FrontendPolicy.include_request is true.
+  google.protobuf.Any request = 4;
+
+  // metadata contains gRPC metadata headers from the request.
+  map<string, string> metadata = 5;
+}
+
+// Action specifies the authorization decision when a rule matches.
+enum Action {
+  ACTION_UNSPECIFIED = 0;
+  ACTION_PERMIT = 1;
+  ACTION_DENY = 2;
+  ACTION_CONTINUE = 3;
+}

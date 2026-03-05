@@ -1,0 +1,123 @@
+// Copyright (c) 2024 Second Star Cavalier, LLC.
+
+// ============================================================================
+// DO NOT MODIFY THIS FILE
+// ============================================================================
+// This file defines X.509 certificate and certificate pair structures used
+// for TLS/mTLS and secure communications.
+// Changes to these definitions will break certificate handling in all services
+// that use TLS, including servers, clients, and certificate management.
+// ============================================================================
+
+syntax = "proto3";
+
+package x509;
+option go_package = "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/x509";
+
+import "libs/key.proto";
+import "google/protobuf/struct.proto";
+
+// PemType represents the PEM block type for encoding/decoding
+enum PemType {
+  // X509PemTypeUndefined represents an unspecified PEM type
+  PEM_TYPE_UNDEFINED = 0;
+  // X509PemTypePrivateKey represents a private key PEM block (BEGIN PRIVATE KEY)
+  PEM_TYPE_PRIVATE_KEY = 1;
+  // X509PemTypePublicKey represents a public key PEM block (BEGIN PUBLIC KEY)
+  PEM_TYPE_PUBLIC_KEY = 2;
+  // X509PemTypeCertificate represents a certificate PEM block (BEGIN CERTIFICATE)
+  PEM_TYPE_CERTIFICATE = 3;
+}
+
+// KeyUsage represents key usage values for X.509 certificates
+enum X509KeyUsage {
+  // X509KeyUsageDigitalSignature indicates digital signature usage
+  X509_KEY_USAGE_DIGITAL_SIGNATURE = 0;
+  // X509KeyUsageContentCommitment indicates content commitment (non-repudiation)
+  X509_KEY_USAGE_CONTENT_COMMITMENT = 1;
+  // X509KeyUsageKeyEncipherment indicates key encipherment
+  X509_KEY_USAGE_KEY_ENCIPHERMENT = 2;
+  // X509KeyUsageDataEncipherment indicates data encipherment
+  X509_KEY_USAGE_DATA_ENCIPHERMENT = 3;
+  // X509KeyUsageKeyAgreement indicates key agreement
+  X509_KEY_USAGE_KEY_AGREEMENT = 4;
+  // X509KeyUsageCertSign indicates certificate signing
+  X509_KEY_USAGE_CERT_SIGN = 5;
+  // X509KeyUsageCRLSign indicates CRL signing
+  X509_KEY_USAGE_CRL_SIGN = 6;
+  // X509KeyUsageEncipherOnly indicates encipher only
+  X509_KEY_USAGE_ENCIPHER_ONLY = 7;
+  // X509KeyUsageDecipherOnly indicates decipher only
+  X509_KEY_USAGE_DECIPHER_ONLY = 8;
+}
+
+// ExtKeyUsage represents extended key usage values for X.509 certificates
+enum X509ExtKeyUsage {
+  // X509ExtKeyUsageAny indicates any extended key usage
+  X509_EXT_KEY_USAGE_ANY = 0;
+  // X509ExtKeyUsageServerAuth indicates TLS server authentication
+  X509_EXT_KEY_USAGE_SERVER_AUTH = 1;
+  // X509ExtKeyUsageClientAuth indicates TLS client authentication
+  X509_EXT_KEY_USAGE_CLIENT_AUTH = 2;
+  // X509ExtKeyUsageCodeSigning indicates code signing
+  X509_EXT_KEY_USAGE_CODE_SIGNING = 3;
+  // X509ExtKeyUsageEmailProtection indicates email protection (S/MIME)
+  X509_EXT_KEY_USAGE_EMAIL_PROTECTION = 4;
+  // X509ExtKeyUsageIPSECEndSystem indicates IPSEC end system
+  X509_EXT_KEY_USAGE_IPSEC_END_SYSTEM = 5;
+  // X509ExtKeyUsageIPSECTunnel indicates IPSEC tunnel
+  X509_EXT_KEY_USAGE_IPSEC_TUNNEL = 6;
+  // X509ExtKeyUsageIPSECUser indicates IPSEC user
+  X509_EXT_KEY_USAGE_IPSEC_USER = 7;
+  // X509ExtKeyUsageTimeStamping indicates time stamping
+  X509_EXT_KEY_USAGE_TIME_STAMPING = 8;
+  // X509ExtKeyUsageOCSPSigning indicates OCSP signing
+  X509_EXT_KEY_USAGE_OCSP_SIGNING = 9;
+  // X509ExtKeyUsageMicrosoftServerGatedCrypto indicates Microsoft Server Gated Crypto
+  X509_EXT_KEY_USAGE_MICROSOFT_SERVER_GATED_CRYPTO = 10;
+  // X509ExtKeyUsageNetscapeServerGatedCrypto indicates Netscape Server Gated Crypto
+  X509_EXT_KEY_USAGE_NETSCAPE_SERVER_GATED_CRYPTO = 11;
+  // X509ExtKeyUsageMicrosoftCommercialCodeSigning indicates Microsoft Commercial Code Signing
+  X509_EXT_KEY_USAGE_MICROSOFT_COMMERCIAL_CODE_SIGNING = 12;
+  // X509ExtKeyUsageMicrosoftKernelCodeSigning indicates Microsoft Kernel Code Signing
+  X509_EXT_KEY_USAGE_MICROSOFT_KERNEL_CODE_SIGNING = 13;
+}
+
+// ProtoCert represents an X.509 certificate.
+// The certificate is stored as a base64-encoded PEM block.
+// Use NewProtoCert() in Go with DER-encoded certificate bytes to create.
+message X509Cert {
+  // Id is a unique identifier for the certificate
+  string id = 1;
+  // Base64 contains the base64url-encoded PEM certificate block
+  string base64 = 2;
+}
+
+// X509CertPair combines a private key with its X.509 certificate.
+// This is a convenience wrapper for keys that have associated certificates,
+// typically used for TLS/SSL operations.
+// Use NewKeyCert() in Go to create from a private key and certificate bytes.
+message X509CertPair {
+  // Key is the private key component
+  key.Key key = 1;
+  // Cert is the certificate component
+  X509Cert cert = 2;
+}
+
+// X509CertRequest represents a certificate signing request (CSR) for generating X.509 certificates.
+// It contains the public key to be certified, validity period, key usage constraints,
+// and issuer information needed to create a signed certificate.
+message X509CertRequest {
+  // Key is the public key to be certified
+  key.PublicKey key = 1;
+  // Exp is the expiration timestamp (Unix time) for the certificate
+  int64 exp = 2;
+  // Metadata contains additional information about the certificate request
+  google.protobuf.Struct metadata = 3;
+  // KeyUsage specifies the intended cryptographic operations (e.g., "digitalSignature", "keyEncipherment")
+  X509KeyUsage key_usage = 4;
+  // ExtKeyUsage specifies extended key usage purposes for the certificate
+  repeated X509ExtKeyUsage ext_key_usage = 5;
+  // Issuer is the distinguished name (DN) of the certificate issuer
+  string issuer = 6;
+}
