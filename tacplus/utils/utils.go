@@ -15,7 +15,7 @@ import (
 	libBase64 "encoding/base64"
 	"net/http"
 
-	protoerrors "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/errors"
+	protoerrors "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/errors"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

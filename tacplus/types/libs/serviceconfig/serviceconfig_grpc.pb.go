@@ -15,7 +15,7 @@ package serviceconfig
 
 import (
 	context "context"
-	jwk "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/jwk"
+	jwk "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/jwk"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"

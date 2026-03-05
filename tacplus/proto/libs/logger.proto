@@ -3,7 +3,7 @@
 syntax = "proto3";
 
 package logger;
-option go_package = "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/logger";
+option go_package = "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/logger";
 
 // Format represents the output format for log messages.
 // This determines how log entries are structured and displayed.

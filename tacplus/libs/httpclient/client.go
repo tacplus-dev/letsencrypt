@@ -19,10 +19,10 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"go.uber.org/zap"
 
-	httpclientProto "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/httpclient"
-	"gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/libs/logger"
-	protoerrors "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/errors"
-	utils "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/utils"
+	httpclientProto "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/httpclient"
+	"gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/libs/logger"
+	protoerrors "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/errors"
+	utils "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/utils"
 )
 
 // DefaultRetryConfig returns a default retry configuration

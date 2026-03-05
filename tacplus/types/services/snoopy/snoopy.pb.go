@@ -14,7 +14,7 @@
 package snoopy
 
 import (
-	_ "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/spec"
+	_ "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/spec"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
@@ -833,7 +833,7 @@ const file_services_snoopy_proto_rawDesc = "" +
 	"\x17ResignEventStreamLeader\x12\x1b.snoopy.LeaderResignRequest\x1a\x14.snoopy.LeaderRecord\x12D\n" +
 	"\x14GetLeaderEventStream\x12\x16.google.protobuf.Empty\x1a\x14.snoopy.LeaderRecord\x12H\n" +
 	"\x16WatchLeaderEventStream\x12\x16.google.protobuf.Empty\x1a\x14.snoopy.LeaderRecord0\x01\x12M\n" +
-	"\x15RenewLeaseEventStream\x12\x1a.snoopy.LeaderLeaseRenewal\x1a\x14.snoopy.LeaderRecord(\x010\x01BWZUgitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/services/snoopyb\x06proto3"
+	"\x15RenewLeaseEventStream\x12\x1a.snoopy.LeaderLeaseRenewal\x1a\x14.snoopy.LeaderRecord(\x010\x01B[ZYgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/snoopyb\x06proto3"
 
 var (
 	file_services_snoopy_proto_rawDescOnce sync.Once

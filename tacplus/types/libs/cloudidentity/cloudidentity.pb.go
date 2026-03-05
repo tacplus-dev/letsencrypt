@@ -14,8 +14,8 @@
 package cloudidentity
 
 import (
-	cloudvendor "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/cloudvendor"
-	_ "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/spec"
+	cloudvendor "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/cloudvendor"
+	_ "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/spec"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -192,7 +192,7 @@ const file_libs_cloudidentity_proto_rawDesc = "" +
 	"\x04body\x18\x04 \x01(\tR\x04body\x1a:\n" +
 	"\fHeadersEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01BZZXgitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/cloudidentityb\x06proto3"
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B^Z\\gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/cloudidentityb\x06proto3"
 
 var (
 	file_libs_cloudidentity_proto_rawDescOnce sync.Once

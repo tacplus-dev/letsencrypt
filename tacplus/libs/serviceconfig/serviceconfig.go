@@ -12,7 +12,7 @@ import (
 	"os"
 	"strings"
 
-	serviceconfig_pb "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/serviceconfig"
+	serviceconfig_pb "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/serviceconfig"
 	"go.uber.org/zap"
 )
 
@@ -81,6 +81,39 @@ func LoadBootstrapConfig() (*serviceconfig_pb.BootstrapConfig, error) {
 
 	if err := serviceconfig_pb.ValidateBootstrapConfig(cfg); err != nil {
 		return nil, fmt.Errorf("invalid config: %w", err)
+	}
+
+	return cfg, nil
+}
+
+// LoadLocalConfig loads serviceconfig.Config fields from the same config file
+// used by LoadBootstrapConfig (via -c/--config flag or BOOTSTRAP_CONFIG env var).
+// This allows per-service config files to specify runtime settings like
+// listen_address that override the runtime config delivered by elvis.
+// Returns nil, nil if no config file is found or if parsing fails (non-fatal).
+func LoadLocalConfig() (*serviceconfig_pb.Config, error) {
+	path := ""
+	for i := 1; i < len(os.Args)-1; i++ {
+		if os.Args[i] == "-c" || os.Args[i] == "--config" {
+			path = os.Args[i+1]
+			break
+		}
+	}
+	if path == "" {
+		path = os.Getenv(serviceconfig_pb.BootstrapConfigEnv)
+	}
+	if path == "" {
+		return nil, nil
+	}
+
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, nil
+	}
+
+	cfg, err := serviceconfig_pb.ConfigFromBytes(data)
+	if err != nil {
+		return nil, nil // not all fields may be present; non-fatal
 	}
 
 	return cfg, nil

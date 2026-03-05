@@ -240,7 +240,7 @@ const file_libs_tacplus_proto_rawDesc = "" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1aS\n" +
 	"\tLangEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x120\n" +
-	"\x05value\x18\x02 \x01(\v2\x1a.spec.LanguageDependenciesR\x05value:\x028\x01BQZOgitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/specb\x06proto3"
+	"\x05value\x18\x02 \x01(\v2\x1a.spec.LanguageDependenciesR\x05value:\x028\x01BUZSgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/specb\x06proto3"
 
 var (
 	file_libs_tacplus_proto_rawDescOnce sync.Once

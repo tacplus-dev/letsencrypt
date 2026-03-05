@@ -20,11 +20,11 @@ import (
 	"strings"
 
 	"github.com/pelletier/go-toml/v2"
-	protoerrors "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/errors"
-	key "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/key"
-	logger "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/logger"
-	x509 "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/x509"
-	utils "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/utils"
+	protoerrors "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/errors"
+	key "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/key"
+	logger "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/logger"
+	x509 "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/x509"
+	utils "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/utils"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 	"gopkg.in/yaml.v3"
@@ -1656,6 +1656,29 @@ func ConfigDefaults(v *Config) {
 	}
 	if v.ShutdownTimeoutSeconds == 0 {
 		v.ShutdownTimeoutSeconds = DefaultShutdownTimeoutSeconds
+	}
+}
+
+// ============================================================
+// TypeUndefaults: Config
+// ============================================================
+// ConfigUndefaults resets fields that match their default values back to zero.
+// Use before persisting to store only explicit user overrides.
+func ConfigUndefaults(v *Config) {
+	if v.PingIntervalMs == int32(DefaultPingIntervalMs) {
+		v.PingIntervalMs = 0
+	}
+	if v.RebalanceIntervalMs == int32(DefaultRebalanceIntervalMs) {
+		v.RebalanceIntervalMs = 0
+	}
+	if v.MaxRequestSize == DefaultMaxRequestSize {
+		v.MaxRequestSize = 0
+	}
+	if v.RequestTimeoutSeconds == DefaultRequestTimeoutSeconds {
+		v.RequestTimeoutSeconds = 0
+	}
+	if v.ShutdownTimeoutSeconds == DefaultShutdownTimeoutSeconds {
+		v.ShutdownTimeoutSeconds = 0
 	}
 }
 

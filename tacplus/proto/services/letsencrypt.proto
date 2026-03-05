@@ -9,14 +9,14 @@
 // If changes are needed, update the tacplus compiler at:
 // gitlab.com/secondstarcavalier/controlplane/services/tacplus
 //
-// Source: services/genesis.proto
+// Source: services/letsencrypt.proto
 
 // Copyright (c) 2024 Second Star Cavalier, LLC.
 
 syntax = "proto3";
 
-package genesis;
-option go_package = "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/services/genesis";
+package letsencrypt;
+option go_package = "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/letsencrypt";
 
 import "libs/x509.proto";
 import "google/protobuf/empty.proto";
@@ -33,7 +33,7 @@ message Config {
 
   // lets_encrypt_email is the email address for Let's Encrypt account
   // registration and certificate expiration notifications.
-  // If empty, genesis will use "admin@<fqdn>".
+  // If empty, letsencrypt will use "admin@<fqdn>".
   string lets_encrypt_email = 2;
 
   // http_listen is the address to bind the HTTP server for ACME HTTP-01
@@ -50,27 +50,27 @@ message Config {
 // Backend State (stored in elvis)
 // ============================================================================
 
-// GenesisState holds the Let's Encrypt certificate and CertMagic storage
-// state. Springsteen watches this to obtain the TLS certificate for its
+// LetsEncryptState holds the Let's Encrypt certificate and CertMagic storage
+// state. Gateway watches this to obtain the TLS certificate for its
 // public-facing HTTPS listener.
-message GenesisState {
+message LetsEncryptState {
 
   // cert_data is the singleton holding the current certificate and
   // CertMagic internal state. Written atomically on each renewal.
-  GenesisCertData cert_data = 1;
+  LetsEncryptCertData cert_data = 1;
 }
 
-// GenesisCertData holds the Let's Encrypt certificate, CertMagic state,
+// LetsEncryptCertData holds the Let's Encrypt certificate, CertMagic state,
 // and metadata. Written as a single atomic unit on each certificate
 // issuance or renewal.
-message GenesisCertData {
+message LetsEncryptCertData {
   // tls_cert is the current Let's Encrypt certificate and private key.
-  // Springsteen watches this to serve HTTPS traffic.
+  // Gateway watches this to serve HTTPS traffic.
   x509.X509CertPair tls_cert = 1;
 
   // certmagic_state is the serialized CertMagic storage tree. Contains
   // ACME account data, certificate metadata, and cached certificates.
-  // Genesis reads this on startup to restore state without re-provisioning.
+  // LetsEncrypt reads this on startup to restore state without re-provisioning.
   CertMagicState certmagic_state = 2;
 
   // last_renewed is the Unix epoch timestamp (seconds) of the last
@@ -102,11 +102,11 @@ message Lock {
 // Auto-generated Backend Service (tacplus)
 // ============================================================================
 
-service GenesisStateBackendService {
+service LetsEncryptStateBackendService {
 	// Singleton: CertData
-	rpc GetCertData(google.protobuf.Empty) returns (GenesisCertData);
-	rpc SetCertData(GenesisCertData) returns (GenesisCertData);
-	rpc WatchCertData(google.protobuf.Empty) returns (stream GenesisCertData);
+	rpc GetCertData(google.protobuf.Empty) returns (LetsEncryptCertData);
+	rpc SetCertData(LetsEncryptCertData) returns (LetsEncryptCertData);
+	rpc WatchCertData(google.protobuf.Empty) returns (stream LetsEncryptCertData);
 }
 
 message MapEmpty {}

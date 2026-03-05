@@ -9,50 +9,51 @@
 // If changes are needed, update the tacplus compiler at:
 // gitlab.com/secondstarcavalier/controlplane/services/tacplus
 //
-// Source: services/ironmaiden.proto
+// Source: services/identity.proto
 
 // Copyright (c) 2024 Second Star Cavalier, LLC.
 
-// Package ironmaiden provides protobuf definitions for the Iron Maiden service.
+// Package identity provides protobuf definitions for the Identity service.
 //
-// Iron Maiden is the centralized OAuth2 authentication gateway. The auth flow:
+// Identity is the centralized OAuth2 authentication gateway. The auth flow:
 //
-//   1. User hits a microservice (e.g. fleetwood). The frontend wrapper checks
-//      for a valid bearer token. If absent/invalid, redirects to Iron Maiden
+//   1. User hits a microservice (e.g. sentinel). The frontend wrapper checks
+//      for a valid bearer token. If absent/invalid, redirects to Identity
 //      with a callback_url query parameter.
 //
-//   2. Iron Maiden's webapp shows provider selection. User picks an IDP.
-//      Iron Maiden redirects to the IDP with PKCE, state, and nonce.
+//   2. Identity's webapp shows provider selection. User picks an IDP.
+//      Identity redirects to the IDP with PKCE, state, and nonce.
 //      The nonce/PKCE state is kept in memory on the originating instance.
 //
-//   3. IDP authenticates the user and redirects back to Iron Maiden's callback.
+//   3. IDP authenticates the user and redirects back to Identity's callback.
 //      If the callback lands on a different instance, that instance publishes
 //      the callback data to the callback_relay topic. The originating instance
 //      receives it via subscription, exchanges the authorization code for an
 //      ID token, validates it against the IDP's JWKS (cached in elvis),
-//      and mints a refresh token signed by Iron Maiden's own keys.
+//      and mints a refresh token signed by Identity's own keys.
 //
-//   4. Iron Maiden uses the refresh token to mint a short-lived access token,
+//   4. Identity uses the refresh token to mint a short-lived access token,
 //      installs both in the user's browser (cookies), and redirects back to
 //      the original callback_url.
 //
 //   5. Subsequent requests include the access token. When it expires, the
-//      frontend wrapper calls Iron Maiden's RefreshToken endpoint using the
+//      frontend wrapper calls Identity's RefreshToken endpoint using the
 //      refresh token to get a new access token without re-authenticating.
 //
-// Key storage: each Iron Maiden instance generates its own key pair locally,
+// Key storage: each Identity instance generates its own key pair locally,
 // keeps the private key in memory, and publishes the public JWK to elvis.
 // Cached external IDP JWKS also live in elvis. Other services subscribe
-// to Iron Maiden's verifying_keys via Watch (RO) and receive new keys
+// to Identity's verifying_keys via Watch (RO) and receive new keys
 // immediately — no polling or pre-generation window needed.
 
 syntax = "proto3";
 
-package ironmaiden;
-option go_package = "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/services/ironmaiden";
+package identity;
+option go_package = "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/identity";
 
 import "libs/entitlement.proto";
 import "libs/jwk.proto";
+import "libs/opa.proto";
 import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
 // ============================================================================
@@ -86,7 +87,7 @@ message Config {
   int64 nonce_expire_seconds = 5;
 
   // issuer is the issuer claim (iss) for tokens minted by this service.
-  // Must match the public-facing URL of Iron Maiden.
+  // Must match the public-facing URL of Identity.
   string issuer = 6;
 
   // jwk_refetch_interval_seconds is the minimum interval between JWKS fetches
@@ -94,14 +95,13 @@ message Config {
   // Default: 300 (5 minutes).
   int64 jwk_refetch_interval_seconds = 7;
 
-  // claim_mapping_policy is a Rego policy that maps IDP claims to a principal.
-  // Evaluated during OAuth callback with input = {origin: {<idp_claims>}}.
-  // Must produce: data.user.main.allow (bool), data.user.main.principal (string).
-  string claim_mapping_policy = 10;
+  // entitlements_policy is a Rego policy evaluated at token exchange time.
+  // Input: {claims: {<flattened IDP claims>}, service: "<target>"}
+  // Expected output: data.entitlements.main → {allow: bool, rpcs: [string]}
+  // Use ["*"] to grant all RPCs for the target service.
+  string entitlements_policy = 11;
 
   // entitlement_mappings maps OPA-resolved principals to entitlement definitions.
-  // After the claim_mapping_policy resolves a principal, that principal is looked
-  // up here to find the entitlements_id for the user's access tokens.
   repeated entitlement.ServiceEntitlementMapping entitlement_mappings = 8;
 
   // service_entitlements holds named entitlement definitions loaded from
@@ -173,27 +173,42 @@ message ProviderConfig {
 // Backend State (stored in elvis)
 // ============================================================================
 
-// IronMaidenState holds public verifying keys readable by all services.
-// Each Iron Maiden instance generates its own key pair locally, keeps the private
-// key in memory, and publishes the public JWK here. Other services subscribe
-// via Watch (RO) and receive new keys immediately to verify access tokens.
-// Access: RW for ironmaiden, RO for any service that needs to verify tokens.
-message IronMaidenState {
-
-  // verifying_keys are the public JWKs published by all Iron Maiden instances.
-  // Each instance publishes its own JWK (keyed by kid). Other services subscribe
-  // via Watch (RO) to verify access tokens signed by any Iron Maiden instance.
-  // Old keys are removed after the access token lifetime elapses post-rotation.
-  repeated jwk.Jwk verifying_keys = 1;
+// EntitlementConfig wraps the entitlement mappings and service entitlement
+// definitions. Published by Identity from config so other services (policy)
+// can read them via Watch (RO) without duplicating config.
+message EntitlementConfig {
+  repeated entitlement.ServiceEntitlementMapping entitlement_mappings = 1;
+  repeated entitlement.ServiceEntitlements service_entitlements = 2;
 }
 
-// IronMaidenStateInternal holds private state used only by Iron Maiden instances.
+// IdentityState holds public verifying keys and auth config readable by all
+// services. Each Identity instance generates its own key pair locally, keeps
+// the private key in memory, and publishes the public JWK here. OPA policies
+// and entitlement config are also published here so downstream services (policy)
+// can consume them without duplicating config.
+// Access: RW for identity, RO for any service that needs to verify tokens
+// or read auth config.
+message IdentityState {
+
+  // verifying_keys are the public JWKs published by all Identity instances.
+  repeated jwk.Jwk verifying_keys = 1;
+
+  // entitlements_policy is the OPA policy for determining entitlements at token
+  // exchange time. Published by identity from config.
+  opa.OpaPolicy entitlements_policy = 2;
+
+  // entitlement_config holds the entitlement mappings and service entitlement
+  // definitions, published from identity's config.
+  EntitlementConfig entitlement_config = 4;
+}
+
+// IdentityStateInternal holds private state used only by Identity instances.
 // Contains cached external IDP JWKS for token validation during callback.
-// Access: RW for ironmaiden only.
-message IronMaidenStateInternal {
+// Access: RW for identity only.
+message IdentityStateInternal {
 
   // external_jwks caches JWKs fetched from external identity providers.
-  // Only Iron Maiden uses these to validate IDP tokens during callback.
+  // Only Identity uses these to validate IDP tokens during callback.
   // Keyed by kid. TTL ensures stale keys are evicted.
   repeated ExternalJwk external_jwks = 1;
 }
@@ -217,22 +232,22 @@ message ExternalJwk {
 // Frontend Service
 // ============================================================================
 
-service IronMaidenService {
+service IdentityService {
 
-  // Iron Maiden is the authentication provider — it must be reachable
+  // Identity is the authentication provider — it must be reachable
   // without a bearer token, otherwise there is no way to obtain one.
 
   // ListProviders returns the configured OAuth2 providers (public info only).
   // The webapp calls this to render provider selection buttons.
   rpc ListProviders(google.protobuf.Empty) returns (ListProvidersResponse) {
-    option (google.api.http) = { get: "/api/ironmaiden/v1/providers" };
+    option (google.api.http) = { get: "/api/identity/v1/providers" };
   }
 
   // Authorize initiates the OAuth2 authorization code flow.
   // Creates a nonce/state in memory and returns the IDP redirect URL.
   // The caller provides a callback_url for post-auth redirect.
   rpc Authorize(AuthorizeRequest) returns (AuthorizeResponse) {
-    option (google.api.http) = { post: "/api/ironmaiden/v1/authorize" body: "*" };
+    option (google.api.http) = { post: "/api/identity/v1/authorize" body: "*" };
   }
 
   // Callback handles the OAuth2 authorization code callback from the IDP.
@@ -240,19 +255,27 @@ service IronMaidenService {
   // completes the exchange directly. Otherwise, it publishes the callback
   // to the callback_relay topic for the originating instance to handle.
   rpc Callback(CallbackRequest) returns (CallbackResponse) {
-    option (google.api.http) = { post: "/api/ironmaiden/v1/callback" body: "*" };
+    option (google.api.http) = { post: "/api/identity/v1/callback" body: "*" };
   }
 
   // RefreshToken exchanges a valid refresh token for a new short-lived access token.
-  // The refresh token is validated against Iron Maiden's verifying_keys in elvis.
+  // The refresh token is validated against Identity's verifying_keys in elvis.
   rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse) {
-    option (google.api.http) = { post: "/api/ironmaiden/v1/refresh" body: "*" };
+    option (google.api.http) = { post: "/api/identity/v1/refresh" body: "*" };
+  }
+
+  // ExchangeToken exchanges a generic access token for a service-specific
+  // access token with entitlements. The entitlements are determined by evaluating
+  // the entitlements_policy (OPA) or falling back to static config mappings.
+  rpc ExchangeToken(ExchangeTokenRequest) returns (ExchangeTokenResponse) {
+    option (google.api.http) = { post: "/api/identity/v1/exchange" body: "*" };
   }
 
   // Logout invalidates the session and optionally redirects to the IDP logout.
   rpc Logout(LogoutRequest) returns (LogoutResponse) {
-    option (google.api.http) = { post: "/api/ironmaiden/v1/logout" body: "*" };
+    option (google.api.http) = { post: "/api/identity/v1/logout" body: "*" };
   }
+
 }
 
 // ============================================================================
@@ -282,7 +305,7 @@ message AuthorizeRequest {
   int32 provider_index = 1;
 
   // callback_url is where the user is sent after successful authentication.
-  // This is the originating microservice's URL (e.g. "https://fleetwood:9000/").
+  // This is the originating microservice's URL (e.g. "https://sentinel:9000/").
   string callback_url = 2;
 }
 
@@ -303,7 +326,7 @@ message CallbackRequest {
 
 // CallbackResponse contains the minted tokens and the callback destination.
 message CallbackResponse {
-  // refresh_token is the long-lived refresh token signed by Iron Maiden.
+  // refresh_token is the long-lived refresh token signed by Identity.
   string refresh_token = 1;
 
   // access_token is the short-lived access token for immediate use.
@@ -321,7 +344,7 @@ message CallbackResponse {
 
 // RefreshTokenRequest exchanges a refresh token for a new access token.
 message RefreshTokenRequest {
-  // refresh_token is the refresh token issued by Iron Maiden.
+  // refresh_token is the refresh token issued by Identity.
   string refresh_token = 1;
 
   // audience is the desired audience claim for the minted access token.
@@ -355,18 +378,23 @@ message LogoutResponse {
   string redirect_url = 1;
 }
 
-// ============================================================================
-// Constants
-// ============================================================================
+// ExchangeTokenRequest exchanges a generic access token for a service-specific one.
+message ExchangeTokenRequest {
+  // access_token is a generic access token (no entitlements) issued by Identity.
+  string access_token = 1;
 
-// API path constants
+  // audience is the target service name (e.g. "sentinel").
+  string audience = 2;
+}
 
-// Query parameter constants
+// ExchangeTokenResponse contains a service-specific access token with entitlements.
+message ExchangeTokenResponse {
+  // access_token is the service-specific access token with entitlements.
+  string access_token = 1;
 
-// Cookie names
-
-// Note: DEFAULT_* constants are auto-generated from (spec.default_int) and
-// (spec.default_string) annotations on Config fields.
+  // expires_in is the access token lifetime in seconds.
+  int64 expires_in = 2;
+}
 
 // Collection query types (auto-injected)
 enum ComparisonOp {
@@ -403,7 +431,15 @@ message CollectionQuery { PredicateGroup where = 1; repeated SortField order_by 
 // Auto-generated Backend Service (tacplus)
 // ============================================================================
 
-service IronMaidenStateBackendService {
+service IdentityStateBackendService {
+	// Singleton: EntitlementsPolicy
+	rpc GetEntitlementsPolicy(google.protobuf.Empty) returns (opa.OpaPolicy);
+	rpc SetEntitlementsPolicy(opa.OpaPolicy) returns (opa.OpaPolicy);
+	rpc WatchEntitlementsPolicy(google.protobuf.Empty) returns (stream opa.OpaPolicy);
+	// Singleton: EntitlementConfig
+	rpc GetEntitlementConfig(google.protobuf.Empty) returns (EntitlementConfig);
+	rpc SetEntitlementConfig(EntitlementConfig) returns (EntitlementConfig);
+	rpc WatchEntitlementConfig(google.protobuf.Empty) returns (stream EntitlementConfig);
 	// Collection: VerifyingKeys
 	rpc GetVerifyingKeys(VerifyingKeysGetRequest) returns (VerifyingKeysValueResponse);
 	rpc PutVerifyingKeys(VerifyingKeysPutRequest) returns (VerifyingKeysValueResponse);
@@ -438,7 +474,7 @@ message VerifyingKeysQueryResponse { repeated jwk.Jwk results = 1; int32 total_c
 // Auto-generated Backend Service (tacplus)
 // ============================================================================
 
-service IronMaidenStateInternalBackendService {
+service IdentityStateInternalBackendService {
 	// Collection: ExternalJwks
 	rpc GetExternalJwks(ExternalJwksGetRequest) returns (ExternalJwksValueResponse);
 	rpc PutExternalJwks(ExternalJwksPutRequest) returns (ExternalJwksValueResponse);

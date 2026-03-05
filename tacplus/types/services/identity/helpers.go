@@ -9,9 +9,9 @@
 // If changes are needed, update the tacplus compiler at:
 // gitlab.com/secondstarcavalier/controlplane/services/tacplus
 //
-// Source: services/ironmaiden.proto
+// Source: services/identity.proto
 
-package ironmaiden
+package identity
 
 import (
 	"bytes"
@@ -20,10 +20,11 @@ import (
 	"strings"
 
 	"github.com/pelletier/go-toml/v2"
-	entitlement "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/entitlement"
-	protoerrors "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/errors"
-	jwk "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/jwk"
-	utils "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/utils"
+	entitlement "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/entitlement"
+	protoerrors "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/errors"
+	jwk "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/jwk"
+	opa "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/opa"
+	utils "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/utils"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 	"gopkg.in/yaml.v3"
@@ -439,7 +440,7 @@ type configJSON struct {
 	NonceExpireSeconds          int64             `json:"nonce_expire_seconds,omitempty"`
 	Issuer                      string            `json:"issuer,omitempty"`
 	JwkRefetchIntervalSeconds   int64             `json:"jwk_refetch_interval_seconds,omitempty"`
-	ClaimMappingPolicy          string            `json:"claim_mapping_policy,omitempty"`
+	EntitlementsPolicy          string            `json:"entitlements_policy,omitempty"`
 	EntitlementMappings         []json.RawMessage `json:"entitlement_mappings,omitempty"`
 	ServiceEntitlements         []json.RawMessage `json:"service_entitlements,omitempty"`
 }
@@ -465,7 +466,7 @@ func ConfigToJSON(v *Config) ([]byte, error) {
 		NonceExpireSeconds:          v.NonceExpireSeconds,
 		Issuer:                      v.Issuer,
 		JwkRefetchIntervalSeconds:   v.JwkRefetchIntervalSeconds,
-		ClaimMappingPolicy:          v.ClaimMappingPolicy,
+		EntitlementsPolicy:          v.EntitlementsPolicy,
 		EntitlementMappings: func() []json.RawMessage {
 			if len(v.EntitlementMappings) == 0 {
 				return nil
@@ -571,7 +572,7 @@ func ConfigFromJSON(data []byte) (*Config, error) {
 	result.NonceExpireSeconds = raw.NonceExpireSeconds
 	result.Issuer = raw.Issuer
 	result.JwkRefetchIntervalSeconds = raw.JwkRefetchIntervalSeconds
-	result.ClaimMappingPolicy = raw.ClaimMappingPolicy
+	result.EntitlementsPolicy = raw.EntitlementsPolicy
 	// Parse repeated message field: EntitlementMappings
 	if len(raw.EntitlementMappings) > 0 {
 		result.EntitlementMappings = make([]*entitlement.ServiceEntitlementMapping, 0, len(raw.EntitlementMappings))
@@ -942,20 +943,194 @@ func ProviderConfigToTOML(v *ProviderConfig) ([]byte, error) {
 	return toml.Marshal(obj)
 }
 
-// IronMaidenStateJSON represents IronMaidenState in external JSON format (with string enums)
+// EntitlementConfigJSON represents EntitlementConfig in external JSON format (with string enums)
 // MARKER: JSON helper struct generated from serial.go
-type ironmaidenstateJSON struct {
-	VerifyingKeys []json.RawMessage `json:"verifying_keys,omitempty"`
+type entitlementconfigJSON struct {
+	EntitlementMappings []json.RawMessage `json:"entitlement_mappings,omitempty"`
+	ServiceEntitlements []json.RawMessage `json:"service_entitlements,omitempty"`
 }
 
-// IronMaidenStateToJSON converts IronMaidenState to JSON bytes.
+// EntitlementConfigToJSON converts EntitlementConfig to JSON bytes.
 // Uses custom JSON helper for friendly enum strings and proper int64 handling.
-func IronMaidenStateToJSON(v *IronMaidenState) ([]byte, error) {
+func EntitlementConfigToJSON(v *EntitlementConfig) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "ironmaidenstate is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "entitlementconfig is nil")
 	}
 	// Convert to JSON helper struct with string enums
-	helper := ironmaidenstateJSON{
+	helper := entitlementconfigJSON{
+		EntitlementMappings: func() []json.RawMessage {
+			if len(v.EntitlementMappings) == 0 {
+				return nil
+			}
+			result := make([]json.RawMessage, 0, len(v.EntitlementMappings))
+			for _, item := range v.EntitlementMappings {
+				if item != nil {
+					if data, err := entitlement.ServiceEntitlementMappingToJSON(item); err == nil {
+						result = append(result, data)
+					}
+				}
+			}
+			return result
+		}(),
+		ServiceEntitlements: func() []json.RawMessage {
+			if len(v.ServiceEntitlements) == 0 {
+				return nil
+			}
+			result := make([]json.RawMessage, 0, len(v.ServiceEntitlements))
+			for _, item := range v.ServiceEntitlements {
+				if item != nil {
+					if data, err := entitlement.ServiceEntitlementsToJSON(item); err == nil {
+						result = append(result, data)
+					}
+				}
+			}
+			return result
+		}(),
+	}
+	return json.Marshal(helper)
+}
+
+// EntitlementConfigFromBytes creates EntitlementConfig from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func EntitlementConfigFromBytes(data []byte) (*EntitlementConfig, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := EntitlementConfigFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := EntitlementConfigFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := EntitlementConfigFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &EntitlementConfig{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse EntitlementConfig: unsupported format or invalid data")
+}
+
+// EntitlementConfigFromJSON creates EntitlementConfig from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func EntitlementConfigFromJSON(data []byte) (*EntitlementConfig, error) {
+	// Unmarshal into helper struct with string enums
+	var raw entitlementconfigJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &EntitlementConfig{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &EntitlementConfig{}
+	// Parse repeated message field: EntitlementMappings
+	if len(raw.EntitlementMappings) > 0 {
+		result.EntitlementMappings = make([]*entitlement.ServiceEntitlementMapping, 0, len(raw.EntitlementMappings))
+		for _, itemJSON := range raw.EntitlementMappings {
+			if len(itemJSON) > 0 {
+				parsed, err := entitlement.ServiceEntitlementMappingFromJSON(itemJSON)
+				if err == nil {
+					result.EntitlementMappings = append(result.EntitlementMappings, parsed)
+				}
+			}
+		}
+	}
+	// Parse repeated message field: ServiceEntitlements
+	if len(raw.ServiceEntitlements) > 0 {
+		result.ServiceEntitlements = make([]*entitlement.ServiceEntitlements, 0, len(raw.ServiceEntitlements))
+		for _, itemJSON := range raw.ServiceEntitlements {
+			if len(itemJSON) > 0 {
+				parsed, err := entitlement.ServiceEntitlementsFromJSON(itemJSON)
+				if err == nil {
+					result.ServiceEntitlements = append(result.ServiceEntitlements, parsed)
+				}
+			}
+		}
+	}
+	return result, nil
+}
+
+// EntitlementConfigToYAML converts EntitlementConfig to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func EntitlementConfigToYAML(v *EntitlementConfig) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "entitlementconfig is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := EntitlementConfigToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// EntitlementConfigToTOML converts EntitlementConfig to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func EntitlementConfigToTOML(v *EntitlementConfig) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "entitlementconfig is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := EntitlementConfigToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
+// IdentityStateJSON represents IdentityState in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type identitystateJSON struct {
+	VerifyingKeys      []json.RawMessage `json:"verifying_keys,omitempty"`
+	EntitlementsPolicy json.RawMessage   `json:"entitlements_policy,omitempty"`
+	EntitlementConfig  json.RawMessage   `json:"entitlement_config,omitempty"`
+}
+
+// IdentityStateToJSON converts IdentityState to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func IdentityStateToJSON(v *IdentityState) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "identitystate is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := identitystateJSON{
 		VerifyingKeys: func() []json.RawMessage {
 			if len(v.VerifyingKeys) == 0 {
 				return nil
@@ -970,13 +1145,27 @@ func IronMaidenStateToJSON(v *IronMaidenState) ([]byte, error) {
 			}
 			return result
 		}(),
+		EntitlementsPolicy: func() json.RawMessage {
+			if v.EntitlementsPolicy == nil {
+				return nil
+			}
+			data, _ := opa.OpaPolicyToJSON(v.EntitlementsPolicy)
+			return data
+		}(),
+		EntitlementConfig: func() json.RawMessage {
+			if v.EntitlementConfig == nil {
+				return nil
+			}
+			data, _ := EntitlementConfigToJSON(v.EntitlementConfig)
+			return data
+		}(),
 	}
 	return json.Marshal(helper)
 }
 
-// IronMaidenStateFromBytes creates IronMaidenState from bytes, auto-detecting the format.
+// IdentityStateFromBytes creates IdentityState from bytes, auto-detecting the format.
 // Supports JSON, YAML, TOML, and binary protobuf formats.
-func IronMaidenStateFromBytes(data []byte) (*IronMaidenState, error) {
+func IdentityStateFromBytes(data []byte) (*IdentityState, error) {
 	// Trim leading whitespace to check format
 	trimmed := bytes.TrimSpace(data)
 	if len(trimmed) == 0 {
@@ -984,7 +1173,7 @@ func IronMaidenStateFromBytes(data []byte) (*IronMaidenState, error) {
 	}
 	// Try JSON first (most common, starts with { or [)
 	if trimmed[0] == '{' || trimmed[0] == '[' {
-		if result, err := IronMaidenStateFromJSON(data); err == nil {
+		if result, err := IdentityStateFromJSON(data); err == nil {
 			return result, nil
 		}
 	}
@@ -994,7 +1183,7 @@ func IronMaidenStateFromBytes(data []byte) (*IronMaidenState, error) {
 		// Convert TOML to JSON, then parse
 		jsonData, err := json.Marshal(tomlObj)
 		if err == nil {
-			if result, err := IronMaidenStateFromJSON(jsonData); err == nil {
+			if result, err := IdentityStateFromJSON(jsonData); err == nil {
 				return result, nil
 			}
 		}
@@ -1005,35 +1194,35 @@ func IronMaidenStateFromBytes(data []byte) (*IronMaidenState, error) {
 		// Convert YAML to JSON, then parse
 		jsonData, err := json.Marshal(yamlObj)
 		if err == nil {
-			if result, err := IronMaidenStateFromJSON(jsonData); err == nil {
+			if result, err := IdentityStateFromJSON(jsonData); err == nil {
 				return result, nil
 			}
 		}
 	}
 	// Try binary protobuf
-	v := &IronMaidenState{}
+	v := &IdentityState{}
 	if err := proto.Unmarshal(data, v); err == nil {
 		return v, nil
 	}
-	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse IronMaidenState: unsupported format or invalid data")
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse IdentityState: unsupported format or invalid data")
 }
 
-// IronMaidenStateFromJSON creates IronMaidenState from JSON bytes.
+// IdentityStateFromJSON creates IdentityState from JSON bytes.
 // Uses standard encoding/json and custom enum parsers for external JSON compatibility.
-func IronMaidenStateFromJSON(data []byte) (*IronMaidenState, error) {
+func IdentityStateFromJSON(data []byte) (*IdentityState, error) {
 	// Unmarshal into helper struct with string enums
-	var raw ironmaidenstateJSON
+	var raw identitystateJSON
 	if err := json.Unmarshal(data, &raw); err != nil {
 		// Fall back to protojson which handles proto3 JSON conventions
 		// (string-encoded int64/uint64, standard enum names, etc.)
-		v := &IronMaidenState{}
+		v := &IdentityState{}
 		if pErr := protojson.Unmarshal(data, v); pErr != nil {
 			return nil, err
 		}
 		return v, nil
 	}
 	// Build result with parsed enums
-	result := &IronMaidenState{}
+	result := &IdentityState{}
 	// Parse repeated message field: VerifyingKeys
 	if len(raw.VerifyingKeys) > 0 {
 		result.VerifyingKeys = make([]*jwk.Jwk, 0, len(raw.VerifyingKeys))
@@ -1046,17 +1235,31 @@ func IronMaidenStateFromJSON(data []byte) (*IronMaidenState, error) {
 			}
 		}
 	}
+	// Parse message field: EntitlementsPolicy
+	if len(raw.EntitlementsPolicy) > 0 {
+		parsed, err := opa.OpaPolicyFromJSON(raw.EntitlementsPolicy)
+		if err == nil {
+			result.EntitlementsPolicy = parsed
+		}
+	}
+	// Parse message field: EntitlementConfig
+	if len(raw.EntitlementConfig) > 0 {
+		parsed, err := EntitlementConfigFromJSON(raw.EntitlementConfig)
+		if err == nil {
+			result.EntitlementConfig = parsed
+		}
+	}
 	return result, nil
 }
 
-// IronMaidenStateToYAML converts IronMaidenState to YAML bytes.
+// IdentityStateToYAML converts IdentityState to YAML bytes.
 // Converts to JSON first, then to YAML for proper protobuf handling.
-func IronMaidenStateToYAML(v *IronMaidenState) ([]byte, error) {
+func IdentityStateToYAML(v *IdentityState) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "ironmaidenstate is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "identitystate is nil")
 	}
 	// Convert to JSON first
-	jsonData, err := IronMaidenStateToJSON(v)
+	jsonData, err := IdentityStateToJSON(v)
 	if err != nil {
 		return nil, err
 	}
@@ -1068,14 +1271,14 @@ func IronMaidenStateToYAML(v *IronMaidenState) ([]byte, error) {
 	return yaml.Marshal(obj)
 }
 
-// IronMaidenStateToTOML converts IronMaidenState to TOML bytes.
+// IdentityStateToTOML converts IdentityState to TOML bytes.
 // Converts to JSON first, then to TOML for proper protobuf handling.
-func IronMaidenStateToTOML(v *IronMaidenState) ([]byte, error) {
+func IdentityStateToTOML(v *IdentityState) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "ironmaidenstate is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "identitystate is nil")
 	}
 	// Convert to JSON first
-	jsonData, err := IronMaidenStateToJSON(v)
+	jsonData, err := IdentityStateToJSON(v)
 	if err != nil {
 		return nil, err
 	}
@@ -1087,20 +1290,20 @@ func IronMaidenStateToTOML(v *IronMaidenState) ([]byte, error) {
 	return toml.Marshal(obj)
 }
 
-// IronMaidenStateInternalJSON represents IronMaidenStateInternal in external JSON format (with string enums)
+// IdentityStateInternalJSON represents IdentityStateInternal in external JSON format (with string enums)
 // MARKER: JSON helper struct generated from serial.go
-type ironmaidenstateinternalJSON struct {
+type identitystateinternalJSON struct {
 	ExternalJwks []json.RawMessage `json:"external_jwks,omitempty"`
 }
 
-// IronMaidenStateInternalToJSON converts IronMaidenStateInternal to JSON bytes.
+// IdentityStateInternalToJSON converts IdentityStateInternal to JSON bytes.
 // Uses custom JSON helper for friendly enum strings and proper int64 handling.
-func IronMaidenStateInternalToJSON(v *IronMaidenStateInternal) ([]byte, error) {
+func IdentityStateInternalToJSON(v *IdentityStateInternal) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "ironmaidenstateinternal is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "identitystateinternal is nil")
 	}
 	// Convert to JSON helper struct with string enums
-	helper := ironmaidenstateinternalJSON{
+	helper := identitystateinternalJSON{
 		ExternalJwks: func() []json.RawMessage {
 			if len(v.ExternalJwks) == 0 {
 				return nil
@@ -1119,9 +1322,9 @@ func IronMaidenStateInternalToJSON(v *IronMaidenStateInternal) ([]byte, error) {
 	return json.Marshal(helper)
 }
 
-// IronMaidenStateInternalFromBytes creates IronMaidenStateInternal from bytes, auto-detecting the format.
+// IdentityStateInternalFromBytes creates IdentityStateInternal from bytes, auto-detecting the format.
 // Supports JSON, YAML, TOML, and binary protobuf formats.
-func IronMaidenStateInternalFromBytes(data []byte) (*IronMaidenStateInternal, error) {
+func IdentityStateInternalFromBytes(data []byte) (*IdentityStateInternal, error) {
 	// Trim leading whitespace to check format
 	trimmed := bytes.TrimSpace(data)
 	if len(trimmed) == 0 {
@@ -1129,7 +1332,7 @@ func IronMaidenStateInternalFromBytes(data []byte) (*IronMaidenStateInternal, er
 	}
 	// Try JSON first (most common, starts with { or [)
 	if trimmed[0] == '{' || trimmed[0] == '[' {
-		if result, err := IronMaidenStateInternalFromJSON(data); err == nil {
+		if result, err := IdentityStateInternalFromJSON(data); err == nil {
 			return result, nil
 		}
 	}
@@ -1139,7 +1342,7 @@ func IronMaidenStateInternalFromBytes(data []byte) (*IronMaidenStateInternal, er
 		// Convert TOML to JSON, then parse
 		jsonData, err := json.Marshal(tomlObj)
 		if err == nil {
-			if result, err := IronMaidenStateInternalFromJSON(jsonData); err == nil {
+			if result, err := IdentityStateInternalFromJSON(jsonData); err == nil {
 				return result, nil
 			}
 		}
@@ -1150,35 +1353,35 @@ func IronMaidenStateInternalFromBytes(data []byte) (*IronMaidenStateInternal, er
 		// Convert YAML to JSON, then parse
 		jsonData, err := json.Marshal(yamlObj)
 		if err == nil {
-			if result, err := IronMaidenStateInternalFromJSON(jsonData); err == nil {
+			if result, err := IdentityStateInternalFromJSON(jsonData); err == nil {
 				return result, nil
 			}
 		}
 	}
 	// Try binary protobuf
-	v := &IronMaidenStateInternal{}
+	v := &IdentityStateInternal{}
 	if err := proto.Unmarshal(data, v); err == nil {
 		return v, nil
 	}
-	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse IronMaidenStateInternal: unsupported format or invalid data")
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse IdentityStateInternal: unsupported format or invalid data")
 }
 
-// IronMaidenStateInternalFromJSON creates IronMaidenStateInternal from JSON bytes.
+// IdentityStateInternalFromJSON creates IdentityStateInternal from JSON bytes.
 // Uses standard encoding/json and custom enum parsers for external JSON compatibility.
-func IronMaidenStateInternalFromJSON(data []byte) (*IronMaidenStateInternal, error) {
+func IdentityStateInternalFromJSON(data []byte) (*IdentityStateInternal, error) {
 	// Unmarshal into helper struct with string enums
-	var raw ironmaidenstateinternalJSON
+	var raw identitystateinternalJSON
 	if err := json.Unmarshal(data, &raw); err != nil {
 		// Fall back to protojson which handles proto3 JSON conventions
 		// (string-encoded int64/uint64, standard enum names, etc.)
-		v := &IronMaidenStateInternal{}
+		v := &IdentityStateInternal{}
 		if pErr := protojson.Unmarshal(data, v); pErr != nil {
 			return nil, err
 		}
 		return v, nil
 	}
 	// Build result with parsed enums
-	result := &IronMaidenStateInternal{}
+	result := &IdentityStateInternal{}
 	// Parse repeated message field: ExternalJwks
 	if len(raw.ExternalJwks) > 0 {
 		result.ExternalJwks = make([]*ExternalJwk, 0, len(raw.ExternalJwks))
@@ -1194,14 +1397,14 @@ func IronMaidenStateInternalFromJSON(data []byte) (*IronMaidenStateInternal, err
 	return result, nil
 }
 
-// IronMaidenStateInternalToYAML converts IronMaidenStateInternal to YAML bytes.
+// IdentityStateInternalToYAML converts IdentityStateInternal to YAML bytes.
 // Converts to JSON first, then to YAML for proper protobuf handling.
-func IronMaidenStateInternalToYAML(v *IronMaidenStateInternal) ([]byte, error) {
+func IdentityStateInternalToYAML(v *IdentityStateInternal) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "ironmaidenstateinternal is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "identitystateinternal is nil")
 	}
 	// Convert to JSON first
-	jsonData, err := IronMaidenStateInternalToJSON(v)
+	jsonData, err := IdentityStateInternalToJSON(v)
 	if err != nil {
 		return nil, err
 	}
@@ -1213,14 +1416,14 @@ func IronMaidenStateInternalToYAML(v *IronMaidenStateInternal) ([]byte, error) {
 	return yaml.Marshal(obj)
 }
 
-// IronMaidenStateInternalToTOML converts IronMaidenStateInternal to TOML bytes.
+// IdentityStateInternalToTOML converts IdentityStateInternal to TOML bytes.
 // Converts to JSON first, then to TOML for proper protobuf handling.
-func IronMaidenStateInternalToTOML(v *IronMaidenStateInternal) ([]byte, error) {
+func IdentityStateInternalToTOML(v *IdentityStateInternal) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "ironmaidenstateinternal is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "identitystateinternal is nil")
 	}
 	// Convert to JSON first
-	jsonData, err := IronMaidenStateInternalToJSON(v)
+	jsonData, err := IdentityStateInternalToJSON(v)
 	if err != nil {
 		return nil, err
 	}
@@ -2630,6 +2833,254 @@ func LogoutResponseToTOML(v *LogoutResponse) ([]byte, error) {
 	}
 	// Convert to JSON first
 	jsonData, err := LogoutResponseToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
+// ExchangeTokenRequestJSON represents ExchangeTokenRequest in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type exchangetokenrequestJSON struct {
+	AccessToken string `json:"access_token,omitempty"`
+	Audience    string `json:"audience,omitempty"`
+}
+
+// ExchangeTokenRequestToJSON converts ExchangeTokenRequest to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func ExchangeTokenRequestToJSON(v *ExchangeTokenRequest) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "exchangetokenrequest is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := exchangetokenrequestJSON{
+		AccessToken: v.AccessToken,
+		Audience:    v.Audience,
+	}
+	return json.Marshal(helper)
+}
+
+// ExchangeTokenRequestFromBytes creates ExchangeTokenRequest from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func ExchangeTokenRequestFromBytes(data []byte) (*ExchangeTokenRequest, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := ExchangeTokenRequestFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := ExchangeTokenRequestFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := ExchangeTokenRequestFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &ExchangeTokenRequest{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse ExchangeTokenRequest: unsupported format or invalid data")
+}
+
+// ExchangeTokenRequestFromJSON creates ExchangeTokenRequest from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func ExchangeTokenRequestFromJSON(data []byte) (*ExchangeTokenRequest, error) {
+	// Unmarshal into helper struct with string enums
+	var raw exchangetokenrequestJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &ExchangeTokenRequest{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &ExchangeTokenRequest{}
+	result.AccessToken = raw.AccessToken
+	result.Audience = raw.Audience
+	return result, nil
+}
+
+// ExchangeTokenRequestToYAML converts ExchangeTokenRequest to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func ExchangeTokenRequestToYAML(v *ExchangeTokenRequest) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "exchangetokenrequest is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := ExchangeTokenRequestToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// ExchangeTokenRequestToTOML converts ExchangeTokenRequest to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func ExchangeTokenRequestToTOML(v *ExchangeTokenRequest) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "exchangetokenrequest is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := ExchangeTokenRequestToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
+// ExchangeTokenResponseJSON represents ExchangeTokenResponse in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type exchangetokenresponseJSON struct {
+	AccessToken string `json:"access_token,omitempty"`
+	ExpiresIn   int64  `json:"expires_in,omitempty"`
+}
+
+// ExchangeTokenResponseToJSON converts ExchangeTokenResponse to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func ExchangeTokenResponseToJSON(v *ExchangeTokenResponse) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "exchangetokenresponse is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := exchangetokenresponseJSON{
+		AccessToken: v.AccessToken,
+		ExpiresIn:   v.ExpiresIn,
+	}
+	return json.Marshal(helper)
+}
+
+// ExchangeTokenResponseFromBytes creates ExchangeTokenResponse from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func ExchangeTokenResponseFromBytes(data []byte) (*ExchangeTokenResponse, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := ExchangeTokenResponseFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := ExchangeTokenResponseFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := ExchangeTokenResponseFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &ExchangeTokenResponse{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse ExchangeTokenResponse: unsupported format or invalid data")
+}
+
+// ExchangeTokenResponseFromJSON creates ExchangeTokenResponse from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func ExchangeTokenResponseFromJSON(data []byte) (*ExchangeTokenResponse, error) {
+	// Unmarshal into helper struct with string enums
+	var raw exchangetokenresponseJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &ExchangeTokenResponse{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &ExchangeTokenResponse{}
+	result.AccessToken = raw.AccessToken
+	result.ExpiresIn = raw.ExpiresIn
+	return result, nil
+}
+
+// ExchangeTokenResponseToYAML converts ExchangeTokenResponse to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func ExchangeTokenResponseToYAML(v *ExchangeTokenResponse) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "exchangetokenresponse is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := ExchangeTokenResponseToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// ExchangeTokenResponseToTOML converts ExchangeTokenResponse to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func ExchangeTokenResponseToTOML(v *ExchangeTokenResponse) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "exchangetokenresponse is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := ExchangeTokenResponseToJSON(v)
 	if err != nil {
 		return nil, err
 	}
@@ -6544,13 +6995,13 @@ func ConfigToEnvVar(v *Config) map[string]string {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_IRONMAIDEN_CONFIG_ACCESS_TOKEN_LIFETIME_SECONDS"] = strconv.FormatInt(v.AccessTokenLifetimeSeconds, 10)
-	result["PROTO_SERVICES_IRONMAIDEN_CONFIG_REFRESH_TOKEN_LIFETIME_SECONDS"] = strconv.FormatInt(v.RefreshTokenLifetimeSeconds, 10)
-	result["PROTO_SERVICES_IRONMAIDEN_CONFIG_KEY_LIFETIME_SECONDS"] = strconv.FormatInt(v.KeyLifetimeSeconds, 10)
-	result["PROTO_SERVICES_IRONMAIDEN_CONFIG_NONCE_EXPIRE_SECONDS"] = strconv.FormatInt(v.NonceExpireSeconds, 10)
-	result["PROTO_SERVICES_IRONMAIDEN_CONFIG_ISSUER"] = v.Issuer
-	result["PROTO_SERVICES_IRONMAIDEN_CONFIG_JWK_REFETCH_INTERVAL_SECONDS"] = strconv.FormatInt(v.JwkRefetchIntervalSeconds, 10)
-	result["PROTO_SERVICES_IRONMAIDEN_CONFIG_CLAIM_MAPPING_POLICY"] = v.ClaimMappingPolicy
+	result["PROTO_SERVICES_IDENTITY_CONFIG_ACCESS_TOKEN_LIFETIME_SECONDS"] = strconv.FormatInt(v.AccessTokenLifetimeSeconds, 10)
+	result["PROTO_SERVICES_IDENTITY_CONFIG_REFRESH_TOKEN_LIFETIME_SECONDS"] = strconv.FormatInt(v.RefreshTokenLifetimeSeconds, 10)
+	result["PROTO_SERVICES_IDENTITY_CONFIG_KEY_LIFETIME_SECONDS"] = strconv.FormatInt(v.KeyLifetimeSeconds, 10)
+	result["PROTO_SERVICES_IDENTITY_CONFIG_NONCE_EXPIRE_SECONDS"] = strconv.FormatInt(v.NonceExpireSeconds, 10)
+	result["PROTO_SERVICES_IDENTITY_CONFIG_ISSUER"] = v.Issuer
+	result["PROTO_SERVICES_IDENTITY_CONFIG_JWK_REFETCH_INTERVAL_SECONDS"] = strconv.FormatInt(v.JwkRefetchIntervalSeconds, 10)
+	result["PROTO_SERVICES_IDENTITY_CONFIG_ENTITLEMENTS_POLICY"] = v.EntitlementsPolicy
 	return result
 }
 
@@ -6562,46 +7013,46 @@ func ConfigFromEnvVar(env map[string]string) (*Config, error) {
 	} else if sub != nil {
 		result.Oauth = sub
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_CONFIG_ACCESS_TOKEN_LIFETIME_SECONDS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_CONFIG_ACCESS_TOKEN_LIFETIME_SECONDS"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
 		}
 		result.AccessTokenLifetimeSeconds = parsed
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_CONFIG_REFRESH_TOKEN_LIFETIME_SECONDS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_CONFIG_REFRESH_TOKEN_LIFETIME_SECONDS"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
 		}
 		result.RefreshTokenLifetimeSeconds = parsed
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_CONFIG_KEY_LIFETIME_SECONDS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_CONFIG_KEY_LIFETIME_SECONDS"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
 		}
 		result.KeyLifetimeSeconds = parsed
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_CONFIG_NONCE_EXPIRE_SECONDS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_CONFIG_NONCE_EXPIRE_SECONDS"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
 		}
 		result.NonceExpireSeconds = parsed
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_CONFIG_ISSUER"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_CONFIG_ISSUER"]; ok && val != "" {
 		result.Issuer = val
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_CONFIG_JWK_REFETCH_INTERVAL_SECONDS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_CONFIG_JWK_REFETCH_INTERVAL_SECONDS"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
 		}
 		result.JwkRefetchIntervalSeconds = parsed
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_CONFIG_CLAIM_MAPPING_POLICY"]; ok && val != "" {
-		result.ClaimMappingPolicy = val
+	if val, ok := env["PROTO_SERVICES_IDENTITY_CONFIG_ENTITLEMENTS_POLICY"]; ok && val != "" {
+		result.EntitlementsPolicy = val
 	}
 	return result, nil
 }
@@ -6612,28 +7063,28 @@ func OAuthConfigToEnvVar(v *OAuthConfig) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_IRONMAIDEN_O_AUTH_CONFIG_ENABLE"] = strconv.FormatBool(v.Enable)
+	result["PROTO_SERVICES_IDENTITY_O_AUTH_CONFIG_ENABLE"] = strconv.FormatBool(v.Enable)
 	if len(v.Scopes) > 0 {
-		result["PROTO_SERVICES_IRONMAIDEN_O_AUTH_CONFIG_SCOPES"] = strings.Join(v.Scopes, ",")
+		result["PROTO_SERVICES_IDENTITY_O_AUTH_CONFIG_SCOPES"] = strings.Join(v.Scopes, ",")
 	}
-	result["PROTO_SERVICES_IRONMAIDEN_O_AUTH_CONFIG_AUDIENCE"] = v.Audience
+	result["PROTO_SERVICES_IDENTITY_O_AUTH_CONFIG_AUDIENCE"] = v.Audience
 	return result
 }
 
 // OAuthConfigFromEnvVar creates OAuthConfig from environment variable key-value pairs.
 func OAuthConfigFromEnvVar(env map[string]string) (*OAuthConfig, error) {
 	result := &OAuthConfig{}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_O_AUTH_CONFIG_ENABLE"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_O_AUTH_CONFIG_ENABLE"]; ok && val != "" {
 		parsed, err := strconv.ParseBool(val)
 		if err != nil {
 			return nil, err
 		}
 		result.Enable = parsed
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_O_AUTH_CONFIG_SCOPES"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_O_AUTH_CONFIG_SCOPES"]; ok && val != "" {
 		result.Scopes = strings.Split(val, ",")
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_O_AUTH_CONFIG_AUDIENCE"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_O_AUTH_CONFIG_AUDIENCE"]; ok && val != "" {
 		result.Audience = val
 	}
 	return result, nil
@@ -6645,69 +7096,69 @@ func ProviderConfigToEnvVar(v *ProviderConfig) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_IRONMAIDEN_PROVIDER_CONFIG_ENABLE"] = strconv.FormatBool(v.Enable)
-	result["PROTO_SERVICES_IRONMAIDEN_PROVIDER_CONFIG_NAME"] = v.Name
+	result["PROTO_SERVICES_IDENTITY_PROVIDER_CONFIG_ENABLE"] = strconv.FormatBool(v.Enable)
+	result["PROTO_SERVICES_IDENTITY_PROVIDER_CONFIG_NAME"] = v.Name
 	if len(v.Domains) > 0 {
-		result["PROTO_SERVICES_IRONMAIDEN_PROVIDER_CONFIG_DOMAINS"] = strings.Join(v.Domains, ",")
+		result["PROTO_SERVICES_IDENTITY_PROVIDER_CONFIG_DOMAINS"] = strings.Join(v.Domains, ",")
 	}
-	result["PROTO_SERVICES_IRONMAIDEN_PROVIDER_CONFIG_ISSUER"] = v.Issuer
-	result["PROTO_SERVICES_IRONMAIDEN_PROVIDER_CONFIG_CLIENT_ID"] = v.ClientId
-	result["PROTO_SERVICES_IRONMAIDEN_PROVIDER_CONFIG_CLIENT_SECRET"] = v.ClientSecret
-	result["PROTO_SERVICES_IRONMAIDEN_PROVIDER_CONFIG_AUTHORIZATION_ENDPOINT"] = v.AuthorizationEndpoint
-	result["PROTO_SERVICES_IRONMAIDEN_PROVIDER_CONFIG_TOKEN_ENDPOINT"] = v.TokenEndpoint
-	result["PROTO_SERVICES_IRONMAIDEN_PROVIDER_CONFIG_END_SESSION_ENDPOINT"] = v.EndSessionEndpoint
+	result["PROTO_SERVICES_IDENTITY_PROVIDER_CONFIG_ISSUER"] = v.Issuer
+	result["PROTO_SERVICES_IDENTITY_PROVIDER_CONFIG_CLIENT_ID"] = v.ClientId
+	result["PROTO_SERVICES_IDENTITY_PROVIDER_CONFIG_CLIENT_SECRET"] = v.ClientSecret
+	result["PROTO_SERVICES_IDENTITY_PROVIDER_CONFIG_AUTHORIZATION_ENDPOINT"] = v.AuthorizationEndpoint
+	result["PROTO_SERVICES_IDENTITY_PROVIDER_CONFIG_TOKEN_ENDPOINT"] = v.TokenEndpoint
+	result["PROTO_SERVICES_IDENTITY_PROVIDER_CONFIG_END_SESSION_ENDPOINT"] = v.EndSessionEndpoint
 	if len(v.Scopes) > 0 {
-		result["PROTO_SERVICES_IRONMAIDEN_PROVIDER_CONFIG_SCOPES"] = strings.Join(v.Scopes, ",")
+		result["PROTO_SERVICES_IDENTITY_PROVIDER_CONFIG_SCOPES"] = strings.Join(v.Scopes, ",")
 	}
-	result["PROTO_SERVICES_IRONMAIDEN_PROVIDER_CONFIG_AUDIENCE"] = v.Audience
+	result["PROTO_SERVICES_IDENTITY_PROVIDER_CONFIG_AUDIENCE"] = v.Audience
 	return result
 }
 
 // ProviderConfigFromEnvVar creates ProviderConfig from environment variable key-value pairs.
 func ProviderConfigFromEnvVar(env map[string]string) (*ProviderConfig, error) {
 	result := &ProviderConfig{}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_PROVIDER_CONFIG_ENABLE"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_PROVIDER_CONFIG_ENABLE"]; ok && val != "" {
 		parsed, err := strconv.ParseBool(val)
 		if err != nil {
 			return nil, err
 		}
 		result.Enable = parsed
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_PROVIDER_CONFIG_NAME"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_PROVIDER_CONFIG_NAME"]; ok && val != "" {
 		result.Name = val
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_PROVIDER_CONFIG_DOMAINS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_PROVIDER_CONFIG_DOMAINS"]; ok && val != "" {
 		result.Domains = strings.Split(val, ",")
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_PROVIDER_CONFIG_ISSUER"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_PROVIDER_CONFIG_ISSUER"]; ok && val != "" {
 		result.Issuer = val
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_PROVIDER_CONFIG_CLIENT_ID"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_PROVIDER_CONFIG_CLIENT_ID"]; ok && val != "" {
 		result.ClientId = val
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_PROVIDER_CONFIG_CLIENT_SECRET"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_PROVIDER_CONFIG_CLIENT_SECRET"]; ok && val != "" {
 		result.ClientSecret = val
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_PROVIDER_CONFIG_AUTHORIZATION_ENDPOINT"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_PROVIDER_CONFIG_AUTHORIZATION_ENDPOINT"]; ok && val != "" {
 		result.AuthorizationEndpoint = val
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_PROVIDER_CONFIG_TOKEN_ENDPOINT"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_PROVIDER_CONFIG_TOKEN_ENDPOINT"]; ok && val != "" {
 		result.TokenEndpoint = val
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_PROVIDER_CONFIG_END_SESSION_ENDPOINT"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_PROVIDER_CONFIG_END_SESSION_ENDPOINT"]; ok && val != "" {
 		result.EndSessionEndpoint = val
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_PROVIDER_CONFIG_SCOPES"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_PROVIDER_CONFIG_SCOPES"]; ok && val != "" {
 		result.Scopes = strings.Split(val, ",")
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_PROVIDER_CONFIG_AUDIENCE"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_PROVIDER_CONFIG_AUDIENCE"]; ok && val != "" {
 		result.Audience = val
 	}
 	return result, nil
 }
 
-// IronMaidenStateToEnvVar converts IronMaidenState to environment variable key-value pairs.
-func IronMaidenStateToEnvVar(v *IronMaidenState) map[string]string {
+// EntitlementConfigToEnvVar converts EntitlementConfig to environment variable key-value pairs.
+func EntitlementConfigToEnvVar(v *EntitlementConfig) map[string]string {
 	if v == nil {
 		return nil
 	}
@@ -6715,14 +7166,49 @@ func IronMaidenStateToEnvVar(v *IronMaidenState) map[string]string {
 	return result
 }
 
-// IronMaidenStateFromEnvVar creates IronMaidenState from environment variable key-value pairs.
-func IronMaidenStateFromEnvVar(env map[string]string) (*IronMaidenState, error) {
-	result := &IronMaidenState{}
+// EntitlementConfigFromEnvVar creates EntitlementConfig from environment variable key-value pairs.
+func EntitlementConfigFromEnvVar(env map[string]string) (*EntitlementConfig, error) {
+	result := &EntitlementConfig{}
 	return result, nil
 }
 
-// IronMaidenStateInternalToEnvVar converts IronMaidenStateInternal to environment variable key-value pairs.
-func IronMaidenStateInternalToEnvVar(v *IronMaidenStateInternal) map[string]string {
+// IdentityStateToEnvVar converts IdentityState to environment variable key-value pairs.
+func IdentityStateToEnvVar(v *IdentityState) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	if v.EntitlementsPolicy != nil {
+		for k, val := range opa.OpaPolicyToEnvVar(v.EntitlementsPolicy) {
+			result[k] = val
+		}
+	}
+	if v.EntitlementConfig != nil {
+		for k, val := range EntitlementConfigToEnvVar(v.EntitlementConfig) {
+			result[k] = val
+		}
+	}
+	return result
+}
+
+// IdentityStateFromEnvVar creates IdentityState from environment variable key-value pairs.
+func IdentityStateFromEnvVar(env map[string]string) (*IdentityState, error) {
+	result := &IdentityState{}
+	if sub, err := opa.OpaPolicyFromEnvVar(env); err != nil {
+		return nil, err
+	} else if sub != nil {
+		result.EntitlementsPolicy = sub
+	}
+	if sub, err := EntitlementConfigFromEnvVar(env); err != nil {
+		return nil, err
+	} else if sub != nil {
+		result.EntitlementConfig = sub
+	}
+	return result, nil
+}
+
+// IdentityStateInternalToEnvVar converts IdentityStateInternal to environment variable key-value pairs.
+func IdentityStateInternalToEnvVar(v *IdentityStateInternal) map[string]string {
 	if v == nil {
 		return nil
 	}
@@ -6730,9 +7216,9 @@ func IronMaidenStateInternalToEnvVar(v *IronMaidenStateInternal) map[string]stri
 	return result
 }
 
-// IronMaidenStateInternalFromEnvVar creates IronMaidenStateInternal from environment variable key-value pairs.
-func IronMaidenStateInternalFromEnvVar(env map[string]string) (*IronMaidenStateInternal, error) {
-	result := &IronMaidenStateInternal{}
+// IdentityStateInternalFromEnvVar creates IdentityStateInternal from environment variable key-value pairs.
+func IdentityStateInternalFromEnvVar(env map[string]string) (*IdentityStateInternal, error) {
+	result := &IdentityStateInternal{}
 	return result, nil
 }
 
@@ -6742,21 +7228,21 @@ func ExternalJwkToEnvVar(v *ExternalJwk) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_IRONMAIDEN_EXTERNAL_JWK_KID"] = v.Kid
+	result["PROTO_SERVICES_IDENTITY_EXTERNAL_JWK_KID"] = v.Kid
 	if v.Key != nil {
 		for k, val := range jwk.JwkToEnvVar(v.Key) {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_IRONMAIDEN_EXTERNAL_JWK_ISSUER"] = v.Issuer
-	result["PROTO_SERVICES_IRONMAIDEN_EXTERNAL_JWK_FETCHED_AT"] = strconv.FormatInt(v.FetchedAt, 10)
+	result["PROTO_SERVICES_IDENTITY_EXTERNAL_JWK_ISSUER"] = v.Issuer
+	result["PROTO_SERVICES_IDENTITY_EXTERNAL_JWK_FETCHED_AT"] = strconv.FormatInt(v.FetchedAt, 10)
 	return result
 }
 
 // ExternalJwkFromEnvVar creates ExternalJwk from environment variable key-value pairs.
 func ExternalJwkFromEnvVar(env map[string]string) (*ExternalJwk, error) {
 	result := &ExternalJwk{}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_EXTERNAL_JWK_KID"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_EXTERNAL_JWK_KID"]; ok && val != "" {
 		result.Kid = val
 	}
 	if sub, err := jwk.JwkFromEnvVar(env); err != nil {
@@ -6764,10 +7250,10 @@ func ExternalJwkFromEnvVar(env map[string]string) (*ExternalJwk, error) {
 	} else if sub != nil {
 		result.Key = sub
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_EXTERNAL_JWK_ISSUER"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_EXTERNAL_JWK_ISSUER"]; ok && val != "" {
 		result.Issuer = val
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_EXTERNAL_JWK_FETCHED_AT"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_EXTERNAL_JWK_FETCHED_AT"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
@@ -6798,24 +7284,24 @@ func ProviderInfoToEnvVar(v *ProviderInfo) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_IRONMAIDEN_PROVIDER_INFO_NAME"] = v.Name
+	result["PROTO_SERVICES_IDENTITY_PROVIDER_INFO_NAME"] = v.Name
 	if len(v.Domains) > 0 {
-		result["PROTO_SERVICES_IRONMAIDEN_PROVIDER_INFO_DOMAINS"] = strings.Join(v.Domains, ",")
+		result["PROTO_SERVICES_IDENTITY_PROVIDER_INFO_DOMAINS"] = strings.Join(v.Domains, ",")
 	}
-	result["PROTO_SERVICES_IRONMAIDEN_PROVIDER_INFO_PROVIDER_INDEX"] = strconv.FormatInt(int64(v.ProviderIndex), 10)
+	result["PROTO_SERVICES_IDENTITY_PROVIDER_INFO_PROVIDER_INDEX"] = strconv.FormatInt(int64(v.ProviderIndex), 10)
 	return result
 }
 
 // ProviderInfoFromEnvVar creates ProviderInfo from environment variable key-value pairs.
 func ProviderInfoFromEnvVar(env map[string]string) (*ProviderInfo, error) {
 	result := &ProviderInfo{}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_PROVIDER_INFO_NAME"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_PROVIDER_INFO_NAME"]; ok && val != "" {
 		result.Name = val
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_PROVIDER_INFO_DOMAINS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_PROVIDER_INFO_DOMAINS"]; ok && val != "" {
 		result.Domains = strings.Split(val, ",")
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_PROVIDER_INFO_PROVIDER_INDEX"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_PROVIDER_INFO_PROVIDER_INDEX"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -6831,22 +7317,22 @@ func AuthorizeRequestToEnvVar(v *AuthorizeRequest) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_IRONMAIDEN_AUTHORIZE_REQUEST_PROVIDER_INDEX"] = strconv.FormatInt(int64(v.ProviderIndex), 10)
-	result["PROTO_SERVICES_IRONMAIDEN_AUTHORIZE_REQUEST_CALLBACK_URL"] = v.CallbackUrl
+	result["PROTO_SERVICES_IDENTITY_AUTHORIZE_REQUEST_PROVIDER_INDEX"] = strconv.FormatInt(int64(v.ProviderIndex), 10)
+	result["PROTO_SERVICES_IDENTITY_AUTHORIZE_REQUEST_CALLBACK_URL"] = v.CallbackUrl
 	return result
 }
 
 // AuthorizeRequestFromEnvVar creates AuthorizeRequest from environment variable key-value pairs.
 func AuthorizeRequestFromEnvVar(env map[string]string) (*AuthorizeRequest, error) {
 	result := &AuthorizeRequest{}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_AUTHORIZE_REQUEST_PROVIDER_INDEX"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_AUTHORIZE_REQUEST_PROVIDER_INDEX"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
 		}
 		result.ProviderIndex = int32(parsed)
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_AUTHORIZE_REQUEST_CALLBACK_URL"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_AUTHORIZE_REQUEST_CALLBACK_URL"]; ok && val != "" {
 		result.CallbackUrl = val
 	}
 	return result, nil
@@ -6858,14 +7344,14 @@ func AuthorizeResponseToEnvVar(v *AuthorizeResponse) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_IRONMAIDEN_AUTHORIZE_RESPONSE_REDIRECT_URL"] = v.RedirectUrl
+	result["PROTO_SERVICES_IDENTITY_AUTHORIZE_RESPONSE_REDIRECT_URL"] = v.RedirectUrl
 	return result
 }
 
 // AuthorizeResponseFromEnvVar creates AuthorizeResponse from environment variable key-value pairs.
 func AuthorizeResponseFromEnvVar(env map[string]string) (*AuthorizeResponse, error) {
 	result := &AuthorizeResponse{}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_AUTHORIZE_RESPONSE_REDIRECT_URL"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_AUTHORIZE_RESPONSE_REDIRECT_URL"]; ok && val != "" {
 		result.RedirectUrl = val
 	}
 	return result, nil
@@ -6877,18 +7363,18 @@ func CallbackRequestToEnvVar(v *CallbackRequest) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_IRONMAIDEN_CALLBACK_REQUEST_CODE"] = v.Code
-	result["PROTO_SERVICES_IRONMAIDEN_CALLBACK_REQUEST_STATE"] = v.State
+	result["PROTO_SERVICES_IDENTITY_CALLBACK_REQUEST_CODE"] = v.Code
+	result["PROTO_SERVICES_IDENTITY_CALLBACK_REQUEST_STATE"] = v.State
 	return result
 }
 
 // CallbackRequestFromEnvVar creates CallbackRequest from environment variable key-value pairs.
 func CallbackRequestFromEnvVar(env map[string]string) (*CallbackRequest, error) {
 	result := &CallbackRequest{}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_CALLBACK_REQUEST_CODE"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_CALLBACK_REQUEST_CODE"]; ok && val != "" {
 		result.Code = val
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_CALLBACK_REQUEST_STATE"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_CALLBACK_REQUEST_STATE"]; ok && val != "" {
 		result.State = val
 	}
 	return result, nil
@@ -6900,34 +7386,34 @@ func CallbackResponseToEnvVar(v *CallbackResponse) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_IRONMAIDEN_CALLBACK_RESPONSE_REFRESH_TOKEN"] = v.RefreshToken
-	result["PROTO_SERVICES_IRONMAIDEN_CALLBACK_RESPONSE_ACCESS_TOKEN"] = v.AccessToken
-	result["PROTO_SERVICES_IRONMAIDEN_CALLBACK_RESPONSE_CALLBACK_URL"] = v.CallbackUrl
-	result["PROTO_SERVICES_IRONMAIDEN_CALLBACK_RESPONSE_ACCESS_TOKEN_EXPIRES_IN"] = strconv.FormatInt(v.AccessTokenExpiresIn, 10)
-	result["PROTO_SERVICES_IRONMAIDEN_CALLBACK_RESPONSE_REFRESH_TOKEN_EXPIRES_IN"] = strconv.FormatInt(v.RefreshTokenExpiresIn, 10)
+	result["PROTO_SERVICES_IDENTITY_CALLBACK_RESPONSE_REFRESH_TOKEN"] = v.RefreshToken
+	result["PROTO_SERVICES_IDENTITY_CALLBACK_RESPONSE_ACCESS_TOKEN"] = v.AccessToken
+	result["PROTO_SERVICES_IDENTITY_CALLBACK_RESPONSE_CALLBACK_URL"] = v.CallbackUrl
+	result["PROTO_SERVICES_IDENTITY_CALLBACK_RESPONSE_ACCESS_TOKEN_EXPIRES_IN"] = strconv.FormatInt(v.AccessTokenExpiresIn, 10)
+	result["PROTO_SERVICES_IDENTITY_CALLBACK_RESPONSE_REFRESH_TOKEN_EXPIRES_IN"] = strconv.FormatInt(v.RefreshTokenExpiresIn, 10)
 	return result
 }
 
 // CallbackResponseFromEnvVar creates CallbackResponse from environment variable key-value pairs.
 func CallbackResponseFromEnvVar(env map[string]string) (*CallbackResponse, error) {
 	result := &CallbackResponse{}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_CALLBACK_RESPONSE_REFRESH_TOKEN"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_CALLBACK_RESPONSE_REFRESH_TOKEN"]; ok && val != "" {
 		result.RefreshToken = val
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_CALLBACK_RESPONSE_ACCESS_TOKEN"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_CALLBACK_RESPONSE_ACCESS_TOKEN"]; ok && val != "" {
 		result.AccessToken = val
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_CALLBACK_RESPONSE_CALLBACK_URL"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_CALLBACK_RESPONSE_CALLBACK_URL"]; ok && val != "" {
 		result.CallbackUrl = val
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_CALLBACK_RESPONSE_ACCESS_TOKEN_EXPIRES_IN"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_CALLBACK_RESPONSE_ACCESS_TOKEN_EXPIRES_IN"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
 		}
 		result.AccessTokenExpiresIn = parsed
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_CALLBACK_RESPONSE_REFRESH_TOKEN_EXPIRES_IN"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_CALLBACK_RESPONSE_REFRESH_TOKEN_EXPIRES_IN"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
@@ -6943,18 +7429,18 @@ func RefreshTokenRequestToEnvVar(v *RefreshTokenRequest) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_IRONMAIDEN_REFRESH_TOKEN_REQUEST_REFRESH_TOKEN"] = v.RefreshToken
-	result["PROTO_SERVICES_IRONMAIDEN_REFRESH_TOKEN_REQUEST_AUDIENCE"] = v.Audience
+	result["PROTO_SERVICES_IDENTITY_REFRESH_TOKEN_REQUEST_REFRESH_TOKEN"] = v.RefreshToken
+	result["PROTO_SERVICES_IDENTITY_REFRESH_TOKEN_REQUEST_AUDIENCE"] = v.Audience
 	return result
 }
 
 // RefreshTokenRequestFromEnvVar creates RefreshTokenRequest from environment variable key-value pairs.
 func RefreshTokenRequestFromEnvVar(env map[string]string) (*RefreshTokenRequest, error) {
 	result := &RefreshTokenRequest{}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_REFRESH_TOKEN_REQUEST_REFRESH_TOKEN"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_REFRESH_TOKEN_REQUEST_REFRESH_TOKEN"]; ok && val != "" {
 		result.RefreshToken = val
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_REFRESH_TOKEN_REQUEST_AUDIENCE"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_REFRESH_TOKEN_REQUEST_AUDIENCE"]; ok && val != "" {
 		result.Audience = val
 	}
 	return result, nil
@@ -6966,18 +7452,18 @@ func RefreshTokenResponseToEnvVar(v *RefreshTokenResponse) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_IRONMAIDEN_REFRESH_TOKEN_RESPONSE_ACCESS_TOKEN"] = v.AccessToken
-	result["PROTO_SERVICES_IRONMAIDEN_REFRESH_TOKEN_RESPONSE_EXPIRES_IN"] = strconv.FormatInt(v.ExpiresIn, 10)
+	result["PROTO_SERVICES_IDENTITY_REFRESH_TOKEN_RESPONSE_ACCESS_TOKEN"] = v.AccessToken
+	result["PROTO_SERVICES_IDENTITY_REFRESH_TOKEN_RESPONSE_EXPIRES_IN"] = strconv.FormatInt(v.ExpiresIn, 10)
 	return result
 }
 
 // RefreshTokenResponseFromEnvVar creates RefreshTokenResponse from environment variable key-value pairs.
 func RefreshTokenResponseFromEnvVar(env map[string]string) (*RefreshTokenResponse, error) {
 	result := &RefreshTokenResponse{}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_REFRESH_TOKEN_RESPONSE_ACCESS_TOKEN"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_REFRESH_TOKEN_RESPONSE_ACCESS_TOKEN"]; ok && val != "" {
 		result.AccessToken = val
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_REFRESH_TOKEN_RESPONSE_EXPIRES_IN"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_REFRESH_TOKEN_RESPONSE_EXPIRES_IN"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
@@ -6993,18 +7479,18 @@ func LogoutRequestToEnvVar(v *LogoutRequest) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_IRONMAIDEN_LOGOUT_REQUEST_POST_LOGOUT_REDIRECT_URL"] = v.PostLogoutRedirectUrl
-	result["PROTO_SERVICES_IRONMAIDEN_LOGOUT_REQUEST_ID_TOKEN_HINT"] = v.IdTokenHint
+	result["PROTO_SERVICES_IDENTITY_LOGOUT_REQUEST_POST_LOGOUT_REDIRECT_URL"] = v.PostLogoutRedirectUrl
+	result["PROTO_SERVICES_IDENTITY_LOGOUT_REQUEST_ID_TOKEN_HINT"] = v.IdTokenHint
 	return result
 }
 
 // LogoutRequestFromEnvVar creates LogoutRequest from environment variable key-value pairs.
 func LogoutRequestFromEnvVar(env map[string]string) (*LogoutRequest, error) {
 	result := &LogoutRequest{}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_LOGOUT_REQUEST_POST_LOGOUT_REDIRECT_URL"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_LOGOUT_REQUEST_POST_LOGOUT_REDIRECT_URL"]; ok && val != "" {
 		result.PostLogoutRedirectUrl = val
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_LOGOUT_REQUEST_ID_TOKEN_HINT"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_LOGOUT_REQUEST_ID_TOKEN_HINT"]; ok && val != "" {
 		result.IdTokenHint = val
 	}
 	return result, nil
@@ -7016,15 +7502,65 @@ func LogoutResponseToEnvVar(v *LogoutResponse) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_IRONMAIDEN_LOGOUT_RESPONSE_REDIRECT_URL"] = v.RedirectUrl
+	result["PROTO_SERVICES_IDENTITY_LOGOUT_RESPONSE_REDIRECT_URL"] = v.RedirectUrl
 	return result
 }
 
 // LogoutResponseFromEnvVar creates LogoutResponse from environment variable key-value pairs.
 func LogoutResponseFromEnvVar(env map[string]string) (*LogoutResponse, error) {
 	result := &LogoutResponse{}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_LOGOUT_RESPONSE_REDIRECT_URL"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_LOGOUT_RESPONSE_REDIRECT_URL"]; ok && val != "" {
 		result.RedirectUrl = val
+	}
+	return result, nil
+}
+
+// ExchangeTokenRequestToEnvVar converts ExchangeTokenRequest to environment variable key-value pairs.
+func ExchangeTokenRequestToEnvVar(v *ExchangeTokenRequest) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	result["PROTO_SERVICES_IDENTITY_EXCHANGE_TOKEN_REQUEST_ACCESS_TOKEN"] = v.AccessToken
+	result["PROTO_SERVICES_IDENTITY_EXCHANGE_TOKEN_REQUEST_AUDIENCE"] = v.Audience
+	return result
+}
+
+// ExchangeTokenRequestFromEnvVar creates ExchangeTokenRequest from environment variable key-value pairs.
+func ExchangeTokenRequestFromEnvVar(env map[string]string) (*ExchangeTokenRequest, error) {
+	result := &ExchangeTokenRequest{}
+	if val, ok := env["PROTO_SERVICES_IDENTITY_EXCHANGE_TOKEN_REQUEST_ACCESS_TOKEN"]; ok && val != "" {
+		result.AccessToken = val
+	}
+	if val, ok := env["PROTO_SERVICES_IDENTITY_EXCHANGE_TOKEN_REQUEST_AUDIENCE"]; ok && val != "" {
+		result.Audience = val
+	}
+	return result, nil
+}
+
+// ExchangeTokenResponseToEnvVar converts ExchangeTokenResponse to environment variable key-value pairs.
+func ExchangeTokenResponseToEnvVar(v *ExchangeTokenResponse) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	result["PROTO_SERVICES_IDENTITY_EXCHANGE_TOKEN_RESPONSE_ACCESS_TOKEN"] = v.AccessToken
+	result["PROTO_SERVICES_IDENTITY_EXCHANGE_TOKEN_RESPONSE_EXPIRES_IN"] = strconv.FormatInt(v.ExpiresIn, 10)
+	return result
+}
+
+// ExchangeTokenResponseFromEnvVar creates ExchangeTokenResponse from environment variable key-value pairs.
+func ExchangeTokenResponseFromEnvVar(env map[string]string) (*ExchangeTokenResponse, error) {
+	result := &ExchangeTokenResponse{}
+	if val, ok := env["PROTO_SERVICES_IDENTITY_EXCHANGE_TOKEN_RESPONSE_ACCESS_TOKEN"]; ok && val != "" {
+		result.AccessToken = val
+	}
+	if val, ok := env["PROTO_SERVICES_IDENTITY_EXCHANGE_TOKEN_RESPONSE_EXPIRES_IN"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.ExpiresIn = parsed
 	}
 	return result, nil
 }
@@ -7050,8 +7586,8 @@ func PredicateToEnvVar(v *Predicate) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_IRONMAIDEN_PREDICATE_FIELD_NAME"] = v.FieldName
-	result["PROTO_SERVICES_IRONMAIDEN_PREDICATE_OP"] = ComparisonOpToString(v.Op)
+	result["PROTO_SERVICES_IDENTITY_PREDICATE_FIELD_NAME"] = v.FieldName
+	result["PROTO_SERVICES_IDENTITY_PREDICATE_OP"] = ComparisonOpToString(v.Op)
 	if v.Value != nil {
 		for k, val := range QueryValueToEnvVar(v.Value) {
 			result[k] = val
@@ -7063,10 +7599,10 @@ func PredicateToEnvVar(v *Predicate) map[string]string {
 // PredicateFromEnvVar creates Predicate from environment variable key-value pairs.
 func PredicateFromEnvVar(env map[string]string) (*Predicate, error) {
 	result := &Predicate{}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_PREDICATE_FIELD_NAME"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_PREDICATE_FIELD_NAME"]; ok && val != "" {
 		result.FieldName = val
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_PREDICATE_OP"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_PREDICATE_OP"]; ok && val != "" {
 		parsed, err := ParseComparisonOp(val)
 		if err != nil {
 			return nil, err
@@ -7087,14 +7623,14 @@ func PredicateGroupToEnvVar(v *PredicateGroup) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_IRONMAIDEN_PREDICATE_GROUP_OP"] = LogicalOpToString(v.Op)
+	result["PROTO_SERVICES_IDENTITY_PREDICATE_GROUP_OP"] = LogicalOpToString(v.Op)
 	return result
 }
 
 // PredicateGroupFromEnvVar creates PredicateGroup from environment variable key-value pairs.
 func PredicateGroupFromEnvVar(env map[string]string) (*PredicateGroup, error) {
 	result := &PredicateGroup{}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_PREDICATE_GROUP_OP"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_PREDICATE_GROUP_OP"]; ok && val != "" {
 		parsed, err := ParseLogicalOp(val)
 		if err != nil {
 			return nil, err
@@ -7110,18 +7646,18 @@ func SortFieldToEnvVar(v *SortField) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_IRONMAIDEN_SORT_FIELD_FIELD_NAME"] = v.FieldName
-	result["PROTO_SERVICES_IRONMAIDEN_SORT_FIELD_DIRECTION"] = SortDirectionToString(v.Direction)
+	result["PROTO_SERVICES_IDENTITY_SORT_FIELD_FIELD_NAME"] = v.FieldName
+	result["PROTO_SERVICES_IDENTITY_SORT_FIELD_DIRECTION"] = SortDirectionToString(v.Direction)
 	return result
 }
 
 // SortFieldFromEnvVar creates SortField from environment variable key-value pairs.
 func SortFieldFromEnvVar(env map[string]string) (*SortField, error) {
 	result := &SortField{}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_SORT_FIELD_FIELD_NAME"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_SORT_FIELD_FIELD_NAME"]; ok && val != "" {
 		result.FieldName = val
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_SORT_FIELD_DIRECTION"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_SORT_FIELD_DIRECTION"]; ok && val != "" {
 		parsed, err := ParseSortDirection(val)
 		if err != nil {
 			return nil, err
@@ -7142,8 +7678,8 @@ func CollectionQueryToEnvVar(v *CollectionQuery) map[string]string {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_IRONMAIDEN_COLLECTION_QUERY_LIMIT"] = strconv.FormatInt(int64(v.Limit), 10)
-	result["PROTO_SERVICES_IRONMAIDEN_COLLECTION_QUERY_OFFSET"] = strconv.FormatInt(int64(v.Offset), 10)
+	result["PROTO_SERVICES_IDENTITY_COLLECTION_QUERY_LIMIT"] = strconv.FormatInt(int64(v.Limit), 10)
+	result["PROTO_SERVICES_IDENTITY_COLLECTION_QUERY_OFFSET"] = strconv.FormatInt(int64(v.Offset), 10)
 	return result
 }
 
@@ -7155,14 +7691,14 @@ func CollectionQueryFromEnvVar(env map[string]string) (*CollectionQuery, error) 
 	} else if sub != nil {
 		result.Where = sub
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_COLLECTION_QUERY_LIMIT"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_COLLECTION_QUERY_LIMIT"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
 		}
 		result.Limit = int32(parsed)
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_COLLECTION_QUERY_OFFSET"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_COLLECTION_QUERY_OFFSET"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -7178,14 +7714,14 @@ func VerifyingKeysGetRequestToEnvVar(v *VerifyingKeysGetRequest) map[string]stri
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_IRONMAIDEN_VERIFYING_KEYS_GET_REQUEST_KEY"] = v.Key
+	result["PROTO_SERVICES_IDENTITY_VERIFYING_KEYS_GET_REQUEST_KEY"] = v.Key
 	return result
 }
 
 // VerifyingKeysGetRequestFromEnvVar creates VerifyingKeysGetRequest from environment variable key-value pairs.
 func VerifyingKeysGetRequestFromEnvVar(env map[string]string) (*VerifyingKeysGetRequest, error) {
 	result := &VerifyingKeysGetRequest{}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_VERIFYING_KEYS_GET_REQUEST_KEY"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_VERIFYING_KEYS_GET_REQUEST_KEY"]; ok && val != "" {
 		result.Key = val
 	}
 	return result, nil
@@ -7197,20 +7733,20 @@ func VerifyingKeysPutRequestToEnvVar(v *VerifyingKeysPutRequest) map[string]stri
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_IRONMAIDEN_VERIFYING_KEYS_PUT_REQUEST_KEY"] = v.Key
+	result["PROTO_SERVICES_IDENTITY_VERIFYING_KEYS_PUT_REQUEST_KEY"] = v.Key
 	if v.Value != nil {
 		for k, val := range jwk.JwkToEnvVar(v.Value) {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_IRONMAIDEN_VERIFYING_KEYS_PUT_REQUEST_LOCK_COUNTER"] = strconv.FormatInt(v.LockCounter, 10)
+	result["PROTO_SERVICES_IDENTITY_VERIFYING_KEYS_PUT_REQUEST_LOCK_COUNTER"] = strconv.FormatInt(v.LockCounter, 10)
 	return result
 }
 
 // VerifyingKeysPutRequestFromEnvVar creates VerifyingKeysPutRequest from environment variable key-value pairs.
 func VerifyingKeysPutRequestFromEnvVar(env map[string]string) (*VerifyingKeysPutRequest, error) {
 	result := &VerifyingKeysPutRequest{}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_VERIFYING_KEYS_PUT_REQUEST_KEY"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_VERIFYING_KEYS_PUT_REQUEST_KEY"]; ok && val != "" {
 		result.Key = val
 	}
 	if sub, err := jwk.JwkFromEnvVar(env); err != nil {
@@ -7218,7 +7754,7 @@ func VerifyingKeysPutRequestFromEnvVar(env map[string]string) (*VerifyingKeysPut
 	} else if sub != nil {
 		result.Value = sub
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_VERIFYING_KEYS_PUT_REQUEST_LOCK_COUNTER"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_VERIFYING_KEYS_PUT_REQUEST_LOCK_COUNTER"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
@@ -7299,7 +7835,7 @@ func VerifyingKeysValueResponseToEnvVar(v *VerifyingKeysValueResponse) map[strin
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_IRONMAIDEN_VERIFYING_KEYS_VALUE_RESPONSE_FOUND"] = strconv.FormatBool(v.Found)
+	result["PROTO_SERVICES_IDENTITY_VERIFYING_KEYS_VALUE_RESPONSE_FOUND"] = strconv.FormatBool(v.Found)
 	return result
 }
 
@@ -7311,7 +7847,7 @@ func VerifyingKeysValueResponseFromEnvVar(env map[string]string) (*VerifyingKeys
 	} else if sub != nil {
 		result.Value = sub
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_VERIFYING_KEYS_VALUE_RESPONSE_FOUND"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_VERIFYING_KEYS_VALUE_RESPONSE_FOUND"]; ok && val != "" {
 		parsed, err := strconv.ParseBool(val)
 		if err != nil {
 			return nil, err
@@ -7343,7 +7879,7 @@ func VerifyingKeysKeysResponseToEnvVar(v *VerifyingKeysKeysResponse) map[string]
 	}
 	result := make(map[string]string)
 	if len(v.Keys) > 0 {
-		result["PROTO_SERVICES_IRONMAIDEN_VERIFYING_KEYS_KEYS_RESPONSE_KEYS"] = strings.Join(v.Keys, ",")
+		result["PROTO_SERVICES_IDENTITY_VERIFYING_KEYS_KEYS_RESPONSE_KEYS"] = strings.Join(v.Keys, ",")
 	}
 	return result
 }
@@ -7351,7 +7887,7 @@ func VerifyingKeysKeysResponseToEnvVar(v *VerifyingKeysKeysResponse) map[string]
 // VerifyingKeysKeysResponseFromEnvVar creates VerifyingKeysKeysResponse from environment variable key-value pairs.
 func VerifyingKeysKeysResponseFromEnvVar(env map[string]string) (*VerifyingKeysKeysResponse, error) {
 	result := &VerifyingKeysKeysResponse{}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_VERIFYING_KEYS_KEYS_RESPONSE_KEYS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_VERIFYING_KEYS_KEYS_RESPONSE_KEYS"]; ok && val != "" {
 		result.Keys = strings.Split(val, ",")
 	}
 	return result, nil
@@ -7363,14 +7899,14 @@ func VerifyingKeysSizeResponseToEnvVar(v *VerifyingKeysSizeResponse) map[string]
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_IRONMAIDEN_VERIFYING_KEYS_SIZE_RESPONSE_SIZE"] = strconv.FormatInt(int64(v.Size), 10)
+	result["PROTO_SERVICES_IDENTITY_VERIFYING_KEYS_SIZE_RESPONSE_SIZE"] = strconv.FormatInt(int64(v.Size), 10)
 	return result
 }
 
 // VerifyingKeysSizeResponseFromEnvVar creates VerifyingKeysSizeResponse from environment variable key-value pairs.
 func VerifyingKeysSizeResponseFromEnvVar(env map[string]string) (*VerifyingKeysSizeResponse, error) {
 	result := &VerifyingKeysSizeResponse{}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_VERIFYING_KEYS_SIZE_RESPONSE_SIZE"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_VERIFYING_KEYS_SIZE_RESPONSE_SIZE"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -7411,14 +7947,14 @@ func VerifyingKeysQueryResponseToEnvVar(v *VerifyingKeysQueryResponse) map[strin
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_IRONMAIDEN_VERIFYING_KEYS_QUERY_RESPONSE_TOTAL_COUNT"] = strconv.FormatInt(int64(v.TotalCount), 10)
+	result["PROTO_SERVICES_IDENTITY_VERIFYING_KEYS_QUERY_RESPONSE_TOTAL_COUNT"] = strconv.FormatInt(int64(v.TotalCount), 10)
 	return result
 }
 
 // VerifyingKeysQueryResponseFromEnvVar creates VerifyingKeysQueryResponse from environment variable key-value pairs.
 func VerifyingKeysQueryResponseFromEnvVar(env map[string]string) (*VerifyingKeysQueryResponse, error) {
 	result := &VerifyingKeysQueryResponse{}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_VERIFYING_KEYS_QUERY_RESPONSE_TOTAL_COUNT"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_VERIFYING_KEYS_QUERY_RESPONSE_TOTAL_COUNT"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -7434,14 +7970,14 @@ func ExternalJwksGetRequestToEnvVar(v *ExternalJwksGetRequest) map[string]string
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_IRONMAIDEN_EXTERNAL_JWKS_GET_REQUEST_KEY"] = v.Key
+	result["PROTO_SERVICES_IDENTITY_EXTERNAL_JWKS_GET_REQUEST_KEY"] = v.Key
 	return result
 }
 
 // ExternalJwksGetRequestFromEnvVar creates ExternalJwksGetRequest from environment variable key-value pairs.
 func ExternalJwksGetRequestFromEnvVar(env map[string]string) (*ExternalJwksGetRequest, error) {
 	result := &ExternalJwksGetRequest{}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_EXTERNAL_JWKS_GET_REQUEST_KEY"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_EXTERNAL_JWKS_GET_REQUEST_KEY"]; ok && val != "" {
 		result.Key = val
 	}
 	return result, nil
@@ -7453,20 +7989,20 @@ func ExternalJwksPutRequestToEnvVar(v *ExternalJwksPutRequest) map[string]string
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_IRONMAIDEN_EXTERNAL_JWKS_PUT_REQUEST_KEY"] = v.Key
+	result["PROTO_SERVICES_IDENTITY_EXTERNAL_JWKS_PUT_REQUEST_KEY"] = v.Key
 	if v.Value != nil {
 		for k, val := range ExternalJwkToEnvVar(v.Value) {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_IRONMAIDEN_EXTERNAL_JWKS_PUT_REQUEST_LOCK_COUNTER"] = strconv.FormatInt(v.LockCounter, 10)
+	result["PROTO_SERVICES_IDENTITY_EXTERNAL_JWKS_PUT_REQUEST_LOCK_COUNTER"] = strconv.FormatInt(v.LockCounter, 10)
 	return result
 }
 
 // ExternalJwksPutRequestFromEnvVar creates ExternalJwksPutRequest from environment variable key-value pairs.
 func ExternalJwksPutRequestFromEnvVar(env map[string]string) (*ExternalJwksPutRequest, error) {
 	result := &ExternalJwksPutRequest{}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_EXTERNAL_JWKS_PUT_REQUEST_KEY"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_EXTERNAL_JWKS_PUT_REQUEST_KEY"]; ok && val != "" {
 		result.Key = val
 	}
 	if sub, err := ExternalJwkFromEnvVar(env); err != nil {
@@ -7474,7 +8010,7 @@ func ExternalJwksPutRequestFromEnvVar(env map[string]string) (*ExternalJwksPutRe
 	} else if sub != nil {
 		result.Value = sub
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_EXTERNAL_JWKS_PUT_REQUEST_LOCK_COUNTER"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_EXTERNAL_JWKS_PUT_REQUEST_LOCK_COUNTER"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
@@ -7555,7 +8091,7 @@ func ExternalJwksValueResponseToEnvVar(v *ExternalJwksValueResponse) map[string]
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_IRONMAIDEN_EXTERNAL_JWKS_VALUE_RESPONSE_FOUND"] = strconv.FormatBool(v.Found)
+	result["PROTO_SERVICES_IDENTITY_EXTERNAL_JWKS_VALUE_RESPONSE_FOUND"] = strconv.FormatBool(v.Found)
 	return result
 }
 
@@ -7567,7 +8103,7 @@ func ExternalJwksValueResponseFromEnvVar(env map[string]string) (*ExternalJwksVa
 	} else if sub != nil {
 		result.Value = sub
 	}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_EXTERNAL_JWKS_VALUE_RESPONSE_FOUND"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_EXTERNAL_JWKS_VALUE_RESPONSE_FOUND"]; ok && val != "" {
 		parsed, err := strconv.ParseBool(val)
 		if err != nil {
 			return nil, err
@@ -7599,7 +8135,7 @@ func ExternalJwksKeysResponseToEnvVar(v *ExternalJwksKeysResponse) map[string]st
 	}
 	result := make(map[string]string)
 	if len(v.Keys) > 0 {
-		result["PROTO_SERVICES_IRONMAIDEN_EXTERNAL_JWKS_KEYS_RESPONSE_KEYS"] = strings.Join(v.Keys, ",")
+		result["PROTO_SERVICES_IDENTITY_EXTERNAL_JWKS_KEYS_RESPONSE_KEYS"] = strings.Join(v.Keys, ",")
 	}
 	return result
 }
@@ -7607,7 +8143,7 @@ func ExternalJwksKeysResponseToEnvVar(v *ExternalJwksKeysResponse) map[string]st
 // ExternalJwksKeysResponseFromEnvVar creates ExternalJwksKeysResponse from environment variable key-value pairs.
 func ExternalJwksKeysResponseFromEnvVar(env map[string]string) (*ExternalJwksKeysResponse, error) {
 	result := &ExternalJwksKeysResponse{}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_EXTERNAL_JWKS_KEYS_RESPONSE_KEYS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_EXTERNAL_JWKS_KEYS_RESPONSE_KEYS"]; ok && val != "" {
 		result.Keys = strings.Split(val, ",")
 	}
 	return result, nil
@@ -7619,14 +8155,14 @@ func ExternalJwksSizeResponseToEnvVar(v *ExternalJwksSizeResponse) map[string]st
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_IRONMAIDEN_EXTERNAL_JWKS_SIZE_RESPONSE_SIZE"] = strconv.FormatInt(int64(v.Size), 10)
+	result["PROTO_SERVICES_IDENTITY_EXTERNAL_JWKS_SIZE_RESPONSE_SIZE"] = strconv.FormatInt(int64(v.Size), 10)
 	return result
 }
 
 // ExternalJwksSizeResponseFromEnvVar creates ExternalJwksSizeResponse from environment variable key-value pairs.
 func ExternalJwksSizeResponseFromEnvVar(env map[string]string) (*ExternalJwksSizeResponse, error) {
 	result := &ExternalJwksSizeResponse{}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_EXTERNAL_JWKS_SIZE_RESPONSE_SIZE"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_EXTERNAL_JWKS_SIZE_RESPONSE_SIZE"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -7667,14 +8203,14 @@ func ExternalJwksQueryResponseToEnvVar(v *ExternalJwksQueryResponse) map[string]
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_IRONMAIDEN_EXTERNAL_JWKS_QUERY_RESPONSE_TOTAL_COUNT"] = strconv.FormatInt(int64(v.TotalCount), 10)
+	result["PROTO_SERVICES_IDENTITY_EXTERNAL_JWKS_QUERY_RESPONSE_TOTAL_COUNT"] = strconv.FormatInt(int64(v.TotalCount), 10)
 	return result
 }
 
 // ExternalJwksQueryResponseFromEnvVar creates ExternalJwksQueryResponse from environment variable key-value pairs.
 func ExternalJwksQueryResponseFromEnvVar(env map[string]string) (*ExternalJwksQueryResponse, error) {
 	result := &ExternalJwksQueryResponse{}
-	if val, ok := env["PROTO_SERVICES_IRONMAIDEN_EXTERNAL_JWKS_QUERY_RESPONSE_TOTAL_COUNT"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_IDENTITY_EXTERNAL_JWKS_QUERY_RESPONSE_TOTAL_COUNT"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -7719,14 +8255,14 @@ func ValidateConfig(m *Config) error {
 		return protoerrors.NewErrMissingInvalidData(nil, "field RefreshTokenLifetimeSeconds must be positive (> 0), got: %d", m.RefreshTokenLifetimeSeconds)
 	}
 
-	// Validate KeyLifetimeSeconds (assert_duration: POSITIVE)
-	if m.KeyLifetimeSeconds <= 0 {
-		return protoerrors.NewErrMissingInvalidData(nil, "field KeyLifetimeSeconds must be positive (> 0), got: %d", m.KeyLifetimeSeconds)
-	}
-
 	// Validate KeyLifetimeSeconds (assert_duration_min: 3600)
 	if m.KeyLifetimeSeconds < 3600 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field KeyLifetimeSeconds must be >= 3600, got: %d", m.KeyLifetimeSeconds)
+	}
+
+	// Validate KeyLifetimeSeconds (assert_duration: POSITIVE)
+	if m.KeyLifetimeSeconds <= 0 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field KeyLifetimeSeconds must be positive (> 0), got: %d", m.KeyLifetimeSeconds)
 	}
 
 	// Validate NonceExpireSeconds (assert_duration: POSITIVE)
@@ -7761,9 +8297,9 @@ func ValidateConfig(m *Config) error {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Issuer exceeds max size of 32768 bytes, got: %d", len(m.Issuer))
 	}
 
-	// Validate ClaimMappingPolicy (default max size: 32768 bytes)
-	if len(m.ClaimMappingPolicy) > 32768 {
-		return protoerrors.NewErrMissingInvalidData(nil, "field ClaimMappingPolicy exceeds max size of 32768 bytes, got: %d", len(m.ClaimMappingPolicy))
+	// Validate EntitlementsPolicy (default max size: 32768 bytes)
+	if len(m.EntitlementsPolicy) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field EntitlementsPolicy exceeds max size of 32768 bytes, got: %d", len(m.EntitlementsPolicy))
 	}
 
 	return nil
@@ -7823,14 +8359,14 @@ func ValidateProviderConfig(m *ProviderConfig) error {
 		return protoerrors.NewErrMissingInvalidData(nil, "field ClientId must be at least 1 characters, got: %d", len(m.ClientId))
 	}
 
-	// Validate ClientSecret (assert_min_length: 1)
-	if len(m.ClientSecret) < 1 {
-		return protoerrors.NewErrMissingInvalidData(nil, "field ClientSecret must be at least 1 characters, got: %d", len(m.ClientSecret))
-	}
-
 	// Validate ClientSecret (assert_required)
 	if m.ClientSecret == "" {
 		return protoerrors.NewErrMissingInvalidData(nil, "field ClientSecret is required")
+	}
+
+	// Validate ClientSecret (assert_min_length: 1)
+	if len(m.ClientSecret) < 1 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field ClientSecret must be at least 1 characters, got: %d", len(m.ClientSecret))
 	}
 
 	// Validate AuthorizationEndpoint (assert_url: URL_SCHEME_HTTPS)
@@ -7902,9 +8438,20 @@ func ValidateProviderConfig(m *ProviderConfig) error {
 	return nil
 }
 
-// ValidateIronMaidenState validates all fields in IronMaidenState according to their annotations.
+// ValidateEntitlementConfig validates all fields in EntitlementConfig according to their annotations.
 // Returns a BlueErr if validation fails, or nil if all validations pass.
-func ValidateIronMaidenState(m *IronMaidenState) error {
+func ValidateEntitlementConfig(m *EntitlementConfig) error {
+	if m == nil {
+		return nil
+	}
+
+	// No field validations defined
+	return nil
+}
+
+// ValidateIdentityState validates all fields in IdentityState according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidateIdentityState(m *IdentityState) error {
 	if m == nil {
 		return nil
 	}
@@ -7912,9 +8459,9 @@ func ValidateIronMaidenState(m *IronMaidenState) error {
 	return nil
 }
 
-// ValidateIronMaidenStateInternal validates all fields in IronMaidenStateInternal according to their annotations.
+// ValidateIdentityStateInternal validates all fields in IdentityStateInternal according to their annotations.
 // Returns a BlueErr if validation fails, or nil if all validations pass.
-func ValidateIronMaidenStateInternal(m *IronMaidenStateInternal) error {
+func ValidateIdentityStateInternal(m *IdentityStateInternal) error {
 	if m == nil {
 		return nil
 	}
@@ -7944,16 +8491,16 @@ func ValidateExternalJwk(m *ExternalJwk) error {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Key is required")
 	}
 
-	// Validate Issuer (assert_required)
-	if m.Issuer == "" {
-		return protoerrors.NewErrMissingInvalidData(nil, "field Issuer is required")
-	}
-
 	// Validate Issuer (assert_url: URL_SCHEME_HTTPS)
 	if m.Issuer != "" {
 		if err := utils.ValidateAssertURL_URL_SCHEME_HTTPS(m.Issuer); err != nil {
 			return protoerrors.NewErrMissingInvalidData(err, "field Issuer URL validation failed")
 		}
+	}
+
+	// Validate Issuer (assert_required)
+	if m.Issuer == "" {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Issuer is required")
 	}
 
 	// Validate FetchedAt (assert_gt: 0)
@@ -8128,16 +8675,16 @@ func ValidateCallbackResponse(m *CallbackResponse) error {
 		return protoerrors.NewErrMissingInvalidData(nil, "field AccessToken must be at least 1 characters, got: %d", len(m.AccessToken))
 	}
 
-	// Validate CallbackUrl (assert_required)
-	if m.CallbackUrl == "" {
-		return protoerrors.NewErrMissingInvalidData(nil, "field CallbackUrl is required")
-	}
-
 	// Validate CallbackUrl (assert_url: URL_SCHEME_HTTPS)
 	if m.CallbackUrl != "" {
 		if err := utils.ValidateAssertURL_URL_SCHEME_HTTPS(m.CallbackUrl); err != nil {
 			return protoerrors.NewErrMissingInvalidData(err, "field CallbackUrl URL validation failed")
 		}
+	}
+
+	// Validate CallbackUrl (assert_required)
+	if m.CallbackUrl == "" {
+		return protoerrors.NewErrMissingInvalidData(nil, "field CallbackUrl is required")
 	}
 
 	// Validate AccessTokenExpiresIn (assert_gt: 0)
@@ -8264,6 +8811,70 @@ func ValidateLogoutResponse(m *LogoutResponse) error {
 	// Validate RedirectUrl (default max size: 32768 bytes)
 	if len(m.RedirectUrl) > 32768 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field RedirectUrl exceeds max size of 32768 bytes, got: %d", len(m.RedirectUrl))
+	}
+
+	return nil
+}
+
+// ValidateExchangeTokenRequest validates all fields in ExchangeTokenRequest according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidateExchangeTokenRequest(m *ExchangeTokenRequest) error {
+	if m == nil {
+		return nil
+	}
+
+	// Validate AccessToken (assert_required)
+	if m.AccessToken == "" {
+		return protoerrors.NewErrMissingInvalidData(nil, "field AccessToken is required")
+	}
+
+	// Validate Audience (assert_required)
+	if m.Audience == "" {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Audience is required")
+	}
+
+	// Validate Audience (assert_min_length: 1)
+	if len(m.Audience) < 1 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Audience must be at least 1 characters, got: %d", len(m.Audience))
+	}
+
+	// Validate AccessToken (default max size: 32768 bytes)
+	if len(m.AccessToken) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field AccessToken exceeds max size of 32768 bytes, got: %d", len(m.AccessToken))
+	}
+
+	// Validate Audience (default max size: 32768 bytes)
+	if len(m.Audience) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Audience exceeds max size of 32768 bytes, got: %d", len(m.Audience))
+	}
+
+	return nil
+}
+
+// ValidateExchangeTokenResponse validates all fields in ExchangeTokenResponse according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidateExchangeTokenResponse(m *ExchangeTokenResponse) error {
+	if m == nil {
+		return nil
+	}
+
+	// Validate AccessToken (assert_required)
+	if m.AccessToken == "" {
+		return protoerrors.NewErrMissingInvalidData(nil, "field AccessToken is required")
+	}
+
+	// Validate AccessToken (assert_min_length: 1)
+	if len(m.AccessToken) < 1 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field AccessToken must be at least 1 characters, got: %d", len(m.AccessToken))
+	}
+
+	// Validate ExpiresIn (assert_gt: 0)
+	if m.ExpiresIn <= 0 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field ExpiresIn must be > 0, got: %v", m.ExpiresIn)
+	}
+	// Validate AccessToken (default max size: 32768 bytes)
+	if len(m.AccessToken) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field AccessToken exceeds max size of 32768 bytes, got: %d", len(m.AccessToken))
 	}
 
 	return nil
@@ -8627,20 +9238,12 @@ func ValidateMapEmpty(m *MapEmpty) error {
 // Constants
 // ============================================================
 const (
-	PathAuthorize                             = "/authorize"
-	PathCallback                              = "/callback"
-	PathRefresh                               = "/refresh"
-	PathLogout                                = "/logout"
-	PathProviders                             = "/providers"
-	ParamCallbackUrl                          = "callback_url"
-	CookieAccessToken                         = "im_access"
-	CookieRefreshToken                        = "im_refresh"
 	DefaultAccessTokenLifetimeSeconds  int64  = 900
 	DefaultRefreshTokenLifetimeSeconds int64  = 86400
 	DefaultKeyLifetimeSeconds          int64  = 86400
 	DefaultNonceExpireSeconds          int64  = 300
 	DefaultJwkRefetchIntervalSeconds   int64  = 300
-	DefaultAudience                    string = "ironmaiden"
+	DefaultAudience                    string = "identity"
 )
 
 // ============================================================
@@ -8648,7 +9251,7 @@ const (
 // ============================================================
 const (
 	MaxSizeConfigIssuer                        int = 32768
-	MaxSizeConfigClaimMappingPolicy            int = 32768
+	MaxSizeConfigEntitlementsPolicy            int = 32768
 	MaxSizeOauthconfigAudience                 int = 32768
 	MaxSizeProviderconfigName                  int = 32768
 	MaxSizeProviderconfigIssuer                int = 32768
@@ -8674,6 +9277,9 @@ const (
 	MaxSizeLogoutrequestPostLogoutRedirectUrl  int = 32768
 	MaxSizeLogoutrequestIdTokenHint            int = 32768
 	MaxSizeLogoutresponseRedirectUrl           int = 32768
+	MaxSizeExchangetokenrequestAccessToken     int = 32768
+	MaxSizeExchangetokenrequestAudience        int = 32768
+	MaxSizeExchangetokenresponseAccessToken    int = 32768
 	MaxSizeQueryvalueStringValue               int = 32768
 	MaxSizePredicateFieldName                  int = 32768
 	MaxSizeSortfieldFieldName                  int = 32768
@@ -8719,6 +9325,43 @@ func OAuthConfigDefaults(v *OAuthConfig) {
 }
 
 // ============================================================
+// TypeUndefaults: Config
+// ============================================================
+// ConfigUndefaults resets fields that match their default values back to zero.
+// Use before persisting to store only explicit user overrides.
+func ConfigUndefaults(v *Config) {
+	if v.AccessTokenLifetimeSeconds == DefaultAccessTokenLifetimeSeconds {
+		v.AccessTokenLifetimeSeconds = 0
+	}
+	if v.RefreshTokenLifetimeSeconds == DefaultRefreshTokenLifetimeSeconds {
+		v.RefreshTokenLifetimeSeconds = 0
+	}
+	if v.KeyLifetimeSeconds == DefaultKeyLifetimeSeconds {
+		v.KeyLifetimeSeconds = 0
+	}
+	if v.NonceExpireSeconds == DefaultNonceExpireSeconds {
+		v.NonceExpireSeconds = 0
+	}
+	if v.JwkRefetchIntervalSeconds == DefaultJwkRefetchIntervalSeconds {
+		v.JwkRefetchIntervalSeconds = 0
+	}
+	if v.Oauth != nil {
+		OAuthConfigUndefaults(v.Oauth)
+	}
+}
+
+// ============================================================
+// TypeUndefaults: OAuthConfig
+// ============================================================
+// OAuthConfigUndefaults resets fields that match their default values back to zero.
+// Use before persisting to store only explicit user overrides.
+func OAuthConfigUndefaults(v *OAuthConfig) {
+	if v.Audience == DefaultAudience {
+		v.Audience = ""
+	}
+}
+
+// ============================================================
 // Merge: Config
 // ============================================================
 // MergeConfig fills zero-valued fields in dst from src.
@@ -8746,8 +9389,8 @@ func MergeConfig(dst, src *Config) {
 	if dst.JwkRefetchIntervalSeconds == 0 {
 		dst.JwkRefetchIntervalSeconds = src.JwkRefetchIntervalSeconds
 	}
-	if dst.ClaimMappingPolicy == "" {
-		dst.ClaimMappingPolicy = src.ClaimMappingPolicy
+	if dst.EntitlementsPolicy == "" {
+		dst.EntitlementsPolicy = src.EntitlementsPolicy
 	}
 	if len(dst.EntitlementMappings) == 0 {
 		dst.EntitlementMappings = src.EntitlementMappings
@@ -8817,20 +9460,41 @@ func MergeProviderConfig(dst, src *ProviderConfig) {
 }
 
 // ============================================================
-// Merge: IronMaidenState
+// Merge: EntitlementConfig
 // ============================================================
-// MergeIronMaidenState fills zero-valued fields in dst from src.
-func MergeIronMaidenState(dst, src *IronMaidenState) {
-	if len(dst.VerifyingKeys) == 0 {
-		dst.VerifyingKeys = src.VerifyingKeys
+// MergeEntitlementConfig fills zero-valued fields in dst from src.
+func MergeEntitlementConfig(dst, src *EntitlementConfig) {
+	if len(dst.EntitlementMappings) == 0 {
+		dst.EntitlementMappings = src.EntitlementMappings
+	}
+	if len(dst.ServiceEntitlements) == 0 {
+		dst.ServiceEntitlements = src.ServiceEntitlements
 	}
 }
 
 // ============================================================
-// Merge: IronMaidenStateInternal
+// Merge: IdentityState
 // ============================================================
-// MergeIronMaidenStateInternal fills zero-valued fields in dst from src.
-func MergeIronMaidenStateInternal(dst, src *IronMaidenStateInternal) {
+// MergeIdentityState fills zero-valued fields in dst from src.
+func MergeIdentityState(dst, src *IdentityState) {
+	if len(dst.VerifyingKeys) == 0 {
+		dst.VerifyingKeys = src.VerifyingKeys
+	}
+	if dst.EntitlementsPolicy == nil {
+		dst.EntitlementsPolicy = src.EntitlementsPolicy
+	}
+	if dst.EntitlementConfig == nil {
+		dst.EntitlementConfig = src.EntitlementConfig
+	} else if src.EntitlementConfig != nil {
+		MergeEntitlementConfig(dst.EntitlementConfig, src.EntitlementConfig)
+	}
+}
+
+// ============================================================
+// Merge: IdentityStateInternal
+// ============================================================
+// MergeIdentityStateInternal fills zero-valued fields in dst from src.
+func MergeIdentityStateInternal(dst, src *IdentityStateInternal) {
 	if len(dst.ExternalJwks) == 0 {
 		dst.ExternalJwks = src.ExternalJwks
 	}
@@ -8985,6 +9649,32 @@ func MergeLogoutRequest(dst, src *LogoutRequest) {
 func MergeLogoutResponse(dst, src *LogoutResponse) {
 	if dst.RedirectUrl == "" {
 		dst.RedirectUrl = src.RedirectUrl
+	}
+}
+
+// ============================================================
+// Merge: ExchangeTokenRequest
+// ============================================================
+// MergeExchangeTokenRequest fills zero-valued fields in dst from src.
+func MergeExchangeTokenRequest(dst, src *ExchangeTokenRequest) {
+	if dst.AccessToken == "" {
+		dst.AccessToken = src.AccessToken
+	}
+	if dst.Audience == "" {
+		dst.Audience = src.Audience
+	}
+}
+
+// ============================================================
+// Merge: ExchangeTokenResponse
+// ============================================================
+// MergeExchangeTokenResponse fills zero-valued fields in dst from src.
+func MergeExchangeTokenResponse(dst, src *ExchangeTokenResponse) {
+	if dst.AccessToken == "" {
+		dst.AccessToken = src.AccessToken
+	}
+	if dst.ExpiresIn == 0 {
+		dst.ExpiresIn = src.ExpiresIn
 	}
 }
 

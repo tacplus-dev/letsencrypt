@@ -14,8 +14,8 @@
 package healthreport
 
 import (
-	host "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/host"
-	_ "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/spec"
+	host "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/host"
+	_ "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/spec"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -333,7 +333,7 @@ const file_libs_healthreport_proto_rawDesc = "" +
 	"\x17INSTANCE_STATUS_HEALTHY\x10\x01\x12\x1c\n" +
 	"\x18INSTANCE_STATUS_DEGRADED\x10\x02\x12\x1c\n" +
 	"\x18INSTANCE_STATUS_DRAINING\x10\x03\x12\x1d\n" +
-	"\x19INSTANCE_STATUS_UNHEALTHY\x10\x04BYZWgitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/healthreportb\x06proto3"
+	"\x19INSTANCE_STATUS_UNHEALTHY\x10\x04B]Z[gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/healthreportb\x06proto3"
 
 var (
 	file_libs_healthreport_proto_rawDescOnce sync.Once

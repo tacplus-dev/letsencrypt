@@ -9,14 +9,14 @@
 // If changes are needed, update the tacplus compiler at:
 // gitlab.com/secondstarcavalier/controlplane/services/tacplus
 //
-// Source: services/fleetwood.proto
+// Source: services/sentinel.proto
 
 // Copyright (c) 2024 Second Star Cavalier, LLC.
 
 syntax = "proto3";
 
-package fleetwood;
-option go_package = "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/services/fleetwood";
+package sentinel;
+option go_package = "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/sentinel";
 
 import "services/presley.proto";
 import "google/protobuf/empty.proto";
@@ -32,34 +32,67 @@ message Config {
 // Backend State
 // ============================================================================
 
-// FleetwoodState is an empty backend — fleetwood reads ClusterState via
+// SentinelState is an empty backend — sentinel reads ClusterState via
 // security policy RO grant, not via its own state.
-message FleetwoodState {
+message SentinelState {
 }
 
 // ============================================================================
 // Frontend Service
 // ============================================================================
 
-service FleetwoodService {
+service SentinelService {
 
   // Cluster-wide singletons
-  rpc GetClusterInfo(google.protobuf.Empty) returns (presley.AdminClusterInfo);
-  rpc GetClusterHealth(google.protobuf.Empty) returns (presley.AdminClusterHealth);
+  rpc GetClusterInfo(google.protobuf.Empty) returns (presley.AdminClusterInfo) {
+    option (google.api.http) = { get: "/api/sentinel/v1/cluster-info" };
+  }
+  rpc GetClusterHealth(google.protobuf.Empty) returns (presley.AdminClusterHealth) {
+    option (google.api.http) = { get: "/api/sentinel/v1/cluster-health" };
+  }
 
   // Per-node collections
-  rpc GetNodeMetrics(google.protobuf.Empty) returns (NodeMetricsResponse);
-  rpc GetGrpcStats(google.protobuf.Empty) returns (GrpcStatsResponse);
-  rpc GetPersistenceStatus(google.protobuf.Empty) returns (PersistenceStatusResponse);
-  rpc GetNetworkStats(google.protobuf.Empty) returns (NetworkStatsResponse);
-  rpc GetThreadInfo(google.protobuf.Empty) returns (ThreadInfoResponse);
-  rpc GetTokenCacheStats(google.protobuf.Empty) returns (TokenCacheStatsResponse);
-  rpc GetMapStats(google.protobuf.Empty) returns (MapStatsResponse);
+  rpc GetNodeMetrics(google.protobuf.Empty) returns (NodeMetricsResponse) {
+    option (google.api.http) = { get: "/api/sentinel/v1/node-metrics" };
+  }
+  rpc GetGrpcStats(google.protobuf.Empty) returns (GrpcStatsResponse) {
+    option (google.api.http) = { get: "/api/sentinel/v1/grpc-stats" };
+  }
+  rpc GetPersistenceStatus(google.protobuf.Empty) returns (PersistenceStatusResponse) {
+    option (google.api.http) = { get: "/api/sentinel/v1/persistence-status" };
+  }
+  rpc GetNetworkStats(google.protobuf.Empty) returns (NetworkStatsResponse) {
+    option (google.api.http) = { get: "/api/sentinel/v1/network-stats" };
+  }
+  rpc GetThreadInfo(google.protobuf.Empty) returns (ThreadInfoResponse) {
+    option (google.api.http) = { get: "/api/sentinel/v1/thread-info" };
+  }
+  rpc GetTokenCacheStats(google.protobuf.Empty) returns (TokenCacheStatsResponse) {
+    option (google.api.http) = { get: "/api/sentinel/v1/token-cache-stats" };
+  }
+  rpc GetMapStats(google.protobuf.Empty) returns (MapStatsResponse) {
+    option (google.api.http) = { get: "/api/sentinel/v1/map-stats" };
+  }
 
   // Full snapshot (all data in one call)
   rpc GetDashboard(google.protobuf.Empty) returns (DashboardResponse) {
-    option (google.api.http) = { get: "/api/fleetwood/v1/dashboard" };
+    option (google.api.http) = { get: "/api/sentinel/v1/dashboard" };
   }
+
+  // Server-streaming dashboard — pushes updates at a regular interval.
+  // Over REST (via grpc-gateway), delivered as newline-delimited JSON (NDJSON).
+  rpc WatchDashboard(WatchDashboardRequest) returns (stream DashboardResponse) {
+    option (google.api.http) = { get: "/api/sentinel/v1/dashboard/watch" };
+  }
+}
+
+// ============================================================================
+// Watch types
+// ============================================================================
+
+message WatchDashboardRequest {
+  // interval_seconds is how often to push updates. Default 5, min 1, max 60.
+  int32 interval_seconds = 1;
 }
 
 // ============================================================================
@@ -86,12 +119,11 @@ message DashboardResponse {
   repeated presley.AdminTokenCacheStats token_cache_stats = 8;
   repeated presley.AdminMapStats map_stats = 9;
 }
-
 // ============================================================================
 // Auto-generated Backend Service (tacplus)
 // ============================================================================
 
-service FleetwoodStateBackendService {
+service SentinelStateBackendService {
 }
 
 message MapEmpty {}

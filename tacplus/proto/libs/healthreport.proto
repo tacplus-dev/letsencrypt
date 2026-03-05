@@ -2,7 +2,7 @@
 
 syntax = "proto3";
 package healthreport;
-option go_package = "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/healthreport";
+option go_package = "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/healthreport";
 
 import "libs/host.proto";
 

@@ -3,7 +3,7 @@
 syntax = "proto3";
 
 package opa;
-option go_package = "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/opa";
+option go_package = "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/opa";
 
 // OpaPolicy defines an OPA policy bundle for authorization evaluation.
 // The bundle is a base64-encoded tar.gz containing .rego policy files.
@@ -12,6 +12,7 @@ message OpaPolicy {
   string entry_point = 1;
 
   // bundle contains the base64-encoded OPA policy bundle (tar.gz format).
+  // Optional — policies can be provided as raw source instead.
   string bundle = 2;
 
   // created is the Unix epoch timestamp (seconds) when the policy was created.

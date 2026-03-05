@@ -3420,7 +3420,7 @@ const file_libs_spec_proto_rawDesc = "" +
 	"\x0fallowed_callers\x12\x1f.google.protobuf.ServiceOptions\x18\xf9\xa2\x04 \x03(\tR\x0eallowedCallers:P\n" +
 	"\x13disable_auth_method\x12\x1e.google.protobuf.MethodOptions\x18\x82\xf1\x04 \x01(\bR\x11disableAuthMethod:\\\n" +
 	"\x19disable_validation_method\x12\x1e.google.protobuf.MethodOptions\x18\x83\xf1\x04 \x01(\bR\x17disableValidationMethod:V\n" +
-	"\x16allowed_callers_method\x12\x1e.google.protobuf.MethodOptions\x18\x84\xf1\x04 \x03(\tR\x14allowedCallersMethodBQZOgitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/specb\x06proto3"
+	"\x16allowed_callers_method\x12\x1e.google.protobuf.MethodOptions\x18\x84\xf1\x04 \x03(\tR\x14allowedCallersMethodBUZSgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/specb\x06proto3"
 
 var (
 	file_libs_spec_proto_rawDescOnce sync.Once

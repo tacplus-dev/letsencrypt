@@ -20,8 +20,8 @@ import (
 	"strings"
 
 	"github.com/pelletier/go-toml/v2"
-	protoerrors "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/errors"
-	host "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/host"
+	protoerrors "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/errors"
+	host "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/host"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 	"gopkg.in/yaml.v3"

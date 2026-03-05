@@ -14,7 +14,7 @@
 package opa
 
 import (
-	_ "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/spec"
+	_ "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/spec"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -36,6 +36,7 @@ type OpaPolicy struct {
 	// entry_point specifies the main package/decision point for policy evaluation.
 	EntryPoint string `protobuf:"bytes,1,opt,name=entry_point,json=entryPoint,proto3" json:"entry_point,omitempty"`
 	// bundle contains the base64-encoded OPA policy bundle (tar.gz format).
+	// Optional — policies can be provided as raw source instead.
 	Bundle string `protobuf:"bytes,2,opt,name=bundle,proto3" json:"bundle,omitempty"`
 	// created is the Unix epoch timestamp (seconds) when the policy was created.
 	Created int64 `protobuf:"varint,3,opt,name=created,proto3" json:"created,omitempty"`
@@ -118,14 +119,14 @@ var File_libs_opa_proto protoreflect.FileDescriptor
 
 const file_libs_opa_proto_rawDesc = "" +
 	"\n" +
-	"\x0elibs/opa.proto\x12\x03opa\x1a\x0flibs/spec.proto\"\xc0\x01\n" +
-	"\tOpaPolicy\x12)\n" +
-	"\ventry_point\x18\x01 \x01(\tB\b\x88\xa6\x1d\x01\x88\xa7\x1d\x01R\n" +
-	"entryPoint\x12$\n" +
-	"\x06bundle\x18\x02 \x01(\tB\f\x88\xa6\x1d\x01\x80\xa7\x1d\x01ا\x1d\x01R\x06bundle\x12*\n" +
+	"\x0elibs/opa.proto\x12\x03opa\x1a\x0flibs/spec.proto\"\xb8\x01\n" +
+	"\tOpaPolicy\x12%\n" +
+	"\ventry_point\x18\x01 \x01(\tB\x04\x88\xa7\x1d\x01R\n" +
+	"entryPoint\x12 \n" +
+	"\x06bundle\x18\x02 \x01(\tB\b\x80\xa7\x1d\x01ا\x1d\x01R\x06bundle\x12*\n" +
 	"\acreated\x18\x03 \x01(\x03B\x10\xb0\xa7\x1d\x80\x8bһ\x06\xc0\xa7\x1d\x80\x86\xc1\xfc\x1dR\acreated\x12\x1e\n" +
 	"\aversion\x18\x04 \x01(\tB\x04\xe0\xa7\x1d\x01R\aversion\x12\x16\n" +
-	"\x06source\x18\x05 \x01(\tR\x06sourceBPZNgitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/opab\x06proto3"
+	"\x06source\x18\x05 \x01(\tR\x06sourceBTZRgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/opab\x06proto3"
 
 var (
 	file_libs_opa_proto_rawDescOnce sync.Once

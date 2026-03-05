@@ -109,7 +109,7 @@ const file_libs_outputformat_proto_rawDesc = "" +
 	"\x18OUTPUT_FORMAT_MULTI_YAML\x10\x03\x12\x16\n" +
 	"\x12OUTPUT_FORMAT_TEXT\x10\x04\x12\x19\n" +
 	"\x15OUTPUT_FORMAT_ENV_VAR\x10\x05\x12\x1c\n" +
-	"\x18OUTPUT_FORMAT_PROTO_WIRE\x10\x06BYZWgitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/outputformatb\x06proto3"
+	"\x18OUTPUT_FORMAT_PROTO_WIRE\x10\x06B]Z[gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/outputformatb\x06proto3"
 
 var (
 	file_libs_outputformat_proto_rawDescOnce sync.Once

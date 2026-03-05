@@ -11,7 +11,7 @@
 //
 // Source: google/api/http.proto
 
-package google
+package annotations
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -336,7 +336,8 @@ const file_google_api_http_proto_rawDesc = "" +
 	"\apattern\";\n" +
 	"\x11CustomHttpPattern\x12\x12\n" +
 	"\x04kind\x18\x01 \x01(\tR\x04kind\x12\x12\n" +
-	"\x04path\x18\x02 \x01(\tR\x04pathBYZWgitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/google/api/googleb\x06proto3"
+	"\x04path\x18\x02 \x01(\tR\x04pathB`\n" +
+	"\x0ecom.google.apiB\tHttpProtoP\x01ZAgoogle.golang.org/genproto/googleapis/api/annotations;annotationsb\x06proto3"
 
 var (
 	file_google_api_http_proto_rawDescOnce sync.Once

@@ -25,8 +25,8 @@ import (
 	"strings"
 
 	"github.com/pelletier/go-toml/v2"
-	protoerrors "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/errors"
-	utils "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/utils"
+	protoerrors "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/errors"
+	utils "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/utils"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 	"gopkg.in/yaml.v3"
@@ -586,14 +586,19 @@ func ValidatePublicKey(m *PublicKey) error {
 		return nil
 	}
 
+	// Validate Id (assert_required)
+	if m.Id == "" {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Id is required")
+	}
+
 	// Validate Id (assert_min_length: 1)
 	if len(m.Id) < 1 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Id must be at least 1 characters, got: %d", len(m.Id))
 	}
 
-	// Validate Id (assert_required)
-	if m.Id == "" {
-		return protoerrors.NewErrMissingInvalidData(nil, "field Id is required")
+	// Validate Base64 (assert_required)
+	if m.Base64 == "" {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Base64 is required")
 	}
 
 	// Validate Base64 (assert_base64)
@@ -603,15 +608,6 @@ func ValidatePublicKey(m *PublicKey) error {
 		}
 	}
 
-	// Validate Base64 (assert_required)
-	if m.Base64 == "" {
-		return protoerrors.NewErrMissingInvalidData(nil, "field Base64 is required")
-	}
-
-	// Validate Created (assert_le: 8045740800)
-	if m.Created > 8045740800 {
-		return protoerrors.NewErrMissingInvalidData(nil, "field Created must be <= 8045740800, got: %v", m.Created)
-	}
 	// Validate Created (assert_required: must be > 0)
 	if m.Created <= 0 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Created is required and must be greater than zero")
@@ -620,6 +616,10 @@ func ValidatePublicKey(m *PublicKey) error {
 	// Validate Created (assert_ge: 1735689600)
 	if m.Created < 1735689600 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Created must be >= 1735689600, got: %v", m.Created)
+	}
+	// Validate Created (assert_le: 8045740800)
+	if m.Created > 8045740800 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Created must be <= 8045740800, got: %v", m.Created)
 	}
 	// Validate Id (default max size: 32768 bytes)
 	if len(m.Id) > 32768 {

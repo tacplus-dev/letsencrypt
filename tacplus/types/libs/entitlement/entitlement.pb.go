@@ -14,7 +14,7 @@
 package entitlement
 
 import (
-	_ "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/spec"
+	_ "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/spec"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -306,7 +306,7 @@ const file_libs_entitlement_proto_rawDesc = "" +
 	"\x14SUBJECT_TYPE_SERVICE\x10\x01\x1a\v\xaa\xb5\x18\aservice\x12\x1d\n" +
 	"\x10SUBJECT_TYPE_API\x10\x02\x1a\a\xaa\xb5\x18\x03api\x12'\n" +
 	"\x15SUBJECT_TYPE_WORKLOAD\x10\x03\x1a\f\xaa\xb5\x18\bworkload\x12!\n" +
-	"\x12SUBJECT_TYPE_AGENT\x10\x04\x1a\t\xaa\xb5\x18\x05agentBXZVgitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/entitlementb\x06proto3"
+	"\x12SUBJECT_TYPE_AGENT\x10\x04\x1a\t\xaa\xb5\x18\x05agentB\\ZZgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/entitlementb\x06proto3"
 
 var (
 	file_libs_entitlement_proto_rawDescOnce sync.Once

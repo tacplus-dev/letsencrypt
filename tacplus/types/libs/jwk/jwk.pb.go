@@ -14,8 +14,8 @@
 package jwk
 
 import (
-	key "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/key"
-	_ "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/spec"
+	key "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/key"
+	_ "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/spec"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -674,7 +674,7 @@ type CredPair struct {
 	// kid (public_key.kid) is used as the collection key.
 	PublicKey *Jwk `protobuf:"bytes,1,opt,name=public_key,json=publicKey,proto3" json:"public_key,omitempty"`
 	// The principal name bound to this key.
-	Principal     string `protobuf:"bytes,3,opt,name=principal,proto3" json:"principal,omitempty"`
+	Principal     string `protobuf:"bytes,2,opt,name=principal,proto3" json:"principal,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -783,17 +783,17 @@ const file_libs_jwk_proto_rawDesc = "" +
 	"0token_endpoint_auth_signing_alg_values_supported\x18$ \x03(\tR*tokenEndpointAuthSigningAlgValuesSupported\x12@\n" +
 	"\x1cbackchannel_logout_supported\x18% \x01(\bR\x1abackchannelLogoutSupported\x12O\n" +
 	"$backchannel_logout_session_supported\x18& \x01(\bR!backchannelLogoutSessionSupported\x12H\n" +
-	"!dpop_signing_alg_values_supported\x18' \x03(\tR\x1ddpopSigningAlgValuesSupported\"c\n" +
+	"!dpop_signing_alg_values_supported\x18' \x03(\tR\x1ddpopSigningAlgValuesSupported\"]\n" +
 	"\bCredPair\x12-\n" +
 	"\n" +
 	"public_key\x18\x01 \x01(\v2\b.jwk.JwkB\x04\x88\xa6\x1d\x01R\tpublicKey\x12\"\n" +
-	"\tprincipal\x18\x03 \x01(\tB\x04\x88\xa6\x1d\x01R\tprincipalJ\x04\b\x02\x10\x03*f\n" +
+	"\tprincipal\x18\x02 \x01(\tB\x04\x88\xa6\x1d\x01R\tprincipal*f\n" +
 	"\n" +
 	"JwkUseType\x12\x1a\n" +
 	"\x16JWK_USE_TYPE_UNDEFINED\x10\x00\x12\x1d\n" +
 	"\x10JWK_USE_TYPE_SIG\x10\x01\x1a\a\xaa\xb5\x18\x03sig\x12\x1d\n" +
-	"\x10JWK_USE_TYPE_ENC\x10\x02\x1a\a\xaa\xb5\x18\x03encB\x8e\x01\x8a\xb5\x18:\n" +
-	"\x16PATH_WELL_KNOWN_OPENID\x12 .well-known/openid-configurationZNgitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/jwkb\x06proto3"
+	"\x10JWK_USE_TYPE_ENC\x10\x02\x1a\a\xaa\xb5\x18\x03encB\x92\x01\x8a\xb5\x18:\n" +
+	"\x16PATH_WELL_KNOWN_OPENID\x12 .well-known/openid-configurationZRgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/jwkb\x06proto3"
 
 var (
 	file_libs_jwk_proto_rawDescOnce sync.Once

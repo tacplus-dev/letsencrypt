@@ -14,7 +14,7 @@
 package woodstock
 
 import (
-	_ "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/spec"
+	_ "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/spec"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
@@ -832,7 +832,7 @@ const file_services_woodstock_proto_rawDesc = "" +
 	"\x17ResignEventStreamLeader\x12\x1e.woodstock.LeaderResignRequest\x1a\x17.woodstock.LeaderRecord\x12G\n" +
 	"\x14GetLeaderEventStream\x12\x16.google.protobuf.Empty\x1a\x17.woodstock.LeaderRecord\x12K\n" +
 	"\x16WatchLeaderEventStream\x12\x16.google.protobuf.Empty\x1a\x17.woodstock.LeaderRecord0\x01\x12S\n" +
-	"\x15RenewLeaseEventStream\x12\x1d.woodstock.LeaderLeaseRenewal\x1a\x17.woodstock.LeaderRecord(\x010\x01BZZXgitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/services/woodstockb\x06proto3"
+	"\x15RenewLeaseEventStream\x12\x1d.woodstock.LeaderLeaseRenewal\x1a\x17.woodstock.LeaderRecord(\x010\x01B^Z\\gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/woodstockb\x06proto3"
 
 var (
 	file_services_woodstock_proto_rawDescOnce sync.Once

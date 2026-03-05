@@ -59,10 +59,10 @@ import (
 	"strings"
 	"time"
 
-	protoX509 "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/x509"
-	wrapperKey "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/libs/key"
-	protoerrors "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/errors"
-	utils "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/utils"
+	protoX509 "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/x509"
+	wrapperKey "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/libs/key"
+	protoerrors "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/errors"
+	utils "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/utils"
 	"google.golang.org/protobuf/proto"
 )
 

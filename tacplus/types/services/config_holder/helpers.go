@@ -18,13 +18,13 @@ import (
 	"encoding/json"
 
 	"github.com/pelletier/go-toml/v2"
-	protoerrors "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/errors"
-	serviceconfig "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/serviceconfig"
-	bowie "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/services/bowie"
-	fleetwood "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/services/fleetwood"
-	genesis "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/services/genesis"
-	ironmaiden "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/services/ironmaiden"
-	springsteen "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/services/springsteen"
+	protoerrors "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/errors"
+	serviceconfig "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/serviceconfig"
+	gateway "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/gateway"
+	identity "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/identity"
+	letsencrypt "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/letsencrypt"
+	policy "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/policy"
+	sentinel "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/sentinel"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 	"gopkg.in/yaml.v3"
@@ -37,11 +37,11 @@ import (
 // ConfigHolderJSON represents ConfigHolder in external JSON format (with string enums)
 // MARKER: JSON helper struct generated from serial.go
 type configholderJSON struct {
-	FleetwoodConfig   json.RawMessage `json:"fleetwood_config,omitempty"`
-	IronmaidenConfig  json.RawMessage `json:"ironmaiden_config,omitempty"`
-	SpringsteenConfig json.RawMessage `json:"springsteen_config,omitempty"`
-	BowieConfig       json.RawMessage `json:"bowie_config,omitempty"`
-	GenesisConfig     json.RawMessage `json:"genesis_config,omitempty"`
+	SentinelConfig    json.RawMessage `json:"sentinel_config,omitempty"`
+	IdentityConfig    json.RawMessage `json:"identity_config,omitempty"`
+	GatewayConfig     json.RawMessage `json:"gateway_config,omitempty"`
+	LetsencryptConfig json.RawMessage `json:"letsencrypt_config,omitempty"`
+	PolicyConfig      json.RawMessage `json:"policy_config,omitempty"`
 }
 
 // ConfigHolderToJSON converts ConfigHolder to JSON bytes.
@@ -52,39 +52,39 @@ func ConfigHolderToJSON(v *ConfigHolder) ([]byte, error) {
 	}
 	// Convert to JSON helper struct with string enums
 	helper := configholderJSON{
-		FleetwoodConfig: func() json.RawMessage {
-			if v.FleetwoodConfig == nil {
+		SentinelConfig: func() json.RawMessage {
+			if v.SentinelConfig == nil {
 				return nil
 			}
-			data, _ := fleetwood.ConfigToJSON(v.FleetwoodConfig)
+			data, _ := sentinel.ConfigToJSON(v.SentinelConfig)
 			return data
 		}(),
-		IronmaidenConfig: func() json.RawMessage {
-			if v.IronmaidenConfig == nil {
+		IdentityConfig: func() json.RawMessage {
+			if v.IdentityConfig == nil {
 				return nil
 			}
-			data, _ := ironmaiden.ConfigToJSON(v.IronmaidenConfig)
+			data, _ := identity.ConfigToJSON(v.IdentityConfig)
 			return data
 		}(),
-		SpringsteenConfig: func() json.RawMessage {
-			if v.SpringsteenConfig == nil {
+		GatewayConfig: func() json.RawMessage {
+			if v.GatewayConfig == nil {
 				return nil
 			}
-			data, _ := springsteen.ConfigToJSON(v.SpringsteenConfig)
+			data, _ := gateway.ConfigToJSON(v.GatewayConfig)
 			return data
 		}(),
-		BowieConfig: func() json.RawMessage {
-			if v.BowieConfig == nil {
+		LetsencryptConfig: func() json.RawMessage {
+			if v.LetsencryptConfig == nil {
 				return nil
 			}
-			data, _ := bowie.ConfigToJSON(v.BowieConfig)
+			data, _ := letsencrypt.ConfigToJSON(v.LetsencryptConfig)
 			return data
 		}(),
-		GenesisConfig: func() json.RawMessage {
-			if v.GenesisConfig == nil {
+		PolicyConfig: func() json.RawMessage {
+			if v.PolicyConfig == nil {
 				return nil
 			}
-			data, _ := genesis.ConfigToJSON(v.GenesisConfig)
+			data, _ := policy.ConfigToJSON(v.PolicyConfig)
 			return data
 		}(),
 	}
@@ -151,39 +151,39 @@ func ConfigHolderFromJSON(data []byte) (*ConfigHolder, error) {
 	}
 	// Build result with parsed enums
 	result := &ConfigHolder{}
-	// Parse message field: FleetwoodConfig
-	if len(raw.FleetwoodConfig) > 0 {
-		parsed, err := fleetwood.ConfigFromJSON(raw.FleetwoodConfig)
+	// Parse message field: SentinelConfig
+	if len(raw.SentinelConfig) > 0 {
+		parsed, err := sentinel.ConfigFromJSON(raw.SentinelConfig)
 		if err == nil {
-			result.FleetwoodConfig = parsed
+			result.SentinelConfig = parsed
 		}
 	}
-	// Parse message field: IronmaidenConfig
-	if len(raw.IronmaidenConfig) > 0 {
-		parsed, err := ironmaiden.ConfigFromJSON(raw.IronmaidenConfig)
+	// Parse message field: IdentityConfig
+	if len(raw.IdentityConfig) > 0 {
+		parsed, err := identity.ConfigFromJSON(raw.IdentityConfig)
 		if err == nil {
-			result.IronmaidenConfig = parsed
+			result.IdentityConfig = parsed
 		}
 	}
-	// Parse message field: SpringsteenConfig
-	if len(raw.SpringsteenConfig) > 0 {
-		parsed, err := springsteen.ConfigFromJSON(raw.SpringsteenConfig)
+	// Parse message field: GatewayConfig
+	if len(raw.GatewayConfig) > 0 {
+		parsed, err := gateway.ConfigFromJSON(raw.GatewayConfig)
 		if err == nil {
-			result.SpringsteenConfig = parsed
+			result.GatewayConfig = parsed
 		}
 	}
-	// Parse message field: BowieConfig
-	if len(raw.BowieConfig) > 0 {
-		parsed, err := bowie.ConfigFromJSON(raw.BowieConfig)
+	// Parse message field: LetsencryptConfig
+	if len(raw.LetsencryptConfig) > 0 {
+		parsed, err := letsencrypt.ConfigFromJSON(raw.LetsencryptConfig)
 		if err == nil {
-			result.BowieConfig = parsed
+			result.LetsencryptConfig = parsed
 		}
 	}
-	// Parse message field: GenesisConfig
-	if len(raw.GenesisConfig) > 0 {
-		parsed, err := genesis.ConfigFromJSON(raw.GenesisConfig)
+	// Parse message field: PolicyConfig
+	if len(raw.PolicyConfig) > 0 {
+		parsed, err := policy.ConfigFromJSON(raw.PolicyConfig)
 		if err == nil {
-			result.GenesisConfig = parsed
+			result.PolicyConfig = parsed
 		}
 	}
 	return result, nil
@@ -227,34 +227,34 @@ func ConfigHolderToTOML(v *ConfigHolder) ([]byte, error) {
 	return toml.Marshal(obj)
 }
 
-// FleetwoodConfigStateJSON represents FleetwoodConfigState in external JSON format (with string enums)
+// SentinelConfigStateJSON represents SentinelConfigState in external JSON format (with string enums)
 // MARKER: JSON helper struct generated from serial.go
-type fleetwoodconfigstateJSON struct {
+type sentinelconfigstateJSON struct {
 	Config json.RawMessage `json:"config,omitempty"`
 }
 
-// FleetwoodConfigStateToJSON converts FleetwoodConfigState to JSON bytes.
+// SentinelConfigStateToJSON converts SentinelConfigState to JSON bytes.
 // Uses custom JSON helper for friendly enum strings and proper int64 handling.
-func FleetwoodConfigStateToJSON(v *FleetwoodConfigState) ([]byte, error) {
+func SentinelConfigStateToJSON(v *SentinelConfigState) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "fleetwoodconfigstate is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "sentinelconfigstate is nil")
 	}
 	// Convert to JSON helper struct with string enums
-	helper := fleetwoodconfigstateJSON{
+	helper := sentinelconfigstateJSON{
 		Config: func() json.RawMessage {
 			if v.Config == nil {
 				return nil
 			}
-			data, _ := fleetwood.ConfigToJSON(v.Config)
+			data, _ := sentinel.ConfigToJSON(v.Config)
 			return data
 		}(),
 	}
 	return json.Marshal(helper)
 }
 
-// FleetwoodConfigStateFromBytes creates FleetwoodConfigState from bytes, auto-detecting the format.
+// SentinelConfigStateFromBytes creates SentinelConfigState from bytes, auto-detecting the format.
 // Supports JSON, YAML, TOML, and binary protobuf formats.
-func FleetwoodConfigStateFromBytes(data []byte) (*FleetwoodConfigState, error) {
+func SentinelConfigStateFromBytes(data []byte) (*SentinelConfigState, error) {
 	// Trim leading whitespace to check format
 	trimmed := bytes.TrimSpace(data)
 	if len(trimmed) == 0 {
@@ -262,7 +262,7 @@ func FleetwoodConfigStateFromBytes(data []byte) (*FleetwoodConfigState, error) {
 	}
 	// Try JSON first (most common, starts with { or [)
 	if trimmed[0] == '{' || trimmed[0] == '[' {
-		if result, err := FleetwoodConfigStateFromJSON(data); err == nil {
+		if result, err := SentinelConfigStateFromJSON(data); err == nil {
 			return result, nil
 		}
 	}
@@ -272,7 +272,7 @@ func FleetwoodConfigStateFromBytes(data []byte) (*FleetwoodConfigState, error) {
 		// Convert TOML to JSON, then parse
 		jsonData, err := json.Marshal(tomlObj)
 		if err == nil {
-			if result, err := FleetwoodConfigStateFromJSON(jsonData); err == nil {
+			if result, err := SentinelConfigStateFromJSON(jsonData); err == nil {
 				return result, nil
 			}
 		}
@@ -283,38 +283,38 @@ func FleetwoodConfigStateFromBytes(data []byte) (*FleetwoodConfigState, error) {
 		// Convert YAML to JSON, then parse
 		jsonData, err := json.Marshal(yamlObj)
 		if err == nil {
-			if result, err := FleetwoodConfigStateFromJSON(jsonData); err == nil {
+			if result, err := SentinelConfigStateFromJSON(jsonData); err == nil {
 				return result, nil
 			}
 		}
 	}
 	// Try binary protobuf
-	v := &FleetwoodConfigState{}
+	v := &SentinelConfigState{}
 	if err := proto.Unmarshal(data, v); err == nil {
 		return v, nil
 	}
-	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse FleetwoodConfigState: unsupported format or invalid data")
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse SentinelConfigState: unsupported format or invalid data")
 }
 
-// FleetwoodConfigStateFromJSON creates FleetwoodConfigState from JSON bytes.
+// SentinelConfigStateFromJSON creates SentinelConfigState from JSON bytes.
 // Uses standard encoding/json and custom enum parsers for external JSON compatibility.
-func FleetwoodConfigStateFromJSON(data []byte) (*FleetwoodConfigState, error) {
+func SentinelConfigStateFromJSON(data []byte) (*SentinelConfigState, error) {
 	// Unmarshal into helper struct with string enums
-	var raw fleetwoodconfigstateJSON
+	var raw sentinelconfigstateJSON
 	if err := json.Unmarshal(data, &raw); err != nil {
 		// Fall back to protojson which handles proto3 JSON conventions
 		// (string-encoded int64/uint64, standard enum names, etc.)
-		v := &FleetwoodConfigState{}
+		v := &SentinelConfigState{}
 		if pErr := protojson.Unmarshal(data, v); pErr != nil {
 			return nil, err
 		}
 		return v, nil
 	}
 	// Build result with parsed enums
-	result := &FleetwoodConfigState{}
+	result := &SentinelConfigState{}
 	// Parse message field: Config
 	if len(raw.Config) > 0 {
-		parsed, err := fleetwood.ConfigFromJSON(raw.Config)
+		parsed, err := sentinel.ConfigFromJSON(raw.Config)
 		if err == nil {
 			result.Config = parsed
 		}
@@ -322,14 +322,14 @@ func FleetwoodConfigStateFromJSON(data []byte) (*FleetwoodConfigState, error) {
 	return result, nil
 }
 
-// FleetwoodConfigStateToYAML converts FleetwoodConfigState to YAML bytes.
+// SentinelConfigStateToYAML converts SentinelConfigState to YAML bytes.
 // Converts to JSON first, then to YAML for proper protobuf handling.
-func FleetwoodConfigStateToYAML(v *FleetwoodConfigState) ([]byte, error) {
+func SentinelConfigStateToYAML(v *SentinelConfigState) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "fleetwoodconfigstate is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "sentinelconfigstate is nil")
 	}
 	// Convert to JSON first
-	jsonData, err := FleetwoodConfigStateToJSON(v)
+	jsonData, err := SentinelConfigStateToJSON(v)
 	if err != nil {
 		return nil, err
 	}
@@ -341,14 +341,14 @@ func FleetwoodConfigStateToYAML(v *FleetwoodConfigState) ([]byte, error) {
 	return yaml.Marshal(obj)
 }
 
-// FleetwoodConfigStateToTOML converts FleetwoodConfigState to TOML bytes.
+// SentinelConfigStateToTOML converts SentinelConfigState to TOML bytes.
 // Converts to JSON first, then to TOML for proper protobuf handling.
-func FleetwoodConfigStateToTOML(v *FleetwoodConfigState) ([]byte, error) {
+func SentinelConfigStateToTOML(v *SentinelConfigState) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "fleetwoodconfigstate is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "sentinelconfigstate is nil")
 	}
 	// Convert to JSON first
-	jsonData, err := FleetwoodConfigStateToJSON(v)
+	jsonData, err := SentinelConfigStateToJSON(v)
 	if err != nil {
 		return nil, err
 	}
@@ -360,34 +360,34 @@ func FleetwoodConfigStateToTOML(v *FleetwoodConfigState) ([]byte, error) {
 	return toml.Marshal(obj)
 }
 
-// IronmaidenConfigStateJSON represents IronmaidenConfigState in external JSON format (with string enums)
+// IdentityConfigStateJSON represents IdentityConfigState in external JSON format (with string enums)
 // MARKER: JSON helper struct generated from serial.go
-type ironmaidenconfigstateJSON struct {
+type identityconfigstateJSON struct {
 	Config json.RawMessage `json:"config,omitempty"`
 }
 
-// IronmaidenConfigStateToJSON converts IronmaidenConfigState to JSON bytes.
+// IdentityConfigStateToJSON converts IdentityConfigState to JSON bytes.
 // Uses custom JSON helper for friendly enum strings and proper int64 handling.
-func IronmaidenConfigStateToJSON(v *IronmaidenConfigState) ([]byte, error) {
+func IdentityConfigStateToJSON(v *IdentityConfigState) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "ironmaidenconfigstate is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "identityconfigstate is nil")
 	}
 	// Convert to JSON helper struct with string enums
-	helper := ironmaidenconfigstateJSON{
+	helper := identityconfigstateJSON{
 		Config: func() json.RawMessage {
 			if v.Config == nil {
 				return nil
 			}
-			data, _ := ironmaiden.ConfigToJSON(v.Config)
+			data, _ := identity.ConfigToJSON(v.Config)
 			return data
 		}(),
 	}
 	return json.Marshal(helper)
 }
 
-// IronmaidenConfigStateFromBytes creates IronmaidenConfigState from bytes, auto-detecting the format.
+// IdentityConfigStateFromBytes creates IdentityConfigState from bytes, auto-detecting the format.
 // Supports JSON, YAML, TOML, and binary protobuf formats.
-func IronmaidenConfigStateFromBytes(data []byte) (*IronmaidenConfigState, error) {
+func IdentityConfigStateFromBytes(data []byte) (*IdentityConfigState, error) {
 	// Trim leading whitespace to check format
 	trimmed := bytes.TrimSpace(data)
 	if len(trimmed) == 0 {
@@ -395,7 +395,7 @@ func IronmaidenConfigStateFromBytes(data []byte) (*IronmaidenConfigState, error)
 	}
 	// Try JSON first (most common, starts with { or [)
 	if trimmed[0] == '{' || trimmed[0] == '[' {
-		if result, err := IronmaidenConfigStateFromJSON(data); err == nil {
+		if result, err := IdentityConfigStateFromJSON(data); err == nil {
 			return result, nil
 		}
 	}
@@ -405,7 +405,7 @@ func IronmaidenConfigStateFromBytes(data []byte) (*IronmaidenConfigState, error)
 		// Convert TOML to JSON, then parse
 		jsonData, err := json.Marshal(tomlObj)
 		if err == nil {
-			if result, err := IronmaidenConfigStateFromJSON(jsonData); err == nil {
+			if result, err := IdentityConfigStateFromJSON(jsonData); err == nil {
 				return result, nil
 			}
 		}
@@ -416,38 +416,38 @@ func IronmaidenConfigStateFromBytes(data []byte) (*IronmaidenConfigState, error)
 		// Convert YAML to JSON, then parse
 		jsonData, err := json.Marshal(yamlObj)
 		if err == nil {
-			if result, err := IronmaidenConfigStateFromJSON(jsonData); err == nil {
+			if result, err := IdentityConfigStateFromJSON(jsonData); err == nil {
 				return result, nil
 			}
 		}
 	}
 	// Try binary protobuf
-	v := &IronmaidenConfigState{}
+	v := &IdentityConfigState{}
 	if err := proto.Unmarshal(data, v); err == nil {
 		return v, nil
 	}
-	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse IronmaidenConfigState: unsupported format or invalid data")
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse IdentityConfigState: unsupported format or invalid data")
 }
 
-// IronmaidenConfigStateFromJSON creates IronmaidenConfigState from JSON bytes.
+// IdentityConfigStateFromJSON creates IdentityConfigState from JSON bytes.
 // Uses standard encoding/json and custom enum parsers for external JSON compatibility.
-func IronmaidenConfigStateFromJSON(data []byte) (*IronmaidenConfigState, error) {
+func IdentityConfigStateFromJSON(data []byte) (*IdentityConfigState, error) {
 	// Unmarshal into helper struct with string enums
-	var raw ironmaidenconfigstateJSON
+	var raw identityconfigstateJSON
 	if err := json.Unmarshal(data, &raw); err != nil {
 		// Fall back to protojson which handles proto3 JSON conventions
 		// (string-encoded int64/uint64, standard enum names, etc.)
-		v := &IronmaidenConfigState{}
+		v := &IdentityConfigState{}
 		if pErr := protojson.Unmarshal(data, v); pErr != nil {
 			return nil, err
 		}
 		return v, nil
 	}
 	// Build result with parsed enums
-	result := &IronmaidenConfigState{}
+	result := &IdentityConfigState{}
 	// Parse message field: Config
 	if len(raw.Config) > 0 {
-		parsed, err := ironmaiden.ConfigFromJSON(raw.Config)
+		parsed, err := identity.ConfigFromJSON(raw.Config)
 		if err == nil {
 			result.Config = parsed
 		}
@@ -455,14 +455,14 @@ func IronmaidenConfigStateFromJSON(data []byte) (*IronmaidenConfigState, error) 
 	return result, nil
 }
 
-// IronmaidenConfigStateToYAML converts IronmaidenConfigState to YAML bytes.
+// IdentityConfigStateToYAML converts IdentityConfigState to YAML bytes.
 // Converts to JSON first, then to YAML for proper protobuf handling.
-func IronmaidenConfigStateToYAML(v *IronmaidenConfigState) ([]byte, error) {
+func IdentityConfigStateToYAML(v *IdentityConfigState) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "ironmaidenconfigstate is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "identityconfigstate is nil")
 	}
 	// Convert to JSON first
-	jsonData, err := IronmaidenConfigStateToJSON(v)
+	jsonData, err := IdentityConfigStateToJSON(v)
 	if err != nil {
 		return nil, err
 	}
@@ -474,14 +474,14 @@ func IronmaidenConfigStateToYAML(v *IronmaidenConfigState) ([]byte, error) {
 	return yaml.Marshal(obj)
 }
 
-// IronmaidenConfigStateToTOML converts IronmaidenConfigState to TOML bytes.
+// IdentityConfigStateToTOML converts IdentityConfigState to TOML bytes.
 // Converts to JSON first, then to TOML for proper protobuf handling.
-func IronmaidenConfigStateToTOML(v *IronmaidenConfigState) ([]byte, error) {
+func IdentityConfigStateToTOML(v *IdentityConfigState) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "ironmaidenconfigstate is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "identityconfigstate is nil")
 	}
 	// Convert to JSON first
-	jsonData, err := IronmaidenConfigStateToJSON(v)
+	jsonData, err := IdentityConfigStateToJSON(v)
 	if err != nil {
 		return nil, err
 	}
@@ -493,34 +493,34 @@ func IronmaidenConfigStateToTOML(v *IronmaidenConfigState) ([]byte, error) {
 	return toml.Marshal(obj)
 }
 
-// SpringsteenConfigStateJSON represents SpringsteenConfigState in external JSON format (with string enums)
+// GatewayConfigStateJSON represents GatewayConfigState in external JSON format (with string enums)
 // MARKER: JSON helper struct generated from serial.go
-type springsteenconfigstateJSON struct {
+type gatewayconfigstateJSON struct {
 	Config json.RawMessage `json:"config,omitempty"`
 }
 
-// SpringsteenConfigStateToJSON converts SpringsteenConfigState to JSON bytes.
+// GatewayConfigStateToJSON converts GatewayConfigState to JSON bytes.
 // Uses custom JSON helper for friendly enum strings and proper int64 handling.
-func SpringsteenConfigStateToJSON(v *SpringsteenConfigState) ([]byte, error) {
+func GatewayConfigStateToJSON(v *GatewayConfigState) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "springsteenconfigstate is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "gatewayconfigstate is nil")
 	}
 	// Convert to JSON helper struct with string enums
-	helper := springsteenconfigstateJSON{
+	helper := gatewayconfigstateJSON{
 		Config: func() json.RawMessage {
 			if v.Config == nil {
 				return nil
 			}
-			data, _ := springsteen.ConfigToJSON(v.Config)
+			data, _ := gateway.ConfigToJSON(v.Config)
 			return data
 		}(),
 	}
 	return json.Marshal(helper)
 }
 
-// SpringsteenConfigStateFromBytes creates SpringsteenConfigState from bytes, auto-detecting the format.
+// GatewayConfigStateFromBytes creates GatewayConfigState from bytes, auto-detecting the format.
 // Supports JSON, YAML, TOML, and binary protobuf formats.
-func SpringsteenConfigStateFromBytes(data []byte) (*SpringsteenConfigState, error) {
+func GatewayConfigStateFromBytes(data []byte) (*GatewayConfigState, error) {
 	// Trim leading whitespace to check format
 	trimmed := bytes.TrimSpace(data)
 	if len(trimmed) == 0 {
@@ -528,7 +528,7 @@ func SpringsteenConfigStateFromBytes(data []byte) (*SpringsteenConfigState, erro
 	}
 	// Try JSON first (most common, starts with { or [)
 	if trimmed[0] == '{' || trimmed[0] == '[' {
-		if result, err := SpringsteenConfigStateFromJSON(data); err == nil {
+		if result, err := GatewayConfigStateFromJSON(data); err == nil {
 			return result, nil
 		}
 	}
@@ -538,7 +538,7 @@ func SpringsteenConfigStateFromBytes(data []byte) (*SpringsteenConfigState, erro
 		// Convert TOML to JSON, then parse
 		jsonData, err := json.Marshal(tomlObj)
 		if err == nil {
-			if result, err := SpringsteenConfigStateFromJSON(jsonData); err == nil {
+			if result, err := GatewayConfigStateFromJSON(jsonData); err == nil {
 				return result, nil
 			}
 		}
@@ -549,38 +549,38 @@ func SpringsteenConfigStateFromBytes(data []byte) (*SpringsteenConfigState, erro
 		// Convert YAML to JSON, then parse
 		jsonData, err := json.Marshal(yamlObj)
 		if err == nil {
-			if result, err := SpringsteenConfigStateFromJSON(jsonData); err == nil {
+			if result, err := GatewayConfigStateFromJSON(jsonData); err == nil {
 				return result, nil
 			}
 		}
 	}
 	// Try binary protobuf
-	v := &SpringsteenConfigState{}
+	v := &GatewayConfigState{}
 	if err := proto.Unmarshal(data, v); err == nil {
 		return v, nil
 	}
-	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse SpringsteenConfigState: unsupported format or invalid data")
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse GatewayConfigState: unsupported format or invalid data")
 }
 
-// SpringsteenConfigStateFromJSON creates SpringsteenConfigState from JSON bytes.
+// GatewayConfigStateFromJSON creates GatewayConfigState from JSON bytes.
 // Uses standard encoding/json and custom enum parsers for external JSON compatibility.
-func SpringsteenConfigStateFromJSON(data []byte) (*SpringsteenConfigState, error) {
+func GatewayConfigStateFromJSON(data []byte) (*GatewayConfigState, error) {
 	// Unmarshal into helper struct with string enums
-	var raw springsteenconfigstateJSON
+	var raw gatewayconfigstateJSON
 	if err := json.Unmarshal(data, &raw); err != nil {
 		// Fall back to protojson which handles proto3 JSON conventions
 		// (string-encoded int64/uint64, standard enum names, etc.)
-		v := &SpringsteenConfigState{}
+		v := &GatewayConfigState{}
 		if pErr := protojson.Unmarshal(data, v); pErr != nil {
 			return nil, err
 		}
 		return v, nil
 	}
 	// Build result with parsed enums
-	result := &SpringsteenConfigState{}
+	result := &GatewayConfigState{}
 	// Parse message field: Config
 	if len(raw.Config) > 0 {
-		parsed, err := springsteen.ConfigFromJSON(raw.Config)
+		parsed, err := gateway.ConfigFromJSON(raw.Config)
 		if err == nil {
 			result.Config = parsed
 		}
@@ -588,14 +588,14 @@ func SpringsteenConfigStateFromJSON(data []byte) (*SpringsteenConfigState, error
 	return result, nil
 }
 
-// SpringsteenConfigStateToYAML converts SpringsteenConfigState to YAML bytes.
+// GatewayConfigStateToYAML converts GatewayConfigState to YAML bytes.
 // Converts to JSON first, then to YAML for proper protobuf handling.
-func SpringsteenConfigStateToYAML(v *SpringsteenConfigState) ([]byte, error) {
+func GatewayConfigStateToYAML(v *GatewayConfigState) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "springsteenconfigstate is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "gatewayconfigstate is nil")
 	}
 	// Convert to JSON first
-	jsonData, err := SpringsteenConfigStateToJSON(v)
+	jsonData, err := GatewayConfigStateToJSON(v)
 	if err != nil {
 		return nil, err
 	}
@@ -607,14 +607,14 @@ func SpringsteenConfigStateToYAML(v *SpringsteenConfigState) ([]byte, error) {
 	return yaml.Marshal(obj)
 }
 
-// SpringsteenConfigStateToTOML converts SpringsteenConfigState to TOML bytes.
+// GatewayConfigStateToTOML converts GatewayConfigState to TOML bytes.
 // Converts to JSON first, then to TOML for proper protobuf handling.
-func SpringsteenConfigStateToTOML(v *SpringsteenConfigState) ([]byte, error) {
+func GatewayConfigStateToTOML(v *GatewayConfigState) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "springsteenconfigstate is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "gatewayconfigstate is nil")
 	}
 	// Convert to JSON first
-	jsonData, err := SpringsteenConfigStateToJSON(v)
+	jsonData, err := GatewayConfigStateToJSON(v)
 	if err != nil {
 		return nil, err
 	}
@@ -626,34 +626,34 @@ func SpringsteenConfigStateToTOML(v *SpringsteenConfigState) ([]byte, error) {
 	return toml.Marshal(obj)
 }
 
-// BowieConfigStateJSON represents BowieConfigState in external JSON format (with string enums)
+// LetsencryptConfigStateJSON represents LetsencryptConfigState in external JSON format (with string enums)
 // MARKER: JSON helper struct generated from serial.go
-type bowieconfigstateJSON struct {
+type letsencryptconfigstateJSON struct {
 	Config json.RawMessage `json:"config,omitempty"`
 }
 
-// BowieConfigStateToJSON converts BowieConfigState to JSON bytes.
+// LetsencryptConfigStateToJSON converts LetsencryptConfigState to JSON bytes.
 // Uses custom JSON helper for friendly enum strings and proper int64 handling.
-func BowieConfigStateToJSON(v *BowieConfigState) ([]byte, error) {
+func LetsencryptConfigStateToJSON(v *LetsencryptConfigState) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "bowieconfigstate is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "letsencryptconfigstate is nil")
 	}
 	// Convert to JSON helper struct with string enums
-	helper := bowieconfigstateJSON{
+	helper := letsencryptconfigstateJSON{
 		Config: func() json.RawMessage {
 			if v.Config == nil {
 				return nil
 			}
-			data, _ := bowie.ConfigToJSON(v.Config)
+			data, _ := letsencrypt.ConfigToJSON(v.Config)
 			return data
 		}(),
 	}
 	return json.Marshal(helper)
 }
 
-// BowieConfigStateFromBytes creates BowieConfigState from bytes, auto-detecting the format.
+// LetsencryptConfigStateFromBytes creates LetsencryptConfigState from bytes, auto-detecting the format.
 // Supports JSON, YAML, TOML, and binary protobuf formats.
-func BowieConfigStateFromBytes(data []byte) (*BowieConfigState, error) {
+func LetsencryptConfigStateFromBytes(data []byte) (*LetsencryptConfigState, error) {
 	// Trim leading whitespace to check format
 	trimmed := bytes.TrimSpace(data)
 	if len(trimmed) == 0 {
@@ -661,7 +661,7 @@ func BowieConfigStateFromBytes(data []byte) (*BowieConfigState, error) {
 	}
 	// Try JSON first (most common, starts with { or [)
 	if trimmed[0] == '{' || trimmed[0] == '[' {
-		if result, err := BowieConfigStateFromJSON(data); err == nil {
+		if result, err := LetsencryptConfigStateFromJSON(data); err == nil {
 			return result, nil
 		}
 	}
@@ -671,7 +671,7 @@ func BowieConfigStateFromBytes(data []byte) (*BowieConfigState, error) {
 		// Convert TOML to JSON, then parse
 		jsonData, err := json.Marshal(tomlObj)
 		if err == nil {
-			if result, err := BowieConfigStateFromJSON(jsonData); err == nil {
+			if result, err := LetsencryptConfigStateFromJSON(jsonData); err == nil {
 				return result, nil
 			}
 		}
@@ -682,38 +682,38 @@ func BowieConfigStateFromBytes(data []byte) (*BowieConfigState, error) {
 		// Convert YAML to JSON, then parse
 		jsonData, err := json.Marshal(yamlObj)
 		if err == nil {
-			if result, err := BowieConfigStateFromJSON(jsonData); err == nil {
+			if result, err := LetsencryptConfigStateFromJSON(jsonData); err == nil {
 				return result, nil
 			}
 		}
 	}
 	// Try binary protobuf
-	v := &BowieConfigState{}
+	v := &LetsencryptConfigState{}
 	if err := proto.Unmarshal(data, v); err == nil {
 		return v, nil
 	}
-	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse BowieConfigState: unsupported format or invalid data")
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse LetsencryptConfigState: unsupported format or invalid data")
 }
 
-// BowieConfigStateFromJSON creates BowieConfigState from JSON bytes.
+// LetsencryptConfigStateFromJSON creates LetsencryptConfigState from JSON bytes.
 // Uses standard encoding/json and custom enum parsers for external JSON compatibility.
-func BowieConfigStateFromJSON(data []byte) (*BowieConfigState, error) {
+func LetsencryptConfigStateFromJSON(data []byte) (*LetsencryptConfigState, error) {
 	// Unmarshal into helper struct with string enums
-	var raw bowieconfigstateJSON
+	var raw letsencryptconfigstateJSON
 	if err := json.Unmarshal(data, &raw); err != nil {
 		// Fall back to protojson which handles proto3 JSON conventions
 		// (string-encoded int64/uint64, standard enum names, etc.)
-		v := &BowieConfigState{}
+		v := &LetsencryptConfigState{}
 		if pErr := protojson.Unmarshal(data, v); pErr != nil {
 			return nil, err
 		}
 		return v, nil
 	}
 	// Build result with parsed enums
-	result := &BowieConfigState{}
+	result := &LetsencryptConfigState{}
 	// Parse message field: Config
 	if len(raw.Config) > 0 {
-		parsed, err := bowie.ConfigFromJSON(raw.Config)
+		parsed, err := letsencrypt.ConfigFromJSON(raw.Config)
 		if err == nil {
 			result.Config = parsed
 		}
@@ -721,14 +721,14 @@ func BowieConfigStateFromJSON(data []byte) (*BowieConfigState, error) {
 	return result, nil
 }
 
-// BowieConfigStateToYAML converts BowieConfigState to YAML bytes.
+// LetsencryptConfigStateToYAML converts LetsencryptConfigState to YAML bytes.
 // Converts to JSON first, then to YAML for proper protobuf handling.
-func BowieConfigStateToYAML(v *BowieConfigState) ([]byte, error) {
+func LetsencryptConfigStateToYAML(v *LetsencryptConfigState) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "bowieconfigstate is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "letsencryptconfigstate is nil")
 	}
 	// Convert to JSON first
-	jsonData, err := BowieConfigStateToJSON(v)
+	jsonData, err := LetsencryptConfigStateToJSON(v)
 	if err != nil {
 		return nil, err
 	}
@@ -740,14 +740,14 @@ func BowieConfigStateToYAML(v *BowieConfigState) ([]byte, error) {
 	return yaml.Marshal(obj)
 }
 
-// BowieConfigStateToTOML converts BowieConfigState to TOML bytes.
+// LetsencryptConfigStateToTOML converts LetsencryptConfigState to TOML bytes.
 // Converts to JSON first, then to TOML for proper protobuf handling.
-func BowieConfigStateToTOML(v *BowieConfigState) ([]byte, error) {
+func LetsencryptConfigStateToTOML(v *LetsencryptConfigState) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "bowieconfigstate is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "letsencryptconfigstate is nil")
 	}
 	// Convert to JSON first
-	jsonData, err := BowieConfigStateToJSON(v)
+	jsonData, err := LetsencryptConfigStateToJSON(v)
 	if err != nil {
 		return nil, err
 	}
@@ -759,34 +759,34 @@ func BowieConfigStateToTOML(v *BowieConfigState) ([]byte, error) {
 	return toml.Marshal(obj)
 }
 
-// GenesisConfigStateJSON represents GenesisConfigState in external JSON format (with string enums)
+// PolicyConfigStateJSON represents PolicyConfigState in external JSON format (with string enums)
 // MARKER: JSON helper struct generated from serial.go
-type genesisconfigstateJSON struct {
+type policyconfigstateJSON struct {
 	Config json.RawMessage `json:"config,omitempty"`
 }
 
-// GenesisConfigStateToJSON converts GenesisConfigState to JSON bytes.
+// PolicyConfigStateToJSON converts PolicyConfigState to JSON bytes.
 // Uses custom JSON helper for friendly enum strings and proper int64 handling.
-func GenesisConfigStateToJSON(v *GenesisConfigState) ([]byte, error) {
+func PolicyConfigStateToJSON(v *PolicyConfigState) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "genesisconfigstate is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "policyconfigstate is nil")
 	}
 	// Convert to JSON helper struct with string enums
-	helper := genesisconfigstateJSON{
+	helper := policyconfigstateJSON{
 		Config: func() json.RawMessage {
 			if v.Config == nil {
 				return nil
 			}
-			data, _ := genesis.ConfigToJSON(v.Config)
+			data, _ := policy.ConfigToJSON(v.Config)
 			return data
 		}(),
 	}
 	return json.Marshal(helper)
 }
 
-// GenesisConfigStateFromBytes creates GenesisConfigState from bytes, auto-detecting the format.
+// PolicyConfigStateFromBytes creates PolicyConfigState from bytes, auto-detecting the format.
 // Supports JSON, YAML, TOML, and binary protobuf formats.
-func GenesisConfigStateFromBytes(data []byte) (*GenesisConfigState, error) {
+func PolicyConfigStateFromBytes(data []byte) (*PolicyConfigState, error) {
 	// Trim leading whitespace to check format
 	trimmed := bytes.TrimSpace(data)
 	if len(trimmed) == 0 {
@@ -794,7 +794,7 @@ func GenesisConfigStateFromBytes(data []byte) (*GenesisConfigState, error) {
 	}
 	// Try JSON first (most common, starts with { or [)
 	if trimmed[0] == '{' || trimmed[0] == '[' {
-		if result, err := GenesisConfigStateFromJSON(data); err == nil {
+		if result, err := PolicyConfigStateFromJSON(data); err == nil {
 			return result, nil
 		}
 	}
@@ -804,7 +804,7 @@ func GenesisConfigStateFromBytes(data []byte) (*GenesisConfigState, error) {
 		// Convert TOML to JSON, then parse
 		jsonData, err := json.Marshal(tomlObj)
 		if err == nil {
-			if result, err := GenesisConfigStateFromJSON(jsonData); err == nil {
+			if result, err := PolicyConfigStateFromJSON(jsonData); err == nil {
 				return result, nil
 			}
 		}
@@ -815,38 +815,38 @@ func GenesisConfigStateFromBytes(data []byte) (*GenesisConfigState, error) {
 		// Convert YAML to JSON, then parse
 		jsonData, err := json.Marshal(yamlObj)
 		if err == nil {
-			if result, err := GenesisConfigStateFromJSON(jsonData); err == nil {
+			if result, err := PolicyConfigStateFromJSON(jsonData); err == nil {
 				return result, nil
 			}
 		}
 	}
 	// Try binary protobuf
-	v := &GenesisConfigState{}
+	v := &PolicyConfigState{}
 	if err := proto.Unmarshal(data, v); err == nil {
 		return v, nil
 	}
-	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse GenesisConfigState: unsupported format or invalid data")
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse PolicyConfigState: unsupported format or invalid data")
 }
 
-// GenesisConfigStateFromJSON creates GenesisConfigState from JSON bytes.
+// PolicyConfigStateFromJSON creates PolicyConfigState from JSON bytes.
 // Uses standard encoding/json and custom enum parsers for external JSON compatibility.
-func GenesisConfigStateFromJSON(data []byte) (*GenesisConfigState, error) {
+func PolicyConfigStateFromJSON(data []byte) (*PolicyConfigState, error) {
 	// Unmarshal into helper struct with string enums
-	var raw genesisconfigstateJSON
+	var raw policyconfigstateJSON
 	if err := json.Unmarshal(data, &raw); err != nil {
 		// Fall back to protojson which handles proto3 JSON conventions
 		// (string-encoded int64/uint64, standard enum names, etc.)
-		v := &GenesisConfigState{}
+		v := &PolicyConfigState{}
 		if pErr := protojson.Unmarshal(data, v); pErr != nil {
 			return nil, err
 		}
 		return v, nil
 	}
 	// Build result with parsed enums
-	result := &GenesisConfigState{}
+	result := &PolicyConfigState{}
 	// Parse message field: Config
 	if len(raw.Config) > 0 {
-		parsed, err := genesis.ConfigFromJSON(raw.Config)
+		parsed, err := policy.ConfigFromJSON(raw.Config)
 		if err == nil {
 			result.Config = parsed
 		}
@@ -854,14 +854,14 @@ func GenesisConfigStateFromJSON(data []byte) (*GenesisConfigState, error) {
 	return result, nil
 }
 
-// GenesisConfigStateToYAML converts GenesisConfigState to YAML bytes.
+// PolicyConfigStateToYAML converts PolicyConfigState to YAML bytes.
 // Converts to JSON first, then to YAML for proper protobuf handling.
-func GenesisConfigStateToYAML(v *GenesisConfigState) ([]byte, error) {
+func PolicyConfigStateToYAML(v *PolicyConfigState) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "genesisconfigstate is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "policyconfigstate is nil")
 	}
 	// Convert to JSON first
-	jsonData, err := GenesisConfigStateToJSON(v)
+	jsonData, err := PolicyConfigStateToJSON(v)
 	if err != nil {
 		return nil, err
 	}
@@ -873,14 +873,14 @@ func GenesisConfigStateToYAML(v *GenesisConfigState) ([]byte, error) {
 	return yaml.Marshal(obj)
 }
 
-// GenesisConfigStateToTOML converts GenesisConfigState to TOML bytes.
+// PolicyConfigStateToTOML converts PolicyConfigState to TOML bytes.
 // Converts to JSON first, then to TOML for proper protobuf handling.
-func GenesisConfigStateToTOML(v *GenesisConfigState) ([]byte, error) {
+func PolicyConfigStateToTOML(v *PolicyConfigState) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "genesisconfigstate is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "policyconfigstate is nil")
 	}
 	// Convert to JSON first
-	jsonData, err := GenesisConfigStateToJSON(v)
+	jsonData, err := PolicyConfigStateToJSON(v)
 	if err != nil {
 		return nil, err
 	}
@@ -1152,28 +1152,28 @@ func ConfigHolderToEnvVar(v *ConfigHolder) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	if v.FleetwoodConfig != nil {
-		for k, val := range fleetwood.ConfigToEnvVar(v.FleetwoodConfig) {
+	if v.SentinelConfig != nil {
+		for k, val := range sentinel.ConfigToEnvVar(v.SentinelConfig) {
 			result[k] = val
 		}
 	}
-	if v.IronmaidenConfig != nil {
-		for k, val := range ironmaiden.ConfigToEnvVar(v.IronmaidenConfig) {
+	if v.IdentityConfig != nil {
+		for k, val := range identity.ConfigToEnvVar(v.IdentityConfig) {
 			result[k] = val
 		}
 	}
-	if v.SpringsteenConfig != nil {
-		for k, val := range springsteen.ConfigToEnvVar(v.SpringsteenConfig) {
+	if v.GatewayConfig != nil {
+		for k, val := range gateway.ConfigToEnvVar(v.GatewayConfig) {
 			result[k] = val
 		}
 	}
-	if v.BowieConfig != nil {
-		for k, val := range bowie.ConfigToEnvVar(v.BowieConfig) {
+	if v.LetsencryptConfig != nil {
+		for k, val := range letsencrypt.ConfigToEnvVar(v.LetsencryptConfig) {
 			result[k] = val
 		}
 	}
-	if v.GenesisConfig != nil {
-		for k, val := range genesis.ConfigToEnvVar(v.GenesisConfig) {
+	if v.PolicyConfig != nil {
+		for k, val := range policy.ConfigToEnvVar(v.PolicyConfig) {
 			result[k] = val
 		}
 	}
@@ -1183,52 +1183,52 @@ func ConfigHolderToEnvVar(v *ConfigHolder) map[string]string {
 // ConfigHolderFromEnvVar creates ConfigHolder from environment variable key-value pairs.
 func ConfigHolderFromEnvVar(env map[string]string) (*ConfigHolder, error) {
 	result := &ConfigHolder{}
-	if sub, err := fleetwood.ConfigFromEnvVar(env); err != nil {
+	if sub, err := sentinel.ConfigFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
-		result.FleetwoodConfig = sub
+		result.SentinelConfig = sub
 	}
-	if sub, err := ironmaiden.ConfigFromEnvVar(env); err != nil {
+	if sub, err := identity.ConfigFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
-		result.IronmaidenConfig = sub
+		result.IdentityConfig = sub
 	}
-	if sub, err := springsteen.ConfigFromEnvVar(env); err != nil {
+	if sub, err := gateway.ConfigFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
-		result.SpringsteenConfig = sub
+		result.GatewayConfig = sub
 	}
-	if sub, err := bowie.ConfigFromEnvVar(env); err != nil {
+	if sub, err := letsencrypt.ConfigFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
-		result.BowieConfig = sub
+		result.LetsencryptConfig = sub
 	}
-	if sub, err := genesis.ConfigFromEnvVar(env); err != nil {
+	if sub, err := policy.ConfigFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
-		result.GenesisConfig = sub
+		result.PolicyConfig = sub
 	}
 	return result, nil
 }
 
-// FleetwoodConfigStateToEnvVar converts FleetwoodConfigState to environment variable key-value pairs.
-func FleetwoodConfigStateToEnvVar(v *FleetwoodConfigState) map[string]string {
+// SentinelConfigStateToEnvVar converts SentinelConfigState to environment variable key-value pairs.
+func SentinelConfigStateToEnvVar(v *SentinelConfigState) map[string]string {
 	if v == nil {
 		return nil
 	}
 	result := make(map[string]string)
 	if v.Config != nil {
-		for k, val := range fleetwood.ConfigToEnvVar(v.Config) {
+		for k, val := range sentinel.ConfigToEnvVar(v.Config) {
 			result[k] = val
 		}
 	}
 	return result
 }
 
-// FleetwoodConfigStateFromEnvVar creates FleetwoodConfigState from environment variable key-value pairs.
-func FleetwoodConfigStateFromEnvVar(env map[string]string) (*FleetwoodConfigState, error) {
-	result := &FleetwoodConfigState{}
-	if sub, err := fleetwood.ConfigFromEnvVar(env); err != nil {
+// SentinelConfigStateFromEnvVar creates SentinelConfigState from environment variable key-value pairs.
+func SentinelConfigStateFromEnvVar(env map[string]string) (*SentinelConfigState, error) {
+	result := &SentinelConfigState{}
+	if sub, err := sentinel.ConfigFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
 		result.Config = sub
@@ -1236,24 +1236,24 @@ func FleetwoodConfigStateFromEnvVar(env map[string]string) (*FleetwoodConfigStat
 	return result, nil
 }
 
-// IronmaidenConfigStateToEnvVar converts IronmaidenConfigState to environment variable key-value pairs.
-func IronmaidenConfigStateToEnvVar(v *IronmaidenConfigState) map[string]string {
+// IdentityConfigStateToEnvVar converts IdentityConfigState to environment variable key-value pairs.
+func IdentityConfigStateToEnvVar(v *IdentityConfigState) map[string]string {
 	if v == nil {
 		return nil
 	}
 	result := make(map[string]string)
 	if v.Config != nil {
-		for k, val := range ironmaiden.ConfigToEnvVar(v.Config) {
+		for k, val := range identity.ConfigToEnvVar(v.Config) {
 			result[k] = val
 		}
 	}
 	return result
 }
 
-// IronmaidenConfigStateFromEnvVar creates IronmaidenConfigState from environment variable key-value pairs.
-func IronmaidenConfigStateFromEnvVar(env map[string]string) (*IronmaidenConfigState, error) {
-	result := &IronmaidenConfigState{}
-	if sub, err := ironmaiden.ConfigFromEnvVar(env); err != nil {
+// IdentityConfigStateFromEnvVar creates IdentityConfigState from environment variable key-value pairs.
+func IdentityConfigStateFromEnvVar(env map[string]string) (*IdentityConfigState, error) {
+	result := &IdentityConfigState{}
+	if sub, err := identity.ConfigFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
 		result.Config = sub
@@ -1261,24 +1261,24 @@ func IronmaidenConfigStateFromEnvVar(env map[string]string) (*IronmaidenConfigSt
 	return result, nil
 }
 
-// SpringsteenConfigStateToEnvVar converts SpringsteenConfigState to environment variable key-value pairs.
-func SpringsteenConfigStateToEnvVar(v *SpringsteenConfigState) map[string]string {
+// GatewayConfigStateToEnvVar converts GatewayConfigState to environment variable key-value pairs.
+func GatewayConfigStateToEnvVar(v *GatewayConfigState) map[string]string {
 	if v == nil {
 		return nil
 	}
 	result := make(map[string]string)
 	if v.Config != nil {
-		for k, val := range springsteen.ConfigToEnvVar(v.Config) {
+		for k, val := range gateway.ConfigToEnvVar(v.Config) {
 			result[k] = val
 		}
 	}
 	return result
 }
 
-// SpringsteenConfigStateFromEnvVar creates SpringsteenConfigState from environment variable key-value pairs.
-func SpringsteenConfigStateFromEnvVar(env map[string]string) (*SpringsteenConfigState, error) {
-	result := &SpringsteenConfigState{}
-	if sub, err := springsteen.ConfigFromEnvVar(env); err != nil {
+// GatewayConfigStateFromEnvVar creates GatewayConfigState from environment variable key-value pairs.
+func GatewayConfigStateFromEnvVar(env map[string]string) (*GatewayConfigState, error) {
+	result := &GatewayConfigState{}
+	if sub, err := gateway.ConfigFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
 		result.Config = sub
@@ -1286,24 +1286,24 @@ func SpringsteenConfigStateFromEnvVar(env map[string]string) (*SpringsteenConfig
 	return result, nil
 }
 
-// BowieConfigStateToEnvVar converts BowieConfigState to environment variable key-value pairs.
-func BowieConfigStateToEnvVar(v *BowieConfigState) map[string]string {
+// LetsencryptConfigStateToEnvVar converts LetsencryptConfigState to environment variable key-value pairs.
+func LetsencryptConfigStateToEnvVar(v *LetsencryptConfigState) map[string]string {
 	if v == nil {
 		return nil
 	}
 	result := make(map[string]string)
 	if v.Config != nil {
-		for k, val := range bowie.ConfigToEnvVar(v.Config) {
+		for k, val := range letsencrypt.ConfigToEnvVar(v.Config) {
 			result[k] = val
 		}
 	}
 	return result
 }
 
-// BowieConfigStateFromEnvVar creates BowieConfigState from environment variable key-value pairs.
-func BowieConfigStateFromEnvVar(env map[string]string) (*BowieConfigState, error) {
-	result := &BowieConfigState{}
-	if sub, err := bowie.ConfigFromEnvVar(env); err != nil {
+// LetsencryptConfigStateFromEnvVar creates LetsencryptConfigState from environment variable key-value pairs.
+func LetsencryptConfigStateFromEnvVar(env map[string]string) (*LetsencryptConfigState, error) {
+	result := &LetsencryptConfigState{}
+	if sub, err := letsencrypt.ConfigFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
 		result.Config = sub
@@ -1311,24 +1311,24 @@ func BowieConfigStateFromEnvVar(env map[string]string) (*BowieConfigState, error
 	return result, nil
 }
 
-// GenesisConfigStateToEnvVar converts GenesisConfigState to environment variable key-value pairs.
-func GenesisConfigStateToEnvVar(v *GenesisConfigState) map[string]string {
+// PolicyConfigStateToEnvVar converts PolicyConfigState to environment variable key-value pairs.
+func PolicyConfigStateToEnvVar(v *PolicyConfigState) map[string]string {
 	if v == nil {
 		return nil
 	}
 	result := make(map[string]string)
 	if v.Config != nil {
-		for k, val := range genesis.ConfigToEnvVar(v.Config) {
+		for k, val := range policy.ConfigToEnvVar(v.Config) {
 			result[k] = val
 		}
 	}
 	return result
 }
 
-// GenesisConfigStateFromEnvVar creates GenesisConfigState from environment variable key-value pairs.
-func GenesisConfigStateFromEnvVar(env map[string]string) (*GenesisConfigState, error) {
-	result := &GenesisConfigState{}
-	if sub, err := genesis.ConfigFromEnvVar(env); err != nil {
+// PolicyConfigStateFromEnvVar creates PolicyConfigState from environment variable key-value pairs.
+func PolicyConfigStateFromEnvVar(env map[string]string) (*PolicyConfigState, error) {
+	result := &PolicyConfigState{}
+	if sub, err := policy.ConfigFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
 		result.Config = sub
@@ -1390,9 +1390,9 @@ func ValidateConfigHolder(m *ConfigHolder) error {
 	return nil
 }
 
-// ValidateFleetwoodConfigState validates all fields in FleetwoodConfigState according to their annotations.
+// ValidateSentinelConfigState validates all fields in SentinelConfigState according to their annotations.
 // Returns a BlueErr if validation fails, or nil if all validations pass.
-func ValidateFleetwoodConfigState(m *FleetwoodConfigState) error {
+func ValidateSentinelConfigState(m *SentinelConfigState) error {
 	if m == nil {
 		return nil
 	}
@@ -1400,9 +1400,9 @@ func ValidateFleetwoodConfigState(m *FleetwoodConfigState) error {
 	return nil
 }
 
-// ValidateIronmaidenConfigState validates all fields in IronmaidenConfigState according to their annotations.
+// ValidateIdentityConfigState validates all fields in IdentityConfigState according to their annotations.
 // Returns a BlueErr if validation fails, or nil if all validations pass.
-func ValidateIronmaidenConfigState(m *IronmaidenConfigState) error {
+func ValidateIdentityConfigState(m *IdentityConfigState) error {
 	if m == nil {
 		return nil
 	}
@@ -1410,9 +1410,9 @@ func ValidateIronmaidenConfigState(m *IronmaidenConfigState) error {
 	return nil
 }
 
-// ValidateSpringsteenConfigState validates all fields in SpringsteenConfigState according to their annotations.
+// ValidateGatewayConfigState validates all fields in GatewayConfigState according to their annotations.
 // Returns a BlueErr if validation fails, or nil if all validations pass.
-func ValidateSpringsteenConfigState(m *SpringsteenConfigState) error {
+func ValidateGatewayConfigState(m *GatewayConfigState) error {
 	if m == nil {
 		return nil
 	}
@@ -1420,9 +1420,9 @@ func ValidateSpringsteenConfigState(m *SpringsteenConfigState) error {
 	return nil
 }
 
-// ValidateBowieConfigState validates all fields in BowieConfigState according to their annotations.
+// ValidateLetsencryptConfigState validates all fields in LetsencryptConfigState according to their annotations.
 // Returns a BlueErr if validation fails, or nil if all validations pass.
-func ValidateBowieConfigState(m *BowieConfigState) error {
+func ValidateLetsencryptConfigState(m *LetsencryptConfigState) error {
 	if m == nil {
 		return nil
 	}
@@ -1430,9 +1430,9 @@ func ValidateBowieConfigState(m *BowieConfigState) error {
 	return nil
 }
 
-// ValidateGenesisConfigState validates all fields in GenesisConfigState according to their annotations.
+// ValidatePolicyConfigState validates all fields in PolicyConfigState according to their annotations.
 // Returns a BlueErr if validation fails, or nil if all validations pass.
-func ValidateGenesisConfigState(m *GenesisConfigState) error {
+func ValidatePolicyConfigState(m *PolicyConfigState) error {
 	if m == nil {
 		return nil
 	}
@@ -1466,68 +1466,68 @@ func ValidateMapEmpty(m *MapEmpty) error {
 // ============================================================
 // MergeConfigHolder fills zero-valued fields in dst from src.
 func MergeConfigHolder(dst, src *ConfigHolder) {
-	if dst.FleetwoodConfig == nil {
-		dst.FleetwoodConfig = src.FleetwoodConfig
+	if dst.SentinelConfig == nil {
+		dst.SentinelConfig = src.SentinelConfig
 	}
-	if dst.IronmaidenConfig == nil {
-		dst.IronmaidenConfig = src.IronmaidenConfig
+	if dst.IdentityConfig == nil {
+		dst.IdentityConfig = src.IdentityConfig
 	}
-	if dst.SpringsteenConfig == nil {
-		dst.SpringsteenConfig = src.SpringsteenConfig
+	if dst.GatewayConfig == nil {
+		dst.GatewayConfig = src.GatewayConfig
 	}
-	if dst.BowieConfig == nil {
-		dst.BowieConfig = src.BowieConfig
+	if dst.LetsencryptConfig == nil {
+		dst.LetsencryptConfig = src.LetsencryptConfig
 	}
-	if dst.GenesisConfig == nil {
-		dst.GenesisConfig = src.GenesisConfig
+	if dst.PolicyConfig == nil {
+		dst.PolicyConfig = src.PolicyConfig
 	}
 }
 
 // ============================================================
-// Merge: FleetwoodConfigState
+// Merge: SentinelConfigState
 // ============================================================
-// MergeFleetwoodConfigState fills zero-valued fields in dst from src.
-func MergeFleetwoodConfigState(dst, src *FleetwoodConfigState) {
+// MergeSentinelConfigState fills zero-valued fields in dst from src.
+func MergeSentinelConfigState(dst, src *SentinelConfigState) {
 	if dst.Config == nil {
 		dst.Config = src.Config
 	}
 }
 
 // ============================================================
-// Merge: IronmaidenConfigState
+// Merge: IdentityConfigState
 // ============================================================
-// MergeIronmaidenConfigState fills zero-valued fields in dst from src.
-func MergeIronmaidenConfigState(dst, src *IronmaidenConfigState) {
+// MergeIdentityConfigState fills zero-valued fields in dst from src.
+func MergeIdentityConfigState(dst, src *IdentityConfigState) {
 	if dst.Config == nil {
 		dst.Config = src.Config
 	}
 }
 
 // ============================================================
-// Merge: SpringsteenConfigState
+// Merge: GatewayConfigState
 // ============================================================
-// MergeSpringsteenConfigState fills zero-valued fields in dst from src.
-func MergeSpringsteenConfigState(dst, src *SpringsteenConfigState) {
+// MergeGatewayConfigState fills zero-valued fields in dst from src.
+func MergeGatewayConfigState(dst, src *GatewayConfigState) {
 	if dst.Config == nil {
 		dst.Config = src.Config
 	}
 }
 
 // ============================================================
-// Merge: BowieConfigState
+// Merge: LetsencryptConfigState
 // ============================================================
-// MergeBowieConfigState fills zero-valued fields in dst from src.
-func MergeBowieConfigState(dst, src *BowieConfigState) {
+// MergeLetsencryptConfigState fills zero-valued fields in dst from src.
+func MergeLetsencryptConfigState(dst, src *LetsencryptConfigState) {
 	if dst.Config == nil {
 		dst.Config = src.Config
 	}
 }
 
 // ============================================================
-// Merge: GenesisConfigState
+// Merge: PolicyConfigState
 // ============================================================
-// MergeGenesisConfigState fills zero-valued fields in dst from src.
-func MergeGenesisConfigState(dst, src *GenesisConfigState) {
+// MergePolicyConfigState fills zero-valued fields in dst from src.
+func MergePolicyConfigState(dst, src *PolicyConfigState) {
 	if dst.Config == nil {
 		dst.Config = src.Config
 	}

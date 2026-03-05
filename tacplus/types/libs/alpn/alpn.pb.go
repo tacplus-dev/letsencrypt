@@ -14,7 +14,7 @@
 package alpn
 
 import (
-	_ "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/spec"
+	_ "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/spec"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -100,7 +100,7 @@ const file_libs_alpn_proto_rawDesc = "" +
 	"\x19ALPN_PROTOCOL_UNSPECIFIED\x10\x00\x12\x1c\n" +
 	"\x10ALPN_PROTOCOL_H2\x10\x01\x1a\x06\xaa\xb5\x18\x02h2\x12(\n" +
 	"\x16ALPN_PROTOCOL_HTTP_1_1\x10\x02\x1a\f\xaa\xb5\x18\bhttp/1.1\x12\x1e\n" +
-	"\x11ALPN_PROTOCOL_H2C\x10\x03\x1a\a\xaa\xb5\x18\x03h2cBQZOgitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/alpnb\x06proto3"
+	"\x11ALPN_PROTOCOL_H2C\x10\x03\x1a\a\xaa\xb5\x18\x03h2cBUZSgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/alpnb\x06proto3"
 
 var (
 	file_libs_alpn_proto_rawDescOnce sync.Once

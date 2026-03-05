@@ -119,7 +119,7 @@ const file_libs_tokencache_proto_rawDesc = "" +
 	"\x0edynamic_lookup\x18\x01 \x01(\bR\rdynamicLookup\x12)\n" +
 	"\x10lifetime_seconds\x18\x02 \x01(\x03R\x0flifetimeSeconds\x122\n" +
 	"\x15expire_unused_seconds\x18\x03 \x01(\x03R\x13expireUnusedSeconds\x128\n" +
-	"\x18refresh_interval_seconds\x18\x04 \x01(\x03R\x16refreshIntervalSecondsBWZUgitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/tokencacheb\x06proto3"
+	"\x18refresh_interval_seconds\x18\x04 \x01(\x03R\x16refreshIntervalSecondsB[ZYgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/tokencacheb\x06proto3"
 
 var (
 	file_libs_tokencache_proto_rawDescOnce sync.Once

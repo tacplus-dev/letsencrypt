@@ -3,7 +3,7 @@
 syntax = "proto3";
 
 package tokencache;
-option go_package = "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/tokencache";
+option go_package = "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/tokencache";
 
 // Config configures the JWT token cache used for authentication.
 // Controls how tokens and JWK signing keys are cached and refreshed.

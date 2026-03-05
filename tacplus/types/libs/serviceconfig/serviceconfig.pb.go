@@ -14,11 +14,11 @@
 package serviceconfig
 
 import (
-	jwk "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/jwk"
-	key "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/key"
-	logger "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/logger"
-	_ "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/spec"
-	x509 "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/x509"
+	jwk "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/jwk"
+	key "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/key"
+	logger "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/logger"
+	_ "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/spec"
+	x509 "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/x509"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
@@ -632,9 +632,9 @@ const file_libs_serviceconfig_proto_rawDesc = "" +
 	"\x03Log\x12\x16.google.protobuf.Empty\x1a\x19.serviceconfig.LogMessage0\x01\x12;\n" +
 	"\x04Ping\x12\x16.google.protobuf.Empty\x1a\x1b.serviceconfig.PingResponse\x12B\n" +
 	"\tSubscribe\x12\x16.google.protobuf.Empty\x1a\x1b.serviceconfig.ClusterState0\x01\x120\n" +
-	"\tWatchJwks\x12\x16.google.protobuf.Empty\x1a\t.jwk.Jwks0\x01B\xa0\x01\x8a\xb5\x18(\n" +
+	"\tWatchJwks\x12\x16.google.protobuf.Empty\x1a\t.jwk.Jwks0\x01B\xa4\x01\x8a\xb5\x18(\n" +
 	"\x14BOOTSTRAP_CONFIG_ENV\x12\x10BOOTSTRAP_CONFIG\x8a\xb5\x18\x16\n" +
-	"\vAUTH_ISSUER\x12\abackendZXgitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/serviceconfigb\x06proto3"
+	"\vAUTH_ISSUER\x12\abackendZ\\gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/serviceconfigb\x06proto3"
 
 var (
 	file_libs_serviceconfig_proto_rawDescOnce sync.Once

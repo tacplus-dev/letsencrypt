@@ -14,7 +14,7 @@
 package http
 
 import (
-	_ "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/spec"
+	_ "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/spec"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -141,7 +141,7 @@ const file_libs_http_proto_rawDesc = "" +
 	"\x0eMETHOD_CONNECT\x10\x80\x02\x1a\v\xaa\xb5\x18\aCONNECT\x12\x1a\n" +
 	"\vMETHOD_GRPC\x10\x80\x04\x1a\b\xaa\xb5\x18\x04GRPC\x12\x18\n" +
 	"\n" +
-	"METHOD_ANY\x10\xff\a\x1a\a\xaa\xb5\x18\x03ANYBQZOgitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/httpb\x06proto3"
+	"METHOD_ANY\x10\xff\a\x1a\a\xaa\xb5\x18\x03ANYBUZSgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/httpb\x06proto3"
 
 var (
 	file_libs_http_proto_rawDescOnce sync.Once

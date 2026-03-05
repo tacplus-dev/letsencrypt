@@ -10,7 +10,7 @@
 syntax = "proto3";
 
 package entitlement;
-option go_package = "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/entitlement";
+option go_package = "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/entitlement";
 
 // ServiceEntitlement defines what a caller is allowed to do on a target service.
 // The service_name becomes the "aud" claim in access tokens.

@@ -3,7 +3,7 @@
 syntax = "proto3";
 
 package auth;
-option go_package = "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/auth";
+option go_package = "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/auth";
 
 import "google/protobuf/any.proto";
 import "libs/token.proto";

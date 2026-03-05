@@ -14,8 +14,8 @@
 package x509
 
 import (
-	key "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/key"
-	_ "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/spec"
+	key "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/key"
+	_ "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/spec"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	structpb "google.golang.org/protobuf/types/known/structpb"
@@ -518,7 +518,7 @@ const file_libs_x509_proto_rawDesc = "" +
 	"\x123\n" +
 	"/X509_EXT_KEY_USAGE_NETSCAPE_SERVER_GATED_CRYPTO\x10\v\x128\n" +
 	"4X509_EXT_KEY_USAGE_MICROSOFT_COMMERCIAL_CODE_SIGNING\x10\f\x124\n" +
-	"0X509_EXT_KEY_USAGE_MICROSOFT_KERNEL_CODE_SIGNING\x10\rBQZOgitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/x509b\x06proto3"
+	"0X509_EXT_KEY_USAGE_MICROSOFT_KERNEL_CODE_SIGNING\x10\rBUZSgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/x509b\x06proto3"
 
 var (
 	file_libs_x509_proto_rawDescOnce sync.Once

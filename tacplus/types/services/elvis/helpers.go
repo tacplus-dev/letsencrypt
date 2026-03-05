@@ -21,17 +21,17 @@ import (
 	"strings"
 
 	"github.com/pelletier/go-toml/v2"
-	cloudidentity "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/cloudidentity"
-	entitlement "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/entitlement"
-	protoerrors "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/errors"
-	healthreport "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/healthreport"
-	host "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/host"
-	jwk "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/jwk"
-	logger "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/logger"
-	outputformat "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/outputformat"
-	x509 "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/x509"
-	config_holder "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/services/config_holder"
-	presley "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/services/presley"
+	cloudidentity "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/cloudidentity"
+	entitlement "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/entitlement"
+	protoerrors "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/errors"
+	healthreport "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/healthreport"
+	host "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/host"
+	jwk "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/jwk"
+	logger "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/logger"
+	outputformat "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/outputformat"
+	x509 "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/x509"
+	config_holder "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/config_holder"
+	presley "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/presley"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 	"gopkg.in/yaml.v3"
@@ -36383,6 +36383,142 @@ func ClusterStateDefaults(v *ClusterState) {
 	}
 	if v.FrontendConfig != nil {
 		ConfigDefaults(v.FrontendConfig)
+	}
+}
+
+// ============================================================
+// TypeUndefaults: BootstrapConfig
+// ============================================================
+// BootstrapConfigUndefaults resets fields that match their default values back to zero.
+// Use before persisting to store only explicit user overrides.
+func BootstrapConfigUndefaults(v *BootstrapConfig) {
+	if v.PartitionCount == int32(DefaultPartitionCount) {
+		v.PartitionCount = 0
+	}
+	if v.PersistenceDir == DefaultPersistenceDir {
+		v.PersistenceDir = ""
+	}
+	if v.RaftPort == int32(DefaultRaftPort) {
+		v.RaftPort = 0
+	}
+	if v.Network != nil {
+		NetworkConfigUndefaults(v.Network)
+	}
+	if v.CpSubsystem != nil {
+		CPSubsystemConfigUndefaults(v.CpSubsystem)
+	}
+}
+
+// ============================================================
+// TypeUndefaults: NetworkConfig
+// ============================================================
+// NetworkConfigUndefaults resets fields that match their default values back to zero.
+// Use before persisting to store only explicit user overrides.
+func NetworkConfigUndefaults(v *NetworkConfig) {
+	if v.ConnectTimeoutSeconds == DefaultConnectTimeoutSeconds {
+		v.ConnectTimeoutSeconds = 0
+	}
+	if v.HeartbeatIntervalSeconds == DefaultHeartbeatIntervalSeconds {
+		v.HeartbeatIntervalSeconds = 0
+	}
+	if v.HeartbeatTimeoutSeconds == DefaultHeartbeatTimeoutSeconds {
+		v.HeartbeatTimeoutSeconds = 0
+	}
+}
+
+// ============================================================
+// TypeUndefaults: CPSubsystemConfig
+// ============================================================
+// CPSubsystemConfigUndefaults resets fields that match their default values back to zero.
+// Use before persisting to store only explicit user overrides.
+func CPSubsystemConfigUndefaults(v *CPSubsystemConfig) {
+	if v.CpMemberCount == int32(DefaultCpMemberCount) {
+		v.CpMemberCount = 0
+	}
+	if v.SessionTimeoutSeconds == DefaultSessionTimeoutSeconds {
+		v.SessionTimeoutSeconds = 0
+	}
+	if v.SessionHeartbeatIntervalSeconds == DefaultSessionHeartbeatIntervalSeconds {
+		v.SessionHeartbeatIntervalSeconds = 0
+	}
+	if v.MissingCpMemberAutoRemovalSeconds == DefaultMissingCpMemberAutoRemovalSeconds {
+		v.MissingCpMemberAutoRemovalSeconds = 0
+	}
+}
+
+// ============================================================
+// TypeUndefaults: RateLimitConfig
+// ============================================================
+// RateLimitConfigUndefaults resets fields that match their default values back to zero.
+// Use before persisting to store only explicit user overrides.
+func RateLimitConfigUndefaults(v *RateLimitConfig) {
+	if v.PollingRate == DefaultPollingRate {
+		v.PollingRate = 0.0
+	}
+	if v.UnaryRate == DefaultUnaryRate {
+		v.UnaryRate = 0.0
+	}
+}
+
+// ============================================================
+// TypeUndefaults: SecurityConfig
+// ============================================================
+// SecurityConfigUndefaults resets fields that match their default values back to zero.
+// Use before persisting to store only explicit user overrides.
+func SecurityConfigUndefaults(v *SecurityConfig) {
+	if v.Audience == DefaultAudience {
+		v.Audience = ""
+	}
+	if v.TokenTtlSeconds == DefaultTokenTtlSeconds {
+		v.TokenTtlSeconds = 0
+	}
+}
+
+// ============================================================
+// TypeUndefaults: TokenExchangerConfig
+// ============================================================
+// TokenExchangerConfigUndefaults resets fields that match their default values back to zero.
+// Use before persisting to store only explicit user overrides.
+func TokenExchangerConfigUndefaults(v *TokenExchangerConfig) {
+	if v.RefreshAudience == DefaultRefreshAudience {
+		v.RefreshAudience = ""
+	}
+	if v.KeyRotationIntervalSeconds == DefaultKeyRotationIntervalSeconds {
+		v.KeyRotationIntervalSeconds = 0
+	}
+	if v.DefaultTokenExpirySeconds == DefaultDefaultTokenExpirySeconds {
+		v.DefaultTokenExpirySeconds = 0
+	}
+}
+
+// ============================================================
+// TypeUndefaults: Config
+// ============================================================
+// ConfigUndefaults resets fields that match their default values back to zero.
+// Use before persisting to store only explicit user overrides.
+func ConfigUndefaults(v *Config) {
+	if v.RateLimit != nil {
+		RateLimitConfigUndefaults(v.RateLimit)
+	}
+	if v.Security != nil {
+		SecurityConfigUndefaults(v.Security)
+	}
+	if v.TokenExchanger != nil {
+		TokenExchangerConfigUndefaults(v.TokenExchanger)
+	}
+}
+
+// ============================================================
+// TypeUndefaults: ClusterState
+// ============================================================
+// ClusterStateUndefaults resets fields that match their default values back to zero.
+// Use before persisting to store only explicit user overrides.
+func ClusterStateUndefaults(v *ClusterState) {
+	if v.BootstrapConfig != nil {
+		BootstrapConfigUndefaults(v.BootstrapConfig)
+	}
+	if v.FrontendConfig != nil {
+		ConfigUndefaults(v.FrontendConfig)
 	}
 }
 

@@ -9,13 +9,13 @@
 // If changes are needed, update the tacplus compiler at:
 // gitlab.com/secondstarcavalier/controlplane/services/tacplus
 //
-// Source: services/genesis.proto
+// Source: services/letsencrypt.proto
 
-package genesis
+package letsencrypt
 
 import (
-	_ "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/spec"
-	x509 "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/x509"
+	_ "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/spec"
+	x509 "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/x509"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
@@ -38,7 +38,7 @@ type Config struct {
 	Fqdn string `protobuf:"bytes,1,opt,name=fqdn,proto3" json:"fqdn,omitempty"`
 	// lets_encrypt_email is the email address for Let's Encrypt account
 	// registration and certificate expiration notifications.
-	// If empty, genesis will use "admin@<fqdn>".
+	// If empty, letsencrypt will use "admin@<fqdn>".
 	LetsEncryptEmail string `protobuf:"bytes,2,opt,name=lets_encrypt_email,json=letsEncryptEmail,proto3" json:"lets_encrypt_email,omitempty"`
 	// http_listen is the address to bind the HTTP server for ACME HTTP-01
 	// challenge responses. Must be reachable on port 80 from the internet.
@@ -53,7 +53,7 @@ type Config struct {
 
 func (x *Config) Reset() {
 	*x = Config{}
-	mi := &file_services_genesis_proto_msgTypes[0]
+	mi := &file_services_letsencrypt_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -65,7 +65,7 @@ func (x *Config) String() string {
 func (*Config) ProtoMessage() {}
 
 func (x *Config) ProtoReflect() protoreflect.Message {
-	mi := &file_services_genesis_proto_msgTypes[0]
+	mi := &file_services_letsencrypt_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -78,7 +78,7 @@ func (x *Config) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Config.ProtoReflect.Descriptor instead.
 func (*Config) Descriptor() ([]byte, []int) {
-	return file_services_genesis_proto_rawDescGZIP(), []int{0}
+	return file_services_letsencrypt_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *Config) GetFqdn() string {
@@ -109,33 +109,33 @@ func (x *Config) GetRenewalCheckIntervalSeconds() int64 {
 	return 0
 }
 
-// GenesisState holds the Let's Encrypt certificate and CertMagic storage
-// state. Springsteen watches this to obtain the TLS certificate for its
+// LetsEncryptState holds the Let's Encrypt certificate and CertMagic storage
+// state. Gateway watches this to obtain the TLS certificate for its
 // public-facing HTTPS listener.
-type GenesisState struct {
+type LetsEncryptState struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// cert_data is the singleton holding the current certificate and
 	// CertMagic internal state. Written atomically on each renewal.
-	CertData      *GenesisCertData `protobuf:"bytes,1,opt,name=cert_data,json=certData,proto3" json:"cert_data,omitempty"`
+	CertData      *LetsEncryptCertData `protobuf:"bytes,1,opt,name=cert_data,json=certData,proto3" json:"cert_data,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GenesisState) Reset() {
-	*x = GenesisState{}
-	mi := &file_services_genesis_proto_msgTypes[1]
+func (x *LetsEncryptState) Reset() {
+	*x = LetsEncryptState{}
+	mi := &file_services_letsencrypt_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GenesisState) String() string {
+func (x *LetsEncryptState) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GenesisState) ProtoMessage() {}
+func (*LetsEncryptState) ProtoMessage() {}
 
-func (x *GenesisState) ProtoReflect() protoreflect.Message {
-	mi := &file_services_genesis_proto_msgTypes[1]
+func (x *LetsEncryptState) ProtoReflect() protoreflect.Message {
+	mi := &file_services_letsencrypt_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -146,29 +146,29 @@ func (x *GenesisState) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GenesisState.ProtoReflect.Descriptor instead.
-func (*GenesisState) Descriptor() ([]byte, []int) {
-	return file_services_genesis_proto_rawDescGZIP(), []int{1}
+// Deprecated: Use LetsEncryptState.ProtoReflect.Descriptor instead.
+func (*LetsEncryptState) Descriptor() ([]byte, []int) {
+	return file_services_letsencrypt_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *GenesisState) GetCertData() *GenesisCertData {
+func (x *LetsEncryptState) GetCertData() *LetsEncryptCertData {
 	if x != nil {
 		return x.CertData
 	}
 	return nil
 }
 
-// GenesisCertData holds the Let's Encrypt certificate, CertMagic state,
+// LetsEncryptCertData holds the Let's Encrypt certificate, CertMagic state,
 // and metadata. Written as a single atomic unit on each certificate
 // issuance or renewal.
-type GenesisCertData struct {
+type LetsEncryptCertData struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// tls_cert is the current Let's Encrypt certificate and private key.
-	// Springsteen watches this to serve HTTPS traffic.
+	// Gateway watches this to serve HTTPS traffic.
 	TlsCert *x509.X509CertPair `protobuf:"bytes,1,opt,name=tls_cert,json=tlsCert,proto3" json:"tls_cert,omitempty"`
 	// certmagic_state is the serialized CertMagic storage tree. Contains
 	// ACME account data, certificate metadata, and cached certificates.
-	// Genesis reads this on startup to restore state without re-provisioning.
+	// LetsEncrypt reads this on startup to restore state without re-provisioning.
 	CertmagicState *CertMagicState `protobuf:"bytes,2,opt,name=certmagic_state,json=certmagicState,proto3" json:"certmagic_state,omitempty"`
 	// last_renewed is the Unix epoch timestamp (seconds) of the last
 	// successful certificate renewal.
@@ -180,21 +180,21 @@ type GenesisCertData struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GenesisCertData) Reset() {
-	*x = GenesisCertData{}
-	mi := &file_services_genesis_proto_msgTypes[2]
+func (x *LetsEncryptCertData) Reset() {
+	*x = LetsEncryptCertData{}
+	mi := &file_services_letsencrypt_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GenesisCertData) String() string {
+func (x *LetsEncryptCertData) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GenesisCertData) ProtoMessage() {}
+func (*LetsEncryptCertData) ProtoMessage() {}
 
-func (x *GenesisCertData) ProtoReflect() protoreflect.Message {
-	mi := &file_services_genesis_proto_msgTypes[2]
+func (x *LetsEncryptCertData) ProtoReflect() protoreflect.Message {
+	mi := &file_services_letsencrypt_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -205,40 +205,40 @@ func (x *GenesisCertData) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GenesisCertData.ProtoReflect.Descriptor instead.
-func (*GenesisCertData) Descriptor() ([]byte, []int) {
-	return file_services_genesis_proto_rawDescGZIP(), []int{2}
+// Deprecated: Use LetsEncryptCertData.ProtoReflect.Descriptor instead.
+func (*LetsEncryptCertData) Descriptor() ([]byte, []int) {
+	return file_services_letsencrypt_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *GenesisCertData) GetTlsCert() *x509.X509CertPair {
+func (x *LetsEncryptCertData) GetTlsCert() *x509.X509CertPair {
 	if x != nil {
 		return x.TlsCert
 	}
 	return nil
 }
 
-func (x *GenesisCertData) GetCertmagicState() *CertMagicState {
+func (x *LetsEncryptCertData) GetCertmagicState() *CertMagicState {
 	if x != nil {
 		return x.CertmagicState
 	}
 	return nil
 }
 
-func (x *GenesisCertData) GetLastRenewed() int64 {
+func (x *LetsEncryptCertData) GetLastRenewed() int64 {
 	if x != nil {
 		return x.LastRenewed
 	}
 	return 0
 }
 
-func (x *GenesisCertData) GetFqdn() string {
+func (x *LetsEncryptCertData) GetFqdn() string {
 	if x != nil {
 		return x.Fqdn
 	}
 	return ""
 }
 
-func (x *GenesisCertData) GetLock() *Lock {
+func (x *LetsEncryptCertData) GetLock() *Lock {
 	if x != nil {
 		return x.Lock
 	}
@@ -260,7 +260,7 @@ type CertMagicState struct {
 
 func (x *CertMagicState) Reset() {
 	*x = CertMagicState{}
-	mi := &file_services_genesis_proto_msgTypes[3]
+	mi := &file_services_letsencrypt_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -272,7 +272,7 @@ func (x *CertMagicState) String() string {
 func (*CertMagicState) ProtoMessage() {}
 
 func (x *CertMagicState) ProtoReflect() protoreflect.Message {
-	mi := &file_services_genesis_proto_msgTypes[3]
+	mi := &file_services_letsencrypt_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -285,7 +285,7 @@ func (x *CertMagicState) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CertMagicState.ProtoReflect.Descriptor instead.
 func (*CertMagicState) Descriptor() ([]byte, []int) {
-	return file_services_genesis_proto_rawDescGZIP(), []int{3}
+	return file_services_letsencrypt_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *CertMagicState) GetIsDir() bool {
@@ -327,7 +327,7 @@ type Lock struct {
 
 func (x *Lock) Reset() {
 	*x = Lock{}
-	mi := &file_services_genesis_proto_msgTypes[4]
+	mi := &file_services_letsencrypt_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -339,7 +339,7 @@ func (x *Lock) String() string {
 func (*Lock) ProtoMessage() {}
 
 func (x *Lock) ProtoReflect() protoreflect.Message {
-	mi := &file_services_genesis_proto_msgTypes[4]
+	mi := &file_services_letsencrypt_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -352,7 +352,7 @@ func (x *Lock) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Lock.ProtoReflect.Descriptor instead.
 func (*Lock) Descriptor() ([]byte, []int) {
-	return file_services_genesis_proto_rawDescGZIP(), []int{4}
+	return file_services_letsencrypt_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *Lock) GetId() string {
@@ -377,7 +377,7 @@ type MapEmpty struct {
 
 func (x *MapEmpty) Reset() {
 	*x = MapEmpty{}
-	mi := &file_services_genesis_proto_msgTypes[5]
+	mi := &file_services_letsencrypt_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -389,7 +389,7 @@ func (x *MapEmpty) String() string {
 func (*MapEmpty) ProtoMessage() {}
 
 func (x *MapEmpty) ProtoReflect() protoreflect.Message {
-	mi := &file_services_genesis_proto_msgTypes[5]
+	mi := &file_services_letsencrypt_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -402,84 +402,84 @@ func (x *MapEmpty) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MapEmpty.ProtoReflect.Descriptor instead.
 func (*MapEmpty) Descriptor() ([]byte, []int) {
-	return file_services_genesis_proto_rawDescGZIP(), []int{5}
+	return file_services_letsencrypt_proto_rawDescGZIP(), []int{5}
 }
 
-var File_services_genesis_proto protoreflect.FileDescriptor
+var File_services_letsencrypt_proto protoreflect.FileDescriptor
 
-const file_services_genesis_proto_rawDesc = "" +
+const file_services_letsencrypt_proto_rawDesc = "" +
 	"\n" +
-	"\x16services/genesis.proto\x12\agenesis\x1a\x0flibs/spec.proto\x1a\x0flibs/x509.proto\x1a\x1bgoogle/protobuf/empty.proto\"\xd7\x01\n" +
+	"\x1aservices/letsencrypt.proto\x12\vletsencrypt\x1a\x0flibs/spec.proto\x1a\x0flibs/x509.proto\x1a\x1bgoogle/protobuf/empty.proto\"\xdb\x01\n" +
 	"\x06Config\x12\x18\n" +
 	"\x04fqdn\x18\x01 \x01(\tB\x04\x88\xa6\x1d\x01R\x04fqdn\x12,\n" +
 	"\x12lets_encrypt_email\x18\x02 \x01(\tR\x10letsEncryptEmail\x12(\n" +
 	"\vhttp_listen\x18\x03 \x01(\tB\a\x8a\xa8\x1d\x03:80R\n" +
 	"httpListen\x12J\n" +
-	"\x1erenewal_check_interval_seconds\x18\x04 \x01(\x03B\x05\x90\xa8\x1d\x90\x1cR\x1brenewalCheckIntervalSeconds:\x0fҨ\x1d\v\n" +
-	"\agenesis\x10\t\"a\n" +
-	"\fGenesisState\x12;\n" +
-	"\tcert_data\x18\x01 \x01(\v2\x18.genesis.GenesisCertDataB\x04\xe0\xb5\x18\x01R\bcertData:\x14\x9a\xa8\x1d\fGenesisState\xa0\xa8\x1d\x01\"\xdc\x01\n" +
-	"\x0fGenesisCertData\x12-\n" +
-	"\btls_cert\x18\x01 \x01(\v2\x12.x509.X509CertPairR\atlsCert\x12@\n" +
-	"\x0fcertmagic_state\x18\x02 \x01(\v2\x17.genesis.CertMagicStateR\x0ecertmagicState\x12!\n" +
+	"\x1erenewal_check_interval_seconds\x18\x04 \x01(\x03B\x05\x90\xa8\x1d\x90\x1cR\x1brenewalCheckIntervalSeconds:\x13Ҩ\x1d\x0f\n" +
+	"\vletsencrypt\x10\t\"q\n" +
+	"\x10LetsEncryptState\x12C\n" +
+	"\tcert_data\x18\x01 \x01(\v2 .letsencrypt.LetsEncryptCertDataB\x04\xe0\xb5\x18\x01R\bcertData:\x18\x9a\xa8\x1d\x10LetsEncryptState\xa0\xa8\x1d\x01\"\xe8\x01\n" +
+	"\x13LetsEncryptCertData\x12-\n" +
+	"\btls_cert\x18\x01 \x01(\v2\x12.x509.X509CertPairR\atlsCert\x12D\n" +
+	"\x0fcertmagic_state\x18\x02 \x01(\v2\x1b.letsencrypt.CertMagicStateR\x0ecertmagicState\x12!\n" +
 	"\flast_renewed\x18\x03 \x01(\x03R\vlastRenewed\x12\x12\n" +
-	"\x04fqdn\x18\x04 \x01(\tR\x04fqdn\x12!\n" +
-	"\x04lock\x18\x05 \x01(\v2\r.genesis.LockR\x04lock\"\xf1\x01\n" +
+	"\x04fqdn\x18\x04 \x01(\tR\x04fqdn\x12%\n" +
+	"\x04lock\x18\x05 \x01(\v2\x11.letsencrypt.LockR\x04lock\"\xf9\x01\n" +
 	"\x0eCertMagicState\x12\x15\n" +
 	"\x06is_dir\x18\x01 \x01(\bR\x05isDir\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\fR\x05value\x12\x19\n" +
-	"\bmod_time\x18\x03 \x01(\x03R\amodTime\x12A\n" +
-	"\bchildren\x18\x04 \x03(\v2%.genesis.CertMagicState.ChildrenEntryR\bchildren\x1aT\n" +
+	"\bmod_time\x18\x03 \x01(\x03R\amodTime\x12E\n" +
+	"\bchildren\x18\x04 \x03(\v2).letsencrypt.CertMagicState.ChildrenEntryR\bchildren\x1aX\n" +
 	"\rChildrenEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12-\n" +
-	"\x05value\x18\x02 \x01(\v2\x17.genesis.CertMagicStateR\x05value:\x028\x01\"0\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x121\n" +
+	"\x05value\x18\x02 \x01(\v2\x1b.letsencrypt.CertMagicStateR\x05value:\x028\x01\"0\n" +
 	"\x04Lock\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
 	"\acounter\x18\x02 \x01(\x03R\acounter\"\n" +
 	"\n" +
-	"\bMapEmpty2\xe5\x01\n" +
-	"\x1aGenesisStateBackendService\x12?\n" +
-	"\vGetCertData\x12\x16.google.protobuf.Empty\x1a\x18.genesis.GenesisCertData\x12A\n" +
-	"\vSetCertData\x12\x18.genesis.GenesisCertData\x1a\x18.genesis.GenesisCertData\x12C\n" +
-	"\rWatchCertData\x12\x16.google.protobuf.Empty\x1a\x18.genesis.GenesisCertData0\x01BXZVgitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/services/genesisb\x06proto3"
+	"\bMapEmpty2\x89\x02\n" +
+	"\x1eLetsEncryptStateBackendService\x12G\n" +
+	"\vGetCertData\x12\x16.google.protobuf.Empty\x1a .letsencrypt.LetsEncryptCertData\x12Q\n" +
+	"\vSetCertData\x12 .letsencrypt.LetsEncryptCertData\x1a .letsencrypt.LetsEncryptCertData\x12K\n" +
+	"\rWatchCertData\x12\x16.google.protobuf.Empty\x1a .letsencrypt.LetsEncryptCertData0\x01B`Z^gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/letsencryptb\x06proto3"
 
 var (
-	file_services_genesis_proto_rawDescOnce sync.Once
-	file_services_genesis_proto_rawDescData []byte
+	file_services_letsencrypt_proto_rawDescOnce sync.Once
+	file_services_letsencrypt_proto_rawDescData []byte
 )
 
-func file_services_genesis_proto_rawDescGZIP() []byte {
-	file_services_genesis_proto_rawDescOnce.Do(func() {
-		file_services_genesis_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_services_genesis_proto_rawDesc), len(file_services_genesis_proto_rawDesc)))
+func file_services_letsencrypt_proto_rawDescGZIP() []byte {
+	file_services_letsencrypt_proto_rawDescOnce.Do(func() {
+		file_services_letsencrypt_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_services_letsencrypt_proto_rawDesc), len(file_services_letsencrypt_proto_rawDesc)))
 	})
-	return file_services_genesis_proto_rawDescData
+	return file_services_letsencrypt_proto_rawDescData
 }
 
-var file_services_genesis_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
-var file_services_genesis_proto_goTypes = []any{
-	(*Config)(nil),            // 0: genesis.Config
-	(*GenesisState)(nil),      // 1: genesis.GenesisState
-	(*GenesisCertData)(nil),   // 2: genesis.GenesisCertData
-	(*CertMagicState)(nil),    // 3: genesis.CertMagicState
-	(*Lock)(nil),              // 4: genesis.Lock
-	(*MapEmpty)(nil),          // 5: genesis.MapEmpty
-	nil,                       // 6: genesis.CertMagicState.ChildrenEntry
-	(*x509.X509CertPair)(nil), // 7: x509.X509CertPair
-	(*emptypb.Empty)(nil),     // 8: google.protobuf.Empty
+var file_services_letsencrypt_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_services_letsencrypt_proto_goTypes = []any{
+	(*Config)(nil),              // 0: letsencrypt.Config
+	(*LetsEncryptState)(nil),    // 1: letsencrypt.LetsEncryptState
+	(*LetsEncryptCertData)(nil), // 2: letsencrypt.LetsEncryptCertData
+	(*CertMagicState)(nil),      // 3: letsencrypt.CertMagicState
+	(*Lock)(nil),                // 4: letsencrypt.Lock
+	(*MapEmpty)(nil),            // 5: letsencrypt.MapEmpty
+	nil,                         // 6: letsencrypt.CertMagicState.ChildrenEntry
+	(*x509.X509CertPair)(nil),   // 7: x509.X509CertPair
+	(*emptypb.Empty)(nil),       // 8: google.protobuf.Empty
 }
-var file_services_genesis_proto_depIdxs = []int32{
-	2, // 0: genesis.GenesisState.cert_data:type_name -> genesis.GenesisCertData
-	7, // 1: genesis.GenesisCertData.tls_cert:type_name -> x509.X509CertPair
-	3, // 2: genesis.GenesisCertData.certmagic_state:type_name -> genesis.CertMagicState
-	4, // 3: genesis.GenesisCertData.lock:type_name -> genesis.Lock
-	6, // 4: genesis.CertMagicState.children:type_name -> genesis.CertMagicState.ChildrenEntry
-	3, // 5: genesis.CertMagicState.ChildrenEntry.value:type_name -> genesis.CertMagicState
-	8, // 6: genesis.GenesisStateBackendService.GetCertData:input_type -> google.protobuf.Empty
-	2, // 7: genesis.GenesisStateBackendService.SetCertData:input_type -> genesis.GenesisCertData
-	8, // 8: genesis.GenesisStateBackendService.WatchCertData:input_type -> google.protobuf.Empty
-	2, // 9: genesis.GenesisStateBackendService.GetCertData:output_type -> genesis.GenesisCertData
-	2, // 10: genesis.GenesisStateBackendService.SetCertData:output_type -> genesis.GenesisCertData
-	2, // 11: genesis.GenesisStateBackendService.WatchCertData:output_type -> genesis.GenesisCertData
+var file_services_letsencrypt_proto_depIdxs = []int32{
+	2, // 0: letsencrypt.LetsEncryptState.cert_data:type_name -> letsencrypt.LetsEncryptCertData
+	7, // 1: letsencrypt.LetsEncryptCertData.tls_cert:type_name -> x509.X509CertPair
+	3, // 2: letsencrypt.LetsEncryptCertData.certmagic_state:type_name -> letsencrypt.CertMagicState
+	4, // 3: letsencrypt.LetsEncryptCertData.lock:type_name -> letsencrypt.Lock
+	6, // 4: letsencrypt.CertMagicState.children:type_name -> letsencrypt.CertMagicState.ChildrenEntry
+	3, // 5: letsencrypt.CertMagicState.ChildrenEntry.value:type_name -> letsencrypt.CertMagicState
+	8, // 6: letsencrypt.LetsEncryptStateBackendService.GetCertData:input_type -> google.protobuf.Empty
+	2, // 7: letsencrypt.LetsEncryptStateBackendService.SetCertData:input_type -> letsencrypt.LetsEncryptCertData
+	8, // 8: letsencrypt.LetsEncryptStateBackendService.WatchCertData:input_type -> google.protobuf.Empty
+	2, // 9: letsencrypt.LetsEncryptStateBackendService.GetCertData:output_type -> letsencrypt.LetsEncryptCertData
+	2, // 10: letsencrypt.LetsEncryptStateBackendService.SetCertData:output_type -> letsencrypt.LetsEncryptCertData
+	2, // 11: letsencrypt.LetsEncryptStateBackendService.WatchCertData:output_type -> letsencrypt.LetsEncryptCertData
 	9, // [9:12] is the sub-list for method output_type
 	6, // [6:9] is the sub-list for method input_type
 	6, // [6:6] is the sub-list for extension type_name
@@ -487,26 +487,26 @@ var file_services_genesis_proto_depIdxs = []int32{
 	0, // [0:6] is the sub-list for field type_name
 }
 
-func init() { file_services_genesis_proto_init() }
-func file_services_genesis_proto_init() {
-	if File_services_genesis_proto != nil {
+func init() { file_services_letsencrypt_proto_init() }
+func file_services_letsencrypt_proto_init() {
+	if File_services_letsencrypt_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_services_genesis_proto_rawDesc), len(file_services_genesis_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_services_letsencrypt_proto_rawDesc), len(file_services_letsencrypt_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_services_genesis_proto_goTypes,
-		DependencyIndexes: file_services_genesis_proto_depIdxs,
-		MessageInfos:      file_services_genesis_proto_msgTypes,
+		GoTypes:           file_services_letsencrypt_proto_goTypes,
+		DependencyIndexes: file_services_letsencrypt_proto_depIdxs,
+		MessageInfos:      file_services_letsencrypt_proto_msgTypes,
 	}.Build()
-	File_services_genesis_proto = out.File
-	file_services_genesis_proto_goTypes = nil
-	file_services_genesis_proto_depIdxs = nil
+	File_services_letsencrypt_proto = out.File
+	file_services_letsencrypt_proto_goTypes = nil
+	file_services_letsencrypt_proto_depIdxs = nil
 }

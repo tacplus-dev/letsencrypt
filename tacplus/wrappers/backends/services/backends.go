@@ -11,14 +11,14 @@ import (
 	"context"
 	"fmt"
 
-	"gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/libs/servicemanager"
-	genesis_state_backend "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/wrappers/backends/services/genesis_state"
+	"gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/libs/servicemanager"
+	lets_encrypt_state_backend "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/wrappers/backends/services/lets_encrypt_state"
 )
 
 // Backends provides typed access to per-service backend clients in the services group.
 type Backends struct {
-	sc            *servicemanager.ServiceManager
-	genesis_state *genesis_state_backend.Backend
+	sc                 *servicemanager.ServiceManager
+	lets_encrypt_state *lets_encrypt_state_backend.Backend
 }
 
 // NewBackends creates backend clients for the services group from a shared Backend.
@@ -27,10 +27,10 @@ func NewBackends(ctx context.Context, sc *servicemanager.ServiceManager,
 	var err error
 	s := &Backends{sc: sc}
 
-	s.genesis_state, err = genesis_state_backend.NewBackend(ctx, sc)
+	s.lets_encrypt_state, err = lets_encrypt_state_backend.NewBackend(ctx, sc)
 	if err != nil {
 		s.Close()
-		return nil, fmt.Errorf("failed to create genesis_state backend client: %w", err)
+		return nil, fmt.Errorf("failed to create lets_encrypt_state backend client: %w", err)
 	}
 
 	return s, nil
@@ -38,12 +38,12 @@ func NewBackends(ctx context.Context, sc *servicemanager.ServiceManager,
 
 // Close shuts down all per-service backend clients in this group.
 func (s *Backends) Close() {
-	if s.genesis_state != nil {
-		s.genesis_state.Close()
+	if s.lets_encrypt_state != nil {
+		s.lets_encrypt_state.Close()
 	}
 }
 
-// GenesisState returns the Backend.
-func (s *Backends) GenesisState() *genesis_state_backend.Backend {
-	return s.genesis_state
+// LetsEncryptState returns the Backend.
+func (s *Backends) LetsEncryptState() *lets_encrypt_state_backend.Backend {
+	return s.lets_encrypt_state
 }

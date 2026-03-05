@@ -14,8 +14,8 @@
 package httpserver
 
 import (
-	_ "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/spec"
-	x509 "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/x509"
+	_ "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/spec"
+	x509 "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/x509"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -509,8 +509,8 @@ const file_libs_httpserver_proto_rawDesc = "" +
 	"\x15SERVER_MODE_UNDEFINED\x10\x00\x12\x1c\n" +
 	"\x18SERVER_MODE_LETS_ENCRYPT\x10\x01\x12\x14\n" +
 	"\x10SERVER_MODE_CERT\x10\x02\x12\x16\n" +
-	"\x12SERVER_MODE_NO_TLS\x10\x03Bv\x8a\xb5\x18\x1b\n" +
-	"\x11PATH_HEALTH_CHECK\x12\x06healthZUgitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/httpserverb\x06proto3"
+	"\x12SERVER_MODE_NO_TLS\x10\x03Bz\x8a\xb5\x18\x1b\n" +
+	"\x11PATH_HEALTH_CHECK\x12\x06healthZYgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/httpserverb\x06proto3"
 
 var (
 	file_libs_httpserver_proto_rawDescOnce sync.Once

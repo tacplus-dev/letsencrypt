@@ -12,8 +12,8 @@ import (
 	"github.com/caddyserver/certmagic"
 	"google.golang.org/protobuf/proto"
 
-	webserverProto "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/httpserver"
-	protoerrors "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/errors"
+	webserverProto "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/httpserver"
+	protoerrors "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/errors"
 )
 
 // Storage implements certmagic.Storage interface and bridges to the Callback interface.

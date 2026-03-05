@@ -12,7 +12,7 @@
 syntax = "proto3";
 
 package jwkview;
-option go_package = "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/jwkview";
+option go_package = "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/jwkview";
 
 import "libs/jwk.proto";
 import "google/protobuf/empty.proto";

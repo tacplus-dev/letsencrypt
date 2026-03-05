@@ -16,8 +16,8 @@ import (
 	"errors"
 	"fmt"
 
-	"google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // ========================================
@@ -35,16 +35,15 @@ func (e *Error) Error() string {
 	return e.Message
 }
 
-// GRPCStatus returns the gRPC status for error conversion
+// GRPCStatus returns the gRPC status for error conversion.
+// Returns *status.Status from google.golang.org/grpc/status so that
+// the gRPC framework (and grpc-gateway) can extract the correct error code
+// and map it to the proper HTTP status (e.g. Unauthenticated → 401).
 func (e *Error) GRPCStatus() *status.Status {
 	if e == nil {
 		return nil
 	}
-	return &status.Status{
-		Code:    e.Code,
-		Message: e.Message,
-		Details: e.Details,
-	}
+	return status.New(codes.Code(e.Code), e.Message)
 }
 
 // Unwrap implements the error unwrapping interface

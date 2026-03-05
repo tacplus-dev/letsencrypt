@@ -11,8 +11,8 @@ import (
 	"sync"
 	"time"
 
-	healthreport_pb "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/healthreport"
-	host_pb "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/host"
+	healthreport_pb "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/healthreport"
+	host_pb "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/host"
 	"go.uber.org/zap"
 )
 

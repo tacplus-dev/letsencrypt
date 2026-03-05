@@ -14,7 +14,7 @@
 package jwkview
 
 import (
-	jwk "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/jwk"
+	jwk "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/jwk"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
@@ -187,7 +187,7 @@ const file_libs_jwkview_proto_rawDesc = "" +
 	"\x05found\x18\x02 \x01(\bR\x05found2\x9a\x01\n" +
 	"\x1bJwkVerifyingKeysViewService\x12;\n" +
 	"\x05Watch\x12\x16.google.protobuf.Empty\x1a\x18.jwkview.JwkViewResponse0\x01\x12>\n" +
-	"\x03Get\x12\x1a.jwkview.JwkViewGetRequest\x1a\x1b.jwkview.JwkViewGetResponseBTZRgitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/jwkviewb\x06proto3"
+	"\x03Get\x12\x1a.jwkview.JwkViewGetRequest\x1a\x1b.jwkview.JwkViewGetResponseBXZVgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/jwkviewb\x06proto3"
 
 var (
 	file_libs_jwkview_proto_rawDescOnce sync.Once

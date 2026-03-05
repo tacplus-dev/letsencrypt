@@ -22,7 +22,7 @@
 syntax = "proto3";
 
 package presley;
-option go_package = "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/services/presley";
+option go_package = "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/presley";
 
 // ============================================================================
 // Cluster Info
@@ -162,10 +162,10 @@ message AdminGraphInfo {
 // on a single elvis node. Published periodically by the security interceptor.
 // Keyed by composite id "service_id@node_id".
 message AdminServiceConnection {
-  // Composite key: "service:fleetwood@node-uuid"
+  // Composite key: "service:sentinel@node-uuid"
   string id = 1;
 
-  // Service identity from token sub claim: "service:fleetwood"
+  // Service identity from token sub claim: "service:sentinel"
   string service_id = 2;
 
   // Node this connection is on
@@ -388,6 +388,12 @@ message AdminMapStats {
 
   // State root that owns this map: "ClusterState"
   string state_root = 25;
+
+  // Consistency model: "atomic" or "convergent"
+  string consistency = 26;
+
+  // Whether persistence is enabled for this boundary
+  bool persistence = 27;
 }
 
 // ============================================================================
@@ -635,10 +641,10 @@ message AdminTopicSubscriber {
 // Published per-active-watch in ClusterState.watch_health.
 // Keyed by watch_id (unique per stream).
 message AdminWatchHealth {
-  // Unique watch identifier: "service:fleetwood@node-uuid#WatchNodeMetrics#1"
+  // Unique watch identifier: "service:sentinel@node-uuid#WatchNodeMetrics#1"
   string watch_id = 1;
 
-  // Service that opened this watch: "service:fleetwood"
+  // Service that opened this watch: "service:sentinel"
   string service_id = 2;
 
   // Node serving this watch stream
@@ -723,7 +729,7 @@ message AdminMutationRate {
   // Total deletes
   int64 delete_count = 10;
 
-  // Per-service mutation counts: "service:fleetwood" -> 50
+  // Per-service mutation counts: "service:sentinel" -> 50
   map<string, int64> per_service_mutations = 11;
 
   // Node reporting

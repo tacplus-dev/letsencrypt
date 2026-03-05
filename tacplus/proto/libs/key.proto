@@ -12,7 +12,7 @@
 syntax = "proto3";
 
 package key;
-option go_package = "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/key";
+option go_package = "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/key";
 
 // KeyType represents the key type. Valid values are RSA, EC (Elliptic Curve),
 // and OKP (Octet Key Pair for EdDSA).

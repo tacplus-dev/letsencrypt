@@ -3,7 +3,7 @@
 syntax = "proto3";
 
 package errors;
-option go_package = "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/errors";
+option go_package = "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/errors";
 
 import "google/protobuf/any.proto";
 

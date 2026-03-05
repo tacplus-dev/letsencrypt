@@ -13,7 +13,7 @@
 syntax = "proto3";
 
 package serviceconfig;
-option go_package = "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/serviceconfig";
+option go_package = "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/serviceconfig";
 
 import "libs/jwk.proto";
 import "libs/key.proto";

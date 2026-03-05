@@ -9,15 +9,16 @@
 // If changes are needed, update the tacplus compiler at:
 // gitlab.com/secondstarcavalier/controlplane/services/tacplus
 //
-// Source: services/ironmaiden.proto
+// Source: services/identity.proto
 
-package ironmaiden
+package identity
 
 import (
-	_ "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/google/api/google"
-	entitlement "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/entitlement"
-	jwk "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/jwk"
-	_ "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/spec"
+	entitlement "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/entitlement"
+	jwk "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/jwk"
+	opa "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/opa"
+	_ "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/spec"
+	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
@@ -94,11 +95,11 @@ func (x ComparisonOp) String() string {
 }
 
 func (ComparisonOp) Descriptor() protoreflect.EnumDescriptor {
-	return file_services_ironmaiden_proto_enumTypes[0].Descriptor()
+	return file_services_identity_proto_enumTypes[0].Descriptor()
 }
 
 func (ComparisonOp) Type() protoreflect.EnumType {
-	return &file_services_ironmaiden_proto_enumTypes[0]
+	return &file_services_identity_proto_enumTypes[0]
 }
 
 func (x ComparisonOp) Number() protoreflect.EnumNumber {
@@ -107,7 +108,7 @@ func (x ComparisonOp) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use ComparisonOp.Descriptor instead.
 func (ComparisonOp) EnumDescriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{0}
+	return file_services_identity_proto_rawDescGZIP(), []int{0}
 }
 
 type SortDirection int32
@@ -143,11 +144,11 @@ func (x SortDirection) String() string {
 }
 
 func (SortDirection) Descriptor() protoreflect.EnumDescriptor {
-	return file_services_ironmaiden_proto_enumTypes[1].Descriptor()
+	return file_services_identity_proto_enumTypes[1].Descriptor()
 }
 
 func (SortDirection) Type() protoreflect.EnumType {
-	return &file_services_ironmaiden_proto_enumTypes[1]
+	return &file_services_identity_proto_enumTypes[1]
 }
 
 func (x SortDirection) Number() protoreflect.EnumNumber {
@@ -156,7 +157,7 @@ func (x SortDirection) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use SortDirection.Descriptor instead.
 func (SortDirection) EnumDescriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{1}
+	return file_services_identity_proto_rawDescGZIP(), []int{1}
 }
 
 type LogicalOp int32
@@ -192,11 +193,11 @@ func (x LogicalOp) String() string {
 }
 
 func (LogicalOp) Descriptor() protoreflect.EnumDescriptor {
-	return file_services_ironmaiden_proto_enumTypes[2].Descriptor()
+	return file_services_identity_proto_enumTypes[2].Descriptor()
 }
 
 func (LogicalOp) Type() protoreflect.EnumType {
-	return &file_services_ironmaiden_proto_enumTypes[2]
+	return &file_services_identity_proto_enumTypes[2]
 }
 
 func (x LogicalOp) Number() protoreflect.EnumNumber {
@@ -205,7 +206,7 @@ func (x LogicalOp) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use LogicalOp.Descriptor instead.
 func (LogicalOp) EnumDescriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{2}
+	return file_services_identity_proto_rawDescGZIP(), []int{2}
 }
 
 type Config struct {
@@ -230,19 +231,18 @@ type Config struct {
 	// Minimum: 1 second. Default: 300 (5 minutes).
 	NonceExpireSeconds int64 `protobuf:"varint,5,opt,name=nonce_expire_seconds,json=nonceExpireSeconds,proto3" json:"nonce_expire_seconds,omitempty"`
 	// issuer is the issuer claim (iss) for tokens minted by this service.
-	// Must match the public-facing URL of Iron Maiden.
+	// Must match the public-facing URL of Identity.
 	Issuer string `protobuf:"bytes,6,opt,name=issuer,proto3" json:"issuer,omitempty"`
 	// jwk_refetch_interval_seconds is the minimum interval between JWKS fetches
 	// from the same external IDP. Prevents excessive outbound requests.
 	// Default: 300 (5 minutes).
 	JwkRefetchIntervalSeconds int64 `protobuf:"varint,7,opt,name=jwk_refetch_interval_seconds,json=jwkRefetchIntervalSeconds,proto3" json:"jwk_refetch_interval_seconds,omitempty"`
-	// claim_mapping_policy is a Rego policy that maps IDP claims to a principal.
-	// Evaluated during OAuth callback with input = {origin: {<idp_claims>}}.
-	// Must produce: data.user.main.allow (bool), data.user.main.principal (string).
-	ClaimMappingPolicy string `protobuf:"bytes,10,opt,name=claim_mapping_policy,json=claimMappingPolicy,proto3" json:"claim_mapping_policy,omitempty"`
+	// entitlements_policy is a Rego policy evaluated at token exchange time.
+	// Input: {claims: {<flattened IDP claims>}, service: "<target>"}
+	// Expected output: data.entitlements.main → {allow: bool, rpcs: [string]}
+	// Use ["*"] to grant all RPCs for the target service.
+	EntitlementsPolicy string `protobuf:"bytes,11,opt,name=entitlements_policy,json=entitlementsPolicy,proto3" json:"entitlements_policy,omitempty"`
 	// entitlement_mappings maps OPA-resolved principals to entitlement definitions.
-	// After the claim_mapping_policy resolves a principal, that principal is looked
-	// up here to find the entitlements_id for the user's access tokens.
 	EntitlementMappings []*entitlement.ServiceEntitlementMapping `protobuf:"bytes,8,rep,name=entitlement_mappings,json=entitlementMappings,proto3" json:"entitlement_mappings,omitempty"`
 	// service_entitlements holds named entitlement definitions loaded from
 	// proto/security/*.json at config build time. Referenced by
@@ -254,7 +254,7 @@ type Config struct {
 
 func (x *Config) Reset() {
 	*x = Config{}
-	mi := &file_services_ironmaiden_proto_msgTypes[0]
+	mi := &file_services_identity_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -266,7 +266,7 @@ func (x *Config) String() string {
 func (*Config) ProtoMessage() {}
 
 func (x *Config) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[0]
+	mi := &file_services_identity_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -279,7 +279,7 @@ func (x *Config) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Config.ProtoReflect.Descriptor instead.
 func (*Config) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{0}
+	return file_services_identity_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *Config) GetOauth() *OAuthConfig {
@@ -331,9 +331,9 @@ func (x *Config) GetJwkRefetchIntervalSeconds() int64 {
 	return 0
 }
 
-func (x *Config) GetClaimMappingPolicy() string {
+func (x *Config) GetEntitlementsPolicy() string {
 	if x != nil {
-		return x.ClaimMappingPolicy
+		return x.EntitlementsPolicy
 	}
 	return ""
 }
@@ -371,7 +371,7 @@ type OAuthConfig struct {
 
 func (x *OAuthConfig) Reset() {
 	*x = OAuthConfig{}
-	mi := &file_services_ironmaiden_proto_msgTypes[1]
+	mi := &file_services_identity_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -383,7 +383,7 @@ func (x *OAuthConfig) String() string {
 func (*OAuthConfig) ProtoMessage() {}
 
 func (x *OAuthConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[1]
+	mi := &file_services_identity_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -396,7 +396,7 @@ func (x *OAuthConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OAuthConfig.ProtoReflect.Descriptor instead.
 func (*OAuthConfig) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{1}
+	return file_services_identity_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *OAuthConfig) GetEnable() bool {
@@ -460,7 +460,7 @@ type ProviderConfig struct {
 
 func (x *ProviderConfig) Reset() {
 	*x = ProviderConfig{}
-	mi := &file_services_ironmaiden_proto_msgTypes[2]
+	mi := &file_services_identity_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -472,7 +472,7 @@ func (x *ProviderConfig) String() string {
 func (*ProviderConfig) ProtoMessage() {}
 
 func (x *ProviderConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[2]
+	mi := &file_services_identity_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -485,7 +485,7 @@ func (x *ProviderConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProviderConfig.ProtoReflect.Descriptor instead.
 func (*ProviderConfig) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{2}
+	return file_services_identity_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *ProviderConfig) GetEnable() bool {
@@ -565,37 +565,32 @@ func (x *ProviderConfig) GetAudience() string {
 	return ""
 }
 
-// IronMaidenState holds public verifying keys readable by all services.
-// Each Iron Maiden instance generates its own key pair locally, keeps the private
-// key in memory, and publishes the public JWK here. Other services subscribe
-// via Watch (RO) and receive new keys immediately to verify access tokens.
-// Access: RW for ironmaiden, RO for any service that needs to verify tokens.
-type IronMaidenState struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// verifying_keys are the public JWKs published by all Iron Maiden instances.
-	// Each instance publishes its own JWK (keyed by kid). Other services subscribe
-	// via Watch (RO) to verify access tokens signed by any Iron Maiden instance.
-	// Old keys are removed after the access token lifetime elapses post-rotation.
-	VerifyingKeys []*jwk.Jwk `protobuf:"bytes,1,rep,name=verifying_keys,json=verifyingKeys,proto3" json:"verifying_keys,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+// EntitlementConfig wraps the entitlement mappings and service entitlement
+// definitions. Published by Identity from config so other services (policy)
+// can read them via Watch (RO) without duplicating config.
+type EntitlementConfig struct {
+	state               protoimpl.MessageState                   `protogen:"open.v1"`
+	EntitlementMappings []*entitlement.ServiceEntitlementMapping `protobuf:"bytes,1,rep,name=entitlement_mappings,json=entitlementMappings,proto3" json:"entitlement_mappings,omitempty"`
+	ServiceEntitlements []*entitlement.ServiceEntitlements       `protobuf:"bytes,2,rep,name=service_entitlements,json=serviceEntitlements,proto3" json:"service_entitlements,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
 }
 
-func (x *IronMaidenState) Reset() {
-	*x = IronMaidenState{}
-	mi := &file_services_ironmaiden_proto_msgTypes[3]
+func (x *EntitlementConfig) Reset() {
+	*x = EntitlementConfig{}
+	mi := &file_services_identity_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *IronMaidenState) String() string {
+func (x *EntitlementConfig) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*IronMaidenState) ProtoMessage() {}
+func (*EntitlementConfig) ProtoMessage() {}
 
-func (x *IronMaidenState) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[3]
+func (x *EntitlementConfig) ProtoReflect() protoreflect.Message {
+	mi := &file_services_identity_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -606,46 +601,125 @@ func (x *IronMaidenState) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use IronMaidenState.ProtoReflect.Descriptor instead.
-func (*IronMaidenState) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{3}
+// Deprecated: Use EntitlementConfig.ProtoReflect.Descriptor instead.
+func (*EntitlementConfig) Descriptor() ([]byte, []int) {
+	return file_services_identity_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *IronMaidenState) GetVerifyingKeys() []*jwk.Jwk {
+func (x *EntitlementConfig) GetEntitlementMappings() []*entitlement.ServiceEntitlementMapping {
+	if x != nil {
+		return x.EntitlementMappings
+	}
+	return nil
+}
+
+func (x *EntitlementConfig) GetServiceEntitlements() []*entitlement.ServiceEntitlements {
+	if x != nil {
+		return x.ServiceEntitlements
+	}
+	return nil
+}
+
+// IdentityState holds public verifying keys and auth config readable by all
+// services. Each Identity instance generates its own key pair locally, keeps
+// the private key in memory, and publishes the public JWK here. OPA policies
+// and entitlement config are also published here so downstream services (policy)
+// can consume them without duplicating config.
+// Access: RW for identity, RO for any service that needs to verify tokens
+// or read auth config.
+type IdentityState struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// verifying_keys are the public JWKs published by all Identity instances.
+	VerifyingKeys []*jwk.Jwk `protobuf:"bytes,1,rep,name=verifying_keys,json=verifyingKeys,proto3" json:"verifying_keys,omitempty"`
+	// entitlements_policy is the OPA policy for determining entitlements at token
+	// exchange time. Published by identity from config.
+	EntitlementsPolicy *opa.OpaPolicy `protobuf:"bytes,2,opt,name=entitlements_policy,json=entitlementsPolicy,proto3" json:"entitlements_policy,omitempty"`
+	// entitlement_config holds the entitlement mappings and service entitlement
+	// definitions, published from identity's config.
+	EntitlementConfig *EntitlementConfig `protobuf:"bytes,4,opt,name=entitlement_config,json=entitlementConfig,proto3" json:"entitlement_config,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *IdentityState) Reset() {
+	*x = IdentityState{}
+	mi := &file_services_identity_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *IdentityState) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IdentityState) ProtoMessage() {}
+
+func (x *IdentityState) ProtoReflect() protoreflect.Message {
+	mi := &file_services_identity_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IdentityState.ProtoReflect.Descriptor instead.
+func (*IdentityState) Descriptor() ([]byte, []int) {
+	return file_services_identity_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *IdentityState) GetVerifyingKeys() []*jwk.Jwk {
 	if x != nil {
 		return x.VerifyingKeys
 	}
 	return nil
 }
 
-// IronMaidenStateInternal holds private state used only by Iron Maiden instances.
+func (x *IdentityState) GetEntitlementsPolicy() *opa.OpaPolicy {
+	if x != nil {
+		return x.EntitlementsPolicy
+	}
+	return nil
+}
+
+func (x *IdentityState) GetEntitlementConfig() *EntitlementConfig {
+	if x != nil {
+		return x.EntitlementConfig
+	}
+	return nil
+}
+
+// IdentityStateInternal holds private state used only by Identity instances.
 // Contains cached external IDP JWKS for token validation during callback.
-// Access: RW for ironmaiden only.
-type IronMaidenStateInternal struct {
+// Access: RW for identity only.
+type IdentityStateInternal struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// external_jwks caches JWKs fetched from external identity providers.
-	// Only Iron Maiden uses these to validate IDP tokens during callback.
+	// Only Identity uses these to validate IDP tokens during callback.
 	// Keyed by kid. TTL ensures stale keys are evicted.
 	ExternalJwks  []*ExternalJwk `protobuf:"bytes,1,rep,name=external_jwks,json=externalJwks,proto3" json:"external_jwks,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *IronMaidenStateInternal) Reset() {
-	*x = IronMaidenStateInternal{}
-	mi := &file_services_ironmaiden_proto_msgTypes[4]
+func (x *IdentityStateInternal) Reset() {
+	*x = IdentityStateInternal{}
+	mi := &file_services_identity_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *IronMaidenStateInternal) String() string {
+func (x *IdentityStateInternal) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*IronMaidenStateInternal) ProtoMessage() {}
+func (*IdentityStateInternal) ProtoMessage() {}
 
-func (x *IronMaidenStateInternal) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[4]
+func (x *IdentityStateInternal) ProtoReflect() protoreflect.Message {
+	mi := &file_services_identity_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -656,12 +730,12 @@ func (x *IronMaidenStateInternal) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use IronMaidenStateInternal.ProtoReflect.Descriptor instead.
-func (*IronMaidenStateInternal) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{4}
+// Deprecated: Use IdentityStateInternal.ProtoReflect.Descriptor instead.
+func (*IdentityStateInternal) Descriptor() ([]byte, []int) {
+	return file_services_identity_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *IronMaidenStateInternal) GetExternalJwks() []*ExternalJwk {
+func (x *IdentityStateInternal) GetExternalJwks() []*ExternalJwk {
 	if x != nil {
 		return x.ExternalJwks
 	}
@@ -685,7 +759,7 @@ type ExternalJwk struct {
 
 func (x *ExternalJwk) Reset() {
 	*x = ExternalJwk{}
-	mi := &file_services_ironmaiden_proto_msgTypes[5]
+	mi := &file_services_identity_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -697,7 +771,7 @@ func (x *ExternalJwk) String() string {
 func (*ExternalJwk) ProtoMessage() {}
 
 func (x *ExternalJwk) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[5]
+	mi := &file_services_identity_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -710,7 +784,7 @@ func (x *ExternalJwk) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExternalJwk.ProtoReflect.Descriptor instead.
 func (*ExternalJwk) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{5}
+	return file_services_identity_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *ExternalJwk) GetKid() string {
@@ -751,7 +825,7 @@ type ListProvidersResponse struct {
 
 func (x *ListProvidersResponse) Reset() {
 	*x = ListProvidersResponse{}
-	mi := &file_services_ironmaiden_proto_msgTypes[6]
+	mi := &file_services_identity_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -763,7 +837,7 @@ func (x *ListProvidersResponse) String() string {
 func (*ListProvidersResponse) ProtoMessage() {}
 
 func (x *ListProvidersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[6]
+	mi := &file_services_identity_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -776,7 +850,7 @@ func (x *ListProvidersResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListProvidersResponse.ProtoReflect.Descriptor instead.
 func (*ListProvidersResponse) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{6}
+	return file_services_identity_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *ListProvidersResponse) GetProviders() []*ProviderInfo {
@@ -801,7 +875,7 @@ type ProviderInfo struct {
 
 func (x *ProviderInfo) Reset() {
 	*x = ProviderInfo{}
-	mi := &file_services_ironmaiden_proto_msgTypes[7]
+	mi := &file_services_identity_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -813,7 +887,7 @@ func (x *ProviderInfo) String() string {
 func (*ProviderInfo) ProtoMessage() {}
 
 func (x *ProviderInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[7]
+	mi := &file_services_identity_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -826,7 +900,7 @@ func (x *ProviderInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProviderInfo.ProtoReflect.Descriptor instead.
 func (*ProviderInfo) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{7}
+	return file_services_identity_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *ProviderInfo) GetName() string {
@@ -856,7 +930,7 @@ type AuthorizeRequest struct {
 	// provider_index selects which configured provider to use.
 	ProviderIndex int32 `protobuf:"varint,1,opt,name=provider_index,json=providerIndex,proto3" json:"provider_index,omitempty"`
 	// callback_url is where the user is sent after successful authentication.
-	// This is the originating microservice's URL (e.g. "https://fleetwood:9000/").
+	// This is the originating microservice's URL (e.g. "https://sentinel:9000/").
 	CallbackUrl   string `protobuf:"bytes,2,opt,name=callback_url,json=callbackUrl,proto3" json:"callback_url,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -864,7 +938,7 @@ type AuthorizeRequest struct {
 
 func (x *AuthorizeRequest) Reset() {
 	*x = AuthorizeRequest{}
-	mi := &file_services_ironmaiden_proto_msgTypes[8]
+	mi := &file_services_identity_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -876,7 +950,7 @@ func (x *AuthorizeRequest) String() string {
 func (*AuthorizeRequest) ProtoMessage() {}
 
 func (x *AuthorizeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[8]
+	mi := &file_services_identity_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -889,7 +963,7 @@ func (x *AuthorizeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AuthorizeRequest.ProtoReflect.Descriptor instead.
 func (*AuthorizeRequest) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{8}
+	return file_services_identity_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *AuthorizeRequest) GetProviderIndex() int32 {
@@ -917,7 +991,7 @@ type AuthorizeResponse struct {
 
 func (x *AuthorizeResponse) Reset() {
 	*x = AuthorizeResponse{}
-	mi := &file_services_ironmaiden_proto_msgTypes[9]
+	mi := &file_services_identity_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -929,7 +1003,7 @@ func (x *AuthorizeResponse) String() string {
 func (*AuthorizeResponse) ProtoMessage() {}
 
 func (x *AuthorizeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[9]
+	mi := &file_services_identity_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -942,7 +1016,7 @@ func (x *AuthorizeResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AuthorizeResponse.ProtoReflect.Descriptor instead.
 func (*AuthorizeResponse) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{9}
+	return file_services_identity_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *AuthorizeResponse) GetRedirectUrl() string {
@@ -965,7 +1039,7 @@ type CallbackRequest struct {
 
 func (x *CallbackRequest) Reset() {
 	*x = CallbackRequest{}
-	mi := &file_services_ironmaiden_proto_msgTypes[10]
+	mi := &file_services_identity_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -977,7 +1051,7 @@ func (x *CallbackRequest) String() string {
 func (*CallbackRequest) ProtoMessage() {}
 
 func (x *CallbackRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[10]
+	mi := &file_services_identity_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -990,7 +1064,7 @@ func (x *CallbackRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CallbackRequest.ProtoReflect.Descriptor instead.
 func (*CallbackRequest) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{10}
+	return file_services_identity_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *CallbackRequest) GetCode() string {
@@ -1010,7 +1084,7 @@ func (x *CallbackRequest) GetState() string {
 // CallbackResponse contains the minted tokens and the callback destination.
 type CallbackResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// refresh_token is the long-lived refresh token signed by Iron Maiden.
+	// refresh_token is the long-lived refresh token signed by Identity.
 	RefreshToken string `protobuf:"bytes,1,opt,name=refresh_token,json=refreshToken,proto3" json:"refresh_token,omitempty"`
 	// access_token is the short-lived access token for immediate use.
 	AccessToken string `protobuf:"bytes,2,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
@@ -1026,7 +1100,7 @@ type CallbackResponse struct {
 
 func (x *CallbackResponse) Reset() {
 	*x = CallbackResponse{}
-	mi := &file_services_ironmaiden_proto_msgTypes[11]
+	mi := &file_services_identity_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1038,7 +1112,7 @@ func (x *CallbackResponse) String() string {
 func (*CallbackResponse) ProtoMessage() {}
 
 func (x *CallbackResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[11]
+	mi := &file_services_identity_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1051,7 +1125,7 @@ func (x *CallbackResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CallbackResponse.ProtoReflect.Descriptor instead.
 func (*CallbackResponse) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{11}
+	return file_services_identity_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *CallbackResponse) GetRefreshToken() string {
@@ -1092,7 +1166,7 @@ func (x *CallbackResponse) GetRefreshTokenExpiresIn() int64 {
 // RefreshTokenRequest exchanges a refresh token for a new access token.
 type RefreshTokenRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// refresh_token is the refresh token issued by Iron Maiden.
+	// refresh_token is the refresh token issued by Identity.
 	RefreshToken string `protobuf:"bytes,1,opt,name=refresh_token,json=refreshToken,proto3" json:"refresh_token,omitempty"`
 	// audience is the desired audience claim for the minted access token.
 	// The caller can request any audience but cannot change other claims
@@ -1105,7 +1179,7 @@ type RefreshTokenRequest struct {
 
 func (x *RefreshTokenRequest) Reset() {
 	*x = RefreshTokenRequest{}
-	mi := &file_services_ironmaiden_proto_msgTypes[12]
+	mi := &file_services_identity_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1117,7 +1191,7 @@ func (x *RefreshTokenRequest) String() string {
 func (*RefreshTokenRequest) ProtoMessage() {}
 
 func (x *RefreshTokenRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[12]
+	mi := &file_services_identity_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1130,7 +1204,7 @@ func (x *RefreshTokenRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RefreshTokenRequest.ProtoReflect.Descriptor instead.
 func (*RefreshTokenRequest) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{12}
+	return file_services_identity_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *RefreshTokenRequest) GetRefreshToken() string {
@@ -1160,7 +1234,7 @@ type RefreshTokenResponse struct {
 
 func (x *RefreshTokenResponse) Reset() {
 	*x = RefreshTokenResponse{}
-	mi := &file_services_ironmaiden_proto_msgTypes[13]
+	mi := &file_services_identity_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1172,7 +1246,7 @@ func (x *RefreshTokenResponse) String() string {
 func (*RefreshTokenResponse) ProtoMessage() {}
 
 func (x *RefreshTokenResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[13]
+	mi := &file_services_identity_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1185,7 +1259,7 @@ func (x *RefreshTokenResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RefreshTokenResponse.ProtoReflect.Descriptor instead.
 func (*RefreshTokenResponse) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{13}
+	return file_services_identity_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *RefreshTokenResponse) GetAccessToken() string {
@@ -1215,7 +1289,7 @@ type LogoutRequest struct {
 
 func (x *LogoutRequest) Reset() {
 	*x = LogoutRequest{}
-	mi := &file_services_ironmaiden_proto_msgTypes[14]
+	mi := &file_services_identity_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1227,7 +1301,7 @@ func (x *LogoutRequest) String() string {
 func (*LogoutRequest) ProtoMessage() {}
 
 func (x *LogoutRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[14]
+	mi := &file_services_identity_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1240,7 +1314,7 @@ func (x *LogoutRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LogoutRequest.ProtoReflect.Descriptor instead.
 func (*LogoutRequest) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{14}
+	return file_services_identity_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *LogoutRequest) GetPostLogoutRedirectUrl() string {
@@ -1268,7 +1342,7 @@ type LogoutResponse struct {
 
 func (x *LogoutResponse) Reset() {
 	*x = LogoutResponse{}
-	mi := &file_services_ironmaiden_proto_msgTypes[15]
+	mi := &file_services_identity_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1280,7 +1354,7 @@ func (x *LogoutResponse) String() string {
 func (*LogoutResponse) ProtoMessage() {}
 
 func (x *LogoutResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[15]
+	mi := &file_services_identity_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1293,7 +1367,7 @@ func (x *LogoutResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LogoutResponse.ProtoReflect.Descriptor instead.
 func (*LogoutResponse) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{15}
+	return file_services_identity_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *LogoutResponse) GetRedirectUrl() string {
@@ -1301,6 +1375,116 @@ func (x *LogoutResponse) GetRedirectUrl() string {
 		return x.RedirectUrl
 	}
 	return ""
+}
+
+// ExchangeTokenRequest exchanges a generic access token for a service-specific one.
+type ExchangeTokenRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// access_token is a generic access token (no entitlements) issued by Identity.
+	AccessToken string `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
+	// audience is the target service name (e.g. "sentinel").
+	Audience      string `protobuf:"bytes,2,opt,name=audience,proto3" json:"audience,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ExchangeTokenRequest) Reset() {
+	*x = ExchangeTokenRequest{}
+	mi := &file_services_identity_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ExchangeTokenRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExchangeTokenRequest) ProtoMessage() {}
+
+func (x *ExchangeTokenRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_services_identity_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ExchangeTokenRequest.ProtoReflect.Descriptor instead.
+func (*ExchangeTokenRequest) Descriptor() ([]byte, []int) {
+	return file_services_identity_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *ExchangeTokenRequest) GetAccessToken() string {
+	if x != nil {
+		return x.AccessToken
+	}
+	return ""
+}
+
+func (x *ExchangeTokenRequest) GetAudience() string {
+	if x != nil {
+		return x.Audience
+	}
+	return ""
+}
+
+// ExchangeTokenResponse contains a service-specific access token with entitlements.
+type ExchangeTokenResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// access_token is the service-specific access token with entitlements.
+	AccessToken string `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
+	// expires_in is the access token lifetime in seconds.
+	ExpiresIn     int64 `protobuf:"varint,2,opt,name=expires_in,json=expiresIn,proto3" json:"expires_in,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ExchangeTokenResponse) Reset() {
+	*x = ExchangeTokenResponse{}
+	mi := &file_services_identity_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ExchangeTokenResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExchangeTokenResponse) ProtoMessage() {}
+
+func (x *ExchangeTokenResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_services_identity_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ExchangeTokenResponse.ProtoReflect.Descriptor instead.
+func (*ExchangeTokenResponse) Descriptor() ([]byte, []int) {
+	return file_services_identity_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *ExchangeTokenResponse) GetAccessToken() string {
+	if x != nil {
+		return x.AccessToken
+	}
+	return ""
+}
+
+func (x *ExchangeTokenResponse) GetExpiresIn() int64 {
+	if x != nil {
+		return x.ExpiresIn
+	}
+	return 0
 }
 
 type QueryValue struct {
@@ -1318,7 +1502,7 @@ type QueryValue struct {
 
 func (x *QueryValue) Reset() {
 	*x = QueryValue{}
-	mi := &file_services_ironmaiden_proto_msgTypes[16]
+	mi := &file_services_identity_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1330,7 +1514,7 @@ func (x *QueryValue) String() string {
 func (*QueryValue) ProtoMessage() {}
 
 func (x *QueryValue) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[16]
+	mi := &file_services_identity_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1343,7 +1527,7 @@ func (x *QueryValue) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QueryValue.ProtoReflect.Descriptor instead.
 func (*QueryValue) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{16}
+	return file_services_identity_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *QueryValue) GetValue() isQueryValue_Value {
@@ -1420,7 +1604,7 @@ func (*QueryValue_BoolValue) isQueryValue_Value() {}
 type Predicate struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	FieldName     string                 `protobuf:"bytes,1,opt,name=field_name,json=fieldName,proto3" json:"field_name,omitempty"`
-	Op            ComparisonOp           `protobuf:"varint,2,opt,name=op,proto3,enum=ironmaiden.ComparisonOp" json:"op,omitempty"`
+	Op            ComparisonOp           `protobuf:"varint,2,opt,name=op,proto3,enum=identity.ComparisonOp" json:"op,omitempty"`
 	Value         *QueryValue            `protobuf:"bytes,3,opt,name=value,proto3" json:"value,omitempty"`
 	Values        []*QueryValue          `protobuf:"bytes,4,rep,name=values,proto3" json:"values,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -1429,7 +1613,7 @@ type Predicate struct {
 
 func (x *Predicate) Reset() {
 	*x = Predicate{}
-	mi := &file_services_ironmaiden_proto_msgTypes[17]
+	mi := &file_services_identity_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1441,7 +1625,7 @@ func (x *Predicate) String() string {
 func (*Predicate) ProtoMessage() {}
 
 func (x *Predicate) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[17]
+	mi := &file_services_identity_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1454,7 +1638,7 @@ func (x *Predicate) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Predicate.ProtoReflect.Descriptor instead.
 func (*Predicate) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{17}
+	return file_services_identity_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *Predicate) GetFieldName() string {
@@ -1487,7 +1671,7 @@ func (x *Predicate) GetValues() []*QueryValue {
 
 type PredicateGroup struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Op            LogicalOp              `protobuf:"varint,1,opt,name=op,proto3,enum=ironmaiden.LogicalOp" json:"op,omitempty"`
+	Op            LogicalOp              `protobuf:"varint,1,opt,name=op,proto3,enum=identity.LogicalOp" json:"op,omitempty"`
 	Predicates    []*Predicate           `protobuf:"bytes,2,rep,name=predicates,proto3" json:"predicates,omitempty"`
 	Groups        []*PredicateGroup      `protobuf:"bytes,3,rep,name=groups,proto3" json:"groups,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -1496,7 +1680,7 @@ type PredicateGroup struct {
 
 func (x *PredicateGroup) Reset() {
 	*x = PredicateGroup{}
-	mi := &file_services_ironmaiden_proto_msgTypes[18]
+	mi := &file_services_identity_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1508,7 +1692,7 @@ func (x *PredicateGroup) String() string {
 func (*PredicateGroup) ProtoMessage() {}
 
 func (x *PredicateGroup) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[18]
+	mi := &file_services_identity_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1521,7 +1705,7 @@ func (x *PredicateGroup) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PredicateGroup.ProtoReflect.Descriptor instead.
 func (*PredicateGroup) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{18}
+	return file_services_identity_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *PredicateGroup) GetOp() LogicalOp {
@@ -1548,14 +1732,14 @@ func (x *PredicateGroup) GetGroups() []*PredicateGroup {
 type SortField struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	FieldName     string                 `protobuf:"bytes,1,opt,name=field_name,json=fieldName,proto3" json:"field_name,omitempty"`
-	Direction     SortDirection          `protobuf:"varint,2,opt,name=direction,proto3,enum=ironmaiden.SortDirection" json:"direction,omitempty"`
+	Direction     SortDirection          `protobuf:"varint,2,opt,name=direction,proto3,enum=identity.SortDirection" json:"direction,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *SortField) Reset() {
 	*x = SortField{}
-	mi := &file_services_ironmaiden_proto_msgTypes[19]
+	mi := &file_services_identity_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1567,7 +1751,7 @@ func (x *SortField) String() string {
 func (*SortField) ProtoMessage() {}
 
 func (x *SortField) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[19]
+	mi := &file_services_identity_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1580,7 +1764,7 @@ func (x *SortField) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SortField.ProtoReflect.Descriptor instead.
 func (*SortField) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{19}
+	return file_services_identity_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *SortField) GetFieldName() string {
@@ -1609,7 +1793,7 @@ type CollectionQuery struct {
 
 func (x *CollectionQuery) Reset() {
 	*x = CollectionQuery{}
-	mi := &file_services_ironmaiden_proto_msgTypes[20]
+	mi := &file_services_identity_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1621,7 +1805,7 @@ func (x *CollectionQuery) String() string {
 func (*CollectionQuery) ProtoMessage() {}
 
 func (x *CollectionQuery) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[20]
+	mi := &file_services_identity_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1634,7 +1818,7 @@ func (x *CollectionQuery) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CollectionQuery.ProtoReflect.Descriptor instead.
 func (*CollectionQuery) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{20}
+	return file_services_identity_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *CollectionQuery) GetWhere() *PredicateGroup {
@@ -1674,7 +1858,7 @@ type VerifyingKeysGetRequest struct {
 
 func (x *VerifyingKeysGetRequest) Reset() {
 	*x = VerifyingKeysGetRequest{}
-	mi := &file_services_ironmaiden_proto_msgTypes[21]
+	mi := &file_services_identity_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1686,7 +1870,7 @@ func (x *VerifyingKeysGetRequest) String() string {
 func (*VerifyingKeysGetRequest) ProtoMessage() {}
 
 func (x *VerifyingKeysGetRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[21]
+	mi := &file_services_identity_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1699,7 +1883,7 @@ func (x *VerifyingKeysGetRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VerifyingKeysGetRequest.ProtoReflect.Descriptor instead.
 func (*VerifyingKeysGetRequest) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{21}
+	return file_services_identity_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *VerifyingKeysGetRequest) GetKey() string {
@@ -1720,7 +1904,7 @@ type VerifyingKeysPutRequest struct {
 
 func (x *VerifyingKeysPutRequest) Reset() {
 	*x = VerifyingKeysPutRequest{}
-	mi := &file_services_ironmaiden_proto_msgTypes[22]
+	mi := &file_services_identity_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1732,7 +1916,7 @@ func (x *VerifyingKeysPutRequest) String() string {
 func (*VerifyingKeysPutRequest) ProtoMessage() {}
 
 func (x *VerifyingKeysPutRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[22]
+	mi := &file_services_identity_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1745,7 +1929,7 @@ func (x *VerifyingKeysPutRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VerifyingKeysPutRequest.ProtoReflect.Descriptor instead.
 func (*VerifyingKeysPutRequest) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{22}
+	return file_services_identity_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *VerifyingKeysPutRequest) GetKey() string {
@@ -1777,7 +1961,7 @@ type VerifyingKeysGetAllRequest struct {
 
 func (x *VerifyingKeysGetAllRequest) Reset() {
 	*x = VerifyingKeysGetAllRequest{}
-	mi := &file_services_ironmaiden_proto_msgTypes[23]
+	mi := &file_services_identity_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1789,7 +1973,7 @@ func (x *VerifyingKeysGetAllRequest) String() string {
 func (*VerifyingKeysGetAllRequest) ProtoMessage() {}
 
 func (x *VerifyingKeysGetAllRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[23]
+	mi := &file_services_identity_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1802,7 +1986,7 @@ func (x *VerifyingKeysGetAllRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VerifyingKeysGetAllRequest.ProtoReflect.Descriptor instead.
 func (*VerifyingKeysGetAllRequest) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{23}
+	return file_services_identity_proto_rawDescGZIP(), []int{26}
 }
 
 type VerifyingKeysKeysRequest struct {
@@ -1813,7 +1997,7 @@ type VerifyingKeysKeysRequest struct {
 
 func (x *VerifyingKeysKeysRequest) Reset() {
 	*x = VerifyingKeysKeysRequest{}
-	mi := &file_services_ironmaiden_proto_msgTypes[24]
+	mi := &file_services_identity_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1825,7 +2009,7 @@ func (x *VerifyingKeysKeysRequest) String() string {
 func (*VerifyingKeysKeysRequest) ProtoMessage() {}
 
 func (x *VerifyingKeysKeysRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[24]
+	mi := &file_services_identity_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1838,7 +2022,7 @@ func (x *VerifyingKeysKeysRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VerifyingKeysKeysRequest.ProtoReflect.Descriptor instead.
 func (*VerifyingKeysKeysRequest) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{24}
+	return file_services_identity_proto_rawDescGZIP(), []int{27}
 }
 
 type VerifyingKeysSizeRequest struct {
@@ -1849,7 +2033,7 @@ type VerifyingKeysSizeRequest struct {
 
 func (x *VerifyingKeysSizeRequest) Reset() {
 	*x = VerifyingKeysSizeRequest{}
-	mi := &file_services_ironmaiden_proto_msgTypes[25]
+	mi := &file_services_identity_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1861,7 +2045,7 @@ func (x *VerifyingKeysSizeRequest) String() string {
 func (*VerifyingKeysSizeRequest) ProtoMessage() {}
 
 func (x *VerifyingKeysSizeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[25]
+	mi := &file_services_identity_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1874,7 +2058,7 @@ func (x *VerifyingKeysSizeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VerifyingKeysSizeRequest.ProtoReflect.Descriptor instead.
 func (*VerifyingKeysSizeRequest) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{25}
+	return file_services_identity_proto_rawDescGZIP(), []int{28}
 }
 
 type VerifyingKeysClearRequest struct {
@@ -1885,7 +2069,7 @@ type VerifyingKeysClearRequest struct {
 
 func (x *VerifyingKeysClearRequest) Reset() {
 	*x = VerifyingKeysClearRequest{}
-	mi := &file_services_ironmaiden_proto_msgTypes[26]
+	mi := &file_services_identity_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1897,7 +2081,7 @@ func (x *VerifyingKeysClearRequest) String() string {
 func (*VerifyingKeysClearRequest) ProtoMessage() {}
 
 func (x *VerifyingKeysClearRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[26]
+	mi := &file_services_identity_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1910,7 +2094,7 @@ func (x *VerifyingKeysClearRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VerifyingKeysClearRequest.ProtoReflect.Descriptor instead.
 func (*VerifyingKeysClearRequest) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{26}
+	return file_services_identity_proto_rawDescGZIP(), []int{29}
 }
 
 type VerifyingKeysValueResponse struct {
@@ -1923,7 +2107,7 @@ type VerifyingKeysValueResponse struct {
 
 func (x *VerifyingKeysValueResponse) Reset() {
 	*x = VerifyingKeysValueResponse{}
-	mi := &file_services_ironmaiden_proto_msgTypes[27]
+	mi := &file_services_identity_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1935,7 +2119,7 @@ func (x *VerifyingKeysValueResponse) String() string {
 func (*VerifyingKeysValueResponse) ProtoMessage() {}
 
 func (x *VerifyingKeysValueResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[27]
+	mi := &file_services_identity_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1948,7 +2132,7 @@ func (x *VerifyingKeysValueResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VerifyingKeysValueResponse.ProtoReflect.Descriptor instead.
 func (*VerifyingKeysValueResponse) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{27}
+	return file_services_identity_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *VerifyingKeysValueResponse) GetValue() *jwk.Jwk {
@@ -1974,7 +2158,7 @@ type VerifyingKeysEntriesResponse struct {
 
 func (x *VerifyingKeysEntriesResponse) Reset() {
 	*x = VerifyingKeysEntriesResponse{}
-	mi := &file_services_ironmaiden_proto_msgTypes[28]
+	mi := &file_services_identity_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1986,7 +2170,7 @@ func (x *VerifyingKeysEntriesResponse) String() string {
 func (*VerifyingKeysEntriesResponse) ProtoMessage() {}
 
 func (x *VerifyingKeysEntriesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[28]
+	mi := &file_services_identity_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1999,7 +2183,7 @@ func (x *VerifyingKeysEntriesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VerifyingKeysEntriesResponse.ProtoReflect.Descriptor instead.
 func (*VerifyingKeysEntriesResponse) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{28}
+	return file_services_identity_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *VerifyingKeysEntriesResponse) GetEntries() map[string]*jwk.Jwk {
@@ -2018,7 +2202,7 @@ type VerifyingKeysKeysResponse struct {
 
 func (x *VerifyingKeysKeysResponse) Reset() {
 	*x = VerifyingKeysKeysResponse{}
-	mi := &file_services_ironmaiden_proto_msgTypes[29]
+	mi := &file_services_identity_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2030,7 +2214,7 @@ func (x *VerifyingKeysKeysResponse) String() string {
 func (*VerifyingKeysKeysResponse) ProtoMessage() {}
 
 func (x *VerifyingKeysKeysResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[29]
+	mi := &file_services_identity_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2043,7 +2227,7 @@ func (x *VerifyingKeysKeysResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VerifyingKeysKeysResponse.ProtoReflect.Descriptor instead.
 func (*VerifyingKeysKeysResponse) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{29}
+	return file_services_identity_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *VerifyingKeysKeysResponse) GetKeys() []string {
@@ -2062,7 +2246,7 @@ type VerifyingKeysSizeResponse struct {
 
 func (x *VerifyingKeysSizeResponse) Reset() {
 	*x = VerifyingKeysSizeResponse{}
-	mi := &file_services_ironmaiden_proto_msgTypes[30]
+	mi := &file_services_identity_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2074,7 +2258,7 @@ func (x *VerifyingKeysSizeResponse) String() string {
 func (*VerifyingKeysSizeResponse) ProtoMessage() {}
 
 func (x *VerifyingKeysSizeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[30]
+	mi := &file_services_identity_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2087,7 +2271,7 @@ func (x *VerifyingKeysSizeResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VerifyingKeysSizeResponse.ProtoReflect.Descriptor instead.
 func (*VerifyingKeysSizeResponse) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{30}
+	return file_services_identity_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *VerifyingKeysSizeResponse) GetSize() int32 {
@@ -2106,7 +2290,7 @@ type VerifyingKeysQueryRequest struct {
 
 func (x *VerifyingKeysQueryRequest) Reset() {
 	*x = VerifyingKeysQueryRequest{}
-	mi := &file_services_ironmaiden_proto_msgTypes[31]
+	mi := &file_services_identity_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2118,7 +2302,7 @@ func (x *VerifyingKeysQueryRequest) String() string {
 func (*VerifyingKeysQueryRequest) ProtoMessage() {}
 
 func (x *VerifyingKeysQueryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[31]
+	mi := &file_services_identity_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2131,7 +2315,7 @@ func (x *VerifyingKeysQueryRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VerifyingKeysQueryRequest.ProtoReflect.Descriptor instead.
 func (*VerifyingKeysQueryRequest) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{31}
+	return file_services_identity_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *VerifyingKeysQueryRequest) GetQuery() *CollectionQuery {
@@ -2151,7 +2335,7 @@ type VerifyingKeysQueryResponse struct {
 
 func (x *VerifyingKeysQueryResponse) Reset() {
 	*x = VerifyingKeysQueryResponse{}
-	mi := &file_services_ironmaiden_proto_msgTypes[32]
+	mi := &file_services_identity_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2163,7 +2347,7 @@ func (x *VerifyingKeysQueryResponse) String() string {
 func (*VerifyingKeysQueryResponse) ProtoMessage() {}
 
 func (x *VerifyingKeysQueryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[32]
+	mi := &file_services_identity_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2176,7 +2360,7 @@ func (x *VerifyingKeysQueryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VerifyingKeysQueryResponse.ProtoReflect.Descriptor instead.
 func (*VerifyingKeysQueryResponse) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{32}
+	return file_services_identity_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *VerifyingKeysQueryResponse) GetResults() []*jwk.Jwk {
@@ -2202,7 +2386,7 @@ type ExternalJwksGetRequest struct {
 
 func (x *ExternalJwksGetRequest) Reset() {
 	*x = ExternalJwksGetRequest{}
-	mi := &file_services_ironmaiden_proto_msgTypes[33]
+	mi := &file_services_identity_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2214,7 +2398,7 @@ func (x *ExternalJwksGetRequest) String() string {
 func (*ExternalJwksGetRequest) ProtoMessage() {}
 
 func (x *ExternalJwksGetRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[33]
+	mi := &file_services_identity_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2227,7 +2411,7 @@ func (x *ExternalJwksGetRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExternalJwksGetRequest.ProtoReflect.Descriptor instead.
 func (*ExternalJwksGetRequest) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{33}
+	return file_services_identity_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *ExternalJwksGetRequest) GetKey() string {
@@ -2248,7 +2432,7 @@ type ExternalJwksPutRequest struct {
 
 func (x *ExternalJwksPutRequest) Reset() {
 	*x = ExternalJwksPutRequest{}
-	mi := &file_services_ironmaiden_proto_msgTypes[34]
+	mi := &file_services_identity_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2260,7 +2444,7 @@ func (x *ExternalJwksPutRequest) String() string {
 func (*ExternalJwksPutRequest) ProtoMessage() {}
 
 func (x *ExternalJwksPutRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[34]
+	mi := &file_services_identity_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2273,7 +2457,7 @@ func (x *ExternalJwksPutRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExternalJwksPutRequest.ProtoReflect.Descriptor instead.
 func (*ExternalJwksPutRequest) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{34}
+	return file_services_identity_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *ExternalJwksPutRequest) GetKey() string {
@@ -2305,7 +2489,7 @@ type ExternalJwksGetAllRequest struct {
 
 func (x *ExternalJwksGetAllRequest) Reset() {
 	*x = ExternalJwksGetAllRequest{}
-	mi := &file_services_ironmaiden_proto_msgTypes[35]
+	mi := &file_services_identity_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2317,7 +2501,7 @@ func (x *ExternalJwksGetAllRequest) String() string {
 func (*ExternalJwksGetAllRequest) ProtoMessage() {}
 
 func (x *ExternalJwksGetAllRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[35]
+	mi := &file_services_identity_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2330,7 +2514,7 @@ func (x *ExternalJwksGetAllRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExternalJwksGetAllRequest.ProtoReflect.Descriptor instead.
 func (*ExternalJwksGetAllRequest) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{35}
+	return file_services_identity_proto_rawDescGZIP(), []int{38}
 }
 
 type ExternalJwksKeysRequest struct {
@@ -2341,7 +2525,7 @@ type ExternalJwksKeysRequest struct {
 
 func (x *ExternalJwksKeysRequest) Reset() {
 	*x = ExternalJwksKeysRequest{}
-	mi := &file_services_ironmaiden_proto_msgTypes[36]
+	mi := &file_services_identity_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2353,7 +2537,7 @@ func (x *ExternalJwksKeysRequest) String() string {
 func (*ExternalJwksKeysRequest) ProtoMessage() {}
 
 func (x *ExternalJwksKeysRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[36]
+	mi := &file_services_identity_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2366,7 +2550,7 @@ func (x *ExternalJwksKeysRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExternalJwksKeysRequest.ProtoReflect.Descriptor instead.
 func (*ExternalJwksKeysRequest) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{36}
+	return file_services_identity_proto_rawDescGZIP(), []int{39}
 }
 
 type ExternalJwksSizeRequest struct {
@@ -2377,7 +2561,7 @@ type ExternalJwksSizeRequest struct {
 
 func (x *ExternalJwksSizeRequest) Reset() {
 	*x = ExternalJwksSizeRequest{}
-	mi := &file_services_ironmaiden_proto_msgTypes[37]
+	mi := &file_services_identity_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2389,7 +2573,7 @@ func (x *ExternalJwksSizeRequest) String() string {
 func (*ExternalJwksSizeRequest) ProtoMessage() {}
 
 func (x *ExternalJwksSizeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[37]
+	mi := &file_services_identity_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2402,7 +2586,7 @@ func (x *ExternalJwksSizeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExternalJwksSizeRequest.ProtoReflect.Descriptor instead.
 func (*ExternalJwksSizeRequest) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{37}
+	return file_services_identity_proto_rawDescGZIP(), []int{40}
 }
 
 type ExternalJwksClearRequest struct {
@@ -2413,7 +2597,7 @@ type ExternalJwksClearRequest struct {
 
 func (x *ExternalJwksClearRequest) Reset() {
 	*x = ExternalJwksClearRequest{}
-	mi := &file_services_ironmaiden_proto_msgTypes[38]
+	mi := &file_services_identity_proto_msgTypes[41]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2425,7 +2609,7 @@ func (x *ExternalJwksClearRequest) String() string {
 func (*ExternalJwksClearRequest) ProtoMessage() {}
 
 func (x *ExternalJwksClearRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[38]
+	mi := &file_services_identity_proto_msgTypes[41]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2438,7 +2622,7 @@ func (x *ExternalJwksClearRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExternalJwksClearRequest.ProtoReflect.Descriptor instead.
 func (*ExternalJwksClearRequest) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{38}
+	return file_services_identity_proto_rawDescGZIP(), []int{41}
 }
 
 type ExternalJwksValueResponse struct {
@@ -2451,7 +2635,7 @@ type ExternalJwksValueResponse struct {
 
 func (x *ExternalJwksValueResponse) Reset() {
 	*x = ExternalJwksValueResponse{}
-	mi := &file_services_ironmaiden_proto_msgTypes[39]
+	mi := &file_services_identity_proto_msgTypes[42]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2463,7 +2647,7 @@ func (x *ExternalJwksValueResponse) String() string {
 func (*ExternalJwksValueResponse) ProtoMessage() {}
 
 func (x *ExternalJwksValueResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[39]
+	mi := &file_services_identity_proto_msgTypes[42]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2476,7 +2660,7 @@ func (x *ExternalJwksValueResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExternalJwksValueResponse.ProtoReflect.Descriptor instead.
 func (*ExternalJwksValueResponse) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{39}
+	return file_services_identity_proto_rawDescGZIP(), []int{42}
 }
 
 func (x *ExternalJwksValueResponse) GetValue() *ExternalJwk {
@@ -2502,7 +2686,7 @@ type ExternalJwksEntriesResponse struct {
 
 func (x *ExternalJwksEntriesResponse) Reset() {
 	*x = ExternalJwksEntriesResponse{}
-	mi := &file_services_ironmaiden_proto_msgTypes[40]
+	mi := &file_services_identity_proto_msgTypes[43]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2514,7 +2698,7 @@ func (x *ExternalJwksEntriesResponse) String() string {
 func (*ExternalJwksEntriesResponse) ProtoMessage() {}
 
 func (x *ExternalJwksEntriesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[40]
+	mi := &file_services_identity_proto_msgTypes[43]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2527,7 +2711,7 @@ func (x *ExternalJwksEntriesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExternalJwksEntriesResponse.ProtoReflect.Descriptor instead.
 func (*ExternalJwksEntriesResponse) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{40}
+	return file_services_identity_proto_rawDescGZIP(), []int{43}
 }
 
 func (x *ExternalJwksEntriesResponse) GetEntries() map[string]*ExternalJwk {
@@ -2546,7 +2730,7 @@ type ExternalJwksKeysResponse struct {
 
 func (x *ExternalJwksKeysResponse) Reset() {
 	*x = ExternalJwksKeysResponse{}
-	mi := &file_services_ironmaiden_proto_msgTypes[41]
+	mi := &file_services_identity_proto_msgTypes[44]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2558,7 +2742,7 @@ func (x *ExternalJwksKeysResponse) String() string {
 func (*ExternalJwksKeysResponse) ProtoMessage() {}
 
 func (x *ExternalJwksKeysResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[41]
+	mi := &file_services_identity_proto_msgTypes[44]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2571,7 +2755,7 @@ func (x *ExternalJwksKeysResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExternalJwksKeysResponse.ProtoReflect.Descriptor instead.
 func (*ExternalJwksKeysResponse) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{41}
+	return file_services_identity_proto_rawDescGZIP(), []int{44}
 }
 
 func (x *ExternalJwksKeysResponse) GetKeys() []string {
@@ -2590,7 +2774,7 @@ type ExternalJwksSizeResponse struct {
 
 func (x *ExternalJwksSizeResponse) Reset() {
 	*x = ExternalJwksSizeResponse{}
-	mi := &file_services_ironmaiden_proto_msgTypes[42]
+	mi := &file_services_identity_proto_msgTypes[45]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2602,7 +2786,7 @@ func (x *ExternalJwksSizeResponse) String() string {
 func (*ExternalJwksSizeResponse) ProtoMessage() {}
 
 func (x *ExternalJwksSizeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[42]
+	mi := &file_services_identity_proto_msgTypes[45]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2615,7 +2799,7 @@ func (x *ExternalJwksSizeResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExternalJwksSizeResponse.ProtoReflect.Descriptor instead.
 func (*ExternalJwksSizeResponse) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{42}
+	return file_services_identity_proto_rawDescGZIP(), []int{45}
 }
 
 func (x *ExternalJwksSizeResponse) GetSize() int32 {
@@ -2634,7 +2818,7 @@ type ExternalJwksQueryRequest struct {
 
 func (x *ExternalJwksQueryRequest) Reset() {
 	*x = ExternalJwksQueryRequest{}
-	mi := &file_services_ironmaiden_proto_msgTypes[43]
+	mi := &file_services_identity_proto_msgTypes[46]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2646,7 +2830,7 @@ func (x *ExternalJwksQueryRequest) String() string {
 func (*ExternalJwksQueryRequest) ProtoMessage() {}
 
 func (x *ExternalJwksQueryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[43]
+	mi := &file_services_identity_proto_msgTypes[46]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2659,7 +2843,7 @@ func (x *ExternalJwksQueryRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExternalJwksQueryRequest.ProtoReflect.Descriptor instead.
 func (*ExternalJwksQueryRequest) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{43}
+	return file_services_identity_proto_rawDescGZIP(), []int{46}
 }
 
 func (x *ExternalJwksQueryRequest) GetQuery() *CollectionQuery {
@@ -2679,7 +2863,7 @@ type ExternalJwksQueryResponse struct {
 
 func (x *ExternalJwksQueryResponse) Reset() {
 	*x = ExternalJwksQueryResponse{}
-	mi := &file_services_ironmaiden_proto_msgTypes[44]
+	mi := &file_services_identity_proto_msgTypes[47]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2691,7 +2875,7 @@ func (x *ExternalJwksQueryResponse) String() string {
 func (*ExternalJwksQueryResponse) ProtoMessage() {}
 
 func (x *ExternalJwksQueryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[44]
+	mi := &file_services_identity_proto_msgTypes[47]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2704,7 +2888,7 @@ func (x *ExternalJwksQueryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExternalJwksQueryResponse.ProtoReflect.Descriptor instead.
 func (*ExternalJwksQueryResponse) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{44}
+	return file_services_identity_proto_rawDescGZIP(), []int{47}
 }
 
 func (x *ExternalJwksQueryResponse) GetResults() []*ExternalJwk {
@@ -2729,7 +2913,7 @@ type MapEmpty struct {
 
 func (x *MapEmpty) Reset() {
 	*x = MapEmpty{}
-	mi := &file_services_ironmaiden_proto_msgTypes[45]
+	mi := &file_services_identity_proto_msgTypes[48]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2741,7 +2925,7 @@ func (x *MapEmpty) String() string {
 func (*MapEmpty) ProtoMessage() {}
 
 func (x *MapEmpty) ProtoReflect() protoreflect.Message {
-	mi := &file_services_ironmaiden_proto_msgTypes[45]
+	mi := &file_services_identity_proto_msgTypes[48]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2754,36 +2938,32 @@ func (x *MapEmpty) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MapEmpty.ProtoReflect.Descriptor instead.
 func (*MapEmpty) Descriptor() ([]byte, []int) {
-	return file_services_ironmaiden_proto_rawDescGZIP(), []int{45}
+	return file_services_identity_proto_rawDescGZIP(), []int{48}
 }
 
-var File_services_ironmaiden_proto protoreflect.FileDescriptor
+var File_services_identity_proto protoreflect.FileDescriptor
 
-const file_services_ironmaiden_proto_rawDesc = "" +
+const file_services_identity_proto_rawDesc = "" +
 	"\n" +
-	"\x19services/ironmaiden.proto\x12\n" +
-	"ironmaiden\x1a\x0flibs/spec.proto\x1a\x16libs/entitlement.proto\x1a\x0elibs/jwk.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1cgoogle/api/annotations.proto\"\xbe\x05\n" +
-	"\x06Config\x12-\n" +
-	"\x05oauth\x18\x01 \x01(\v2\x17.ironmaiden.OAuthConfigR\x05oauth\x12L\n" +
+	"\x17services/identity.proto\x12\bidentity\x1a\x0flibs/spec.proto\x1a\x16libs/entitlement.proto\x1a\x0elibs/jwk.proto\x1a\x0elibs/opa.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1cgoogle/api/annotations.proto\"\xb9\x05\n" +
+	"\x06Config\x12+\n" +
+	"\x05oauth\x18\x01 \x01(\v2\x15.identity.OAuthConfigR\x05oauth\x12L\n" +
 	"\x1daccess_token_lifetime_seconds\x18\x02 \x01(\x03B\t\xc0\xa6\x1d\x01\x90\xa8\x1d\x84\aR\x1aaccessTokenLifetimeSeconds\x12O\n" +
 	"\x1erefresh_token_lifetime_seconds\x18\x03 \x01(\x03B\n" +
 	"\xc0\xa6\x1d\x01\x90\xa8\x1d\x80\xa3\x05R\x1brefreshTokenLifetimeSeconds\x12A\n" +
 	"\x14key_lifetime_seconds\x18\x04 \x01(\x03B\x0f\xc0\xa6\x1d\x01Ȧ\x1d\x90\x1c\x90\xa8\x1d\x80\xa3\x05R\x12keyLifetimeSeconds\x12?\n" +
 	"\x14nonce_expire_seconds\x18\x05 \x01(\x03B\r\xc0\xa6\x1d\x01Ȧ\x1d\x01\x90\xa8\x1d\xac\x02R\x12nonceExpireSeconds\x12 \n" +
 	"\x06issuer\x18\x06 \x01(\tB\b\x88\xa6\x1d\x01\xa8\xa6\x1d\x02R\x06issuer\x12J\n" +
-	"\x1cjwk_refetch_interval_seconds\x18\a \x01(\x03B\t\xc0\xa6\x1d\x01\x90\xa8\x1d\xac\x02R\x19jwkRefetchIntervalSeconds\x120\n" +
-	"\x14claim_mapping_policy\x18\n" +
-	" \x01(\tR\x12claimMappingPolicy\x12Y\n" +
+	"\x1cjwk_refetch_interval_seconds\x18\a \x01(\x03B\t\xc0\xa6\x1d\x01\x90\xa8\x1d\xac\x02R\x19jwkRefetchIntervalSeconds\x12/\n" +
+	"\x13entitlements_policy\x18\v \x01(\tR\x12entitlementsPolicy\x12Y\n" +
 	"\x14entitlement_mappings\x18\b \x03(\v2&.entitlement.ServiceEntitlementMappingR\x13entitlementMappings\x12S\n" +
-	"\x14service_entitlements\x18\t \x03(\v2 .entitlement.ServiceEntitlementsR\x13serviceEntitlements:\x12Ҩ\x1d\x0e\n" +
-	"\n" +
-	"ironmaiden\x10\x06\"\xa7\x01\n" +
+	"\x14service_entitlements\x18\t \x03(\v2 .entitlement.ServiceEntitlementsR\x13serviceEntitlements:\x10Ҩ\x1d\f\n" +
+	"\bidentity\x10\x06\"\xa3\x01\n" +
 	"\vOAuthConfig\x12\x16\n" +
 	"\x06enable\x18\x01 \x01(\bR\x06enable\x12\x16\n" +
-	"\x06scopes\x18\x02 \x03(\tR\x06scopes\x128\n" +
-	"\tproviders\x18\x03 \x03(\v2\x1a.ironmaiden.ProviderConfigR\tproviders\x12.\n" +
-	"\baudience\x18\x04 \x01(\tB\x12\x88\xa7\x1d\x01\x8a\xa8\x1d\n" +
-	"ironmaidenR\baudience\"\xb0\x03\n" +
+	"\x06scopes\x18\x02 \x03(\tR\x06scopes\x126\n" +
+	"\tproviders\x18\x03 \x03(\v2\x18.identity.ProviderConfigR\tproviders\x12,\n" +
+	"\baudience\x18\x04 \x01(\tB\x10\x88\xa7\x1d\x01\x8a\xa8\x1d\bidentityR\baudience\"\xb0\x03\n" +
 	"\x0eProviderConfig\x12\x16\n" +
 	"\x06enable\x18\x01 \x01(\bR\x06enable\x12\x18\n" +
 	"\x04name\x18\x02 \x01(\tB\x04\x88\xa7\x1d\x01R\x04name\x12\x18\n" +
@@ -2796,20 +2976,25 @@ const file_services_ironmaiden_proto_rawDesc = "" +
 	"\x14end_session_endpoint\x18\t \x01(\tB\x04\xa8\xa6\x1d\x02R\x12endSessionEndpoint\x12\x16\n" +
 	"\x06scopes\x18\n" +
 	" \x03(\tR\x06scopes\x12 \n" +
-	"\baudience\x18\v \x01(\tB\x04\x88\xa7\x1d\x01R\baudience\"}\n" +
-	"\x0fIronMaidenState\x12Q\n" +
-	"\x0everifying_keys\x18\x01 \x03(\v2\b.jwk.JwkB \xe0\xb5\x18\x02\xe0\xb6\x18\x01\x9a\xb7\x18\x14JwkVerifyingKeysViewR\rverifyingKeys:\x17\x9a\xa8\x1d\x0fIronMaidenState\xa0\xa8\x1d\x02\"\x88\x01\n" +
-	"\x17IronMaidenStateInternal\x12H\n" +
-	"\rexternal_jwks\x18\x01 \x03(\v2\x17.ironmaiden.ExternalJwkB\n" +
-	"\xe0\xb5\x18\x02ȶ\x18\x80\xa3\x05R\fexternalJwks:#\x9a\xa8\x1d\x17IronMaidenStateInternal\xa0\xa8\x1d\x02ب\x1d\x01\"\x96\x01\n" +
+	"\baudience\x18\v \x01(\tB\x04\x88\xa7\x1d\x01R\baudience\"\xc3\x01\n" +
+	"\x11EntitlementConfig\x12Y\n" +
+	"\x14entitlement_mappings\x18\x01 \x03(\v2&.entitlement.ServiceEntitlementMappingR\x13entitlementMappings\x12S\n" +
+	"\x14service_entitlements\x18\x02 \x03(\v2 .entitlement.ServiceEntitlementsR\x13serviceEntitlements\"\x92\x02\n" +
+	"\rIdentityState\x12Q\n" +
+	"\x0everifying_keys\x18\x01 \x03(\v2\b.jwk.JwkB \xe0\xb5\x18\x02\xe0\xb6\x18\x01\x9a\xb7\x18\x14JwkVerifyingKeysViewR\rverifyingKeys\x12E\n" +
+	"\x13entitlements_policy\x18\x02 \x01(\v2\x0e.opa.OpaPolicyB\x04\xe0\xb5\x18\x02R\x12entitlementsPolicy\x12P\n" +
+	"\x12entitlement_config\x18\x04 \x01(\v2\x1b.identity.EntitlementConfigB\x04\xe0\xb5\x18\x02R\x11entitlementConfig:\x15\x9a\xa8\x1d\rIdentityState\xa0\xa8\x1d\x02\"\x82\x01\n" +
+	"\x15IdentityStateInternal\x12F\n" +
+	"\rexternal_jwks\x18\x01 \x03(\v2\x15.identity.ExternalJwkB\n" +
+	"\xe0\xb5\x18\x02ȶ\x18\x80\xa3\x05R\fexternalJwks:!\x9a\xa8\x1d\x15IdentityStateInternal\xa0\xa8\x1d\x02ب\x1d\x01\"\x96\x01\n" +
 	"\vExternalJwk\x12\x1e\n" +
 	"\x03kid\x18\x01 \x01(\tB\fе\x18\x01\x88\xa6\x1d\x01\x88\xa7\x1d\x01R\x03kid\x12 \n" +
 	"\x03key\x18\x02 \x01(\v2\b.jwk.JwkB\x04\x88\xa6\x1d\x01R\x03key\x12 \n" +
 	"\x06issuer\x18\x03 \x01(\tB\b\x88\xa6\x1d\x01\xa8\xa6\x1d\x02R\x06issuer\x12#\n" +
 	"\n" +
-	"fetched_at\x18\x04 \x01(\x03B\x04\xa8\xa7\x1d\x00R\tfetchedAt\"O\n" +
-	"\x15ListProvidersResponse\x126\n" +
-	"\tproviders\x18\x01 \x03(\v2\x18.ironmaiden.ProviderInfoR\tproviders\"s\n" +
+	"fetched_at\x18\x04 \x01(\x03B\x04\xa8\xa7\x1d\x00R\tfetchedAt\"M\n" +
+	"\x15ListProvidersResponse\x124\n" +
+	"\tproviders\x18\x01 \x03(\v2\x16.identity.ProviderInfoR\tproviders\"s\n" +
 	"\fProviderInfo\x12\x1c\n" +
 	"\x04name\x18\x01 \x01(\tB\b\x88\xa6\x1d\x01\x88\xa7\x1d\x01R\x04name\x12\x18\n" +
 	"\adomains\x18\x02 \x03(\tR\adomains\x12+\n" +
@@ -2839,7 +3024,14 @@ const file_services_ironmaiden_proto_rawDesc = "" +
 	"\x18post_logout_redirect_url\x18\x01 \x01(\tB\x04\xa8\xa6\x1d\x02R\x15postLogoutRedirectUrl\x12\"\n" +
 	"\rid_token_hint\x18\x02 \x01(\tR\vidTokenHint\"9\n" +
 	"\x0eLogoutResponse\x12'\n" +
-	"\fredirect_url\x18\x01 \x01(\tB\x04\xa8\xa6\x1d\x02R\vredirectUrl\"\x9f\x01\n" +
+	"\fredirect_url\x18\x01 \x01(\tB\x04\xa8\xa6\x1d\x02R\vredirectUrl\"e\n" +
+	"\x14ExchangeTokenRequest\x12'\n" +
+	"\faccess_token\x18\x01 \x01(\tB\x04\x88\xa6\x1d\x01R\vaccessToken\x12$\n" +
+	"\baudience\x18\x02 \x01(\tB\b\x88\xa6\x1d\x01\x88\xa7\x1d\x01R\baudience\"i\n" +
+	"\x15ExchangeTokenResponse\x12+\n" +
+	"\faccess_token\x18\x01 \x01(\tB\b\x88\xa6\x1d\x01\x88\xa7\x1d\x01R\vaccessToken\x12#\n" +
+	"\n" +
+	"expires_in\x18\x02 \x01(\x03B\x04\xa8\xa7\x1d\x00R\texpiresIn\"\x9f\x01\n" +
 	"\n" +
 	"QueryValue\x12#\n" +
 	"\fstring_value\x18\x01 \x01(\tH\x00R\vstringValue\x12\x1d\n" +
@@ -2847,26 +3039,26 @@ const file_services_ironmaiden_proto_rawDesc = "" +
 	"\fdouble_value\x18\x03 \x01(\x01H\x00R\vdoubleValue\x12\x1f\n" +
 	"\n" +
 	"bool_value\x18\x04 \x01(\bH\x00R\tboolValueB\a\n" +
-	"\x05value\"\xb2\x01\n" +
+	"\x05value\"\xac\x01\n" +
 	"\tPredicate\x12\x1d\n" +
 	"\n" +
-	"field_name\x18\x01 \x01(\tR\tfieldName\x12(\n" +
-	"\x02op\x18\x02 \x01(\x0e2\x18.ironmaiden.ComparisonOpR\x02op\x12,\n" +
-	"\x05value\x18\x03 \x01(\v2\x16.ironmaiden.QueryValueR\x05value\x12.\n" +
-	"\x06values\x18\x04 \x03(\v2\x16.ironmaiden.QueryValueR\x06values\"\xa2\x01\n" +
-	"\x0ePredicateGroup\x12%\n" +
-	"\x02op\x18\x01 \x01(\x0e2\x15.ironmaiden.LogicalOpR\x02op\x125\n" +
+	"field_name\x18\x01 \x01(\tR\tfieldName\x12&\n" +
+	"\x02op\x18\x02 \x01(\x0e2\x16.identity.ComparisonOpR\x02op\x12*\n" +
+	"\x05value\x18\x03 \x01(\v2\x14.identity.QueryValueR\x05value\x12,\n" +
+	"\x06values\x18\x04 \x03(\v2\x14.identity.QueryValueR\x06values\"\x9c\x01\n" +
+	"\x0ePredicateGroup\x12#\n" +
+	"\x02op\x18\x01 \x01(\x0e2\x13.identity.LogicalOpR\x02op\x123\n" +
 	"\n" +
-	"predicates\x18\x02 \x03(\v2\x15.ironmaiden.PredicateR\n" +
-	"predicates\x122\n" +
-	"\x06groups\x18\x03 \x03(\v2\x1a.ironmaiden.PredicateGroupR\x06groups\"c\n" +
+	"predicates\x18\x02 \x03(\v2\x13.identity.PredicateR\n" +
+	"predicates\x120\n" +
+	"\x06groups\x18\x03 \x03(\v2\x18.identity.PredicateGroupR\x06groups\"a\n" +
 	"\tSortField\x12\x1d\n" +
 	"\n" +
-	"field_name\x18\x01 \x01(\tR\tfieldName\x127\n" +
-	"\tdirection\x18\x02 \x01(\x0e2\x19.ironmaiden.SortDirectionR\tdirection\"\xa3\x01\n" +
-	"\x0fCollectionQuery\x120\n" +
-	"\x05where\x18\x01 \x01(\v2\x1a.ironmaiden.PredicateGroupR\x05where\x120\n" +
-	"\border_by\x18\x02 \x03(\v2\x15.ironmaiden.SortFieldR\aorderBy\x12\x14\n" +
+	"field_name\x18\x01 \x01(\tR\tfieldName\x125\n" +
+	"\tdirection\x18\x02 \x01(\x0e2\x17.identity.SortDirectionR\tdirection\"\x9f\x01\n" +
+	"\x0fCollectionQuery\x12.\n" +
+	"\x05where\x18\x01 \x01(\v2\x18.identity.PredicateGroupR\x05where\x12.\n" +
+	"\border_by\x18\x02 \x03(\v2\x13.identity.SortFieldR\aorderBy\x12\x14\n" +
 	"\x05limit\x18\x03 \x01(\x05R\x05limit\x12\x16\n" +
 	"\x06offset\x18\x04 \x01(\x05R\x06offset\"+\n" +
 	"\x17VerifyingKeysGetRequest\x12\x10\n" +
@@ -2881,48 +3073,48 @@ const file_services_ironmaiden_proto_rawDesc = "" +
 	"\x19VerifyingKeysClearRequest\"R\n" +
 	"\x1aVerifyingKeysValueResponse\x12\x1e\n" +
 	"\x05value\x18\x01 \x01(\v2\b.jwk.JwkR\x05value\x12\x14\n" +
-	"\x05found\x18\x02 \x01(\bR\x05found\"\xb5\x01\n" +
-	"\x1cVerifyingKeysEntriesResponse\x12O\n" +
-	"\aentries\x18\x01 \x03(\v25.ironmaiden.VerifyingKeysEntriesResponse.EntriesEntryR\aentries\x1aD\n" +
+	"\x05found\x18\x02 \x01(\bR\x05found\"\xb3\x01\n" +
+	"\x1cVerifyingKeysEntriesResponse\x12M\n" +
+	"\aentries\x18\x01 \x03(\v23.identity.VerifyingKeysEntriesResponse.EntriesEntryR\aentries\x1aD\n" +
 	"\fEntriesEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x1e\n" +
 	"\x05value\x18\x02 \x01(\v2\b.jwk.JwkR\x05value:\x028\x01\"/\n" +
 	"\x19VerifyingKeysKeysResponse\x12\x12\n" +
 	"\x04keys\x18\x01 \x03(\tR\x04keys\"/\n" +
 	"\x19VerifyingKeysSizeResponse\x12\x12\n" +
-	"\x04size\x18\x01 \x01(\x05R\x04size\"N\n" +
-	"\x19VerifyingKeysQueryRequest\x121\n" +
-	"\x05query\x18\x01 \x01(\v2\x1b.ironmaiden.CollectionQueryR\x05query\"a\n" +
+	"\x04size\x18\x01 \x01(\x05R\x04size\"L\n" +
+	"\x19VerifyingKeysQueryRequest\x12/\n" +
+	"\x05query\x18\x01 \x01(\v2\x19.identity.CollectionQueryR\x05query\"a\n" +
 	"\x1aVerifyingKeysQueryResponse\x12\"\n" +
 	"\aresults\x18\x01 \x03(\v2\b.jwk.JwkR\aresults\x12\x1f\n" +
 	"\vtotal_count\x18\x02 \x01(\x05R\n" +
 	"totalCount\"*\n" +
 	"\x16ExternalJwksGetRequest\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\"|\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\"z\n" +
 	"\x16ExternalJwksPutRequest\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12-\n" +
-	"\x05value\x18\x02 \x01(\v2\x17.ironmaiden.ExternalJwkR\x05value\x12!\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12+\n" +
+	"\x05value\x18\x02 \x01(\v2\x15.identity.ExternalJwkR\x05value\x12!\n" +
 	"\flock_counter\x18\x03 \x01(\x03R\vlockCounter\"\x1b\n" +
 	"\x19ExternalJwksGetAllRequest\"\x19\n" +
 	"\x17ExternalJwksKeysRequest\"\x19\n" +
 	"\x17ExternalJwksSizeRequest\"\x1a\n" +
-	"\x18ExternalJwksClearRequest\"`\n" +
-	"\x19ExternalJwksValueResponse\x12-\n" +
-	"\x05value\x18\x01 \x01(\v2\x17.ironmaiden.ExternalJwkR\x05value\x12\x14\n" +
-	"\x05found\x18\x02 \x01(\bR\x05found\"\xc2\x01\n" +
-	"\x1bExternalJwksEntriesResponse\x12N\n" +
-	"\aentries\x18\x01 \x03(\v24.ironmaiden.ExternalJwksEntriesResponse.EntriesEntryR\aentries\x1aS\n" +
+	"\x18ExternalJwksClearRequest\"^\n" +
+	"\x19ExternalJwksValueResponse\x12+\n" +
+	"\x05value\x18\x01 \x01(\v2\x15.identity.ExternalJwkR\x05value\x12\x14\n" +
+	"\x05found\x18\x02 \x01(\bR\x05found\"\xbe\x01\n" +
+	"\x1bExternalJwksEntriesResponse\x12L\n" +
+	"\aentries\x18\x01 \x03(\v22.identity.ExternalJwksEntriesResponse.EntriesEntryR\aentries\x1aQ\n" +
 	"\fEntriesEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12-\n" +
-	"\x05value\x18\x02 \x01(\v2\x17.ironmaiden.ExternalJwkR\x05value:\x028\x01\".\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12+\n" +
+	"\x05value\x18\x02 \x01(\v2\x15.identity.ExternalJwkR\x05value:\x028\x01\".\n" +
 	"\x18ExternalJwksKeysResponse\x12\x12\n" +
 	"\x04keys\x18\x01 \x03(\tR\x04keys\".\n" +
 	"\x18ExternalJwksSizeResponse\x12\x12\n" +
-	"\x04size\x18\x01 \x01(\x05R\x04size\"M\n" +
-	"\x18ExternalJwksQueryRequest\x121\n" +
-	"\x05query\x18\x01 \x01(\v2\x1b.ironmaiden.CollectionQueryR\x05query\"o\n" +
-	"\x19ExternalJwksQueryResponse\x121\n" +
-	"\aresults\x18\x01 \x03(\v2\x17.ironmaiden.ExternalJwkR\aresults\x12\x1f\n" +
+	"\x04size\x18\x01 \x01(\x05R\x04size\"K\n" +
+	"\x18ExternalJwksQueryRequest\x12/\n" +
+	"\x05query\x18\x01 \x01(\v2\x19.identity.CollectionQueryR\x05query\"m\n" +
+	"\x19ExternalJwksQueryResponse\x12/\n" +
+	"\aresults\x18\x01 \x03(\v2\x15.identity.ExternalJwkR\aresults\x12\x1f\n" +
 	"\vtotal_count\x18\x02 \x01(\x05R\n" +
 	"totalCount\"\n" +
 	"\n" +
@@ -2948,238 +3140,254 @@ const file_services_ironmaiden_proto_rawDesc = "" +
 	"\tLogicalOp\x12\x1a\n" +
 	"\x16LOGICAL_OP_UNSPECIFIED\x10\x00\x12\x12\n" +
 	"\x0eLOGICAL_OP_AND\x10\x01\x12\x11\n" +
-	"\rLOGICAL_OP_OR\x10\x022\xdc\x04\n" +
-	"\x11IronMaidenService\x12p\n" +
-	"\rListProviders\x12\x16.google.protobuf.Empty\x1a!.ironmaiden.ListProvidersResponse\"$\x82\xd3\xe4\x93\x02\x1e\x12\x1c/api/ironmaiden/v1/providers\x12q\n" +
-	"\tAuthorize\x12\x1c.ironmaiden.AuthorizeRequest\x1a\x1d.ironmaiden.AuthorizeResponse\"'\x82\xd3\xe4\x93\x02!:\x01*\"\x1c/api/ironmaiden/v1/authorize\x12m\n" +
-	"\bCallback\x12\x1b.ironmaiden.CallbackRequest\x1a\x1c.ironmaiden.CallbackResponse\"&\x82\xd3\xe4\x93\x02 :\x01*\"\x1b/api/ironmaiden/v1/callback\x12x\n" +
-	"\fRefreshToken\x12\x1f.ironmaiden.RefreshTokenRequest\x1a .ironmaiden.RefreshTokenResponse\"%\x82\xd3\xe4\x93\x02\x1f:\x01*\"\x1a/api/ironmaiden/v1/refresh\x12e\n" +
-	"\x06Logout\x12\x19.ironmaiden.LogoutRequest\x1a\x1a.ironmaiden.LogoutResponse\"$\x82\xd3\xe4\x93\x02\x1e:\x01*\"\x19/api/ironmaiden/v1/logout\x1a\x12\xa2\x97\"\n" +
-	"ironmaiden\xb8\x97\"\x012\xe5\n" +
+	"\rLOGICAL_OP_OR\x10\x022\xb4\x05\n" +
+	"\x0fIdentityService\x12l\n" +
+	"\rListProviders\x12\x16.google.protobuf.Empty\x1a\x1f.identity.ListProvidersResponse\"\"\x82\xd3\xe4\x93\x02\x1c\x12\x1a/api/identity/v1/providers\x12k\n" +
+	"\tAuthorize\x12\x1a.identity.AuthorizeRequest\x1a\x1b.identity.AuthorizeResponse\"%\x82\xd3\xe4\x93\x02\x1f:\x01*\"\x1a/api/identity/v1/authorize\x12g\n" +
+	"\bCallback\x12\x19.identity.CallbackRequest\x1a\x1a.identity.CallbackResponse\"$\x82\xd3\xe4\x93\x02\x1e:\x01*\"\x19/api/identity/v1/callback\x12r\n" +
+	"\fRefreshToken\x12\x1d.identity.RefreshTokenRequest\x1a\x1e.identity.RefreshTokenResponse\"#\x82\xd3\xe4\x93\x02\x1d:\x01*\"\x18/api/identity/v1/refresh\x12v\n" +
+	"\rExchangeToken\x12\x1e.identity.ExchangeTokenRequest\x1a\x1f.identity.ExchangeTokenResponse\"$\x82\xd3\xe4\x93\x02\x1e:\x01*\"\x19/api/identity/v1/exchange\x12_\n" +
+	"\x06Logout\x12\x17.identity.LogoutRequest\x1a\x18.identity.LogoutResponse\"\"\x82\xd3\xe4\x93\x02\x1c:\x01*\"\x17/api/identity/v1/logout\x1a\x10\xa2\x97\"\bidentity\xb8\x97\"\x012\xdc\r\n" +
+	"\x1bIdentityStateBackendService\x12?\n" +
+	"\x15GetEntitlementsPolicy\x12\x16.google.protobuf.Empty\x1a\x0e.opa.OpaPolicy\x127\n" +
+	"\x15SetEntitlementsPolicy\x12\x0e.opa.OpaPolicy\x1a\x0e.opa.OpaPolicy\x12C\n" +
+	"\x17WatchEntitlementsPolicy\x12\x16.google.protobuf.Empty\x1a\x0e.opa.OpaPolicy0\x01\x12K\n" +
+	"\x14GetEntitlementConfig\x12\x16.google.protobuf.Empty\x1a\x1b.identity.EntitlementConfig\x12P\n" +
+	"\x14SetEntitlementConfig\x12\x1b.identity.EntitlementConfig\x1a\x1b.identity.EntitlementConfig\x12O\n" +
+	"\x16WatchEntitlementConfig\x12\x16.google.protobuf.Empty\x1a\x1b.identity.EntitlementConfig0\x01\x12[\n" +
+	"\x10GetVerifyingKeys\x12!.identity.VerifyingKeysGetRequest\x1a$.identity.VerifyingKeysValueResponse\x12[\n" +
+	"\x10PutVerifyingKeys\x12!.identity.VerifyingKeysPutRequest\x1a$.identity.VerifyingKeysValueResponse\x12I\n" +
+	"\x10SetVerifyingKeys\x12!.identity.VerifyingKeysPutRequest\x1a\x12.identity.MapEmpty\x12^\n" +
+	"\x13RemoveVerifyingKeys\x12!.identity.VerifyingKeysGetRequest\x1a$.identity.VerifyingKeysValueResponse\x12L\n" +
+	"\x13DeleteVerifyingKeys\x12!.identity.VerifyingKeysGetRequest\x1a\x12.identity.MapEmpty\x12c\n" +
+	"\x18ContainsKeyVerifyingKeys\x12!.identity.VerifyingKeysGetRequest\x1a$.identity.VerifyingKeysValueResponse\x12c\n" +
+	"\x13GetAllVerifyingKeys\x12$.identity.VerifyingKeysGetAllRequest\x1a&.identity.VerifyingKeysEntriesResponse\x12^\n" +
+	"\x13KeySetVerifyingKeys\x12\".identity.VerifyingKeysKeysRequest\x1a#.identity.VerifyingKeysKeysResponse\x12\\\n" +
+	"\x11SizeVerifyingKeys\x12\".identity.VerifyingKeysSizeRequest\x1a#.identity.VerifyingKeysSizeResponse\x12M\n" +
+	"\x12ClearVerifyingKeys\x12#.identity.VerifyingKeysClearRequest\x1a\x12.identity.MapEmpty\x12c\n" +
+	"\x18PutIfAbsentVerifyingKeys\x12!.identity.VerifyingKeysPutRequest\x1a$.identity.VerifyingKeysValueResponse\x12V\n" +
+	"\x12WatchVerifyingKeys\x12\x16.google.protobuf.Empty\x1a&.identity.VerifyingKeysEntriesResponse0\x01\x12_\n" +
+	"\x12QueryVerifyingKeys\x12#.identity.VerifyingKeysQueryRequest\x1a$.identity.VerifyingKeysQueryResponse\x12f\n" +
+	"\x17WatchQueryVerifyingKeys\x12#.identity.VerifyingKeysQueryRequest\x1a$.identity.VerifyingKeysQueryResponse0\x012\x8f\n" +
 	"\n" +
-	"\x1dIronMaidenStateBackendService\x12_\n" +
-	"\x10GetVerifyingKeys\x12#.ironmaiden.VerifyingKeysGetRequest\x1a&.ironmaiden.VerifyingKeysValueResponse\x12_\n" +
-	"\x10PutVerifyingKeys\x12#.ironmaiden.VerifyingKeysPutRequest\x1a&.ironmaiden.VerifyingKeysValueResponse\x12M\n" +
-	"\x10SetVerifyingKeys\x12#.ironmaiden.VerifyingKeysPutRequest\x1a\x14.ironmaiden.MapEmpty\x12b\n" +
-	"\x13RemoveVerifyingKeys\x12#.ironmaiden.VerifyingKeysGetRequest\x1a&.ironmaiden.VerifyingKeysValueResponse\x12P\n" +
-	"\x13DeleteVerifyingKeys\x12#.ironmaiden.VerifyingKeysGetRequest\x1a\x14.ironmaiden.MapEmpty\x12g\n" +
-	"\x18ContainsKeyVerifyingKeys\x12#.ironmaiden.VerifyingKeysGetRequest\x1a&.ironmaiden.VerifyingKeysValueResponse\x12g\n" +
-	"\x13GetAllVerifyingKeys\x12&.ironmaiden.VerifyingKeysGetAllRequest\x1a(.ironmaiden.VerifyingKeysEntriesResponse\x12b\n" +
-	"\x13KeySetVerifyingKeys\x12$.ironmaiden.VerifyingKeysKeysRequest\x1a%.ironmaiden.VerifyingKeysKeysResponse\x12`\n" +
-	"\x11SizeVerifyingKeys\x12$.ironmaiden.VerifyingKeysSizeRequest\x1a%.ironmaiden.VerifyingKeysSizeResponse\x12Q\n" +
-	"\x12ClearVerifyingKeys\x12%.ironmaiden.VerifyingKeysClearRequest\x1a\x14.ironmaiden.MapEmpty\x12g\n" +
-	"\x18PutIfAbsentVerifyingKeys\x12#.ironmaiden.VerifyingKeysPutRequest\x1a&.ironmaiden.VerifyingKeysValueResponse\x12X\n" +
-	"\x12WatchVerifyingKeys\x12\x16.google.protobuf.Empty\x1a(.ironmaiden.VerifyingKeysEntriesResponse0\x01\x12c\n" +
-	"\x12QueryVerifyingKeys\x12%.ironmaiden.VerifyingKeysQueryRequest\x1a&.ironmaiden.VerifyingKeysQueryResponse\x12j\n" +
-	"\x17WatchQueryVerifyingKeys\x12%.ironmaiden.VerifyingKeysQueryRequest\x1a&.ironmaiden.VerifyingKeysQueryResponse0\x012\xc7\n" +
-	"\n" +
-	"%IronMaidenStateInternalBackendService\x12\\\n" +
-	"\x0fGetExternalJwks\x12\".ironmaiden.ExternalJwksGetRequest\x1a%.ironmaiden.ExternalJwksValueResponse\x12\\\n" +
-	"\x0fPutExternalJwks\x12\".ironmaiden.ExternalJwksPutRequest\x1a%.ironmaiden.ExternalJwksValueResponse\x12K\n" +
-	"\x0fSetExternalJwks\x12\".ironmaiden.ExternalJwksPutRequest\x1a\x14.ironmaiden.MapEmpty\x12_\n" +
-	"\x12RemoveExternalJwks\x12\".ironmaiden.ExternalJwksGetRequest\x1a%.ironmaiden.ExternalJwksValueResponse\x12N\n" +
-	"\x12DeleteExternalJwks\x12\".ironmaiden.ExternalJwksGetRequest\x1a\x14.ironmaiden.MapEmpty\x12d\n" +
-	"\x17ContainsKeyExternalJwks\x12\".ironmaiden.ExternalJwksGetRequest\x1a%.ironmaiden.ExternalJwksValueResponse\x12d\n" +
-	"\x12GetAllExternalJwks\x12%.ironmaiden.ExternalJwksGetAllRequest\x1a'.ironmaiden.ExternalJwksEntriesResponse\x12_\n" +
-	"\x12KeySetExternalJwks\x12#.ironmaiden.ExternalJwksKeysRequest\x1a$.ironmaiden.ExternalJwksKeysResponse\x12]\n" +
-	"\x10SizeExternalJwks\x12#.ironmaiden.ExternalJwksSizeRequest\x1a$.ironmaiden.ExternalJwksSizeResponse\x12O\n" +
-	"\x11ClearExternalJwks\x12$.ironmaiden.ExternalJwksClearRequest\x1a\x14.ironmaiden.MapEmpty\x12d\n" +
-	"\x17PutIfAbsentExternalJwks\x12\".ironmaiden.ExternalJwksPutRequest\x1a%.ironmaiden.ExternalJwksValueResponse\x12V\n" +
-	"\x11WatchExternalJwks\x12\x16.google.protobuf.Empty\x1a'.ironmaiden.ExternalJwksEntriesResponse0\x01\x12`\n" +
-	"\x11QueryExternalJwks\x12$.ironmaiden.ExternalJwksQueryRequest\x1a%.ironmaiden.ExternalJwksQueryResponse\x12g\n" +
-	"\x16WatchQueryExternalJwks\x12$.ironmaiden.ExternalJwksQueryRequest\x1a%.ironmaiden.ExternalJwksQueryResponse0\x01B\xdf\x02\x8a\xb5\x18\x1c\n" +
-	"\x0ePATH_AUTHORIZE\x12\n" +
-	"/authorize\x8a\xb5\x18\x1a\n" +
-	"\rPATH_CALLBACK\x12\t/callback\x8a\xb5\x18\x18\n" +
-	"\fPATH_REFRESH\x12\b/refresh\x8a\xb5\x18\x16\n" +
-	"\vPATH_LOGOUT\x12\a/logout\x8a\xb5\x18\x1c\n" +
-	"\x0ePATH_PROVIDERS\x12\n" +
-	"/providers\x8a\xb5\x18\"\n" +
-	"\x12PARAM_CALLBACK_URL\x12\fcallback_url\x8a\xb5\x18 \n" +
-	"\x13COOKIE_ACCESS_TOKEN\x12\tim_access\x8a\xb5\x18\"\n" +
-	"\x14COOKIE_REFRESH_TOKEN\x12\n" +
-	"im_refreshZYgitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/services/ironmaidenb\x06proto3"
+	"#IdentityStateInternalBackendService\x12X\n" +
+	"\x0fGetExternalJwks\x12 .identity.ExternalJwksGetRequest\x1a#.identity.ExternalJwksValueResponse\x12X\n" +
+	"\x0fPutExternalJwks\x12 .identity.ExternalJwksPutRequest\x1a#.identity.ExternalJwksValueResponse\x12G\n" +
+	"\x0fSetExternalJwks\x12 .identity.ExternalJwksPutRequest\x1a\x12.identity.MapEmpty\x12[\n" +
+	"\x12RemoveExternalJwks\x12 .identity.ExternalJwksGetRequest\x1a#.identity.ExternalJwksValueResponse\x12J\n" +
+	"\x12DeleteExternalJwks\x12 .identity.ExternalJwksGetRequest\x1a\x12.identity.MapEmpty\x12`\n" +
+	"\x17ContainsKeyExternalJwks\x12 .identity.ExternalJwksGetRequest\x1a#.identity.ExternalJwksValueResponse\x12`\n" +
+	"\x12GetAllExternalJwks\x12#.identity.ExternalJwksGetAllRequest\x1a%.identity.ExternalJwksEntriesResponse\x12[\n" +
+	"\x12KeySetExternalJwks\x12!.identity.ExternalJwksKeysRequest\x1a\".identity.ExternalJwksKeysResponse\x12Y\n" +
+	"\x10SizeExternalJwks\x12!.identity.ExternalJwksSizeRequest\x1a\".identity.ExternalJwksSizeResponse\x12K\n" +
+	"\x11ClearExternalJwks\x12\".identity.ExternalJwksClearRequest\x1a\x12.identity.MapEmpty\x12`\n" +
+	"\x17PutIfAbsentExternalJwks\x12 .identity.ExternalJwksPutRequest\x1a#.identity.ExternalJwksValueResponse\x12T\n" +
+	"\x11WatchExternalJwks\x12\x16.google.protobuf.Empty\x1a%.identity.ExternalJwksEntriesResponse0\x01\x12\\\n" +
+	"\x11QueryExternalJwks\x12\".identity.ExternalJwksQueryRequest\x1a#.identity.ExternalJwksQueryResponse\x12c\n" +
+	"\x16WatchQueryExternalJwks\x12\".identity.ExternalJwksQueryRequest\x1a#.identity.ExternalJwksQueryResponse0\x01B]Z[gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/identityb\x06proto3"
 
 var (
-	file_services_ironmaiden_proto_rawDescOnce sync.Once
-	file_services_ironmaiden_proto_rawDescData []byte
+	file_services_identity_proto_rawDescOnce sync.Once
+	file_services_identity_proto_rawDescData []byte
 )
 
-func file_services_ironmaiden_proto_rawDescGZIP() []byte {
-	file_services_ironmaiden_proto_rawDescOnce.Do(func() {
-		file_services_ironmaiden_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_services_ironmaiden_proto_rawDesc), len(file_services_ironmaiden_proto_rawDesc)))
+func file_services_identity_proto_rawDescGZIP() []byte {
+	file_services_identity_proto_rawDescOnce.Do(func() {
+		file_services_identity_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_services_identity_proto_rawDesc), len(file_services_identity_proto_rawDesc)))
 	})
-	return file_services_ironmaiden_proto_rawDescData
+	return file_services_identity_proto_rawDescData
 }
 
-var file_services_ironmaiden_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_services_ironmaiden_proto_msgTypes = make([]protoimpl.MessageInfo, 48)
-var file_services_ironmaiden_proto_goTypes = []any{
-	(ComparisonOp)(0),                             // 0: ironmaiden.ComparisonOp
-	(SortDirection)(0),                            // 1: ironmaiden.SortDirection
-	(LogicalOp)(0),                                // 2: ironmaiden.LogicalOp
-	(*Config)(nil),                                // 3: ironmaiden.Config
-	(*OAuthConfig)(nil),                           // 4: ironmaiden.OAuthConfig
-	(*ProviderConfig)(nil),                        // 5: ironmaiden.ProviderConfig
-	(*IronMaidenState)(nil),                       // 6: ironmaiden.IronMaidenState
-	(*IronMaidenStateInternal)(nil),               // 7: ironmaiden.IronMaidenStateInternal
-	(*ExternalJwk)(nil),                           // 8: ironmaiden.ExternalJwk
-	(*ListProvidersResponse)(nil),                 // 9: ironmaiden.ListProvidersResponse
-	(*ProviderInfo)(nil),                          // 10: ironmaiden.ProviderInfo
-	(*AuthorizeRequest)(nil),                      // 11: ironmaiden.AuthorizeRequest
-	(*AuthorizeResponse)(nil),                     // 12: ironmaiden.AuthorizeResponse
-	(*CallbackRequest)(nil),                       // 13: ironmaiden.CallbackRequest
-	(*CallbackResponse)(nil),                      // 14: ironmaiden.CallbackResponse
-	(*RefreshTokenRequest)(nil),                   // 15: ironmaiden.RefreshTokenRequest
-	(*RefreshTokenResponse)(nil),                  // 16: ironmaiden.RefreshTokenResponse
-	(*LogoutRequest)(nil),                         // 17: ironmaiden.LogoutRequest
-	(*LogoutResponse)(nil),                        // 18: ironmaiden.LogoutResponse
-	(*QueryValue)(nil),                            // 19: ironmaiden.QueryValue
-	(*Predicate)(nil),                             // 20: ironmaiden.Predicate
-	(*PredicateGroup)(nil),                        // 21: ironmaiden.PredicateGroup
-	(*SortField)(nil),                             // 22: ironmaiden.SortField
-	(*CollectionQuery)(nil),                       // 23: ironmaiden.CollectionQuery
-	(*VerifyingKeysGetRequest)(nil),               // 24: ironmaiden.VerifyingKeysGetRequest
-	(*VerifyingKeysPutRequest)(nil),               // 25: ironmaiden.VerifyingKeysPutRequest
-	(*VerifyingKeysGetAllRequest)(nil),            // 26: ironmaiden.VerifyingKeysGetAllRequest
-	(*VerifyingKeysKeysRequest)(nil),              // 27: ironmaiden.VerifyingKeysKeysRequest
-	(*VerifyingKeysSizeRequest)(nil),              // 28: ironmaiden.VerifyingKeysSizeRequest
-	(*VerifyingKeysClearRequest)(nil),             // 29: ironmaiden.VerifyingKeysClearRequest
-	(*VerifyingKeysValueResponse)(nil),            // 30: ironmaiden.VerifyingKeysValueResponse
-	(*VerifyingKeysEntriesResponse)(nil),          // 31: ironmaiden.VerifyingKeysEntriesResponse
-	(*VerifyingKeysKeysResponse)(nil),             // 32: ironmaiden.VerifyingKeysKeysResponse
-	(*VerifyingKeysSizeResponse)(nil),             // 33: ironmaiden.VerifyingKeysSizeResponse
-	(*VerifyingKeysQueryRequest)(nil),             // 34: ironmaiden.VerifyingKeysQueryRequest
-	(*VerifyingKeysQueryResponse)(nil),            // 35: ironmaiden.VerifyingKeysQueryResponse
-	(*ExternalJwksGetRequest)(nil),                // 36: ironmaiden.ExternalJwksGetRequest
-	(*ExternalJwksPutRequest)(nil),                // 37: ironmaiden.ExternalJwksPutRequest
-	(*ExternalJwksGetAllRequest)(nil),             // 38: ironmaiden.ExternalJwksGetAllRequest
-	(*ExternalJwksKeysRequest)(nil),               // 39: ironmaiden.ExternalJwksKeysRequest
-	(*ExternalJwksSizeRequest)(nil),               // 40: ironmaiden.ExternalJwksSizeRequest
-	(*ExternalJwksClearRequest)(nil),              // 41: ironmaiden.ExternalJwksClearRequest
-	(*ExternalJwksValueResponse)(nil),             // 42: ironmaiden.ExternalJwksValueResponse
-	(*ExternalJwksEntriesResponse)(nil),           // 43: ironmaiden.ExternalJwksEntriesResponse
-	(*ExternalJwksKeysResponse)(nil),              // 44: ironmaiden.ExternalJwksKeysResponse
-	(*ExternalJwksSizeResponse)(nil),              // 45: ironmaiden.ExternalJwksSizeResponse
-	(*ExternalJwksQueryRequest)(nil),              // 46: ironmaiden.ExternalJwksQueryRequest
-	(*ExternalJwksQueryResponse)(nil),             // 47: ironmaiden.ExternalJwksQueryResponse
-	(*MapEmpty)(nil),                              // 48: ironmaiden.MapEmpty
-	nil,                                           // 49: ironmaiden.VerifyingKeysEntriesResponse.EntriesEntry
-	nil,                                           // 50: ironmaiden.ExternalJwksEntriesResponse.EntriesEntry
-	(*entitlement.ServiceEntitlementMapping)(nil), // 51: entitlement.ServiceEntitlementMapping
-	(*entitlement.ServiceEntitlements)(nil),       // 52: entitlement.ServiceEntitlements
-	(*jwk.Jwk)(nil),                               // 53: jwk.Jwk
-	(*emptypb.Empty)(nil),                         // 54: google.protobuf.Empty
+var file_services_identity_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
+var file_services_identity_proto_msgTypes = make([]protoimpl.MessageInfo, 51)
+var file_services_identity_proto_goTypes = []any{
+	(ComparisonOp)(0),                             // 0: identity.ComparisonOp
+	(SortDirection)(0),                            // 1: identity.SortDirection
+	(LogicalOp)(0),                                // 2: identity.LogicalOp
+	(*Config)(nil),                                // 3: identity.Config
+	(*OAuthConfig)(nil),                           // 4: identity.OAuthConfig
+	(*ProviderConfig)(nil),                        // 5: identity.ProviderConfig
+	(*EntitlementConfig)(nil),                     // 6: identity.EntitlementConfig
+	(*IdentityState)(nil),                         // 7: identity.IdentityState
+	(*IdentityStateInternal)(nil),                 // 8: identity.IdentityStateInternal
+	(*ExternalJwk)(nil),                           // 9: identity.ExternalJwk
+	(*ListProvidersResponse)(nil),                 // 10: identity.ListProvidersResponse
+	(*ProviderInfo)(nil),                          // 11: identity.ProviderInfo
+	(*AuthorizeRequest)(nil),                      // 12: identity.AuthorizeRequest
+	(*AuthorizeResponse)(nil),                     // 13: identity.AuthorizeResponse
+	(*CallbackRequest)(nil),                       // 14: identity.CallbackRequest
+	(*CallbackResponse)(nil),                      // 15: identity.CallbackResponse
+	(*RefreshTokenRequest)(nil),                   // 16: identity.RefreshTokenRequest
+	(*RefreshTokenResponse)(nil),                  // 17: identity.RefreshTokenResponse
+	(*LogoutRequest)(nil),                         // 18: identity.LogoutRequest
+	(*LogoutResponse)(nil),                        // 19: identity.LogoutResponse
+	(*ExchangeTokenRequest)(nil),                  // 20: identity.ExchangeTokenRequest
+	(*ExchangeTokenResponse)(nil),                 // 21: identity.ExchangeTokenResponse
+	(*QueryValue)(nil),                            // 22: identity.QueryValue
+	(*Predicate)(nil),                             // 23: identity.Predicate
+	(*PredicateGroup)(nil),                        // 24: identity.PredicateGroup
+	(*SortField)(nil),                             // 25: identity.SortField
+	(*CollectionQuery)(nil),                       // 26: identity.CollectionQuery
+	(*VerifyingKeysGetRequest)(nil),               // 27: identity.VerifyingKeysGetRequest
+	(*VerifyingKeysPutRequest)(nil),               // 28: identity.VerifyingKeysPutRequest
+	(*VerifyingKeysGetAllRequest)(nil),            // 29: identity.VerifyingKeysGetAllRequest
+	(*VerifyingKeysKeysRequest)(nil),              // 30: identity.VerifyingKeysKeysRequest
+	(*VerifyingKeysSizeRequest)(nil),              // 31: identity.VerifyingKeysSizeRequest
+	(*VerifyingKeysClearRequest)(nil),             // 32: identity.VerifyingKeysClearRequest
+	(*VerifyingKeysValueResponse)(nil),            // 33: identity.VerifyingKeysValueResponse
+	(*VerifyingKeysEntriesResponse)(nil),          // 34: identity.VerifyingKeysEntriesResponse
+	(*VerifyingKeysKeysResponse)(nil),             // 35: identity.VerifyingKeysKeysResponse
+	(*VerifyingKeysSizeResponse)(nil),             // 36: identity.VerifyingKeysSizeResponse
+	(*VerifyingKeysQueryRequest)(nil),             // 37: identity.VerifyingKeysQueryRequest
+	(*VerifyingKeysQueryResponse)(nil),            // 38: identity.VerifyingKeysQueryResponse
+	(*ExternalJwksGetRequest)(nil),                // 39: identity.ExternalJwksGetRequest
+	(*ExternalJwksPutRequest)(nil),                // 40: identity.ExternalJwksPutRequest
+	(*ExternalJwksGetAllRequest)(nil),             // 41: identity.ExternalJwksGetAllRequest
+	(*ExternalJwksKeysRequest)(nil),               // 42: identity.ExternalJwksKeysRequest
+	(*ExternalJwksSizeRequest)(nil),               // 43: identity.ExternalJwksSizeRequest
+	(*ExternalJwksClearRequest)(nil),              // 44: identity.ExternalJwksClearRequest
+	(*ExternalJwksValueResponse)(nil),             // 45: identity.ExternalJwksValueResponse
+	(*ExternalJwksEntriesResponse)(nil),           // 46: identity.ExternalJwksEntriesResponse
+	(*ExternalJwksKeysResponse)(nil),              // 47: identity.ExternalJwksKeysResponse
+	(*ExternalJwksSizeResponse)(nil),              // 48: identity.ExternalJwksSizeResponse
+	(*ExternalJwksQueryRequest)(nil),              // 49: identity.ExternalJwksQueryRequest
+	(*ExternalJwksQueryResponse)(nil),             // 50: identity.ExternalJwksQueryResponse
+	(*MapEmpty)(nil),                              // 51: identity.MapEmpty
+	nil,                                           // 52: identity.VerifyingKeysEntriesResponse.EntriesEntry
+	nil,                                           // 53: identity.ExternalJwksEntriesResponse.EntriesEntry
+	(*entitlement.ServiceEntitlementMapping)(nil), // 54: entitlement.ServiceEntitlementMapping
+	(*entitlement.ServiceEntitlements)(nil),       // 55: entitlement.ServiceEntitlements
+	(*jwk.Jwk)(nil),                               // 56: jwk.Jwk
+	(*opa.OpaPolicy)(nil),                         // 57: opa.OpaPolicy
+	(*emptypb.Empty)(nil),                         // 58: google.protobuf.Empty
 }
-var file_services_ironmaiden_proto_depIdxs = []int32{
-	4,  // 0: ironmaiden.Config.oauth:type_name -> ironmaiden.OAuthConfig
-	51, // 1: ironmaiden.Config.entitlement_mappings:type_name -> entitlement.ServiceEntitlementMapping
-	52, // 2: ironmaiden.Config.service_entitlements:type_name -> entitlement.ServiceEntitlements
-	5,  // 3: ironmaiden.OAuthConfig.providers:type_name -> ironmaiden.ProviderConfig
-	53, // 4: ironmaiden.IronMaidenState.verifying_keys:type_name -> jwk.Jwk
-	8,  // 5: ironmaiden.IronMaidenStateInternal.external_jwks:type_name -> ironmaiden.ExternalJwk
-	53, // 6: ironmaiden.ExternalJwk.key:type_name -> jwk.Jwk
-	10, // 7: ironmaiden.ListProvidersResponse.providers:type_name -> ironmaiden.ProviderInfo
-	0,  // 8: ironmaiden.Predicate.op:type_name -> ironmaiden.ComparisonOp
-	19, // 9: ironmaiden.Predicate.value:type_name -> ironmaiden.QueryValue
-	19, // 10: ironmaiden.Predicate.values:type_name -> ironmaiden.QueryValue
-	2,  // 11: ironmaiden.PredicateGroup.op:type_name -> ironmaiden.LogicalOp
-	20, // 12: ironmaiden.PredicateGroup.predicates:type_name -> ironmaiden.Predicate
-	21, // 13: ironmaiden.PredicateGroup.groups:type_name -> ironmaiden.PredicateGroup
-	1,  // 14: ironmaiden.SortField.direction:type_name -> ironmaiden.SortDirection
-	21, // 15: ironmaiden.CollectionQuery.where:type_name -> ironmaiden.PredicateGroup
-	22, // 16: ironmaiden.CollectionQuery.order_by:type_name -> ironmaiden.SortField
-	53, // 17: ironmaiden.VerifyingKeysPutRequest.value:type_name -> jwk.Jwk
-	53, // 18: ironmaiden.VerifyingKeysValueResponse.value:type_name -> jwk.Jwk
-	49, // 19: ironmaiden.VerifyingKeysEntriesResponse.entries:type_name -> ironmaiden.VerifyingKeysEntriesResponse.EntriesEntry
-	23, // 20: ironmaiden.VerifyingKeysQueryRequest.query:type_name -> ironmaiden.CollectionQuery
-	53, // 21: ironmaiden.VerifyingKeysQueryResponse.results:type_name -> jwk.Jwk
-	8,  // 22: ironmaiden.ExternalJwksPutRequest.value:type_name -> ironmaiden.ExternalJwk
-	8,  // 23: ironmaiden.ExternalJwksValueResponse.value:type_name -> ironmaiden.ExternalJwk
-	50, // 24: ironmaiden.ExternalJwksEntriesResponse.entries:type_name -> ironmaiden.ExternalJwksEntriesResponse.EntriesEntry
-	23, // 25: ironmaiden.ExternalJwksQueryRequest.query:type_name -> ironmaiden.CollectionQuery
-	8,  // 26: ironmaiden.ExternalJwksQueryResponse.results:type_name -> ironmaiden.ExternalJwk
-	53, // 27: ironmaiden.VerifyingKeysEntriesResponse.EntriesEntry.value:type_name -> jwk.Jwk
-	8,  // 28: ironmaiden.ExternalJwksEntriesResponse.EntriesEntry.value:type_name -> ironmaiden.ExternalJwk
-	54, // 29: ironmaiden.IronMaidenService.ListProviders:input_type -> google.protobuf.Empty
-	11, // 30: ironmaiden.IronMaidenService.Authorize:input_type -> ironmaiden.AuthorizeRequest
-	13, // 31: ironmaiden.IronMaidenService.Callback:input_type -> ironmaiden.CallbackRequest
-	15, // 32: ironmaiden.IronMaidenService.RefreshToken:input_type -> ironmaiden.RefreshTokenRequest
-	17, // 33: ironmaiden.IronMaidenService.Logout:input_type -> ironmaiden.LogoutRequest
-	24, // 34: ironmaiden.IronMaidenStateBackendService.GetVerifyingKeys:input_type -> ironmaiden.VerifyingKeysGetRequest
-	25, // 35: ironmaiden.IronMaidenStateBackendService.PutVerifyingKeys:input_type -> ironmaiden.VerifyingKeysPutRequest
-	25, // 36: ironmaiden.IronMaidenStateBackendService.SetVerifyingKeys:input_type -> ironmaiden.VerifyingKeysPutRequest
-	24, // 37: ironmaiden.IronMaidenStateBackendService.RemoveVerifyingKeys:input_type -> ironmaiden.VerifyingKeysGetRequest
-	24, // 38: ironmaiden.IronMaidenStateBackendService.DeleteVerifyingKeys:input_type -> ironmaiden.VerifyingKeysGetRequest
-	24, // 39: ironmaiden.IronMaidenStateBackendService.ContainsKeyVerifyingKeys:input_type -> ironmaiden.VerifyingKeysGetRequest
-	26, // 40: ironmaiden.IronMaidenStateBackendService.GetAllVerifyingKeys:input_type -> ironmaiden.VerifyingKeysGetAllRequest
-	27, // 41: ironmaiden.IronMaidenStateBackendService.KeySetVerifyingKeys:input_type -> ironmaiden.VerifyingKeysKeysRequest
-	28, // 42: ironmaiden.IronMaidenStateBackendService.SizeVerifyingKeys:input_type -> ironmaiden.VerifyingKeysSizeRequest
-	29, // 43: ironmaiden.IronMaidenStateBackendService.ClearVerifyingKeys:input_type -> ironmaiden.VerifyingKeysClearRequest
-	25, // 44: ironmaiden.IronMaidenStateBackendService.PutIfAbsentVerifyingKeys:input_type -> ironmaiden.VerifyingKeysPutRequest
-	54, // 45: ironmaiden.IronMaidenStateBackendService.WatchVerifyingKeys:input_type -> google.protobuf.Empty
-	34, // 46: ironmaiden.IronMaidenStateBackendService.QueryVerifyingKeys:input_type -> ironmaiden.VerifyingKeysQueryRequest
-	34, // 47: ironmaiden.IronMaidenStateBackendService.WatchQueryVerifyingKeys:input_type -> ironmaiden.VerifyingKeysQueryRequest
-	36, // 48: ironmaiden.IronMaidenStateInternalBackendService.GetExternalJwks:input_type -> ironmaiden.ExternalJwksGetRequest
-	37, // 49: ironmaiden.IronMaidenStateInternalBackendService.PutExternalJwks:input_type -> ironmaiden.ExternalJwksPutRequest
-	37, // 50: ironmaiden.IronMaidenStateInternalBackendService.SetExternalJwks:input_type -> ironmaiden.ExternalJwksPutRequest
-	36, // 51: ironmaiden.IronMaidenStateInternalBackendService.RemoveExternalJwks:input_type -> ironmaiden.ExternalJwksGetRequest
-	36, // 52: ironmaiden.IronMaidenStateInternalBackendService.DeleteExternalJwks:input_type -> ironmaiden.ExternalJwksGetRequest
-	36, // 53: ironmaiden.IronMaidenStateInternalBackendService.ContainsKeyExternalJwks:input_type -> ironmaiden.ExternalJwksGetRequest
-	38, // 54: ironmaiden.IronMaidenStateInternalBackendService.GetAllExternalJwks:input_type -> ironmaiden.ExternalJwksGetAllRequest
-	39, // 55: ironmaiden.IronMaidenStateInternalBackendService.KeySetExternalJwks:input_type -> ironmaiden.ExternalJwksKeysRequest
-	40, // 56: ironmaiden.IronMaidenStateInternalBackendService.SizeExternalJwks:input_type -> ironmaiden.ExternalJwksSizeRequest
-	41, // 57: ironmaiden.IronMaidenStateInternalBackendService.ClearExternalJwks:input_type -> ironmaiden.ExternalJwksClearRequest
-	37, // 58: ironmaiden.IronMaidenStateInternalBackendService.PutIfAbsentExternalJwks:input_type -> ironmaiden.ExternalJwksPutRequest
-	54, // 59: ironmaiden.IronMaidenStateInternalBackendService.WatchExternalJwks:input_type -> google.protobuf.Empty
-	46, // 60: ironmaiden.IronMaidenStateInternalBackendService.QueryExternalJwks:input_type -> ironmaiden.ExternalJwksQueryRequest
-	46, // 61: ironmaiden.IronMaidenStateInternalBackendService.WatchQueryExternalJwks:input_type -> ironmaiden.ExternalJwksQueryRequest
-	9,  // 62: ironmaiden.IronMaidenService.ListProviders:output_type -> ironmaiden.ListProvidersResponse
-	12, // 63: ironmaiden.IronMaidenService.Authorize:output_type -> ironmaiden.AuthorizeResponse
-	14, // 64: ironmaiden.IronMaidenService.Callback:output_type -> ironmaiden.CallbackResponse
-	16, // 65: ironmaiden.IronMaidenService.RefreshToken:output_type -> ironmaiden.RefreshTokenResponse
-	18, // 66: ironmaiden.IronMaidenService.Logout:output_type -> ironmaiden.LogoutResponse
-	30, // 67: ironmaiden.IronMaidenStateBackendService.GetVerifyingKeys:output_type -> ironmaiden.VerifyingKeysValueResponse
-	30, // 68: ironmaiden.IronMaidenStateBackendService.PutVerifyingKeys:output_type -> ironmaiden.VerifyingKeysValueResponse
-	48, // 69: ironmaiden.IronMaidenStateBackendService.SetVerifyingKeys:output_type -> ironmaiden.MapEmpty
-	30, // 70: ironmaiden.IronMaidenStateBackendService.RemoveVerifyingKeys:output_type -> ironmaiden.VerifyingKeysValueResponse
-	48, // 71: ironmaiden.IronMaidenStateBackendService.DeleteVerifyingKeys:output_type -> ironmaiden.MapEmpty
-	30, // 72: ironmaiden.IronMaidenStateBackendService.ContainsKeyVerifyingKeys:output_type -> ironmaiden.VerifyingKeysValueResponse
-	31, // 73: ironmaiden.IronMaidenStateBackendService.GetAllVerifyingKeys:output_type -> ironmaiden.VerifyingKeysEntriesResponse
-	32, // 74: ironmaiden.IronMaidenStateBackendService.KeySetVerifyingKeys:output_type -> ironmaiden.VerifyingKeysKeysResponse
-	33, // 75: ironmaiden.IronMaidenStateBackendService.SizeVerifyingKeys:output_type -> ironmaiden.VerifyingKeysSizeResponse
-	48, // 76: ironmaiden.IronMaidenStateBackendService.ClearVerifyingKeys:output_type -> ironmaiden.MapEmpty
-	30, // 77: ironmaiden.IronMaidenStateBackendService.PutIfAbsentVerifyingKeys:output_type -> ironmaiden.VerifyingKeysValueResponse
-	31, // 78: ironmaiden.IronMaidenStateBackendService.WatchVerifyingKeys:output_type -> ironmaiden.VerifyingKeysEntriesResponse
-	35, // 79: ironmaiden.IronMaidenStateBackendService.QueryVerifyingKeys:output_type -> ironmaiden.VerifyingKeysQueryResponse
-	35, // 80: ironmaiden.IronMaidenStateBackendService.WatchQueryVerifyingKeys:output_type -> ironmaiden.VerifyingKeysQueryResponse
-	42, // 81: ironmaiden.IronMaidenStateInternalBackendService.GetExternalJwks:output_type -> ironmaiden.ExternalJwksValueResponse
-	42, // 82: ironmaiden.IronMaidenStateInternalBackendService.PutExternalJwks:output_type -> ironmaiden.ExternalJwksValueResponse
-	48, // 83: ironmaiden.IronMaidenStateInternalBackendService.SetExternalJwks:output_type -> ironmaiden.MapEmpty
-	42, // 84: ironmaiden.IronMaidenStateInternalBackendService.RemoveExternalJwks:output_type -> ironmaiden.ExternalJwksValueResponse
-	48, // 85: ironmaiden.IronMaidenStateInternalBackendService.DeleteExternalJwks:output_type -> ironmaiden.MapEmpty
-	42, // 86: ironmaiden.IronMaidenStateInternalBackendService.ContainsKeyExternalJwks:output_type -> ironmaiden.ExternalJwksValueResponse
-	43, // 87: ironmaiden.IronMaidenStateInternalBackendService.GetAllExternalJwks:output_type -> ironmaiden.ExternalJwksEntriesResponse
-	44, // 88: ironmaiden.IronMaidenStateInternalBackendService.KeySetExternalJwks:output_type -> ironmaiden.ExternalJwksKeysResponse
-	45, // 89: ironmaiden.IronMaidenStateInternalBackendService.SizeExternalJwks:output_type -> ironmaiden.ExternalJwksSizeResponse
-	48, // 90: ironmaiden.IronMaidenStateInternalBackendService.ClearExternalJwks:output_type -> ironmaiden.MapEmpty
-	42, // 91: ironmaiden.IronMaidenStateInternalBackendService.PutIfAbsentExternalJwks:output_type -> ironmaiden.ExternalJwksValueResponse
-	43, // 92: ironmaiden.IronMaidenStateInternalBackendService.WatchExternalJwks:output_type -> ironmaiden.ExternalJwksEntriesResponse
-	47, // 93: ironmaiden.IronMaidenStateInternalBackendService.QueryExternalJwks:output_type -> ironmaiden.ExternalJwksQueryResponse
-	47, // 94: ironmaiden.IronMaidenStateInternalBackendService.WatchQueryExternalJwks:output_type -> ironmaiden.ExternalJwksQueryResponse
-	62, // [62:95] is the sub-list for method output_type
-	29, // [29:62] is the sub-list for method input_type
-	29, // [29:29] is the sub-list for extension type_name
-	29, // [29:29] is the sub-list for extension extendee
-	0,  // [0:29] is the sub-list for field type_name
+var file_services_identity_proto_depIdxs = []int32{
+	4,  // 0: identity.Config.oauth:type_name -> identity.OAuthConfig
+	54, // 1: identity.Config.entitlement_mappings:type_name -> entitlement.ServiceEntitlementMapping
+	55, // 2: identity.Config.service_entitlements:type_name -> entitlement.ServiceEntitlements
+	5,  // 3: identity.OAuthConfig.providers:type_name -> identity.ProviderConfig
+	54, // 4: identity.EntitlementConfig.entitlement_mappings:type_name -> entitlement.ServiceEntitlementMapping
+	55, // 5: identity.EntitlementConfig.service_entitlements:type_name -> entitlement.ServiceEntitlements
+	56, // 6: identity.IdentityState.verifying_keys:type_name -> jwk.Jwk
+	57, // 7: identity.IdentityState.entitlements_policy:type_name -> opa.OpaPolicy
+	6,  // 8: identity.IdentityState.entitlement_config:type_name -> identity.EntitlementConfig
+	9,  // 9: identity.IdentityStateInternal.external_jwks:type_name -> identity.ExternalJwk
+	56, // 10: identity.ExternalJwk.key:type_name -> jwk.Jwk
+	11, // 11: identity.ListProvidersResponse.providers:type_name -> identity.ProviderInfo
+	0,  // 12: identity.Predicate.op:type_name -> identity.ComparisonOp
+	22, // 13: identity.Predicate.value:type_name -> identity.QueryValue
+	22, // 14: identity.Predicate.values:type_name -> identity.QueryValue
+	2,  // 15: identity.PredicateGroup.op:type_name -> identity.LogicalOp
+	23, // 16: identity.PredicateGroup.predicates:type_name -> identity.Predicate
+	24, // 17: identity.PredicateGroup.groups:type_name -> identity.PredicateGroup
+	1,  // 18: identity.SortField.direction:type_name -> identity.SortDirection
+	24, // 19: identity.CollectionQuery.where:type_name -> identity.PredicateGroup
+	25, // 20: identity.CollectionQuery.order_by:type_name -> identity.SortField
+	56, // 21: identity.VerifyingKeysPutRequest.value:type_name -> jwk.Jwk
+	56, // 22: identity.VerifyingKeysValueResponse.value:type_name -> jwk.Jwk
+	52, // 23: identity.VerifyingKeysEntriesResponse.entries:type_name -> identity.VerifyingKeysEntriesResponse.EntriesEntry
+	26, // 24: identity.VerifyingKeysQueryRequest.query:type_name -> identity.CollectionQuery
+	56, // 25: identity.VerifyingKeysQueryResponse.results:type_name -> jwk.Jwk
+	9,  // 26: identity.ExternalJwksPutRequest.value:type_name -> identity.ExternalJwk
+	9,  // 27: identity.ExternalJwksValueResponse.value:type_name -> identity.ExternalJwk
+	53, // 28: identity.ExternalJwksEntriesResponse.entries:type_name -> identity.ExternalJwksEntriesResponse.EntriesEntry
+	26, // 29: identity.ExternalJwksQueryRequest.query:type_name -> identity.CollectionQuery
+	9,  // 30: identity.ExternalJwksQueryResponse.results:type_name -> identity.ExternalJwk
+	56, // 31: identity.VerifyingKeysEntriesResponse.EntriesEntry.value:type_name -> jwk.Jwk
+	9,  // 32: identity.ExternalJwksEntriesResponse.EntriesEntry.value:type_name -> identity.ExternalJwk
+	58, // 33: identity.IdentityService.ListProviders:input_type -> google.protobuf.Empty
+	12, // 34: identity.IdentityService.Authorize:input_type -> identity.AuthorizeRequest
+	14, // 35: identity.IdentityService.Callback:input_type -> identity.CallbackRequest
+	16, // 36: identity.IdentityService.RefreshToken:input_type -> identity.RefreshTokenRequest
+	20, // 37: identity.IdentityService.ExchangeToken:input_type -> identity.ExchangeTokenRequest
+	18, // 38: identity.IdentityService.Logout:input_type -> identity.LogoutRequest
+	58, // 39: identity.IdentityStateBackendService.GetEntitlementsPolicy:input_type -> google.protobuf.Empty
+	57, // 40: identity.IdentityStateBackendService.SetEntitlementsPolicy:input_type -> opa.OpaPolicy
+	58, // 41: identity.IdentityStateBackendService.WatchEntitlementsPolicy:input_type -> google.protobuf.Empty
+	58, // 42: identity.IdentityStateBackendService.GetEntitlementConfig:input_type -> google.protobuf.Empty
+	6,  // 43: identity.IdentityStateBackendService.SetEntitlementConfig:input_type -> identity.EntitlementConfig
+	58, // 44: identity.IdentityStateBackendService.WatchEntitlementConfig:input_type -> google.protobuf.Empty
+	27, // 45: identity.IdentityStateBackendService.GetVerifyingKeys:input_type -> identity.VerifyingKeysGetRequest
+	28, // 46: identity.IdentityStateBackendService.PutVerifyingKeys:input_type -> identity.VerifyingKeysPutRequest
+	28, // 47: identity.IdentityStateBackendService.SetVerifyingKeys:input_type -> identity.VerifyingKeysPutRequest
+	27, // 48: identity.IdentityStateBackendService.RemoveVerifyingKeys:input_type -> identity.VerifyingKeysGetRequest
+	27, // 49: identity.IdentityStateBackendService.DeleteVerifyingKeys:input_type -> identity.VerifyingKeysGetRequest
+	27, // 50: identity.IdentityStateBackendService.ContainsKeyVerifyingKeys:input_type -> identity.VerifyingKeysGetRequest
+	29, // 51: identity.IdentityStateBackendService.GetAllVerifyingKeys:input_type -> identity.VerifyingKeysGetAllRequest
+	30, // 52: identity.IdentityStateBackendService.KeySetVerifyingKeys:input_type -> identity.VerifyingKeysKeysRequest
+	31, // 53: identity.IdentityStateBackendService.SizeVerifyingKeys:input_type -> identity.VerifyingKeysSizeRequest
+	32, // 54: identity.IdentityStateBackendService.ClearVerifyingKeys:input_type -> identity.VerifyingKeysClearRequest
+	28, // 55: identity.IdentityStateBackendService.PutIfAbsentVerifyingKeys:input_type -> identity.VerifyingKeysPutRequest
+	58, // 56: identity.IdentityStateBackendService.WatchVerifyingKeys:input_type -> google.protobuf.Empty
+	37, // 57: identity.IdentityStateBackendService.QueryVerifyingKeys:input_type -> identity.VerifyingKeysQueryRequest
+	37, // 58: identity.IdentityStateBackendService.WatchQueryVerifyingKeys:input_type -> identity.VerifyingKeysQueryRequest
+	39, // 59: identity.IdentityStateInternalBackendService.GetExternalJwks:input_type -> identity.ExternalJwksGetRequest
+	40, // 60: identity.IdentityStateInternalBackendService.PutExternalJwks:input_type -> identity.ExternalJwksPutRequest
+	40, // 61: identity.IdentityStateInternalBackendService.SetExternalJwks:input_type -> identity.ExternalJwksPutRequest
+	39, // 62: identity.IdentityStateInternalBackendService.RemoveExternalJwks:input_type -> identity.ExternalJwksGetRequest
+	39, // 63: identity.IdentityStateInternalBackendService.DeleteExternalJwks:input_type -> identity.ExternalJwksGetRequest
+	39, // 64: identity.IdentityStateInternalBackendService.ContainsKeyExternalJwks:input_type -> identity.ExternalJwksGetRequest
+	41, // 65: identity.IdentityStateInternalBackendService.GetAllExternalJwks:input_type -> identity.ExternalJwksGetAllRequest
+	42, // 66: identity.IdentityStateInternalBackendService.KeySetExternalJwks:input_type -> identity.ExternalJwksKeysRequest
+	43, // 67: identity.IdentityStateInternalBackendService.SizeExternalJwks:input_type -> identity.ExternalJwksSizeRequest
+	44, // 68: identity.IdentityStateInternalBackendService.ClearExternalJwks:input_type -> identity.ExternalJwksClearRequest
+	40, // 69: identity.IdentityStateInternalBackendService.PutIfAbsentExternalJwks:input_type -> identity.ExternalJwksPutRequest
+	58, // 70: identity.IdentityStateInternalBackendService.WatchExternalJwks:input_type -> google.protobuf.Empty
+	49, // 71: identity.IdentityStateInternalBackendService.QueryExternalJwks:input_type -> identity.ExternalJwksQueryRequest
+	49, // 72: identity.IdentityStateInternalBackendService.WatchQueryExternalJwks:input_type -> identity.ExternalJwksQueryRequest
+	10, // 73: identity.IdentityService.ListProviders:output_type -> identity.ListProvidersResponse
+	13, // 74: identity.IdentityService.Authorize:output_type -> identity.AuthorizeResponse
+	15, // 75: identity.IdentityService.Callback:output_type -> identity.CallbackResponse
+	17, // 76: identity.IdentityService.RefreshToken:output_type -> identity.RefreshTokenResponse
+	21, // 77: identity.IdentityService.ExchangeToken:output_type -> identity.ExchangeTokenResponse
+	19, // 78: identity.IdentityService.Logout:output_type -> identity.LogoutResponse
+	57, // 79: identity.IdentityStateBackendService.GetEntitlementsPolicy:output_type -> opa.OpaPolicy
+	57, // 80: identity.IdentityStateBackendService.SetEntitlementsPolicy:output_type -> opa.OpaPolicy
+	57, // 81: identity.IdentityStateBackendService.WatchEntitlementsPolicy:output_type -> opa.OpaPolicy
+	6,  // 82: identity.IdentityStateBackendService.GetEntitlementConfig:output_type -> identity.EntitlementConfig
+	6,  // 83: identity.IdentityStateBackendService.SetEntitlementConfig:output_type -> identity.EntitlementConfig
+	6,  // 84: identity.IdentityStateBackendService.WatchEntitlementConfig:output_type -> identity.EntitlementConfig
+	33, // 85: identity.IdentityStateBackendService.GetVerifyingKeys:output_type -> identity.VerifyingKeysValueResponse
+	33, // 86: identity.IdentityStateBackendService.PutVerifyingKeys:output_type -> identity.VerifyingKeysValueResponse
+	51, // 87: identity.IdentityStateBackendService.SetVerifyingKeys:output_type -> identity.MapEmpty
+	33, // 88: identity.IdentityStateBackendService.RemoveVerifyingKeys:output_type -> identity.VerifyingKeysValueResponse
+	51, // 89: identity.IdentityStateBackendService.DeleteVerifyingKeys:output_type -> identity.MapEmpty
+	33, // 90: identity.IdentityStateBackendService.ContainsKeyVerifyingKeys:output_type -> identity.VerifyingKeysValueResponse
+	34, // 91: identity.IdentityStateBackendService.GetAllVerifyingKeys:output_type -> identity.VerifyingKeysEntriesResponse
+	35, // 92: identity.IdentityStateBackendService.KeySetVerifyingKeys:output_type -> identity.VerifyingKeysKeysResponse
+	36, // 93: identity.IdentityStateBackendService.SizeVerifyingKeys:output_type -> identity.VerifyingKeysSizeResponse
+	51, // 94: identity.IdentityStateBackendService.ClearVerifyingKeys:output_type -> identity.MapEmpty
+	33, // 95: identity.IdentityStateBackendService.PutIfAbsentVerifyingKeys:output_type -> identity.VerifyingKeysValueResponse
+	34, // 96: identity.IdentityStateBackendService.WatchVerifyingKeys:output_type -> identity.VerifyingKeysEntriesResponse
+	38, // 97: identity.IdentityStateBackendService.QueryVerifyingKeys:output_type -> identity.VerifyingKeysQueryResponse
+	38, // 98: identity.IdentityStateBackendService.WatchQueryVerifyingKeys:output_type -> identity.VerifyingKeysQueryResponse
+	45, // 99: identity.IdentityStateInternalBackendService.GetExternalJwks:output_type -> identity.ExternalJwksValueResponse
+	45, // 100: identity.IdentityStateInternalBackendService.PutExternalJwks:output_type -> identity.ExternalJwksValueResponse
+	51, // 101: identity.IdentityStateInternalBackendService.SetExternalJwks:output_type -> identity.MapEmpty
+	45, // 102: identity.IdentityStateInternalBackendService.RemoveExternalJwks:output_type -> identity.ExternalJwksValueResponse
+	51, // 103: identity.IdentityStateInternalBackendService.DeleteExternalJwks:output_type -> identity.MapEmpty
+	45, // 104: identity.IdentityStateInternalBackendService.ContainsKeyExternalJwks:output_type -> identity.ExternalJwksValueResponse
+	46, // 105: identity.IdentityStateInternalBackendService.GetAllExternalJwks:output_type -> identity.ExternalJwksEntriesResponse
+	47, // 106: identity.IdentityStateInternalBackendService.KeySetExternalJwks:output_type -> identity.ExternalJwksKeysResponse
+	48, // 107: identity.IdentityStateInternalBackendService.SizeExternalJwks:output_type -> identity.ExternalJwksSizeResponse
+	51, // 108: identity.IdentityStateInternalBackendService.ClearExternalJwks:output_type -> identity.MapEmpty
+	45, // 109: identity.IdentityStateInternalBackendService.PutIfAbsentExternalJwks:output_type -> identity.ExternalJwksValueResponse
+	46, // 110: identity.IdentityStateInternalBackendService.WatchExternalJwks:output_type -> identity.ExternalJwksEntriesResponse
+	50, // 111: identity.IdentityStateInternalBackendService.QueryExternalJwks:output_type -> identity.ExternalJwksQueryResponse
+	50, // 112: identity.IdentityStateInternalBackendService.WatchQueryExternalJwks:output_type -> identity.ExternalJwksQueryResponse
+	73, // [73:113] is the sub-list for method output_type
+	33, // [33:73] is the sub-list for method input_type
+	33, // [33:33] is the sub-list for extension type_name
+	33, // [33:33] is the sub-list for extension extendee
+	0,  // [0:33] is the sub-list for field type_name
 }
 
-func init() { file_services_ironmaiden_proto_init() }
-func file_services_ironmaiden_proto_init() {
-	if File_services_ironmaiden_proto != nil {
+func init() { file_services_identity_proto_init() }
+func file_services_identity_proto_init() {
+	if File_services_identity_proto != nil {
 		return
 	}
-	file_services_ironmaiden_proto_msgTypes[16].OneofWrappers = []any{
+	file_services_identity_proto_msgTypes[19].OneofWrappers = []any{
 		(*QueryValue_StringValue)(nil),
 		(*QueryValue_IntValue)(nil),
 		(*QueryValue_DoubleValue)(nil),
@@ -3189,18 +3397,18 @@ func file_services_ironmaiden_proto_init() {
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_services_ironmaiden_proto_rawDesc), len(file_services_ironmaiden_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_services_identity_proto_rawDesc), len(file_services_identity_proto_rawDesc)),
 			NumEnums:      3,
-			NumMessages:   48,
+			NumMessages:   51,
 			NumExtensions: 0,
 			NumServices:   3,
 		},
-		GoTypes:           file_services_ironmaiden_proto_goTypes,
-		DependencyIndexes: file_services_ironmaiden_proto_depIdxs,
-		EnumInfos:         file_services_ironmaiden_proto_enumTypes,
-		MessageInfos:      file_services_ironmaiden_proto_msgTypes,
+		GoTypes:           file_services_identity_proto_goTypes,
+		DependencyIndexes: file_services_identity_proto_depIdxs,
+		EnumInfos:         file_services_identity_proto_enumTypes,
+		MessageInfos:      file_services_identity_proto_msgTypes,
 	}.Build()
-	File_services_ironmaiden_proto = out.File
-	file_services_ironmaiden_proto_goTypes = nil
-	file_services_ironmaiden_proto_depIdxs = nil
+	File_services_identity_proto = out.File
+	file_services_identity_proto_goTypes = nil
+	file_services_identity_proto_depIdxs = nil
 }

@@ -3,7 +3,7 @@
 syntax = "proto3";
 
 package alpn;
-option go_package = "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/alpn";
+option go_package = "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/alpn";
 
 // ALPNProtocol defines the Application-Layer Protocol Negotiation identifiers.
 // Used during TLS handshake to negotiate which protocol to use.

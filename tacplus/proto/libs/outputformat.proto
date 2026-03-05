@@ -3,7 +3,7 @@
 syntax = "proto3";
 
 package outputformat;
-option go_package = "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/outputformat";
+option go_package = "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/outputformat";
 
 // OutputFormat represents the output format for data serialization
 enum OutputFormat {

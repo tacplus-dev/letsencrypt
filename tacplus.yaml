@@ -1,6 +1,6 @@
 language: go
 src: /Users/jody/workspace/services/proto
 tag: latest
-pkg: gitlab.com/secondstarcavalier/controlplane/services/genesis
+pkg: gitlab.com/secondstarcavalier/controlplane/services/letsencrypt
 backends:
-  - services/genesis.GenesisState:rw
+  - services/letsencrypt.LetsEncryptState:rw

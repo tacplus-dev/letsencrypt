@@ -19,8 +19,8 @@ import (
 	"strconv"
 
 	"github.com/pelletier/go-toml/v2"
-	protoerrors "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/errors"
-	utils "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/utils"
+	protoerrors "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/errors"
+	utils "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/utils"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 	"gopkg.in/yaml.v3"
@@ -219,16 +219,6 @@ func ValidateOpaPolicy(m *OpaPolicy) error {
 	// Validate EntryPoint (assert_min_length: 1)
 	if len(m.EntryPoint) < 1 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field EntryPoint must be at least 1 characters, got: %d", len(m.EntryPoint))
-	}
-
-	// Validate EntryPoint (assert_required)
-	if m.EntryPoint == "" {
-		return protoerrors.NewErrMissingInvalidData(nil, "field EntryPoint is required")
-	}
-
-	// Validate Bundle (assert_required)
-	if m.Bundle == "" {
-		return protoerrors.NewErrMissingInvalidData(nil, "field Bundle is required")
 	}
 
 	// Validate Bundle (assert_base64)

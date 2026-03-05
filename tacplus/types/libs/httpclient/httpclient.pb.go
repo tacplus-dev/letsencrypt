@@ -14,8 +14,8 @@
 package httpclient
 
 import (
-	_ "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/spec"
-	x509 "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/x509"
+	_ "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/spec"
+	x509 "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/x509"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -336,7 +336,7 @@ const file_libs_httpclient_proto_rawDesc = "" +
 	"\x12initial_backoff_ms\x18\x02 \x01(\x03B\x04\xc0\xa6\x1d\x01R\x10initialBackoffMs\x12*\n" +
 	"\x0emax_backoff_ms\x18\x03 \x01(\x03B\x04\xc0\xa6\x1d\x01R\fmaxBackoffMs\x123\n" +
 	"\x12backoff_multiplier\x18\x04 \x01(\x01B\x04\xa8\xa7\x1d\x00R\x11backoffMultiplier\x124\n" +
-	"\x16retryable_status_codes\x18\x05 \x03(\x05R\x14retryableStatusCodesBWZUgitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/httpclientb\x06proto3"
+	"\x16retryable_status_codes\x18\x05 \x03(\x05R\x14retryableStatusCodesB[ZYgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/httpclientb\x06proto3"
 
 var (
 	file_libs_httpclient_proto_rawDescOnce sync.Once

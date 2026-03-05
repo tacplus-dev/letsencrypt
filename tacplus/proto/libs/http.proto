@@ -3,7 +3,7 @@
 syntax = "proto3";
 
 package http;
-option go_package = "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/http";
+option go_package = "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/http";
 
 // Method represents HTTP request methods using bitmask values.
 // Values are powers of 2 to enable bitwise OR operations for combining methods.

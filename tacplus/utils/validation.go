@@ -17,7 +17,7 @@ import (
 	"net/url"
 	"regexp"
 
-	protoerrors "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/errors"
+	protoerrors "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/errors"
 )
 
 // ========================================

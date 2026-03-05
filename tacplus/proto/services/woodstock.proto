@@ -14,7 +14,7 @@
 syntax = "proto3";
 
 package woodstock;
-option go_package = "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/services/woodstock";
+option go_package = "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/woodstock";
 
 import "google/protobuf/empty.proto";
 
@@ -64,7 +64,6 @@ message ServiceStatus {
 	string version = 4;
   Lock lock = 5;
 }
-
 // Lock provides optimistic concurrency control for atomic state boundaries.
 message Lock {
   string id = 1;

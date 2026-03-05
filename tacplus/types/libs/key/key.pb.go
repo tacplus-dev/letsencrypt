@@ -14,7 +14,7 @@
 package key
 
 import (
-	_ "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/spec"
+	_ "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/spec"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -295,7 +295,7 @@ const file_libs_key_proto_rawDesc = "" +
 	"\aUseType\x12\x16\n" +
 	"\x12USE_TYPE_UNDEFINED\x10\x00\x12\x19\n" +
 	"\fUSE_TYPE_SIG\x10\x01\x1a\a\xaa\xb5\x18\x03sig\x12\x19\n" +
-	"\fUSE_TYPE_ENC\x10\x02\x1a\a\xaa\xb5\x18\x03encBPZNgitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/keyb\x06proto3"
+	"\fUSE_TYPE_ENC\x10\x02\x1a\a\xaa\xb5\x18\x03encBTZRgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/keyb\x06proto3"
 
 var (
 	file_libs_key_proto_rawDescOnce sync.Once

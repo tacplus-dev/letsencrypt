@@ -11,22 +11,22 @@ import (
 	"time"
 
 	"github.com/caddyserver/certmagic"
-	key_pb "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/key"
-	x509_pb "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/x509"
-	genesis_pb "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/services/genesis"
-	"gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/wrappers/backends"
+	key_pb "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/key"
+	x509_pb "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/x509"
+	letsencrypt_pb "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/letsencrypt"
+	"gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/wrappers/backends"
 	"go.uber.org/zap"
 )
 
 // CertManager handles Let's Encrypt certificate provisioning and renewal,
-// storing the resulting X509CertPair in elvis for springsteen to consume.
+// storing the resulting X509CertPair in elvis for gateway to consume.
 type CertManager struct {
-	cfg     *genesis_pb.Config
+	cfg     *letsencrypt_pb.Config
 	backend *backends.Backends
 	storage *Storage
 }
 
-func NewCertManager(cfg *genesis_pb.Config, bc *backends.Backends) (*CertManager, error) {
+func NewCertManager(cfg *letsencrypt_pb.Config, bc *backends.Backends) (*CertManager, error) {
 	return &CertManager{
 		cfg:     cfg,
 		backend: bc,
@@ -99,7 +99,7 @@ func (cm *CertManager) Run(ctx context.Context) error {
 	for {
 		select {
 		case <-ctx.Done():
-			zap.L().Info("Shutting down genesis")
+			zap.L().Info("Shutting down letsencrypt")
 			return nil
 		case <-ticker.C:
 			if err := cm.extractAndStore(ctx, magic); err != nil {
@@ -132,14 +132,14 @@ func (cm *CertManager) extractAndStore(ctx context.Context, magic *certmagic.Con
 	certmagicState := cm.storage.ToProto()
 
 	// Write to elvis.
-	certData := &genesis_pb.GenesisCertData{
+	certData := &letsencrypt_pb.LetsEncryptCertData{
 		TlsCert:         certPair,
 		CertmagicState:  certmagicState,
 		LastRenewed:     time.Now().Unix(),
 		Fqdn:            cm.cfg.Fqdn,
 	}
 
-	if _, err := cm.backend.Services().GenesisState().CertData().Set(ctx, certData); err != nil {
+	if _, err := cm.backend.Services().LetsEncryptState().CertData().Set(ctx, certData); err != nil {
 		return fmt.Errorf("writing to elvis: %w", err)
 	}
 
@@ -153,7 +153,7 @@ func (cm *CertManager) extractAndStore(ctx context.Context, magic *certmagic.Con
 // restoreState loads CertMagic state from elvis and restores it into the
 // in-memory storage, so CertMagic doesn't re-provision on restart.
 func (cm *CertManager) restoreState(ctx context.Context) error {
-	data, err := cm.backend.Services().GenesisState().CertData().Fetch(ctx)
+	data, err := cm.backend.Services().LetsEncryptState().CertData().Fetch(ctx)
 	if err != nil {
 		return err
 	}

@@ -12,7 +12,7 @@
 syntax = "proto3";
 
 package x509;
-option go_package = "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/x509";
+option go_package = "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/x509";
 
 import "libs/key.proto";
 import "google/protobuf/struct.proto";

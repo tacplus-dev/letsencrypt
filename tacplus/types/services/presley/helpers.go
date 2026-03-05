@@ -20,7 +20,7 @@ import (
 	"strings"
 
 	"github.com/pelletier/go-toml/v2"
-	protoerrors "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/errors"
+	protoerrors "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/errors"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 	"gopkg.in/yaml.v3"
@@ -1779,6 +1779,8 @@ type adminmapstatsJSON struct {
 	GraphType             string `json:"graph_type,omitempty"`
 	QualifiedName         string `json:"qualified_name,omitempty"`
 	StateRoot             string `json:"state_root,omitempty"`
+	Consistency           string `json:"consistency,omitempty"`
+	Persistence           bool   `json:"persistence,omitempty"`
 }
 
 // AdminMapStatsToJSON converts AdminMapStats to JSON bytes.
@@ -1814,6 +1816,8 @@ func AdminMapStatsToJSON(v *AdminMapStats) ([]byte, error) {
 		GraphType:             AdminGraphTypeToString(v.GraphType),
 		QualifiedName:         v.QualifiedName,
 		StateRoot:             v.StateRoot,
+		Consistency:           v.Consistency,
+		Persistence:           v.Persistence,
 	}
 	return json.Marshal(helper)
 }
@@ -1908,6 +1912,8 @@ func AdminMapStatsFromJSON(data []byte) (*AdminMapStats, error) {
 	}
 	result.QualifiedName = raw.QualifiedName
 	result.StateRoot = raw.StateRoot
+	result.Consistency = raw.Consistency
+	result.Persistence = raw.Persistence
 	return result, nil
 }
 
@@ -4768,6 +4774,8 @@ func AdminMapStatsToEnvVar(v *AdminMapStats) map[string]string {
 	result["PROTO_SERVICES_PRESLEY_ADMIN_MAP_STATS_GRAPH_TYPE"] = AdminGraphTypeToString(v.GraphType)
 	result["PROTO_SERVICES_PRESLEY_ADMIN_MAP_STATS_QUALIFIED_NAME"] = v.QualifiedName
 	result["PROTO_SERVICES_PRESLEY_ADMIN_MAP_STATS_STATE_ROOT"] = v.StateRoot
+	result["PROTO_SERVICES_PRESLEY_ADMIN_MAP_STATS_CONSISTENCY"] = v.Consistency
+	result["PROTO_SERVICES_PRESLEY_ADMIN_MAP_STATS_PERSISTENCE"] = strconv.FormatBool(v.Persistence)
 	return result
 }
 
@@ -4932,6 +4940,16 @@ func AdminMapStatsFromEnvVar(env map[string]string) (*AdminMapStats, error) {
 	}
 	if val, ok := env["PROTO_SERVICES_PRESLEY_ADMIN_MAP_STATS_STATE_ROOT"]; ok && val != "" {
 		result.StateRoot = val
+	}
+	if val, ok := env["PROTO_SERVICES_PRESLEY_ADMIN_MAP_STATS_CONSISTENCY"]; ok && val != "" {
+		result.Consistency = val
+	}
+	if val, ok := env["PROTO_SERVICES_PRESLEY_ADMIN_MAP_STATS_PERSISTENCE"]; ok && val != "" {
+		parsed, err := strconv.ParseBool(val)
+		if err != nil {
+			return nil, err
+		}
+		result.Persistence = parsed
 	}
 	return result, nil
 }
@@ -6168,6 +6186,11 @@ func ValidateAdminMapStats(m *AdminMapStats) error {
 		return protoerrors.NewErrMissingInvalidData(nil, "field StateRoot exceeds max size of 32768 bytes, got: %d", len(m.StateRoot))
 	}
 
+	// Validate Consistency (default max size: 32768 bytes)
+	if len(m.Consistency) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Consistency exceeds max size of 32768 bytes, got: %d", len(m.Consistency))
+	}
+
 	return nil
 }
 
@@ -6488,6 +6511,7 @@ const (
 	MaxSizeAdminmapstatsValueType                  int = 32768
 	MaxSizeAdminmapstatsQualifiedName              int = 32768
 	MaxSizeAdminmapstatsStateRoot                  int = 32768
+	MaxSizeAdminmapstatsConsistency                int = 32768
 	MaxSizeAdmingrpcstatsNodeId                    int = 32768
 	MaxSizeAdminpersistencestatusNodeId            int = 32768
 	MaxSizeAdminpersistencestatusPersistenceDir    int = 32768
@@ -6926,6 +6950,12 @@ func MergeAdminMapStats(dst, src *AdminMapStats) {
 	}
 	if dst.StateRoot == "" {
 		dst.StateRoot = src.StateRoot
+	}
+	if dst.Consistency == "" {
+		dst.Consistency = src.Consistency
+	}
+	if !dst.Persistence {
+		dst.Persistence = src.Persistence
 	}
 }
 

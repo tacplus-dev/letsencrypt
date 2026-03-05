@@ -14,7 +14,7 @@
 package orchestrator
 
 import (
-	_ "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/spec"
+	_ "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/spec"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -113,7 +113,7 @@ const file_services_orchestrator_proto_rawDesc = "" +
 	"\x12elvis.ClusterState\x10\x04\"\n" +
 	"\n" +
 	"\bMapEmpty2!\n" +
-	"\x1fOrchestratorStateBackendServiceB]Z[gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/services/orchestratorb\x06proto3"
+	"\x1fOrchestratorStateBackendServiceBaZ_gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/orchestratorb\x06proto3"
 
 var (
 	file_services_orchestrator_proto_rawDescOnce sync.Once

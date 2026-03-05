@@ -20,7 +20,7 @@ type BoundaryInfo struct {
 // Boundaries returns all backend boundaries across all services.
 func (s *Backends) Boundaries() []BoundaryInfo {
 	return []BoundaryInfo{
-		{Service: "services/genesis_state", Boundary: "CertData", Consistency: "atomic", Persistence: false},
+		{Service: "services/lets_encrypt_state", Boundary: "CertData", Consistency: "atomic", Persistence: false},
 	}
 }
 
@@ -30,8 +30,8 @@ func (s *Backends) Boundaries() []BoundaryInfo {
 // type does not support cached state (topics, queues, priority queues, uncached).
 func (s *Backends) GetBoundary(service, boundary string) proto.Message {
 	switch service + "." + boundary {
-	case "services/genesis_state.CertData":
-		return s.Services().GenesisState().CertData().Get()
+	case "services/lets_encrypt_state.CertData":
+		return s.Services().LetsEncryptState().CertData().Get()
 	}
 	return nil
 }

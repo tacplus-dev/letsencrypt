@@ -14,18 +14,18 @@
 package elvis
 
 import (
-	cloudidentity "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/cloudidentity"
-	entitlement "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/entitlement"
-	healthreport "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/healthreport"
-	host "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/host"
-	jwk "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/jwk"
-	logger "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/logger"
-	outputformat "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/outputformat"
-	_ "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/spec"
-	token "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/token"
-	x509 "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/x509"
-	config_holder "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/services/config_holder"
-	presley "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/services/presley"
+	cloudidentity "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/cloudidentity"
+	entitlement "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/entitlement"
+	healthreport "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/healthreport"
+	host "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/host"
+	jwk "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/jwk"
+	logger "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/logger"
+	outputformat "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/outputformat"
+	_ "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/spec"
+	token "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/token"
+	x509 "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/x509"
+	config_holder "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/config_holder"
+	presley "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/presley"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
@@ -1145,7 +1145,7 @@ func (x *TokenRequest) GetCloudProof() *cloudidentity.CloudIdentityProof {
 
 // TokenExchangerState holds the public verifying keys for the built-in token
 // exchange service. TokenExchanger is built into elvis to solve the
-// chicken-egg problem: services like IronMaiden need a ServiceToken from
+// chicken-egg problem: services like Identity need a ServiceToken from
 // TokenExchanger (via their CredPair) before they can register their own
 // JWKs with elvis. If TokenExchanger were external, it would need a
 // ServiceToken from itself to bootstrap.
@@ -1269,15 +1269,15 @@ type Config struct {
 	Security *SecurityConfig `protobuf:"bytes,10,opt,name=security,proto3" json:"security,omitempty"`
 	// token_exchanger configures the token exchange service.
 	TokenExchanger *TokenExchangerConfig `protobuf:"bytes,15,opt,name=token_exchanger,json=tokenExchanger,proto3" json:"token_exchanger,omitempty"`
-	// cred_pairs bind public keys to identities for the CredPair token exchange flow.
+	// cred_pairs hold public keys for the CredPair token exchange flow.
+	// Identity mapping (kid → service) is in entitlement_mappings.
 	CredPairs []*jwk.CredPair `protobuf:"bytes,16,rep,name=cred_pairs,json=credPairs,proto3" json:"cred_pairs,omitempty"`
-	// entitlement_mappings defines static entitlements for CredPair principals.
-	// TokenExchanger uses these to encode entitlements as claims in access tokens.
-	// Each mapping's string_id must match "local:<principal>" for a CredPair.
+	// entitlement_mappings maps credential IDs (kid) to service identities.
+	// TokenExchanger uses these to resolve which service a CredPair represents.
 	EntitlementMappings []*entitlement.ServiceEntitlementMapping `protobuf:"bytes,21,rep,name=entitlement_mappings,json=entitlementMappings,proto3" json:"entitlement_mappings,omitempty"`
 	// service_entitlements holds named entitlement definitions loaded from
-	// proto/security/*.json at config build time. Referenced by
-	// entitlement_mappings via entitlements_id.
+	// proto/security/*.json at config build time. Used for S2S entitlements
+	// (derived from proto descriptors) and U2S entitlements (expandWildcard).
 	ServiceEntitlements []*entitlement.ServiceEntitlements `protobuf:"bytes,22,rep,name=service_entitlements,json=serviceEntitlements,proto3" json:"service_entitlements,omitempty"`
 	unknownFields       protoimpl.UnknownFields
 	sizeCache           protoimpl.SizeCache
@@ -11564,7 +11564,7 @@ const file_services_elvis_proto_rawDesc = "" +
 	"\rSizeInstances\x12\x1b.elvis.InstancesSizeRequest\x1a\x1c.elvis.InstancesSizeResponse\x12K\n" +
 	"\x0eWatchInstances\x12\x16.google.protobuf.Empty\x1a\x1f.elvis.InstancesEntriesResponse0\x01\x12M\n" +
 	"\x0eQueryInstances\x12\x1c.elvis.InstancesQueryRequest\x1a\x1d.elvis.InstancesQueryResponse\x12T\n" +
-	"\x13WatchQueryInstances\x12\x1c.elvis.InstancesQueryRequest\x1a\x1d.elvis.InstancesQueryResponse0\x01BVZTgitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/services/elvisb\x06proto3"
+	"\x13WatchQueryInstances\x12\x1c.elvis.InstancesQueryRequest\x1a\x1d.elvis.InstancesQueryResponse0\x01BZZXgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/elvisb\x06proto3"
 
 var (
 	file_services_elvis_proto_rawDescOnce sync.Once

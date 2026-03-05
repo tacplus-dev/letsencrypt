@@ -20,9 +20,9 @@ import (
 	"strings"
 
 	"github.com/pelletier/go-toml/v2"
-	protoerrors "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/errors"
-	key "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/key"
-	utils "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/utils"
+	protoerrors "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/errors"
+	key "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/key"
+	utils "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/utils"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 	"gopkg.in/yaml.v3"
@@ -1186,14 +1186,14 @@ func ValidateJwk(m *Jwk) error {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Alg must be at least 1 characters, got: %d", len(m.Alg))
 	}
 
-	// Validate Kid (assert_required)
-	if m.Kid == "" {
-		return protoerrors.NewErrMissingInvalidData(nil, "field Kid is required")
-	}
-
 	// Validate Kid (assert_min_length: 1)
 	if len(m.Kid) < 1 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Kid must be at least 1 characters, got: %d", len(m.Kid))
+	}
+
+	// Validate Kid (assert_required)
+	if m.Kid == "" {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Kid is required")
 	}
 
 	// Validate E (assert_base64)

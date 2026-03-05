@@ -11,7 +11,7 @@
 //
 // Source: google/api/annotations.proto
 
-package google
+package annotations
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -53,7 +53,8 @@ const file_google_api_annotations_proto_rawDesc = "" +
 	"\n" +
 	"\x1cgoogle/api/annotations.proto\x12\n" +
 	"google.api\x1a\x15google/api/http.proto\x1a google/protobuf/descriptor.proto:K\n" +
-	"\x04http\x12\x1e.google.protobuf.MethodOptions\x18\xb0ʼ\" \x01(\v2\x14.google.api.HttpRuleR\x04httpBYZWgitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/google/api/googleb\x06proto3"
+	"\x04http\x12\x1e.google.protobuf.MethodOptions\x18\xb0ʼ\" \x01(\v2\x14.google.api.HttpRuleR\x04httpBg\n" +
+	"\x0ecom.google.apiB\x10AnnotationsProtoP\x01ZAgoogle.golang.org/genproto/googleapis/api/annotations;annotationsb\x06proto3"
 
 var file_google_api_annotations_proto_goTypes = []any{
 	(*descriptorpb.MethodOptions)(nil), // 0: google.protobuf.MethodOptions

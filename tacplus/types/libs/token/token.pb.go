@@ -14,7 +14,7 @@
 package token
 
 import (
-	_ "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/spec"
+	_ "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/spec"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	structpb "google.golang.org/protobuf/types/known/structpb"
@@ -793,7 +793,7 @@ const file_libs_token_proto_rawDesc = "" +
 	"store_code\x124\n" +
 	"\x1dTOKEN_PARAM_KEY_ID_TOKEN_HINT\x10\r\x1a\x11\xaa\xb5\x18\rid_token_hint\x12J\n" +
 	"(TOKEN_PARAM_KEY_POST_LOGOUT_REDIRECT_URI\x10\x0e\x1a\x1c\xaa\xb5\x18\x18post_logout_redirect_uri\x12,\n" +
-	"\x19TOKEN_PARAM_KEY_GET_TOKEN\x10\x0f\x1a\r\xaa\xb5\x18\tget_tokenBRZPgitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/tokenb\x06proto3"
+	"\x19TOKEN_PARAM_KEY_GET_TOKEN\x10\x0f\x1a\r\xaa\xb5\x18\tget_tokenBVZTgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/tokenb\x06proto3"
 
 var (
 	file_libs_token_proto_rawDescOnce sync.Once

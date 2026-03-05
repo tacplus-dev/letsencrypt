@@ -14,7 +14,7 @@
 package presley
 
 import (
-	_ "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/spec"
+	_ "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/spec"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -780,9 +780,9 @@ func (x *AdminGraphInfo) GetValueType() string {
 // Keyed by composite id "service_id@node_id".
 type AdminServiceConnection struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Composite key: "service:fleetwood@node-uuid"
+	// Composite key: "service:sentinel@node-uuid"
 	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	// Service identity from token sub claim: "service:fleetwood"
+	// Service identity from token sub claim: "service:sentinel"
 	ServiceId string `protobuf:"bytes,2,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
 	// Node this connection is on
 	NodeId string `protobuf:"bytes,3,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
@@ -1310,7 +1310,11 @@ type AdminMapStats struct {
 	// Fully qualified name: "services/elvis/ClusterState.NodeMetrics"
 	QualifiedName string `protobuf:"bytes,24,opt,name=qualified_name,json=qualifiedName,proto3" json:"qualified_name,omitempty"`
 	// State root that owns this map: "ClusterState"
-	StateRoot     string `protobuf:"bytes,25,opt,name=state_root,json=stateRoot,proto3" json:"state_root,omitempty"`
+	StateRoot string `protobuf:"bytes,25,opt,name=state_root,json=stateRoot,proto3" json:"state_root,omitempty"`
+	// Consistency model: "atomic" or "convergent"
+	Consistency string `protobuf:"bytes,26,opt,name=consistency,proto3" json:"consistency,omitempty"`
+	// Whether persistence is enabled for this boundary
+	Persistence   bool `protobuf:"varint,27,opt,name=persistence,proto3" json:"persistence,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1518,6 +1522,20 @@ func (x *AdminMapStats) GetStateRoot() string {
 		return x.StateRoot
 	}
 	return ""
+}
+
+func (x *AdminMapStats) GetConsistency() string {
+	if x != nil {
+		return x.Consistency
+	}
+	return ""
+}
+
+func (x *AdminMapStats) GetPersistence() bool {
+	if x != nil {
+		return x.Persistence
+	}
+	return false
 }
 
 // AdminGrpcStats captures gRPC connection and RPC statistics for a single node.
@@ -2727,9 +2745,9 @@ func (x *AdminTopicSubscriber) GetLastReceivedMs() int64 {
 // Keyed by watch_id (unique per stream).
 type AdminWatchHealth struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Unique watch identifier: "service:fleetwood@node-uuid#WatchNodeMetrics#1"
+	// Unique watch identifier: "service:sentinel@node-uuid#WatchNodeMetrics#1"
 	WatchId string `protobuf:"bytes,1,opt,name=watch_id,json=watchId,proto3" json:"watch_id,omitempty"`
-	// Service that opened this watch: "service:fleetwood"
+	// Service that opened this watch: "service:sentinel"
 	ServiceId string `protobuf:"bytes,2,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
 	// Node serving this watch stream
 	NodeId string `protobuf:"bytes,3,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
@@ -2931,7 +2949,7 @@ type AdminMutationRate struct {
 	SetCount int64 `protobuf:"varint,9,opt,name=set_count,json=setCount,proto3" json:"set_count,omitempty"`
 	// Total deletes
 	DeleteCount int64 `protobuf:"varint,10,opt,name=delete_count,json=deleteCount,proto3" json:"delete_count,omitempty"`
-	// Per-service mutation counts: "service:fleetwood" -> 50
+	// Per-service mutation counts: "service:sentinel" -> 50
 	PerServiceMutations map[string]int64 `protobuf:"bytes,11,rep,name=per_service_mutations,json=perServiceMutations,proto3" json:"per_service_mutations,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`
 	// Node reporting
 	NodeId        string `protobuf:"bytes,12,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
@@ -3218,7 +3236,7 @@ const file_services_presley_proto_rawDesc = "" +
 	"\x05value\x18\x02 \x01(\x03R\x05value:\x028\x01\x1aE\n" +
 	"\x17PerErrorCodeCountsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\x03R\x05value:\x028\x01\"\xe4\a\n" +
+	"\x05value\x18\x02 \x01(\x03R\x05value:\x028\x01\"\xa8\b\n" +
 	"\rAdminMapStats\x12\x1f\n" +
 	"\bmap_name\x18\x01 \x01(\tB\x04е\x18\x01R\amapName\x12\x12\n" +
 	"\x04size\x18\x02 \x01(\x05R\x04size\x12*\n" +
@@ -3248,7 +3266,9 @@ const file_services_presley_proto_rawDesc = "" +
 	"graph_type\x18\x17 \x01(\x0e2\x17.presley.AdminGraphTypeR\tgraphType\x12%\n" +
 	"\x0equalified_name\x18\x18 \x01(\tR\rqualifiedName\x12\x1d\n" +
 	"\n" +
-	"state_root\x18\x19 \x01(\tR\tstateRoot\"\xb4\x03\n" +
+	"state_root\x18\x19 \x01(\tR\tstateRoot\x12 \n" +
+	"\vconsistency\x18\x1a \x01(\tR\vconsistency\x12 \n" +
+	"\vpersistence\x18\x1b \x01(\bR\vpersistence\"\xb4\x03\n" +
 	"\x0eAdminGrpcStats\x12\x1d\n" +
 	"\anode_id\x18\x01 \x01(\tB\x04е\x18\x01R\x06nodeId\x12-\n" +
 	"\x12active_connections\x18\x02 \x01(\x05R\x11activeConnections\x12\x1d\n" +
@@ -3416,7 +3436,7 @@ const file_services_presley_proto_rawDesc = "" +
 	"\x1fADMIN_GRAPH_TYPE_PRIORITY_QUEUE\x10\x03\x12\x1a\n" +
 	"\x16ADMIN_GRAPH_TYPE_TOPIC\x10\x04\x12\x19\n" +
 	"\x15ADMIN_GRAPH_TYPE_VIEW\x10\x05\x12\x1c\n" +
-	"\x18ADMIN_GRAPH_TYPE_COMMAND\x10\x06BXZVgitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/services/presleyb\x06proto3"
+	"\x18ADMIN_GRAPH_TYPE_COMMAND\x10\x06B\\ZZgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/presleyb\x06proto3"
 
 var (
 	file_services_presley_proto_rawDescOnce sync.Once

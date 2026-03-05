@@ -10,34 +10,34 @@ import (
 	"time"
 
 	"github.com/caddyserver/certmagic"
-	genesis_pb "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/services/genesis"
+	letsencrypt_pb "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/letsencrypt"
 )
 
 // Storage implements certmagic.Storage backed by an in-memory tree.
-// State is serialized to/from genesis_pb.CertMagicState for persistence in elvis.
+// State is serialized to/from letsencrypt_pb.CertMagicState for persistence in elvis.
 type Storage struct {
 	mu   sync.Mutex
-	root *genesis_pb.CertMagicState
+	root *letsencrypt_pb.CertMagicState
 }
 
 func NewStorage() *Storage {
 	return &Storage{
-		root: &genesis_pb.CertMagicState{
+		root: &letsencrypt_pb.CertMagicState{
 			IsDir:    true,
-			Children: make(map[string]*genesis_pb.CertMagicState),
+			Children: make(map[string]*letsencrypt_pb.CertMagicState),
 		},
 	}
 }
 
 // ToProto returns a deep copy of the storage tree for persistence.
-func (s *Storage) ToProto() *genesis_pb.CertMagicState {
+func (s *Storage) ToProto() *letsencrypt_pb.CertMagicState {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	return cloneTree(s.root)
 }
 
 // FromProto restores the storage tree from a proto snapshot.
-func (s *Storage) FromProto(state *genesis_pb.CertMagicState) {
+func (s *Storage) FromProto(state *letsencrypt_pb.CertMagicState) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if state != nil {
@@ -116,12 +116,12 @@ func (s *Storage) Stat(_ context.Context, key string) (certmagic.KeyInfo, error)
 	}, nil
 }
 
-// Lock and Unlock are no-ops — genesis runs as a single instance.
+// Lock and Unlock are no-ops — letsencrypt runs as a single instance.
 func (s *Storage) Lock(_ context.Context, _ string) error   { return nil }
 func (s *Storage) Unlock(_ context.Context, _ string) error { return nil }
 
 // getNode traverses the tree to find the node at the given path.
-func (s *Storage) getNode(key string) *genesis_pb.CertMagicState {
+func (s *Storage) getNode(key string) *letsencrypt_pb.CertMagicState {
 	key = strings.TrimPrefix(key, "/")
 	if key == "" || key == "." {
 		return s.root
@@ -151,13 +151,13 @@ func (s *Storage) ensurePath(key string) {
 			continue
 		}
 		if current.Children == nil {
-			current.Children = make(map[string]*genesis_pb.CertMagicState)
+			current.Children = make(map[string]*letsencrypt_pb.CertMagicState)
 		}
 		if current.Children[part] == nil {
-			current.Children[part] = &genesis_pb.CertMagicState{
+			current.Children[part] = &letsencrypt_pb.CertMagicState{
 				IsDir:    true,
 				ModTime:  time.Now().Unix(),
-				Children: make(map[string]*genesis_pb.CertMagicState),
+				Children: make(map[string]*letsencrypt_pb.CertMagicState),
 			}
 		}
 		current = current.Children[part]
@@ -166,17 +166,17 @@ func (s *Storage) ensurePath(key string) {
 	// Create leaf file node.
 	fileName := parts[len(parts)-1]
 	if current.Children == nil {
-		current.Children = make(map[string]*genesis_pb.CertMagicState)
+		current.Children = make(map[string]*letsencrypt_pb.CertMagicState)
 	}
 	if current.Children[fileName] == nil {
-		current.Children[fileName] = &genesis_pb.CertMagicState{
+		current.Children[fileName] = &letsencrypt_pb.CertMagicState{
 			IsDir:   false,
 			ModTime: time.Now().Unix(),
 		}
 	}
 }
 
-func (s *Storage) listRecursive(prefix string, node *genesis_pb.CertMagicState, recursive bool, results *[]string) {
+func (s *Storage) listRecursive(prefix string, node *letsencrypt_pb.CertMagicState, recursive bool, results *[]string) {
 	if node == nil || !node.IsDir || node.Children == nil {
 		return
 	}
@@ -193,17 +193,17 @@ func (s *Storage) listRecursive(prefix string, node *genesis_pb.CertMagicState, 
 }
 
 // cloneTree deep-copies a CertMagicState tree.
-func cloneTree(src *genesis_pb.CertMagicState) *genesis_pb.CertMagicState {
+func cloneTree(src *letsencrypt_pb.CertMagicState) *letsencrypt_pb.CertMagicState {
 	if src == nil {
 		return nil
 	}
-	dst := &genesis_pb.CertMagicState{
+	dst := &letsencrypt_pb.CertMagicState{
 		IsDir:   src.IsDir,
 		Value:   append([]byte(nil), src.Value...),
 		ModTime: src.ModTime,
 	}
 	if src.Children != nil {
-		dst.Children = make(map[string]*genesis_pb.CertMagicState, len(src.Children))
+		dst.Children = make(map[string]*letsencrypt_pb.CertMagicState, len(src.Children))
 		for k, v := range src.Children {
 			dst.Children[k] = cloneTree(v)
 		}

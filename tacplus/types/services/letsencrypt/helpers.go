@@ -9,9 +9,9 @@
 // If changes are needed, update the tacplus compiler at:
 // gitlab.com/secondstarcavalier/controlplane/services/tacplus
 //
-// Source: services/genesis.proto
+// Source: services/letsencrypt.proto
 
-package genesis
+package letsencrypt
 
 import (
 	"bytes"
@@ -20,8 +20,8 @@ import (
 	"strconv"
 
 	"github.com/pelletier/go-toml/v2"
-	protoerrors "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/errors"
-	x509 "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/x509"
+	protoerrors "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/errors"
+	x509 "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/x509"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 	"gopkg.in/yaml.v3"
@@ -161,34 +161,34 @@ func ConfigToTOML(v *Config) ([]byte, error) {
 	return toml.Marshal(obj)
 }
 
-// GenesisStateJSON represents GenesisState in external JSON format (with string enums)
+// LetsEncryptStateJSON represents LetsEncryptState in external JSON format (with string enums)
 // MARKER: JSON helper struct generated from serial.go
-type genesisstateJSON struct {
+type letsencryptstateJSON struct {
 	CertData json.RawMessage `json:"cert_data,omitempty"`
 }
 
-// GenesisStateToJSON converts GenesisState to JSON bytes.
+// LetsEncryptStateToJSON converts LetsEncryptState to JSON bytes.
 // Uses custom JSON helper for friendly enum strings and proper int64 handling.
-func GenesisStateToJSON(v *GenesisState) ([]byte, error) {
+func LetsEncryptStateToJSON(v *LetsEncryptState) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "genesisstate is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "letsencryptstate is nil")
 	}
 	// Convert to JSON helper struct with string enums
-	helper := genesisstateJSON{
+	helper := letsencryptstateJSON{
 		CertData: func() json.RawMessage {
 			if v.CertData == nil {
 				return nil
 			}
-			data, _ := GenesisCertDataToJSON(v.CertData)
+			data, _ := LetsEncryptCertDataToJSON(v.CertData)
 			return data
 		}(),
 	}
 	return json.Marshal(helper)
 }
 
-// GenesisStateFromBytes creates GenesisState from bytes, auto-detecting the format.
+// LetsEncryptStateFromBytes creates LetsEncryptState from bytes, auto-detecting the format.
 // Supports JSON, YAML, TOML, and binary protobuf formats.
-func GenesisStateFromBytes(data []byte) (*GenesisState, error) {
+func LetsEncryptStateFromBytes(data []byte) (*LetsEncryptState, error) {
 	// Trim leading whitespace to check format
 	trimmed := bytes.TrimSpace(data)
 	if len(trimmed) == 0 {
@@ -196,7 +196,7 @@ func GenesisStateFromBytes(data []byte) (*GenesisState, error) {
 	}
 	// Try JSON first (most common, starts with { or [)
 	if trimmed[0] == '{' || trimmed[0] == '[' {
-		if result, err := GenesisStateFromJSON(data); err == nil {
+		if result, err := LetsEncryptStateFromJSON(data); err == nil {
 			return result, nil
 		}
 	}
@@ -206,7 +206,7 @@ func GenesisStateFromBytes(data []byte) (*GenesisState, error) {
 		// Convert TOML to JSON, then parse
 		jsonData, err := json.Marshal(tomlObj)
 		if err == nil {
-			if result, err := GenesisStateFromJSON(jsonData); err == nil {
+			if result, err := LetsEncryptStateFromJSON(jsonData); err == nil {
 				return result, nil
 			}
 		}
@@ -217,38 +217,38 @@ func GenesisStateFromBytes(data []byte) (*GenesisState, error) {
 		// Convert YAML to JSON, then parse
 		jsonData, err := json.Marshal(yamlObj)
 		if err == nil {
-			if result, err := GenesisStateFromJSON(jsonData); err == nil {
+			if result, err := LetsEncryptStateFromJSON(jsonData); err == nil {
 				return result, nil
 			}
 		}
 	}
 	// Try binary protobuf
-	v := &GenesisState{}
+	v := &LetsEncryptState{}
 	if err := proto.Unmarshal(data, v); err == nil {
 		return v, nil
 	}
-	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse GenesisState: unsupported format or invalid data")
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse LetsEncryptState: unsupported format or invalid data")
 }
 
-// GenesisStateFromJSON creates GenesisState from JSON bytes.
+// LetsEncryptStateFromJSON creates LetsEncryptState from JSON bytes.
 // Uses standard encoding/json and custom enum parsers for external JSON compatibility.
-func GenesisStateFromJSON(data []byte) (*GenesisState, error) {
+func LetsEncryptStateFromJSON(data []byte) (*LetsEncryptState, error) {
 	// Unmarshal into helper struct with string enums
-	var raw genesisstateJSON
+	var raw letsencryptstateJSON
 	if err := json.Unmarshal(data, &raw); err != nil {
 		// Fall back to protojson which handles proto3 JSON conventions
 		// (string-encoded int64/uint64, standard enum names, etc.)
-		v := &GenesisState{}
+		v := &LetsEncryptState{}
 		if pErr := protojson.Unmarshal(data, v); pErr != nil {
 			return nil, err
 		}
 		return v, nil
 	}
 	// Build result with parsed enums
-	result := &GenesisState{}
+	result := &LetsEncryptState{}
 	// Parse message field: CertData
 	if len(raw.CertData) > 0 {
-		parsed, err := GenesisCertDataFromJSON(raw.CertData)
+		parsed, err := LetsEncryptCertDataFromJSON(raw.CertData)
 		if err == nil {
 			result.CertData = parsed
 		}
@@ -256,14 +256,14 @@ func GenesisStateFromJSON(data []byte) (*GenesisState, error) {
 	return result, nil
 }
 
-// GenesisStateToYAML converts GenesisState to YAML bytes.
+// LetsEncryptStateToYAML converts LetsEncryptState to YAML bytes.
 // Converts to JSON first, then to YAML for proper protobuf handling.
-func GenesisStateToYAML(v *GenesisState) ([]byte, error) {
+func LetsEncryptStateToYAML(v *LetsEncryptState) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "genesisstate is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "letsencryptstate is nil")
 	}
 	// Convert to JSON first
-	jsonData, err := GenesisStateToJSON(v)
+	jsonData, err := LetsEncryptStateToJSON(v)
 	if err != nil {
 		return nil, err
 	}
@@ -275,14 +275,14 @@ func GenesisStateToYAML(v *GenesisState) ([]byte, error) {
 	return yaml.Marshal(obj)
 }
 
-// GenesisStateToTOML converts GenesisState to TOML bytes.
+// LetsEncryptStateToTOML converts LetsEncryptState to TOML bytes.
 // Converts to JSON first, then to TOML for proper protobuf handling.
-func GenesisStateToTOML(v *GenesisState) ([]byte, error) {
+func LetsEncryptStateToTOML(v *LetsEncryptState) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "genesisstate is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "letsencryptstate is nil")
 	}
 	// Convert to JSON first
-	jsonData, err := GenesisStateToJSON(v)
+	jsonData, err := LetsEncryptStateToJSON(v)
 	if err != nil {
 		return nil, err
 	}
@@ -294,9 +294,9 @@ func GenesisStateToTOML(v *GenesisState) ([]byte, error) {
 	return toml.Marshal(obj)
 }
 
-// GenesisCertDataJSON represents GenesisCertData in external JSON format (with string enums)
+// LetsEncryptCertDataJSON represents LetsEncryptCertData in external JSON format (with string enums)
 // MARKER: JSON helper struct generated from serial.go
-type genesiscertdataJSON struct {
+type letsencryptcertdataJSON struct {
 	TlsCert        json.RawMessage `json:"tls_cert,omitempty"`
 	CertmagicState json.RawMessage `json:"certmagic_state,omitempty"`
 	LastRenewed    int64           `json:"last_renewed,omitempty"`
@@ -304,14 +304,14 @@ type genesiscertdataJSON struct {
 	Lock           json.RawMessage `json:"lock,omitempty"`
 }
 
-// GenesisCertDataToJSON converts GenesisCertData to JSON bytes.
+// LetsEncryptCertDataToJSON converts LetsEncryptCertData to JSON bytes.
 // Uses custom JSON helper for friendly enum strings and proper int64 handling.
-func GenesisCertDataToJSON(v *GenesisCertData) ([]byte, error) {
+func LetsEncryptCertDataToJSON(v *LetsEncryptCertData) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "genesiscertdata is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "letsencryptcertdata is nil")
 	}
 	// Convert to JSON helper struct with string enums
-	helper := genesiscertdataJSON{
+	helper := letsencryptcertdataJSON{
 		TlsCert: func() json.RawMessage {
 			if v.TlsCert == nil {
 				return nil
@@ -339,9 +339,9 @@ func GenesisCertDataToJSON(v *GenesisCertData) ([]byte, error) {
 	return json.Marshal(helper)
 }
 
-// GenesisCertDataFromBytes creates GenesisCertData from bytes, auto-detecting the format.
+// LetsEncryptCertDataFromBytes creates LetsEncryptCertData from bytes, auto-detecting the format.
 // Supports JSON, YAML, TOML, and binary protobuf formats.
-func GenesisCertDataFromBytes(data []byte) (*GenesisCertData, error) {
+func LetsEncryptCertDataFromBytes(data []byte) (*LetsEncryptCertData, error) {
 	// Trim leading whitespace to check format
 	trimmed := bytes.TrimSpace(data)
 	if len(trimmed) == 0 {
@@ -349,7 +349,7 @@ func GenesisCertDataFromBytes(data []byte) (*GenesisCertData, error) {
 	}
 	// Try JSON first (most common, starts with { or [)
 	if trimmed[0] == '{' || trimmed[0] == '[' {
-		if result, err := GenesisCertDataFromJSON(data); err == nil {
+		if result, err := LetsEncryptCertDataFromJSON(data); err == nil {
 			return result, nil
 		}
 	}
@@ -359,7 +359,7 @@ func GenesisCertDataFromBytes(data []byte) (*GenesisCertData, error) {
 		// Convert TOML to JSON, then parse
 		jsonData, err := json.Marshal(tomlObj)
 		if err == nil {
-			if result, err := GenesisCertDataFromJSON(jsonData); err == nil {
+			if result, err := LetsEncryptCertDataFromJSON(jsonData); err == nil {
 				return result, nil
 			}
 		}
@@ -370,35 +370,35 @@ func GenesisCertDataFromBytes(data []byte) (*GenesisCertData, error) {
 		// Convert YAML to JSON, then parse
 		jsonData, err := json.Marshal(yamlObj)
 		if err == nil {
-			if result, err := GenesisCertDataFromJSON(jsonData); err == nil {
+			if result, err := LetsEncryptCertDataFromJSON(jsonData); err == nil {
 				return result, nil
 			}
 		}
 	}
 	// Try binary protobuf
-	v := &GenesisCertData{}
+	v := &LetsEncryptCertData{}
 	if err := proto.Unmarshal(data, v); err == nil {
 		return v, nil
 	}
-	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse GenesisCertData: unsupported format or invalid data")
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse LetsEncryptCertData: unsupported format or invalid data")
 }
 
-// GenesisCertDataFromJSON creates GenesisCertData from JSON bytes.
+// LetsEncryptCertDataFromJSON creates LetsEncryptCertData from JSON bytes.
 // Uses standard encoding/json and custom enum parsers for external JSON compatibility.
-func GenesisCertDataFromJSON(data []byte) (*GenesisCertData, error) {
+func LetsEncryptCertDataFromJSON(data []byte) (*LetsEncryptCertData, error) {
 	// Unmarshal into helper struct with string enums
-	var raw genesiscertdataJSON
+	var raw letsencryptcertdataJSON
 	if err := json.Unmarshal(data, &raw); err != nil {
 		// Fall back to protojson which handles proto3 JSON conventions
 		// (string-encoded int64/uint64, standard enum names, etc.)
-		v := &GenesisCertData{}
+		v := &LetsEncryptCertData{}
 		if pErr := protojson.Unmarshal(data, v); pErr != nil {
 			return nil, err
 		}
 		return v, nil
 	}
 	// Build result with parsed enums
-	result := &GenesisCertData{}
+	result := &LetsEncryptCertData{}
 	// Parse message field: TlsCert
 	if len(raw.TlsCert) > 0 {
 		parsed, err := x509.X509CertPairFromJSON(raw.TlsCert)
@@ -425,14 +425,14 @@ func GenesisCertDataFromJSON(data []byte) (*GenesisCertData, error) {
 	return result, nil
 }
 
-// GenesisCertDataToYAML converts GenesisCertData to YAML bytes.
+// LetsEncryptCertDataToYAML converts LetsEncryptCertData to YAML bytes.
 // Converts to JSON first, then to YAML for proper protobuf handling.
-func GenesisCertDataToYAML(v *GenesisCertData) ([]byte, error) {
+func LetsEncryptCertDataToYAML(v *LetsEncryptCertData) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "genesiscertdata is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "letsencryptcertdata is nil")
 	}
 	// Convert to JSON first
-	jsonData, err := GenesisCertDataToJSON(v)
+	jsonData, err := LetsEncryptCertDataToJSON(v)
 	if err != nil {
 		return nil, err
 	}
@@ -444,14 +444,14 @@ func GenesisCertDataToYAML(v *GenesisCertData) ([]byte, error) {
 	return yaml.Marshal(obj)
 }
 
-// GenesisCertDataToTOML converts GenesisCertData to TOML bytes.
+// LetsEncryptCertDataToTOML converts LetsEncryptCertData to TOML bytes.
 // Converts to JSON first, then to TOML for proper protobuf handling.
-func GenesisCertDataToTOML(v *GenesisCertData) ([]byte, error) {
+func LetsEncryptCertDataToTOML(v *LetsEncryptCertData) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "genesiscertdata is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "letsencryptcertdata is nil")
 	}
 	// Convert to JSON first
-	jsonData, err := GenesisCertDataToJSON(v)
+	jsonData, err := LetsEncryptCertDataToJSON(v)
 	if err != nil {
 		return nil, err
 	}
@@ -841,26 +841,26 @@ func ConfigToEnvVar(v *Config) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_GENESIS_CONFIG_FQDN"] = v.Fqdn
-	result["PROTO_SERVICES_GENESIS_CONFIG_LETS_ENCRYPT_EMAIL"] = v.LetsEncryptEmail
-	result["PROTO_SERVICES_GENESIS_CONFIG_HTTP_LISTEN"] = v.HttpListen
-	result["PROTO_SERVICES_GENESIS_CONFIG_RENEWAL_CHECK_INTERVAL_SECONDS"] = strconv.FormatInt(v.RenewalCheckIntervalSeconds, 10)
+	result["PROTO_SERVICES_LETSENCRYPT_CONFIG_FQDN"] = v.Fqdn
+	result["PROTO_SERVICES_LETSENCRYPT_CONFIG_LETS_ENCRYPT_EMAIL"] = v.LetsEncryptEmail
+	result["PROTO_SERVICES_LETSENCRYPT_CONFIG_HTTP_LISTEN"] = v.HttpListen
+	result["PROTO_SERVICES_LETSENCRYPT_CONFIG_RENEWAL_CHECK_INTERVAL_SECONDS"] = strconv.FormatInt(v.RenewalCheckIntervalSeconds, 10)
 	return result
 }
 
 // ConfigFromEnvVar creates Config from environment variable key-value pairs.
 func ConfigFromEnvVar(env map[string]string) (*Config, error) {
 	result := &Config{}
-	if val, ok := env["PROTO_SERVICES_GENESIS_CONFIG_FQDN"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_LETSENCRYPT_CONFIG_FQDN"]; ok && val != "" {
 		result.Fqdn = val
 	}
-	if val, ok := env["PROTO_SERVICES_GENESIS_CONFIG_LETS_ENCRYPT_EMAIL"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_LETSENCRYPT_CONFIG_LETS_ENCRYPT_EMAIL"]; ok && val != "" {
 		result.LetsEncryptEmail = val
 	}
-	if val, ok := env["PROTO_SERVICES_GENESIS_CONFIG_HTTP_LISTEN"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_LETSENCRYPT_CONFIG_HTTP_LISTEN"]; ok && val != "" {
 		result.HttpListen = val
 	}
-	if val, ok := env["PROTO_SERVICES_GENESIS_CONFIG_RENEWAL_CHECK_INTERVAL_SECONDS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_LETSENCRYPT_CONFIG_RENEWAL_CHECK_INTERVAL_SECONDS"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
@@ -870,24 +870,24 @@ func ConfigFromEnvVar(env map[string]string) (*Config, error) {
 	return result, nil
 }
 
-// GenesisStateToEnvVar converts GenesisState to environment variable key-value pairs.
-func GenesisStateToEnvVar(v *GenesisState) map[string]string {
+// LetsEncryptStateToEnvVar converts LetsEncryptState to environment variable key-value pairs.
+func LetsEncryptStateToEnvVar(v *LetsEncryptState) map[string]string {
 	if v == nil {
 		return nil
 	}
 	result := make(map[string]string)
 	if v.CertData != nil {
-		for k, val := range GenesisCertDataToEnvVar(v.CertData) {
+		for k, val := range LetsEncryptCertDataToEnvVar(v.CertData) {
 			result[k] = val
 		}
 	}
 	return result
 }
 
-// GenesisStateFromEnvVar creates GenesisState from environment variable key-value pairs.
-func GenesisStateFromEnvVar(env map[string]string) (*GenesisState, error) {
-	result := &GenesisState{}
-	if sub, err := GenesisCertDataFromEnvVar(env); err != nil {
+// LetsEncryptStateFromEnvVar creates LetsEncryptState from environment variable key-value pairs.
+func LetsEncryptStateFromEnvVar(env map[string]string) (*LetsEncryptState, error) {
+	result := &LetsEncryptState{}
+	if sub, err := LetsEncryptCertDataFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
 		result.CertData = sub
@@ -895,8 +895,8 @@ func GenesisStateFromEnvVar(env map[string]string) (*GenesisState, error) {
 	return result, nil
 }
 
-// GenesisCertDataToEnvVar converts GenesisCertData to environment variable key-value pairs.
-func GenesisCertDataToEnvVar(v *GenesisCertData) map[string]string {
+// LetsEncryptCertDataToEnvVar converts LetsEncryptCertData to environment variable key-value pairs.
+func LetsEncryptCertDataToEnvVar(v *LetsEncryptCertData) map[string]string {
 	if v == nil {
 		return nil
 	}
@@ -911,8 +911,8 @@ func GenesisCertDataToEnvVar(v *GenesisCertData) map[string]string {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_GENESIS_GENESIS_CERT_DATA_LAST_RENEWED"] = strconv.FormatInt(v.LastRenewed, 10)
-	result["PROTO_SERVICES_GENESIS_GENESIS_CERT_DATA_FQDN"] = v.Fqdn
+	result["PROTO_SERVICES_LETSENCRYPT_LETS_ENCRYPT_CERT_DATA_LAST_RENEWED"] = strconv.FormatInt(v.LastRenewed, 10)
+	result["PROTO_SERVICES_LETSENCRYPT_LETS_ENCRYPT_CERT_DATA_FQDN"] = v.Fqdn
 	if v.Lock != nil {
 		for k, val := range LockToEnvVar(v.Lock) {
 			result[k] = val
@@ -921,9 +921,9 @@ func GenesisCertDataToEnvVar(v *GenesisCertData) map[string]string {
 	return result
 }
 
-// GenesisCertDataFromEnvVar creates GenesisCertData from environment variable key-value pairs.
-func GenesisCertDataFromEnvVar(env map[string]string) (*GenesisCertData, error) {
-	result := &GenesisCertData{}
+// LetsEncryptCertDataFromEnvVar creates LetsEncryptCertData from environment variable key-value pairs.
+func LetsEncryptCertDataFromEnvVar(env map[string]string) (*LetsEncryptCertData, error) {
+	result := &LetsEncryptCertData{}
 	if sub, err := x509.X509CertPairFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
@@ -934,14 +934,14 @@ func GenesisCertDataFromEnvVar(env map[string]string) (*GenesisCertData, error) 
 	} else if sub != nil {
 		result.CertmagicState = sub
 	}
-	if val, ok := env["PROTO_SERVICES_GENESIS_GENESIS_CERT_DATA_LAST_RENEWED"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_LETSENCRYPT_LETS_ENCRYPT_CERT_DATA_LAST_RENEWED"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
 		}
 		result.LastRenewed = parsed
 	}
-	if val, ok := env["PROTO_SERVICES_GENESIS_GENESIS_CERT_DATA_FQDN"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_LETSENCRYPT_LETS_ENCRYPT_CERT_DATA_FQDN"]; ok && val != "" {
 		result.Fqdn = val
 	}
 	if sub, err := LockFromEnvVar(env); err != nil {
@@ -958,30 +958,30 @@ func CertMagicStateToEnvVar(v *CertMagicState) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_GENESIS_CERT_MAGIC_STATE_IS_DIR"] = strconv.FormatBool(v.IsDir)
-	result["PROTO_SERVICES_GENESIS_CERT_MAGIC_STATE_VALUE"] = base64.StdEncoding.EncodeToString(v.Value)
-	result["PROTO_SERVICES_GENESIS_CERT_MAGIC_STATE_MOD_TIME"] = strconv.FormatInt(v.ModTime, 10)
+	result["PROTO_SERVICES_LETSENCRYPT_CERT_MAGIC_STATE_IS_DIR"] = strconv.FormatBool(v.IsDir)
+	result["PROTO_SERVICES_LETSENCRYPT_CERT_MAGIC_STATE_VALUE"] = base64.StdEncoding.EncodeToString(v.Value)
+	result["PROTO_SERVICES_LETSENCRYPT_CERT_MAGIC_STATE_MOD_TIME"] = strconv.FormatInt(v.ModTime, 10)
 	return result
 }
 
 // CertMagicStateFromEnvVar creates CertMagicState from environment variable key-value pairs.
 func CertMagicStateFromEnvVar(env map[string]string) (*CertMagicState, error) {
 	result := &CertMagicState{}
-	if val, ok := env["PROTO_SERVICES_GENESIS_CERT_MAGIC_STATE_IS_DIR"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_LETSENCRYPT_CERT_MAGIC_STATE_IS_DIR"]; ok && val != "" {
 		parsed, err := strconv.ParseBool(val)
 		if err != nil {
 			return nil, err
 		}
 		result.IsDir = parsed
 	}
-	if val, ok := env["PROTO_SERVICES_GENESIS_CERT_MAGIC_STATE_VALUE"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_LETSENCRYPT_CERT_MAGIC_STATE_VALUE"]; ok && val != "" {
 		parsed, err := base64.StdEncoding.DecodeString(val)
 		if err != nil {
 			return nil, err
 		}
 		result.Value = parsed
 	}
-	if val, ok := env["PROTO_SERVICES_GENESIS_CERT_MAGIC_STATE_MOD_TIME"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_LETSENCRYPT_CERT_MAGIC_STATE_MOD_TIME"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
@@ -997,18 +997,18 @@ func LockToEnvVar(v *Lock) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_GENESIS_LOCK_ID"] = v.Id
-	result["PROTO_SERVICES_GENESIS_LOCK_COUNTER"] = strconv.FormatInt(v.Counter, 10)
+	result["PROTO_SERVICES_LETSENCRYPT_LOCK_ID"] = v.Id
+	result["PROTO_SERVICES_LETSENCRYPT_LOCK_COUNTER"] = strconv.FormatInt(v.Counter, 10)
 	return result
 }
 
 // LockFromEnvVar creates Lock from environment variable key-value pairs.
 func LockFromEnvVar(env map[string]string) (*Lock, error) {
 	result := &Lock{}
-	if val, ok := env["PROTO_SERVICES_GENESIS_LOCK_ID"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_LETSENCRYPT_LOCK_ID"]; ok && val != "" {
 		result.Id = val
 	}
-	if val, ok := env["PROTO_SERVICES_GENESIS_LOCK_COUNTER"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_LETSENCRYPT_LOCK_COUNTER"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
@@ -1066,9 +1066,9 @@ func ValidateConfig(m *Config) error {
 	return nil
 }
 
-// ValidateGenesisState validates all fields in GenesisState according to their annotations.
+// ValidateLetsEncryptState validates all fields in LetsEncryptState according to their annotations.
 // Returns a BlueErr if validation fails, or nil if all validations pass.
-func ValidateGenesisState(m *GenesisState) error {
+func ValidateLetsEncryptState(m *LetsEncryptState) error {
 	if m == nil {
 		return nil
 	}
@@ -1076,9 +1076,9 @@ func ValidateGenesisState(m *GenesisState) error {
 	return nil
 }
 
-// ValidateGenesisCertData validates all fields in GenesisCertData according to their annotations.
+// ValidateLetsEncryptCertData validates all fields in LetsEncryptCertData according to their annotations.
 // Returns a BlueErr if validation fails, or nil if all validations pass.
-func ValidateGenesisCertData(m *GenesisCertData) error {
+func ValidateLetsEncryptCertData(m *LetsEncryptCertData) error {
 	if m == nil {
 		return nil
 	}
@@ -1144,12 +1144,12 @@ const (
 // Capacity Constants (for utilization monitoring)
 // ============================================================
 const (
-	MaxSizeConfigFqdn             int = 32768
-	MaxSizeConfigLetsEncryptEmail int = 32768
-	MaxSizeConfigHttpListen       int = 32768
-	MaxSizeGenesiscertdataFqdn    int = 32768
-	MaxSizeCertmagicstateValue    int = 32768
-	MaxSizeLockId                 int = 32768
+	MaxSizeConfigFqdn              int = 32768
+	MaxSizeConfigLetsEncryptEmail  int = 32768
+	MaxSizeConfigHttpListen        int = 32768
+	MaxSizeLetsencryptcertdataFqdn int = 32768
+	MaxSizeCertmagicstateValue     int = 32768
+	MaxSizeLockId                  int = 32768
 )
 
 // ============================================================
@@ -1162,6 +1162,20 @@ func ConfigDefaults(v *Config) {
 	}
 	if v.RenewalCheckIntervalSeconds == 0 {
 		v.RenewalCheckIntervalSeconds = DefaultRenewalCheckIntervalSeconds
+	}
+}
+
+// ============================================================
+// TypeUndefaults: Config
+// ============================================================
+// ConfigUndefaults resets fields that match their default values back to zero.
+// Use before persisting to store only explicit user overrides.
+func ConfigUndefaults(v *Config) {
+	if v.HttpListen == DefaultHttpListen {
+		v.HttpListen = ""
+	}
+	if v.RenewalCheckIntervalSeconds == DefaultRenewalCheckIntervalSeconds {
+		v.RenewalCheckIntervalSeconds = 0
 	}
 }
 
@@ -1185,22 +1199,22 @@ func MergeConfig(dst, src *Config) {
 }
 
 // ============================================================
-// Merge: GenesisState
+// Merge: LetsEncryptState
 // ============================================================
-// MergeGenesisState fills zero-valued fields in dst from src.
-func MergeGenesisState(dst, src *GenesisState) {
+// MergeLetsEncryptState fills zero-valued fields in dst from src.
+func MergeLetsEncryptState(dst, src *LetsEncryptState) {
 	if dst.CertData == nil {
 		dst.CertData = src.CertData
 	} else if src.CertData != nil {
-		MergeGenesisCertData(dst.CertData, src.CertData)
+		MergeLetsEncryptCertData(dst.CertData, src.CertData)
 	}
 }
 
 // ============================================================
-// Merge: GenesisCertData
+// Merge: LetsEncryptCertData
 // ============================================================
-// MergeGenesisCertData fills zero-valued fields in dst from src.
-func MergeGenesisCertData(dst, src *GenesisCertData) {
+// MergeLetsEncryptCertData fills zero-valued fields in dst from src.
+func MergeLetsEncryptCertData(dst, src *LetsEncryptCertData) {
 	if dst.TlsCert == nil {
 		dst.TlsCert = src.TlsCert
 	}

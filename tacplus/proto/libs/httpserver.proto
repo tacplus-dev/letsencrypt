@@ -3,7 +3,7 @@
 syntax = "proto3";
 
 package httpserver;
-option go_package = "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/httpserver";
+option go_package = "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/httpserver";
 
 import "libs/x509.proto";
 

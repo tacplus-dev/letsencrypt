@@ -12,7 +12,7 @@
 syntax = "proto3";
 
 package host;
-option go_package = "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/host";
+option go_package = "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/host";
 
 // Host identifies a network endpoint by hostname/IP and port.
 // The host field accepts either an FQDN or an IP address (v4/v6).

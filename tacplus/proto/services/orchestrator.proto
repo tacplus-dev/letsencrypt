@@ -16,7 +16,7 @@
 syntax = "proto3";
 
 package orchestrator;
-option go_package = "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/services/orchestrator";
+option go_package = "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/orchestrator";
 
 // ============================================================================
 // Backend State
@@ -27,7 +27,6 @@ option go_package = "gitlab.com/secondstarcavalier/controlplane/services/genesis
 // trigger a config reload on the elvis cluster.
 message OrchestratorState {
 }
-
 // ============================================================================
 // Auto-generated Backend Service (tacplus)
 // ============================================================================

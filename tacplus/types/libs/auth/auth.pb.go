@@ -14,8 +14,8 @@
 package auth
 
 import (
-	_ "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/spec"
-	token "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/token"
+	_ "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/spec"
+	token "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/token"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	anypb "google.golang.org/protobuf/types/known/anypb"
@@ -194,7 +194,7 @@ const file_libs_auth_proto_rawDesc = "" +
 	"\rACTION_PERMIT\x10\x01\x1a\n" +
 	"\xaa\xb5\x18\x06permit\x12\x19\n" +
 	"\vACTION_DENY\x10\x02\x1a\b\xaa\xb5\x18\x04deny\x12!\n" +
-	"\x0fACTION_CONTINUE\x10\x03\x1a\f\xaa\xb5\x18\bcontinueBQZOgitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/authb\x06proto3"
+	"\x0fACTION_CONTINUE\x10\x03\x1a\f\xaa\xb5\x18\bcontinueBUZSgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/authb\x06proto3"
 
 var (
 	file_libs_auth_proto_rawDescOnce sync.Once

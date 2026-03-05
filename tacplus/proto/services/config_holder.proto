@@ -5,47 +5,47 @@
 syntax = "proto3";
 
 package config_holder;
-option go_package = "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/services/config_holder";
+option go_package = "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/config_holder";
 
 import "libs/serviceconfig.proto";
-import "services/bowie.proto";
-import "services/fleetwood.proto";
-import "services/genesis.proto";
-import "services/ironmaiden.proto";
-import "services/springsteen.proto";
+import "services/gateway.proto";
+import "services/identity.proto";
+import "services/letsencrypt.proto";
+import "services/policy.proto";
+import "services/sentinel.proto";
 import "google/protobuf/empty.proto";
 
 message ConfigHolder {
-  fleetwood.Config fleetwood_config = 5;
-  ironmaiden.Config ironmaiden_config = 6;
-  springsteen.Config springsteen_config = 7;
-  bowie.Config bowie_config = 8;
-  genesis.Config genesis_config = 9;
+  sentinel.Config sentinel_config = 5;
+  identity.Config identity_config = 6;
+  gateway.Config gateway_config = 7;
+  letsencrypt.Config letsencrypt_config = 9;
+  policy.Config policy_config = 10;
 }
 
-message FleetwoodConfigState {
+message SentinelConfigState {
 
-  fleetwood.Config config = 1;
+  sentinel.Config config = 1;
 }
 
-message IronmaidenConfigState {
+message IdentityConfigState {
 
-  ironmaiden.Config config = 1;
+  identity.Config config = 1;
 }
 
-message SpringsteenConfigState {
+message GatewayConfigState {
 
-  springsteen.Config config = 1;
+  gateway.Config config = 1;
 }
 
-message BowieConfigState {
+message LetsencryptConfigState {
 
-  bowie.Config config = 1;
+  letsencrypt.Config config = 1;
 }
 
-message GenesisConfigState {
+message PolicyConfigState {
 
-  genesis.Config config = 1;
+  policy.Config config = 1;
 }
 
 // ServiceConfigState delivers runtime configuration (OPA policy) to all services.
@@ -59,55 +59,55 @@ message ServiceConfigState {
 // Auto-generated Backend Service (tacplus)
 // ============================================================================
 
-service FleetwoodConfigStateBackendService {
+service SentinelConfigStateBackendService {
 	// Singleton: Config
-	rpc GetConfig(google.protobuf.Empty) returns (fleetwood.Config);
-	rpc SetConfig(fleetwood.Config) returns (fleetwood.Config);
-	rpc WatchConfig(google.protobuf.Empty) returns (stream fleetwood.Config);
+	rpc GetConfig(google.protobuf.Empty) returns (sentinel.Config);
+	rpc SetConfig(sentinel.Config) returns (sentinel.Config);
+	rpc WatchConfig(google.protobuf.Empty) returns (stream sentinel.Config);
 }
 
 // ============================================================================
 // Auto-generated Backend Service (tacplus)
 // ============================================================================
 
-service IronmaidenConfigStateBackendService {
+service IdentityConfigStateBackendService {
 	// Singleton: Config
-	rpc GetConfig(google.protobuf.Empty) returns (ironmaiden.Config);
-	rpc SetConfig(ironmaiden.Config) returns (ironmaiden.Config);
-	rpc WatchConfig(google.protobuf.Empty) returns (stream ironmaiden.Config);
+	rpc GetConfig(google.protobuf.Empty) returns (identity.Config);
+	rpc SetConfig(identity.Config) returns (identity.Config);
+	rpc WatchConfig(google.protobuf.Empty) returns (stream identity.Config);
 }
 
 // ============================================================================
 // Auto-generated Backend Service (tacplus)
 // ============================================================================
 
-service SpringsteenConfigStateBackendService {
+service GatewayConfigStateBackendService {
 	// Singleton: Config
-	rpc GetConfig(google.protobuf.Empty) returns (springsteen.Config);
-	rpc SetConfig(springsteen.Config) returns (springsteen.Config);
-	rpc WatchConfig(google.protobuf.Empty) returns (stream springsteen.Config);
+	rpc GetConfig(google.protobuf.Empty) returns (gateway.Config);
+	rpc SetConfig(gateway.Config) returns (gateway.Config);
+	rpc WatchConfig(google.protobuf.Empty) returns (stream gateway.Config);
 }
 
 // ============================================================================
 // Auto-generated Backend Service (tacplus)
 // ============================================================================
 
-service BowieConfigStateBackendService {
+service LetsencryptConfigStateBackendService {
 	// Singleton: Config
-	rpc GetConfig(google.protobuf.Empty) returns (bowie.Config);
-	rpc SetConfig(bowie.Config) returns (bowie.Config);
-	rpc WatchConfig(google.protobuf.Empty) returns (stream bowie.Config);
+	rpc GetConfig(google.protobuf.Empty) returns (letsencrypt.Config);
+	rpc SetConfig(letsencrypt.Config) returns (letsencrypt.Config);
+	rpc WatchConfig(google.protobuf.Empty) returns (stream letsencrypt.Config);
 }
 
 // ============================================================================
 // Auto-generated Backend Service (tacplus)
 // ============================================================================
 
-service GenesisConfigStateBackendService {
+service PolicyConfigStateBackendService {
 	// Singleton: Config
-	rpc GetConfig(google.protobuf.Empty) returns (genesis.Config);
-	rpc SetConfig(genesis.Config) returns (genesis.Config);
-	rpc WatchConfig(google.protobuf.Empty) returns (stream genesis.Config);
+	rpc GetConfig(google.protobuf.Empty) returns (policy.Config);
+	rpc SetConfig(policy.Config) returns (policy.Config);
+	rpc WatchConfig(google.protobuf.Empty) returns (stream policy.Config);
 }
 
 // ============================================================================

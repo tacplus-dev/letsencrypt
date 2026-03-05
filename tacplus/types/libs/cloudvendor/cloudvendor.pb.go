@@ -109,7 +109,7 @@ const file_libs_cloudvendor_proto_rawDesc = "" +
 	"\x10CLOUD_VENDOR_GCP\x10\x03\x12\x17\n" +
 	"\x13CLOUD_VENDOR_ORACLE\x10\x04\x12\x18\n" +
 	"\x14CLOUD_VENDOR_ALIBABA\x10\x05\x12\x14\n" +
-	"\x10CLOUD_VENDOR_IBM\x10\x06BXZVgitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/cloudvendorb\x06proto3"
+	"\x10CLOUD_VENDOR_IBM\x10\x06B\\ZZgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/cloudvendorb\x06proto3"
 
 var (
 	file_libs_cloudvendor_proto_rawDescOnce sync.Once

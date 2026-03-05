@@ -12,17 +12,17 @@ RUN --mount=type=secret,id=netrc,dst=/root/.netrc go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /genesis .
+RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /letsencrypt .
 
 FROM alpine:3.21
 
 RUN apk add --no-cache ca-certificates tzdata && \
-    addgroup -S genesis && adduser -S genesis -G genesis
+    addgroup -S letsencrypt && adduser -S letsencrypt -G letsencrypt
 
 WORKDIR /app
 
-COPY --from=builder /genesis /app/genesis
+COPY --from=builder /letsencrypt /app/letsencrypt
 
-USER genesis
+USER letsencrypt
 
-ENTRYPOINT ["/app/genesis"]
+ENTRYPOINT ["/app/letsencrypt"]

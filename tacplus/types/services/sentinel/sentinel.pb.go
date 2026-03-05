@@ -9,14 +9,14 @@
 // If changes are needed, update the tacplus compiler at:
 // gitlab.com/secondstarcavalier/controlplane/services/tacplus
 //
-// Source: services/fleetwood.proto
+// Source: services/sentinel.proto
 
-package fleetwood
+package sentinel
 
 import (
-	_ "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/google/api/google"
-	_ "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/spec"
-	presley "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/services/presley"
+	_ "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/spec"
+	presley "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/presley"
+	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
@@ -40,7 +40,7 @@ type Config struct {
 
 func (x *Config) Reset() {
 	*x = Config{}
-	mi := &file_services_fleetwood_proto_msgTypes[0]
+	mi := &file_services_sentinel_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -52,7 +52,7 @@ func (x *Config) String() string {
 func (*Config) ProtoMessage() {}
 
 func (x *Config) ProtoReflect() protoreflect.Message {
-	mi := &file_services_fleetwood_proto_msgTypes[0]
+	mi := &file_services_sentinel_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -65,32 +65,32 @@ func (x *Config) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Config.ProtoReflect.Descriptor instead.
 func (*Config) Descriptor() ([]byte, []int) {
-	return file_services_fleetwood_proto_rawDescGZIP(), []int{0}
+	return file_services_sentinel_proto_rawDescGZIP(), []int{0}
 }
 
-// FleetwoodState is an empty backend — fleetwood reads ClusterState via
+// SentinelState is an empty backend — sentinel reads ClusterState via
 // security policy RO grant, not via its own state.
-type FleetwoodState struct {
+type SentinelState struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *FleetwoodState) Reset() {
-	*x = FleetwoodState{}
-	mi := &file_services_fleetwood_proto_msgTypes[1]
+func (x *SentinelState) Reset() {
+	*x = SentinelState{}
+	mi := &file_services_sentinel_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *FleetwoodState) String() string {
+func (x *SentinelState) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*FleetwoodState) ProtoMessage() {}
+func (*SentinelState) ProtoMessage() {}
 
-func (x *FleetwoodState) ProtoReflect() protoreflect.Message {
-	mi := &file_services_fleetwood_proto_msgTypes[1]
+func (x *SentinelState) ProtoReflect() protoreflect.Message {
+	mi := &file_services_sentinel_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -101,9 +101,54 @@ func (x *FleetwoodState) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use FleetwoodState.ProtoReflect.Descriptor instead.
-func (*FleetwoodState) Descriptor() ([]byte, []int) {
-	return file_services_fleetwood_proto_rawDescGZIP(), []int{1}
+// Deprecated: Use SentinelState.ProtoReflect.Descriptor instead.
+func (*SentinelState) Descriptor() ([]byte, []int) {
+	return file_services_sentinel_proto_rawDescGZIP(), []int{1}
+}
+
+type WatchDashboardRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// interval_seconds is how often to push updates. Default 5, min 1, max 60.
+	IntervalSeconds int32 `protobuf:"varint,1,opt,name=interval_seconds,json=intervalSeconds,proto3" json:"interval_seconds,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *WatchDashboardRequest) Reset() {
+	*x = WatchDashboardRequest{}
+	mi := &file_services_sentinel_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *WatchDashboardRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WatchDashboardRequest) ProtoMessage() {}
+
+func (x *WatchDashboardRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_services_sentinel_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WatchDashboardRequest.ProtoReflect.Descriptor instead.
+func (*WatchDashboardRequest) Descriptor() ([]byte, []int) {
+	return file_services_sentinel_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *WatchDashboardRequest) GetIntervalSeconds() int32 {
+	if x != nil {
+		return x.IntervalSeconds
+	}
+	return 0
 }
 
 // Wrapper responses for per-node collections
@@ -116,7 +161,7 @@ type NodeMetricsResponse struct {
 
 func (x *NodeMetricsResponse) Reset() {
 	*x = NodeMetricsResponse{}
-	mi := &file_services_fleetwood_proto_msgTypes[2]
+	mi := &file_services_sentinel_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -128,7 +173,7 @@ func (x *NodeMetricsResponse) String() string {
 func (*NodeMetricsResponse) ProtoMessage() {}
 
 func (x *NodeMetricsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_services_fleetwood_proto_msgTypes[2]
+	mi := &file_services_sentinel_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -141,7 +186,7 @@ func (x *NodeMetricsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NodeMetricsResponse.ProtoReflect.Descriptor instead.
 func (*NodeMetricsResponse) Descriptor() ([]byte, []int) {
-	return file_services_fleetwood_proto_rawDescGZIP(), []int{2}
+	return file_services_sentinel_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *NodeMetricsResponse) GetItems() []*presley.AdminNodeMetrics {
@@ -160,7 +205,7 @@ type GrpcStatsResponse struct {
 
 func (x *GrpcStatsResponse) Reset() {
 	*x = GrpcStatsResponse{}
-	mi := &file_services_fleetwood_proto_msgTypes[3]
+	mi := &file_services_sentinel_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -172,7 +217,7 @@ func (x *GrpcStatsResponse) String() string {
 func (*GrpcStatsResponse) ProtoMessage() {}
 
 func (x *GrpcStatsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_services_fleetwood_proto_msgTypes[3]
+	mi := &file_services_sentinel_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -185,7 +230,7 @@ func (x *GrpcStatsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GrpcStatsResponse.ProtoReflect.Descriptor instead.
 func (*GrpcStatsResponse) Descriptor() ([]byte, []int) {
-	return file_services_fleetwood_proto_rawDescGZIP(), []int{3}
+	return file_services_sentinel_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *GrpcStatsResponse) GetItems() []*presley.AdminGrpcStats {
@@ -204,7 +249,7 @@ type PersistenceStatusResponse struct {
 
 func (x *PersistenceStatusResponse) Reset() {
 	*x = PersistenceStatusResponse{}
-	mi := &file_services_fleetwood_proto_msgTypes[4]
+	mi := &file_services_sentinel_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -216,7 +261,7 @@ func (x *PersistenceStatusResponse) String() string {
 func (*PersistenceStatusResponse) ProtoMessage() {}
 
 func (x *PersistenceStatusResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_services_fleetwood_proto_msgTypes[4]
+	mi := &file_services_sentinel_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -229,7 +274,7 @@ func (x *PersistenceStatusResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PersistenceStatusResponse.ProtoReflect.Descriptor instead.
 func (*PersistenceStatusResponse) Descriptor() ([]byte, []int) {
-	return file_services_fleetwood_proto_rawDescGZIP(), []int{4}
+	return file_services_sentinel_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *PersistenceStatusResponse) GetItems() []*presley.AdminPersistenceStatus {
@@ -248,7 +293,7 @@ type NetworkStatsResponse struct {
 
 func (x *NetworkStatsResponse) Reset() {
 	*x = NetworkStatsResponse{}
-	mi := &file_services_fleetwood_proto_msgTypes[5]
+	mi := &file_services_sentinel_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -260,7 +305,7 @@ func (x *NetworkStatsResponse) String() string {
 func (*NetworkStatsResponse) ProtoMessage() {}
 
 func (x *NetworkStatsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_services_fleetwood_proto_msgTypes[5]
+	mi := &file_services_sentinel_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -273,7 +318,7 @@ func (x *NetworkStatsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NetworkStatsResponse.ProtoReflect.Descriptor instead.
 func (*NetworkStatsResponse) Descriptor() ([]byte, []int) {
-	return file_services_fleetwood_proto_rawDescGZIP(), []int{5}
+	return file_services_sentinel_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *NetworkStatsResponse) GetItems() []*presley.AdminNetworkStats {
@@ -292,7 +337,7 @@ type ThreadInfoResponse struct {
 
 func (x *ThreadInfoResponse) Reset() {
 	*x = ThreadInfoResponse{}
-	mi := &file_services_fleetwood_proto_msgTypes[6]
+	mi := &file_services_sentinel_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -304,7 +349,7 @@ func (x *ThreadInfoResponse) String() string {
 func (*ThreadInfoResponse) ProtoMessage() {}
 
 func (x *ThreadInfoResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_services_fleetwood_proto_msgTypes[6]
+	mi := &file_services_sentinel_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -317,7 +362,7 @@ func (x *ThreadInfoResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ThreadInfoResponse.ProtoReflect.Descriptor instead.
 func (*ThreadInfoResponse) Descriptor() ([]byte, []int) {
-	return file_services_fleetwood_proto_rawDescGZIP(), []int{6}
+	return file_services_sentinel_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *ThreadInfoResponse) GetItems() []*presley.AdminThreadInfo {
@@ -336,7 +381,7 @@ type TokenCacheStatsResponse struct {
 
 func (x *TokenCacheStatsResponse) Reset() {
 	*x = TokenCacheStatsResponse{}
-	mi := &file_services_fleetwood_proto_msgTypes[7]
+	mi := &file_services_sentinel_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -348,7 +393,7 @@ func (x *TokenCacheStatsResponse) String() string {
 func (*TokenCacheStatsResponse) ProtoMessage() {}
 
 func (x *TokenCacheStatsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_services_fleetwood_proto_msgTypes[7]
+	mi := &file_services_sentinel_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -361,7 +406,7 @@ func (x *TokenCacheStatsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TokenCacheStatsResponse.ProtoReflect.Descriptor instead.
 func (*TokenCacheStatsResponse) Descriptor() ([]byte, []int) {
-	return file_services_fleetwood_proto_rawDescGZIP(), []int{7}
+	return file_services_sentinel_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *TokenCacheStatsResponse) GetItems() []*presley.AdminTokenCacheStats {
@@ -380,7 +425,7 @@ type MapStatsResponse struct {
 
 func (x *MapStatsResponse) Reset() {
 	*x = MapStatsResponse{}
-	mi := &file_services_fleetwood_proto_msgTypes[8]
+	mi := &file_services_sentinel_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -392,7 +437,7 @@ func (x *MapStatsResponse) String() string {
 func (*MapStatsResponse) ProtoMessage() {}
 
 func (x *MapStatsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_services_fleetwood_proto_msgTypes[8]
+	mi := &file_services_sentinel_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -405,7 +450,7 @@ func (x *MapStatsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MapStatsResponse.ProtoReflect.Descriptor instead.
 func (*MapStatsResponse) Descriptor() ([]byte, []int) {
-	return file_services_fleetwood_proto_rawDescGZIP(), []int{8}
+	return file_services_sentinel_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *MapStatsResponse) GetItems() []*presley.AdminMapStats {
@@ -432,7 +477,7 @@ type DashboardResponse struct {
 
 func (x *DashboardResponse) Reset() {
 	*x = DashboardResponse{}
-	mi := &file_services_fleetwood_proto_msgTypes[9]
+	mi := &file_services_sentinel_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -444,7 +489,7 @@ func (x *DashboardResponse) String() string {
 func (*DashboardResponse) ProtoMessage() {}
 
 func (x *DashboardResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_services_fleetwood_proto_msgTypes[9]
+	mi := &file_services_sentinel_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -457,7 +502,7 @@ func (x *DashboardResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DashboardResponse.ProtoReflect.Descriptor instead.
 func (*DashboardResponse) Descriptor() ([]byte, []int) {
-	return file_services_fleetwood_proto_rawDescGZIP(), []int{9}
+	return file_services_sentinel_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *DashboardResponse) GetClusterInfo() *presley.AdminClusterInfo {
@@ -531,7 +576,7 @@ type MapEmpty struct {
 
 func (x *MapEmpty) Reset() {
 	*x = MapEmpty{}
-	mi := &file_services_fleetwood_proto_msgTypes[10]
+	mi := &file_services_sentinel_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -543,7 +588,7 @@ func (x *MapEmpty) String() string {
 func (*MapEmpty) ProtoMessage() {}
 
 func (x *MapEmpty) ProtoReflect() protoreflect.Message {
-	mi := &file_services_fleetwood_proto_msgTypes[10]
+	mi := &file_services_sentinel_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -556,17 +601,19 @@ func (x *MapEmpty) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MapEmpty.ProtoReflect.Descriptor instead.
 func (*MapEmpty) Descriptor() ([]byte, []int) {
-	return file_services_fleetwood_proto_rawDescGZIP(), []int{10}
+	return file_services_sentinel_proto_rawDescGZIP(), []int{11}
 }
 
-var File_services_fleetwood_proto protoreflect.FileDescriptor
+var File_services_sentinel_proto protoreflect.FileDescriptor
 
-const file_services_fleetwood_proto_rawDesc = "" +
+const file_services_sentinel_proto_rawDesc = "" +
 	"\n" +
-	"\x18services/fleetwood.proto\x12\tfleetwood\x1a\x0flibs/spec.proto\x1a\x16services/presley.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1cgoogle/api/annotations.proto\"\x1b\n" +
-	"\x06Config:\x11Ҩ\x1d\r\n" +
-	"\tfleetwood\x10\x05\"$\n" +
-	"\x0eFleetwoodState:\x12\x9a\xa8\x1d\x0eFleetwoodState\"F\n" +
+	"\x17services/sentinel.proto\x12\bsentinel\x1a\x0flibs/spec.proto\x1a\x16services/presley.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1cgoogle/api/annotations.proto\"\x1a\n" +
+	"\x06Config:\x10Ҩ\x1d\f\n" +
+	"\bsentinel\x10\x05\"\"\n" +
+	"\rSentinelState:\x11\x9a\xa8\x1d\rSentinelState\"B\n" +
+	"\x15WatchDashboardRequest\x12)\n" +
+	"\x10interval_seconds\x18\x01 \x01(\x05R\x0fintervalSeconds\"F\n" +
 	"\x13NodeMetricsResponse\x12/\n" +
 	"\x05items\x18\x01 \x03(\v2\x19.presley.AdminNodeMetricsR\x05items\"B\n" +
 	"\x11GrpcStatsResponse\x12-\n" +
@@ -594,120 +641,125 @@ const file_services_fleetwood_proto_rawDesc = "" +
 	"\x11token_cache_stats\x18\b \x03(\v2\x1d.presley.AdminTokenCacheStatsR\x0ftokenCacheStats\x123\n" +
 	"\tmap_stats\x18\t \x03(\v2\x16.presley.AdminMapStatsR\bmapStats\"\n" +
 	"\n" +
-	"\bMapEmpty2\xaa\x06\n" +
-	"\x10FleetwoodService\x12C\n" +
-	"\x0eGetClusterInfo\x12\x16.google.protobuf.Empty\x1a\x19.presley.AdminClusterInfo\x12G\n" +
-	"\x10GetClusterHealth\x12\x16.google.protobuf.Empty\x1a\x1b.presley.AdminClusterHealth\x12H\n" +
-	"\x0eGetNodeMetrics\x12\x16.google.protobuf.Empty\x1a\x1e.fleetwood.NodeMetricsResponse\x12D\n" +
-	"\fGetGrpcStats\x12\x16.google.protobuf.Empty\x1a\x1c.fleetwood.GrpcStatsResponse\x12T\n" +
-	"\x14GetPersistenceStatus\x12\x16.google.protobuf.Empty\x1a$.fleetwood.PersistenceStatusResponse\x12J\n" +
-	"\x0fGetNetworkStats\x12\x16.google.protobuf.Empty\x1a\x1f.fleetwood.NetworkStatsResponse\x12F\n" +
-	"\rGetThreadInfo\x12\x16.google.protobuf.Empty\x1a\x1d.fleetwood.ThreadInfoResponse\x12P\n" +
-	"\x12GetTokenCacheStats\x12\x16.google.protobuf.Empty\x1a\".fleetwood.TokenCacheStatsResponse\x12B\n" +
-	"\vGetMapStats\x12\x16.google.protobuf.Empty\x1a\x1b.fleetwood.MapStatsResponse\x12i\n" +
-	"\fGetDashboard\x12\x16.google.protobuf.Empty\x1a\x1c.fleetwood.DashboardResponse\"#\x82\xd3\xe4\x93\x02\x1d\x12\x1b/api/fleetwood/v1/dashboard\x1a\r\xa2\x97\"\tfleetwood2\x1e\n" +
-	"\x1cFleetwoodStateBackendServiceBZZXgitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/services/fleetwoodb\x06proto3"
+	"\bMapEmpty2\x83\n" +
+	"\n" +
+	"\x0fSentinelService\x12j\n" +
+	"\x0eGetClusterInfo\x12\x16.google.protobuf.Empty\x1a\x19.presley.AdminClusterInfo\"%\x82\xd3\xe4\x93\x02\x1f\x12\x1d/api/sentinel/v1/cluster-info\x12p\n" +
+	"\x10GetClusterHealth\x12\x16.google.protobuf.Empty\x1a\x1b.presley.AdminClusterHealth\"'\x82\xd3\xe4\x93\x02!\x12\x1f/api/sentinel/v1/cluster-health\x12n\n" +
+	"\x0eGetNodeMetrics\x12\x16.google.protobuf.Empty\x1a\x1d.sentinel.NodeMetricsResponse\"%\x82\xd3\xe4\x93\x02\x1f\x12\x1d/api/sentinel/v1/node-metrics\x12h\n" +
+	"\fGetGrpcStats\x12\x16.google.protobuf.Empty\x1a\x1b.sentinel.GrpcStatsResponse\"#\x82\xd3\xe4\x93\x02\x1d\x12\x1b/api/sentinel/v1/grpc-stats\x12\x80\x01\n" +
+	"\x14GetPersistenceStatus\x12\x16.google.protobuf.Empty\x1a#.sentinel.PersistenceStatusResponse\"+\x82\xd3\xe4\x93\x02%\x12#/api/sentinel/v1/persistence-status\x12q\n" +
+	"\x0fGetNetworkStats\x12\x16.google.protobuf.Empty\x1a\x1e.sentinel.NetworkStatsResponse\"&\x82\xd3\xe4\x93\x02 \x12\x1e/api/sentinel/v1/network-stats\x12k\n" +
+	"\rGetThreadInfo\x12\x16.google.protobuf.Empty\x1a\x1c.sentinel.ThreadInfoResponse\"$\x82\xd3\xe4\x93\x02\x1e\x12\x1c/api/sentinel/v1/thread-info\x12{\n" +
+	"\x12GetTokenCacheStats\x12\x16.google.protobuf.Empty\x1a!.sentinel.TokenCacheStatsResponse\"*\x82\xd3\xe4\x93\x02$\x12\"/api/sentinel/v1/token-cache-stats\x12e\n" +
+	"\vGetMapStats\x12\x16.google.protobuf.Empty\x1a\x1a.sentinel.MapStatsResponse\"\"\x82\xd3\xe4\x93\x02\x1c\x12\x1a/api/sentinel/v1/map-stats\x12g\n" +
+	"\fGetDashboard\x12\x16.google.protobuf.Empty\x1a\x1b.sentinel.DashboardResponse\"\"\x82\xd3\xe4\x93\x02\x1c\x12\x1a/api/sentinel/v1/dashboard\x12z\n" +
+	"\x0eWatchDashboard\x12\x1f.sentinel.WatchDashboardRequest\x1a\x1b.sentinel.DashboardResponse\"(\x82\xd3\xe4\x93\x02\"\x12 /api/sentinel/v1/dashboard/watch0\x01\x1a\f\xa2\x97\"\bsentinel2\x1d\n" +
+	"\x1bSentinelStateBackendServiceB]Z[gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/sentinelb\x06proto3"
 
 var (
-	file_services_fleetwood_proto_rawDescOnce sync.Once
-	file_services_fleetwood_proto_rawDescData []byte
+	file_services_sentinel_proto_rawDescOnce sync.Once
+	file_services_sentinel_proto_rawDescData []byte
 )
 
-func file_services_fleetwood_proto_rawDescGZIP() []byte {
-	file_services_fleetwood_proto_rawDescOnce.Do(func() {
-		file_services_fleetwood_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_services_fleetwood_proto_rawDesc), len(file_services_fleetwood_proto_rawDesc)))
+func file_services_sentinel_proto_rawDescGZIP() []byte {
+	file_services_sentinel_proto_rawDescOnce.Do(func() {
+		file_services_sentinel_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_services_sentinel_proto_rawDesc), len(file_services_sentinel_proto_rawDesc)))
 	})
-	return file_services_fleetwood_proto_rawDescData
+	return file_services_sentinel_proto_rawDescData
 }
 
-var file_services_fleetwood_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
-var file_services_fleetwood_proto_goTypes = []any{
-	(*Config)(nil),                         // 0: fleetwood.Config
-	(*FleetwoodState)(nil),                 // 1: fleetwood.FleetwoodState
-	(*NodeMetricsResponse)(nil),            // 2: fleetwood.NodeMetricsResponse
-	(*GrpcStatsResponse)(nil),              // 3: fleetwood.GrpcStatsResponse
-	(*PersistenceStatusResponse)(nil),      // 4: fleetwood.PersistenceStatusResponse
-	(*NetworkStatsResponse)(nil),           // 5: fleetwood.NetworkStatsResponse
-	(*ThreadInfoResponse)(nil),             // 6: fleetwood.ThreadInfoResponse
-	(*TokenCacheStatsResponse)(nil),        // 7: fleetwood.TokenCacheStatsResponse
-	(*MapStatsResponse)(nil),               // 8: fleetwood.MapStatsResponse
-	(*DashboardResponse)(nil),              // 9: fleetwood.DashboardResponse
-	(*MapEmpty)(nil),                       // 10: fleetwood.MapEmpty
-	(*presley.AdminNodeMetrics)(nil),       // 11: presley.AdminNodeMetrics
-	(*presley.AdminGrpcStats)(nil),         // 12: presley.AdminGrpcStats
-	(*presley.AdminPersistenceStatus)(nil), // 13: presley.AdminPersistenceStatus
-	(*presley.AdminNetworkStats)(nil),      // 14: presley.AdminNetworkStats
-	(*presley.AdminThreadInfo)(nil),        // 15: presley.AdminThreadInfo
-	(*presley.AdminTokenCacheStats)(nil),   // 16: presley.AdminTokenCacheStats
-	(*presley.AdminMapStats)(nil),          // 17: presley.AdminMapStats
-	(*presley.AdminClusterInfo)(nil),       // 18: presley.AdminClusterInfo
-	(*presley.AdminClusterHealth)(nil),     // 19: presley.AdminClusterHealth
-	(*emptypb.Empty)(nil),                  // 20: google.protobuf.Empty
+var file_services_sentinel_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_services_sentinel_proto_goTypes = []any{
+	(*Config)(nil),                         // 0: sentinel.Config
+	(*SentinelState)(nil),                  // 1: sentinel.SentinelState
+	(*WatchDashboardRequest)(nil),          // 2: sentinel.WatchDashboardRequest
+	(*NodeMetricsResponse)(nil),            // 3: sentinel.NodeMetricsResponse
+	(*GrpcStatsResponse)(nil),              // 4: sentinel.GrpcStatsResponse
+	(*PersistenceStatusResponse)(nil),      // 5: sentinel.PersistenceStatusResponse
+	(*NetworkStatsResponse)(nil),           // 6: sentinel.NetworkStatsResponse
+	(*ThreadInfoResponse)(nil),             // 7: sentinel.ThreadInfoResponse
+	(*TokenCacheStatsResponse)(nil),        // 8: sentinel.TokenCacheStatsResponse
+	(*MapStatsResponse)(nil),               // 9: sentinel.MapStatsResponse
+	(*DashboardResponse)(nil),              // 10: sentinel.DashboardResponse
+	(*MapEmpty)(nil),                       // 11: sentinel.MapEmpty
+	(*presley.AdminNodeMetrics)(nil),       // 12: presley.AdminNodeMetrics
+	(*presley.AdminGrpcStats)(nil),         // 13: presley.AdminGrpcStats
+	(*presley.AdminPersistenceStatus)(nil), // 14: presley.AdminPersistenceStatus
+	(*presley.AdminNetworkStats)(nil),      // 15: presley.AdminNetworkStats
+	(*presley.AdminThreadInfo)(nil),        // 16: presley.AdminThreadInfo
+	(*presley.AdminTokenCacheStats)(nil),   // 17: presley.AdminTokenCacheStats
+	(*presley.AdminMapStats)(nil),          // 18: presley.AdminMapStats
+	(*presley.AdminClusterInfo)(nil),       // 19: presley.AdminClusterInfo
+	(*presley.AdminClusterHealth)(nil),     // 20: presley.AdminClusterHealth
+	(*emptypb.Empty)(nil),                  // 21: google.protobuf.Empty
 }
-var file_services_fleetwood_proto_depIdxs = []int32{
-	11, // 0: fleetwood.NodeMetricsResponse.items:type_name -> presley.AdminNodeMetrics
-	12, // 1: fleetwood.GrpcStatsResponse.items:type_name -> presley.AdminGrpcStats
-	13, // 2: fleetwood.PersistenceStatusResponse.items:type_name -> presley.AdminPersistenceStatus
-	14, // 3: fleetwood.NetworkStatsResponse.items:type_name -> presley.AdminNetworkStats
-	15, // 4: fleetwood.ThreadInfoResponse.items:type_name -> presley.AdminThreadInfo
-	16, // 5: fleetwood.TokenCacheStatsResponse.items:type_name -> presley.AdminTokenCacheStats
-	17, // 6: fleetwood.MapStatsResponse.items:type_name -> presley.AdminMapStats
-	18, // 7: fleetwood.DashboardResponse.cluster_info:type_name -> presley.AdminClusterInfo
-	19, // 8: fleetwood.DashboardResponse.cluster_health:type_name -> presley.AdminClusterHealth
-	11, // 9: fleetwood.DashboardResponse.node_metrics:type_name -> presley.AdminNodeMetrics
-	12, // 10: fleetwood.DashboardResponse.grpc_stats:type_name -> presley.AdminGrpcStats
-	13, // 11: fleetwood.DashboardResponse.persistence_status:type_name -> presley.AdminPersistenceStatus
-	14, // 12: fleetwood.DashboardResponse.network_stats:type_name -> presley.AdminNetworkStats
-	15, // 13: fleetwood.DashboardResponse.thread_info:type_name -> presley.AdminThreadInfo
-	16, // 14: fleetwood.DashboardResponse.token_cache_stats:type_name -> presley.AdminTokenCacheStats
-	17, // 15: fleetwood.DashboardResponse.map_stats:type_name -> presley.AdminMapStats
-	20, // 16: fleetwood.FleetwoodService.GetClusterInfo:input_type -> google.protobuf.Empty
-	20, // 17: fleetwood.FleetwoodService.GetClusterHealth:input_type -> google.protobuf.Empty
-	20, // 18: fleetwood.FleetwoodService.GetNodeMetrics:input_type -> google.protobuf.Empty
-	20, // 19: fleetwood.FleetwoodService.GetGrpcStats:input_type -> google.protobuf.Empty
-	20, // 20: fleetwood.FleetwoodService.GetPersistenceStatus:input_type -> google.protobuf.Empty
-	20, // 21: fleetwood.FleetwoodService.GetNetworkStats:input_type -> google.protobuf.Empty
-	20, // 22: fleetwood.FleetwoodService.GetThreadInfo:input_type -> google.protobuf.Empty
-	20, // 23: fleetwood.FleetwoodService.GetTokenCacheStats:input_type -> google.protobuf.Empty
-	20, // 24: fleetwood.FleetwoodService.GetMapStats:input_type -> google.protobuf.Empty
-	20, // 25: fleetwood.FleetwoodService.GetDashboard:input_type -> google.protobuf.Empty
-	18, // 26: fleetwood.FleetwoodService.GetClusterInfo:output_type -> presley.AdminClusterInfo
-	19, // 27: fleetwood.FleetwoodService.GetClusterHealth:output_type -> presley.AdminClusterHealth
-	2,  // 28: fleetwood.FleetwoodService.GetNodeMetrics:output_type -> fleetwood.NodeMetricsResponse
-	3,  // 29: fleetwood.FleetwoodService.GetGrpcStats:output_type -> fleetwood.GrpcStatsResponse
-	4,  // 30: fleetwood.FleetwoodService.GetPersistenceStatus:output_type -> fleetwood.PersistenceStatusResponse
-	5,  // 31: fleetwood.FleetwoodService.GetNetworkStats:output_type -> fleetwood.NetworkStatsResponse
-	6,  // 32: fleetwood.FleetwoodService.GetThreadInfo:output_type -> fleetwood.ThreadInfoResponse
-	7,  // 33: fleetwood.FleetwoodService.GetTokenCacheStats:output_type -> fleetwood.TokenCacheStatsResponse
-	8,  // 34: fleetwood.FleetwoodService.GetMapStats:output_type -> fleetwood.MapStatsResponse
-	9,  // 35: fleetwood.FleetwoodService.GetDashboard:output_type -> fleetwood.DashboardResponse
-	26, // [26:36] is the sub-list for method output_type
-	16, // [16:26] is the sub-list for method input_type
+var file_services_sentinel_proto_depIdxs = []int32{
+	12, // 0: sentinel.NodeMetricsResponse.items:type_name -> presley.AdminNodeMetrics
+	13, // 1: sentinel.GrpcStatsResponse.items:type_name -> presley.AdminGrpcStats
+	14, // 2: sentinel.PersistenceStatusResponse.items:type_name -> presley.AdminPersistenceStatus
+	15, // 3: sentinel.NetworkStatsResponse.items:type_name -> presley.AdminNetworkStats
+	16, // 4: sentinel.ThreadInfoResponse.items:type_name -> presley.AdminThreadInfo
+	17, // 5: sentinel.TokenCacheStatsResponse.items:type_name -> presley.AdminTokenCacheStats
+	18, // 6: sentinel.MapStatsResponse.items:type_name -> presley.AdminMapStats
+	19, // 7: sentinel.DashboardResponse.cluster_info:type_name -> presley.AdminClusterInfo
+	20, // 8: sentinel.DashboardResponse.cluster_health:type_name -> presley.AdminClusterHealth
+	12, // 9: sentinel.DashboardResponse.node_metrics:type_name -> presley.AdminNodeMetrics
+	13, // 10: sentinel.DashboardResponse.grpc_stats:type_name -> presley.AdminGrpcStats
+	14, // 11: sentinel.DashboardResponse.persistence_status:type_name -> presley.AdminPersistenceStatus
+	15, // 12: sentinel.DashboardResponse.network_stats:type_name -> presley.AdminNetworkStats
+	16, // 13: sentinel.DashboardResponse.thread_info:type_name -> presley.AdminThreadInfo
+	17, // 14: sentinel.DashboardResponse.token_cache_stats:type_name -> presley.AdminTokenCacheStats
+	18, // 15: sentinel.DashboardResponse.map_stats:type_name -> presley.AdminMapStats
+	21, // 16: sentinel.SentinelService.GetClusterInfo:input_type -> google.protobuf.Empty
+	21, // 17: sentinel.SentinelService.GetClusterHealth:input_type -> google.protobuf.Empty
+	21, // 18: sentinel.SentinelService.GetNodeMetrics:input_type -> google.protobuf.Empty
+	21, // 19: sentinel.SentinelService.GetGrpcStats:input_type -> google.protobuf.Empty
+	21, // 20: sentinel.SentinelService.GetPersistenceStatus:input_type -> google.protobuf.Empty
+	21, // 21: sentinel.SentinelService.GetNetworkStats:input_type -> google.protobuf.Empty
+	21, // 22: sentinel.SentinelService.GetThreadInfo:input_type -> google.protobuf.Empty
+	21, // 23: sentinel.SentinelService.GetTokenCacheStats:input_type -> google.protobuf.Empty
+	21, // 24: sentinel.SentinelService.GetMapStats:input_type -> google.protobuf.Empty
+	21, // 25: sentinel.SentinelService.GetDashboard:input_type -> google.protobuf.Empty
+	2,  // 26: sentinel.SentinelService.WatchDashboard:input_type -> sentinel.WatchDashboardRequest
+	19, // 27: sentinel.SentinelService.GetClusterInfo:output_type -> presley.AdminClusterInfo
+	20, // 28: sentinel.SentinelService.GetClusterHealth:output_type -> presley.AdminClusterHealth
+	3,  // 29: sentinel.SentinelService.GetNodeMetrics:output_type -> sentinel.NodeMetricsResponse
+	4,  // 30: sentinel.SentinelService.GetGrpcStats:output_type -> sentinel.GrpcStatsResponse
+	5,  // 31: sentinel.SentinelService.GetPersistenceStatus:output_type -> sentinel.PersistenceStatusResponse
+	6,  // 32: sentinel.SentinelService.GetNetworkStats:output_type -> sentinel.NetworkStatsResponse
+	7,  // 33: sentinel.SentinelService.GetThreadInfo:output_type -> sentinel.ThreadInfoResponse
+	8,  // 34: sentinel.SentinelService.GetTokenCacheStats:output_type -> sentinel.TokenCacheStatsResponse
+	9,  // 35: sentinel.SentinelService.GetMapStats:output_type -> sentinel.MapStatsResponse
+	10, // 36: sentinel.SentinelService.GetDashboard:output_type -> sentinel.DashboardResponse
+	10, // 37: sentinel.SentinelService.WatchDashboard:output_type -> sentinel.DashboardResponse
+	27, // [27:38] is the sub-list for method output_type
+	16, // [16:27] is the sub-list for method input_type
 	16, // [16:16] is the sub-list for extension type_name
 	16, // [16:16] is the sub-list for extension extendee
 	0,  // [0:16] is the sub-list for field type_name
 }
 
-func init() { file_services_fleetwood_proto_init() }
-func file_services_fleetwood_proto_init() {
-	if File_services_fleetwood_proto != nil {
+func init() { file_services_sentinel_proto_init() }
+func file_services_sentinel_proto_init() {
+	if File_services_sentinel_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_services_fleetwood_proto_rawDesc), len(file_services_fleetwood_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_services_sentinel_proto_rawDesc), len(file_services_sentinel_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   11,
+			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   2,
 		},
-		GoTypes:           file_services_fleetwood_proto_goTypes,
-		DependencyIndexes: file_services_fleetwood_proto_depIdxs,
-		MessageInfos:      file_services_fleetwood_proto_msgTypes,
+		GoTypes:           file_services_sentinel_proto_goTypes,
+		DependencyIndexes: file_services_sentinel_proto_depIdxs,
+		MessageInfos:      file_services_sentinel_proto_msgTypes,
 	}.Build()
-	File_services_fleetwood_proto = out.File
-	file_services_fleetwood_proto_goTypes = nil
-	file_services_fleetwood_proto_depIdxs = nil
+	File_services_sentinel_proto = out.File
+	file_services_sentinel_proto_goTypes = nil
+	file_services_sentinel_proto_depIdxs = nil
 }

@@ -12,7 +12,7 @@
 syntax = "proto3";
 
 package token;
-option go_package = "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/token";
+option go_package = "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/token";
 
 import "google/protobuf/struct.proto";
 

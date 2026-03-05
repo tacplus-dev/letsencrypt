@@ -8,18 +8,18 @@ import (
 	"os/signal"
 	"syscall"
 
-	genesis "gitlab.com/secondstarcavalier/controlplane/services/genesis/internal"
-	"gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/libs/logger"
-	"gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/libs/servicemanager"
-	serviceconfig_pb "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/serviceconfig"
-	genesis_pb "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/services/genesis"
-	"gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/wrappers/backends"
+	letsencrypt "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/internal"
+	"gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/libs/logger"
+	"gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/libs/servicemanager"
+	serviceconfig_pb "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/serviceconfig"
+	letsencrypt_pb "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/letsencrypt"
+	"gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/wrappers/backends"
 	"go.uber.org/zap"
 )
 
 func main() {
 	if err := run(); err != nil {
-		log.Fatalf("genesis: %v", err)
+		log.Fatalf("letsencrypt: %v", err)
 	}
 }
 
@@ -56,9 +56,9 @@ func run() error {
 	}
 
 	// 3. Parse typed config.
-	genesisCfg, err := genesis_pb.ConfigFromBytes(data)
+	letsencryptCfg, err := letsencrypt_pb.ConfigFromBytes(data)
 	if err != nil {
-		return fmt.Errorf("parsing genesis config %s: %w", configPath, err)
+		return fmt.Errorf("parsing letsencrypt config %s: %w", configPath, err)
 	}
 
 	// 4. Connect to elvis via ServiceManager.
@@ -76,9 +76,9 @@ func run() error {
 	defer bc.Close()
 
 	// 6. Run the cert manager.
-	zap.L().Info("Starting genesis", zap.String("fqdn", genesisCfg.Fqdn))
+	zap.L().Info("Starting letsencrypt", zap.String("fqdn", letsencryptCfg.Fqdn))
 
-	cm, err := genesis.NewCertManager(genesisCfg, bc)
+	cm, err := letsencrypt.NewCertManager(letsencryptCfg, bc)
 	if err != nil {
 		return fmt.Errorf("cert manager: %w", err)
 	}

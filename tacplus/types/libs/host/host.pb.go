@@ -14,7 +14,7 @@
 package host
 
 import (
-	_ "gitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/spec"
+	_ "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/spec"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -92,7 +92,7 @@ const file_libs_host_proto_rawDesc = "" +
 	"\x0flibs/host.proto\x12\x04host\x1a\x0flibs/spec.proto\">\n" +
 	"\x04Host\x12\x1c\n" +
 	"\x04host\x18\x01 \x01(\tB\b\x88\xa6\x1d\x01\x80\xa8\x1d\x01R\x04host\x12\x18\n" +
-	"\x04port\x18\x02 \x01(\x05B\x04\xa0\xa6\x1d\x01R\x04portBQZOgitlab.com/secondstarcavalier/controlplane/services/genesis/tacplus/types/libs/hostb\x06proto3"
+	"\x04port\x18\x02 \x01(\x05B\x04\xa0\xa6\x1d\x01R\x04portBUZSgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/hostb\x06proto3"
 
 var (
 	file_libs_host_proto_rawDescOnce sync.Once
