@@ -1,17 +1,16 @@
 {
-  "binary_hash": "704b28fed9fd190364231d653c561ab0edf265e9211f30301259abc59bcda46e",
+  "binary_hash": "30df610691969127460444c77cb5422a4c5077cbd7cb662bc8ac54dbdd8a61d9",
   "config_hash": "44bb74cc7ceaef5e4d529ce78469deefe5ff7dfc4d75b9e3c0fcc37276f03e6c",
-  "structure_hash": "c683d06bf54314d591eb80292b56632792224816a961a80b79b40cc3b6886a37",
+  "structure_hash": "13763a4e7590a5409a91f6e4b8f16ee9b350f4a6a42505004053caaf52256cbb",
   "files": {
     "dependencies.yaml": "b1e3b41802693b989403f5da77d07c50392cbeb70718fbb6341421ffc1ac2442",
-    "services/elvis.proto": "ca9c64d21c527c88e0f0bc3ab96e7ca6d745b56315a3502487f4f6f6ff9362bd",
     "services/gateway.proto": "ed2598f1c82c856c1df5c9fbb7e1cbb285075d397b4dbf7c2e919b75285fa608",
-    "services/identity.proto": "a5293157f34b54f7dcbb504ab047449350410a2956b3461e11c6ab007a7fcd89",
-    "services/letsencrypt.proto": "44366284e0532c4c00cb93f8d5a3510e56a471f503831dbbee82f0c5af815a3d",
-    "services/orchestrator.proto": "2b2ff73b1942541e137b6e7013ab26c7aceb4b40c8749980e4cf24497ccce714",
+    "services/identity.proto": "59b4d7ad9c307135e47507d2527d368bb85652ba8d45e20320df05d53f9ffbea",
+    "services/kernel.proto": "329a24b373e5cecad7f19be8271febf197418bc173f693c3aefbca288bb2e2f2",
+    "services/letsencrypt.proto": "a22e104aabe98907b6ea992efa645dfac847b5e2ddd19610480e1d95b88c3aad",
+    "services/orchestrator.proto": "6e4c719e915ebed7e6ca9e0105ee9ab484038df2c9b8c65879880e3f8efb5405",
     "services/policy.proto": "0375f1556cbf8d160143201a287683f8cc7b7878d49e17246c0578d2f7c24b3d",
-    "services/presley.proto": "0cec6a5861506e56e03e5792935115cebbe9a0e49c8f7be78c41ece7360f210a",
-    "services/sentinel.proto": "bf3ff5dfbc53ffec046383a6f80aac0c43c07fe93024e247e41b5cdd9e5cdb09",
+    "services/sentinel.proto": "43c282cac33311112a92e77eaea5878082b3ca7117f472e09e7644b65d70117b",
     "services/snoopy.proto": "3ad109bdcf347d242779c738e937136ab095acf86d05a910307d56c6a84e25b9",
     "services/woodstock.proto": "07da50aa11dcb6531f46b0a6bc343cc766647b52c6f42dae5b21f304262f42db"
   }

@@ -14,7 +14,7 @@ import (
 )
 
 // Storage implements certmagic.Storage backed by an in-memory tree.
-// State is serialized to/from letsencrypt_pb.CertMagicState for persistence in elvis.
+// State is serialized to/from letsencrypt_pb.CertMagicState for persistence in kernel.
 type Storage struct {
 	mu   sync.Mutex
 	root *letsencrypt_pb.CertMagicState

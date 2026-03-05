@@ -9,20 +9,17 @@
 // If changes are needed, update the tacplus compiler at:
 // gitlab.com/secondstarcavalier/controlplane/services/tacplus
 //
-// Source: services/elvis.proto
+// Source: services/kernel.proto
 
 // Copyright (c) 2024 Second Star Cavalier, LLC.
 //
-// The King (Elvis) is split across two proto files to avoid circular
-// dependencies: elvis.proto defines the Config and ClusterState (which all
-// microservices need to know), while presley.proto defines the Admin types
-// that ClusterState references. This split lets microservices import
-// presley.proto without pulling in the full elvis.proto dependency chain.
+// BackendDB configuration, cluster state, and token exchange definitions.
+// Admin types used by ClusterState are defined in sentinel.proto.
 
 syntax = "proto3";
 
-package elvis;
-option go_package = "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/elvis";
+package kernel;
+option go_package = "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/kernel";
 
 import "libs/logger.proto";
 import "libs/outputformat.proto";
@@ -34,7 +31,7 @@ import "libs/cloudidentity.proto";
 import "libs/entitlement.proto";
 import "libs/healthreport.proto";
 
-import "services/presley.proto";
+import "services/sentinel.proto";
 import "services/config_holder.proto";
 import "google/protobuf/empty.proto";
 
@@ -52,7 +49,7 @@ import "google/protobuf/empty.proto";
 // Unlike BootstrapConfig, Config can be reloaded at any time.
 message BootstrapConfig {
 
-  // cluster_name is the logical name for this presley.
+  // cluster_name is the logical name for this cluster.
   // All nodes in the same cluster must use the same name.
   string cluster_name = 1;
 
@@ -60,10 +57,10 @@ message BootstrapConfig {
   host.Host listener = 2;
 
   // members is the list of cluster members for discovery.
-  // At least one member must be specified for the node to join the presley.
+  // At least one member must be specified for the node to join the cluster.
   repeated host.Host members = 3;
 
-  // node_count is the expected number of nodes in the presley.
+  // node_count is the expected number of nodes in the cluster.
   // Used for partition planning and quorum calculations.
   // Must be at least 1.
   int32 node_count = 4;
@@ -95,7 +92,7 @@ message BootstrapConfig {
   CPSubsystemConfig cp_subsystem = 11;
 
   // persistence_dir is the directory where DB dumps and redo logs are stored.
-  // Default: "data/elvis".
+  // Default: "data/kernel".
   string persistence_dir = 12;
 
   // persistence_format configures the serialization format for redo logs and dumps.
@@ -227,7 +224,7 @@ message FullDumpHeader {
   string node_id = 3;
 }
 
-// SecurityConfig defines the security policy for the elvis presley.
+// SecurityConfig defines the security policy for the kernel cluster.
 // All tokens must have: sub, aud matching audience, and a kid matching a known key.
 // Tokens are validated using keys from the JwkVerifyingKeysView.
 message SecurityConfig {
@@ -248,7 +245,7 @@ message SecurityConfig {
 // TokenExchangerConfig configures the built-in token exchange service.
 // The exchanger validates incoming tokens signed by a CredPair or
 // existing refresh tokens, and issues short-lived access tokens
-// for backend (elvis) communication.
+// for backend (kernel) communication.
 message TokenExchangerConfig {
   // refresh_audience is the expected "aud" claim in refresh tokens.
   string refresh_audience = 1;
@@ -285,10 +282,10 @@ message TokenRequest {
 }
 
 // TokenExchangerState holds the public verifying keys for the built-in token
-// exchange service. TokenExchanger is built into elvis to solve the
+// exchange service. TokenExchanger is built into kernel to solve the
 // chicken-egg problem: services like Identity need a ServiceToken from
 // TokenExchanger (via their CredPair) before they can register their own
-// JWKs with elvis. If TokenExchanger were external, it would need a
+// JWKs with kernel. If TokenExchanger were external, it would need a
 // ServiceToken from itself to bootstrap.
 //
 // TokenExchanger does three things:
@@ -298,14 +295,14 @@ message TokenRequest {
 //      refresh tokens with the client_id carrying over
 //
 // All tokens issued by TokenExchanger are exclusively for communicating
-// with the elvis backend. Elvis validates them internally via the
+// with the kernel backend. Kernel validates them internally via the
 // SecurityInterceptor.
-// Access: RW for elvis, RO for any service that needs to verify exchanger tokens.
+// Access: RW for kernel, RO for any service that needs to verify exchanger tokens.
 message TokenExchangerState {
 
   // Verification keys — the exchanger's public keys, rotated periodically.
   // The exchanger holds the corresponding private keys internally.
-  // Used by elvis's SecurityInterceptor to validate tokens for backend calls.
+  // Used by kernel's SecurityInterceptor to validate tokens for backend calls.
   repeated jwk.Jwk verifying_keys = 1;
 }
 
@@ -319,7 +316,7 @@ message TrustedCaState {
 
 // TokenExchangerService is the built-in backend RPC service for token exchange.
 // Accepts a CredPair-signed token or refresh token and returns tokens for
-// backend (elvis) communication. Hand-written implementation; tacplus
+// backend (kernel) communication. Hand-written implementation; tacplus
 // generates client wrappers and server wiring.
 service TokenExchangerService {
 
@@ -431,35 +428,35 @@ message ClusterState {
 
   // cluster_info captures cluster membership, state, and version.
   // Updated on membership change events and periodically.
-  presley.AdminClusterInfo cluster_info = 1;
+  sentinel.AdminClusterInfo cluster_info = 1;
 
   // cluster_health captures partition safety, quorum, and migration state.
   // Updated on membership change events and periodically.
-  presley.AdminClusterHealth cluster_health = 2;
+  sentinel.AdminClusterHealth cluster_health = 2;
 
   // --- Per-node collections (each node writes its own entry, keyed by node_id) ---
 
   // node_metrics captures memory, CPU, and disk usage per node.
-  repeated presley.AdminNodeMetrics node_metrics = 3;
+  repeated sentinel.AdminNodeMetrics node_metrics = 3;
 
   // grpc_stats captures gRPC connection and RPC statistics per node.
-  repeated presley.AdminGrpcStats grpc_stats = 4;
+  repeated sentinel.AdminGrpcStats grpc_stats = 4;
 
   // persistence_status captures redo log and dump state per node.
-  repeated presley.AdminPersistenceStatus persistence_status = 5;
+  repeated sentinel.AdminPersistenceStatus persistence_status = 5;
 
   // network_stats captures network connections and traffic per node.
-  repeated presley.AdminNetworkStats network_stats = 6;
+  repeated sentinel.AdminNetworkStats network_stats = 6;
 
   // thread_info captures JVM thread counts per node.
-  repeated presley.AdminThreadInfo thread_info = 7;
+  repeated sentinel.AdminThreadInfo thread_info = 7;
 
   // token_cache_stats captures security token cache statistics per node.
-  repeated presley.AdminTokenCacheStats token_cache_stats = 8;
+  repeated sentinel.AdminTokenCacheStats token_cache_stats = 8;
 
   // map_stats captures per-map statistics. Keyed by map name.
   // Each node publishes stats for maps it owns partitions of.
-  repeated presley.AdminMapStats map_stats = 9;
+  repeated sentinel.AdminMapStats map_stats = 9;
 
   // --- Configuration (published on boot / config reload for admin visibility) ---
 
@@ -475,28 +472,28 @@ message ClusterState {
   // graph_registry contains metadata for all boundaries across all state roots.
   // Published once at boot from the generated Registry. Keyed by qualified_name.
   // Consumers use WatchGraphRegistry to discover all graphs in the system.
-  repeated presley.AdminGraphInfo graph_registry = 17;
+  repeated sentinel.AdminGraphInfo graph_registry = 17;
 
   // service_connections tracks which microservices are connected and what
   // graphs they are accessing. Published periodically by the security
   // interceptor based on authenticated peer identity. Keyed by "service_id@node_id".
-  repeated presley.AdminServiceConnection service_connections = 18;
+  repeated sentinel.AdminServiceConnection service_connections = 18;
 
   // queue_stats captures per-queue statistics (depth, offer/consume rates).
   // Published per-queue per-node. Keyed by qualified_name.
-  repeated presley.AdminQueueStats queue_stats = 19;
+  repeated sentinel.AdminQueueStats queue_stats = 19;
 
   // topic_stats captures per-topic statistics (publish rate, subscriber count).
   // Published per-topic per-node. Keyed by qualified_name.
-  repeated presley.AdminTopicStats topic_stats = 20;
+  repeated sentinel.AdminTopicStats topic_stats = 20;
 
   // watch_health tracks active Watch streams and their consumer health.
   // Published per-active-watch per-node. Keyed by watch_id.
-  repeated presley.AdminWatchHealth watch_health = 21;
+  repeated sentinel.AdminWatchHealth watch_health = 21;
 
   // mutation_rates captures per-boundary write throughput.
   // Published per-boundary per-node. Keyed by qualified_name.
-  repeated presley.AdminMutationRate mutation_rates = 22;
+  repeated sentinel.AdminMutationRate mutation_rates = 22;
 
   // --- Commands ---
 
@@ -670,13 +667,13 @@ message TrustedCasQueryResponse { repeated x509.X509Cert results = 1; int32 tota
 
 service ClusterStateBackendService {
 	// Singleton: ClusterInfo
-	rpc GetClusterInfo(google.protobuf.Empty) returns (presley.AdminClusterInfo);
-	rpc SetClusterInfo(presley.AdminClusterInfo) returns (presley.AdminClusterInfo);
-	rpc WatchClusterInfo(google.protobuf.Empty) returns (stream presley.AdminClusterInfo);
+	rpc GetClusterInfo(google.protobuf.Empty) returns (sentinel.AdminClusterInfo);
+	rpc SetClusterInfo(sentinel.AdminClusterInfo) returns (sentinel.AdminClusterInfo);
+	rpc WatchClusterInfo(google.protobuf.Empty) returns (stream sentinel.AdminClusterInfo);
 	// Singleton: ClusterHealth
-	rpc GetClusterHealth(google.protobuf.Empty) returns (presley.AdminClusterHealth);
-	rpc SetClusterHealth(presley.AdminClusterHealth) returns (presley.AdminClusterHealth);
-	rpc WatchClusterHealth(google.protobuf.Empty) returns (stream presley.AdminClusterHealth);
+	rpc GetClusterHealth(google.protobuf.Empty) returns (sentinel.AdminClusterHealth);
+	rpc SetClusterHealth(sentinel.AdminClusterHealth) returns (sentinel.AdminClusterHealth);
+	rpc WatchClusterHealth(google.protobuf.Empty) returns (stream sentinel.AdminClusterHealth);
 	// Singleton: FrontendConfig
 	rpc GetFrontendConfig(google.protobuf.Empty) returns (Config);
 	rpc SetFrontendConfig(Config) returns (Config);
@@ -883,173 +880,173 @@ service ClusterStateBackendService {
 }
 
 message NodeMetricsGetRequest { string key = 1; }
-message NodeMetricsPutRequest { string key = 1; presley.AdminNodeMetrics value = 2; int64 lock_counter = 3; }
+message NodeMetricsPutRequest { string key = 1; sentinel.AdminNodeMetrics value = 2; int64 lock_counter = 3; }
 message NodeMetricsGetAllRequest {}
 message NodeMetricsKeysRequest {}
 message NodeMetricsSizeRequest {}
 message NodeMetricsClearRequest {}
-message NodeMetricsValueResponse { presley.AdminNodeMetrics value = 1; bool found = 2; }
-message NodeMetricsEntriesResponse { map<string, presley.AdminNodeMetrics> entries = 1; }
+message NodeMetricsValueResponse { sentinel.AdminNodeMetrics value = 1; bool found = 2; }
+message NodeMetricsEntriesResponse { map<string, sentinel.AdminNodeMetrics> entries = 1; }
 message NodeMetricsKeysResponse { repeated string keys = 1; }
 message NodeMetricsSizeResponse { int32 size = 1; }
 message NodeMetricsQueryRequest { CollectionQuery query = 1; }
-message NodeMetricsQueryResponse { repeated presley.AdminNodeMetrics results = 1; int32 total_count = 2; }
+message NodeMetricsQueryResponse { repeated sentinel.AdminNodeMetrics results = 1; int32 total_count = 2; }
 
 message GrpcStatsGetRequest { string key = 1; }
-message GrpcStatsPutRequest { string key = 1; presley.AdminGrpcStats value = 2; int64 lock_counter = 3; }
+message GrpcStatsPutRequest { string key = 1; sentinel.AdminGrpcStats value = 2; int64 lock_counter = 3; }
 message GrpcStatsGetAllRequest {}
 message GrpcStatsKeysRequest {}
 message GrpcStatsSizeRequest {}
 message GrpcStatsClearRequest {}
-message GrpcStatsValueResponse { presley.AdminGrpcStats value = 1; bool found = 2; }
-message GrpcStatsEntriesResponse { map<string, presley.AdminGrpcStats> entries = 1; }
+message GrpcStatsValueResponse { sentinel.AdminGrpcStats value = 1; bool found = 2; }
+message GrpcStatsEntriesResponse { map<string, sentinel.AdminGrpcStats> entries = 1; }
 message GrpcStatsKeysResponse { repeated string keys = 1; }
 message GrpcStatsSizeResponse { int32 size = 1; }
 message GrpcStatsQueryRequest { CollectionQuery query = 1; }
-message GrpcStatsQueryResponse { repeated presley.AdminGrpcStats results = 1; int32 total_count = 2; }
+message GrpcStatsQueryResponse { repeated sentinel.AdminGrpcStats results = 1; int32 total_count = 2; }
 
 message PersistenceStatusGetRequest { string key = 1; }
-message PersistenceStatusPutRequest { string key = 1; presley.AdminPersistenceStatus value = 2; int64 lock_counter = 3; }
+message PersistenceStatusPutRequest { string key = 1; sentinel.AdminPersistenceStatus value = 2; int64 lock_counter = 3; }
 message PersistenceStatusGetAllRequest {}
 message PersistenceStatusKeysRequest {}
 message PersistenceStatusSizeRequest {}
 message PersistenceStatusClearRequest {}
-message PersistenceStatusValueResponse { presley.AdminPersistenceStatus value = 1; bool found = 2; }
-message PersistenceStatusEntriesResponse { map<string, presley.AdminPersistenceStatus> entries = 1; }
+message PersistenceStatusValueResponse { sentinel.AdminPersistenceStatus value = 1; bool found = 2; }
+message PersistenceStatusEntriesResponse { map<string, sentinel.AdminPersistenceStatus> entries = 1; }
 message PersistenceStatusKeysResponse { repeated string keys = 1; }
 message PersistenceStatusSizeResponse { int32 size = 1; }
 message PersistenceStatusQueryRequest { CollectionQuery query = 1; }
-message PersistenceStatusQueryResponse { repeated presley.AdminPersistenceStatus results = 1; int32 total_count = 2; }
+message PersistenceStatusQueryResponse { repeated sentinel.AdminPersistenceStatus results = 1; int32 total_count = 2; }
 
 message NetworkStatsGetRequest { string key = 1; }
-message NetworkStatsPutRequest { string key = 1; presley.AdminNetworkStats value = 2; int64 lock_counter = 3; }
+message NetworkStatsPutRequest { string key = 1; sentinel.AdminNetworkStats value = 2; int64 lock_counter = 3; }
 message NetworkStatsGetAllRequest {}
 message NetworkStatsKeysRequest {}
 message NetworkStatsSizeRequest {}
 message NetworkStatsClearRequest {}
-message NetworkStatsValueResponse { presley.AdminNetworkStats value = 1; bool found = 2; }
-message NetworkStatsEntriesResponse { map<string, presley.AdminNetworkStats> entries = 1; }
+message NetworkStatsValueResponse { sentinel.AdminNetworkStats value = 1; bool found = 2; }
+message NetworkStatsEntriesResponse { map<string, sentinel.AdminNetworkStats> entries = 1; }
 message NetworkStatsKeysResponse { repeated string keys = 1; }
 message NetworkStatsSizeResponse { int32 size = 1; }
 message NetworkStatsQueryRequest { CollectionQuery query = 1; }
-message NetworkStatsQueryResponse { repeated presley.AdminNetworkStats results = 1; int32 total_count = 2; }
+message NetworkStatsQueryResponse { repeated sentinel.AdminNetworkStats results = 1; int32 total_count = 2; }
 
 message ThreadInfoGetRequest { string key = 1; }
-message ThreadInfoPutRequest { string key = 1; presley.AdminThreadInfo value = 2; int64 lock_counter = 3; }
+message ThreadInfoPutRequest { string key = 1; sentinel.AdminThreadInfo value = 2; int64 lock_counter = 3; }
 message ThreadInfoGetAllRequest {}
 message ThreadInfoKeysRequest {}
 message ThreadInfoSizeRequest {}
 message ThreadInfoClearRequest {}
-message ThreadInfoValueResponse { presley.AdminThreadInfo value = 1; bool found = 2; }
-message ThreadInfoEntriesResponse { map<string, presley.AdminThreadInfo> entries = 1; }
+message ThreadInfoValueResponse { sentinel.AdminThreadInfo value = 1; bool found = 2; }
+message ThreadInfoEntriesResponse { map<string, sentinel.AdminThreadInfo> entries = 1; }
 message ThreadInfoKeysResponse { repeated string keys = 1; }
 message ThreadInfoSizeResponse { int32 size = 1; }
 message ThreadInfoQueryRequest { CollectionQuery query = 1; }
-message ThreadInfoQueryResponse { repeated presley.AdminThreadInfo results = 1; int32 total_count = 2; }
+message ThreadInfoQueryResponse { repeated sentinel.AdminThreadInfo results = 1; int32 total_count = 2; }
 
 message TokenCacheStatsGetRequest { string key = 1; }
-message TokenCacheStatsPutRequest { string key = 1; presley.AdminTokenCacheStats value = 2; int64 lock_counter = 3; }
+message TokenCacheStatsPutRequest { string key = 1; sentinel.AdminTokenCacheStats value = 2; int64 lock_counter = 3; }
 message TokenCacheStatsGetAllRequest {}
 message TokenCacheStatsKeysRequest {}
 message TokenCacheStatsSizeRequest {}
 message TokenCacheStatsClearRequest {}
-message TokenCacheStatsValueResponse { presley.AdminTokenCacheStats value = 1; bool found = 2; }
-message TokenCacheStatsEntriesResponse { map<string, presley.AdminTokenCacheStats> entries = 1; }
+message TokenCacheStatsValueResponse { sentinel.AdminTokenCacheStats value = 1; bool found = 2; }
+message TokenCacheStatsEntriesResponse { map<string, sentinel.AdminTokenCacheStats> entries = 1; }
 message TokenCacheStatsKeysResponse { repeated string keys = 1; }
 message TokenCacheStatsSizeResponse { int32 size = 1; }
 message TokenCacheStatsQueryRequest { CollectionQuery query = 1; }
-message TokenCacheStatsQueryResponse { repeated presley.AdminTokenCacheStats results = 1; int32 total_count = 2; }
+message TokenCacheStatsQueryResponse { repeated sentinel.AdminTokenCacheStats results = 1; int32 total_count = 2; }
 
 message MapStatsGetRequest { string key = 1; }
-message MapStatsPutRequest { string key = 1; presley.AdminMapStats value = 2; int64 lock_counter = 3; }
+message MapStatsPutRequest { string key = 1; sentinel.AdminMapStats value = 2; int64 lock_counter = 3; }
 message MapStatsGetAllRequest {}
 message MapStatsKeysRequest {}
 message MapStatsSizeRequest {}
 message MapStatsClearRequest {}
-message MapStatsValueResponse { presley.AdminMapStats value = 1; bool found = 2; }
-message MapStatsEntriesResponse { map<string, presley.AdminMapStats> entries = 1; }
+message MapStatsValueResponse { sentinel.AdminMapStats value = 1; bool found = 2; }
+message MapStatsEntriesResponse { map<string, sentinel.AdminMapStats> entries = 1; }
 message MapStatsKeysResponse { repeated string keys = 1; }
 message MapStatsSizeResponse { int32 size = 1; }
 message MapStatsQueryRequest { CollectionQuery query = 1; }
-message MapStatsQueryResponse { repeated presley.AdminMapStats results = 1; int32 total_count = 2; }
+message MapStatsQueryResponse { repeated sentinel.AdminMapStats results = 1; int32 total_count = 2; }
 
 message GraphRegistryGetRequest { string key = 1; }
-message GraphRegistryPutRequest { string key = 1; presley.AdminGraphInfo value = 2; int64 lock_counter = 3; }
+message GraphRegistryPutRequest { string key = 1; sentinel.AdminGraphInfo value = 2; int64 lock_counter = 3; }
 message GraphRegistryGetAllRequest {}
 message GraphRegistryKeysRequest {}
 message GraphRegistrySizeRequest {}
 message GraphRegistryClearRequest {}
-message GraphRegistryValueResponse { presley.AdminGraphInfo value = 1; bool found = 2; }
-message GraphRegistryEntriesResponse { map<string, presley.AdminGraphInfo> entries = 1; }
+message GraphRegistryValueResponse { sentinel.AdminGraphInfo value = 1; bool found = 2; }
+message GraphRegistryEntriesResponse { map<string, sentinel.AdminGraphInfo> entries = 1; }
 message GraphRegistryKeysResponse { repeated string keys = 1; }
 message GraphRegistrySizeResponse { int32 size = 1; }
 message GraphRegistryQueryRequest { CollectionQuery query = 1; }
-message GraphRegistryQueryResponse { repeated presley.AdminGraphInfo results = 1; int32 total_count = 2; }
+message GraphRegistryQueryResponse { repeated sentinel.AdminGraphInfo results = 1; int32 total_count = 2; }
 
 message ServiceConnectionsGetRequest { string key = 1; }
-message ServiceConnectionsPutRequest { string key = 1; presley.AdminServiceConnection value = 2; int64 lock_counter = 3; }
+message ServiceConnectionsPutRequest { string key = 1; sentinel.AdminServiceConnection value = 2; int64 lock_counter = 3; }
 message ServiceConnectionsGetAllRequest {}
 message ServiceConnectionsKeysRequest {}
 message ServiceConnectionsSizeRequest {}
 message ServiceConnectionsClearRequest {}
-message ServiceConnectionsValueResponse { presley.AdminServiceConnection value = 1; bool found = 2; }
-message ServiceConnectionsEntriesResponse { map<string, presley.AdminServiceConnection> entries = 1; }
+message ServiceConnectionsValueResponse { sentinel.AdminServiceConnection value = 1; bool found = 2; }
+message ServiceConnectionsEntriesResponse { map<string, sentinel.AdminServiceConnection> entries = 1; }
 message ServiceConnectionsKeysResponse { repeated string keys = 1; }
 message ServiceConnectionsSizeResponse { int32 size = 1; }
 message ServiceConnectionsQueryRequest { CollectionQuery query = 1; }
-message ServiceConnectionsQueryResponse { repeated presley.AdminServiceConnection results = 1; int32 total_count = 2; }
+message ServiceConnectionsQueryResponse { repeated sentinel.AdminServiceConnection results = 1; int32 total_count = 2; }
 
 message QueueStatsGetRequest { string key = 1; }
-message QueueStatsPutRequest { string key = 1; presley.AdminQueueStats value = 2; int64 lock_counter = 3; }
+message QueueStatsPutRequest { string key = 1; sentinel.AdminQueueStats value = 2; int64 lock_counter = 3; }
 message QueueStatsGetAllRequest {}
 message QueueStatsKeysRequest {}
 message QueueStatsSizeRequest {}
 message QueueStatsClearRequest {}
-message QueueStatsValueResponse { presley.AdminQueueStats value = 1; bool found = 2; }
-message QueueStatsEntriesResponse { map<string, presley.AdminQueueStats> entries = 1; }
+message QueueStatsValueResponse { sentinel.AdminQueueStats value = 1; bool found = 2; }
+message QueueStatsEntriesResponse { map<string, sentinel.AdminQueueStats> entries = 1; }
 message QueueStatsKeysResponse { repeated string keys = 1; }
 message QueueStatsSizeResponse { int32 size = 1; }
 message QueueStatsQueryRequest { CollectionQuery query = 1; }
-message QueueStatsQueryResponse { repeated presley.AdminQueueStats results = 1; int32 total_count = 2; }
+message QueueStatsQueryResponse { repeated sentinel.AdminQueueStats results = 1; int32 total_count = 2; }
 
 message TopicStatsGetRequest { string key = 1; }
-message TopicStatsPutRequest { string key = 1; presley.AdminTopicStats value = 2; int64 lock_counter = 3; }
+message TopicStatsPutRequest { string key = 1; sentinel.AdminTopicStats value = 2; int64 lock_counter = 3; }
 message TopicStatsGetAllRequest {}
 message TopicStatsKeysRequest {}
 message TopicStatsSizeRequest {}
 message TopicStatsClearRequest {}
-message TopicStatsValueResponse { presley.AdminTopicStats value = 1; bool found = 2; }
-message TopicStatsEntriesResponse { map<string, presley.AdminTopicStats> entries = 1; }
+message TopicStatsValueResponse { sentinel.AdminTopicStats value = 1; bool found = 2; }
+message TopicStatsEntriesResponse { map<string, sentinel.AdminTopicStats> entries = 1; }
 message TopicStatsKeysResponse { repeated string keys = 1; }
 message TopicStatsSizeResponse { int32 size = 1; }
 message TopicStatsQueryRequest { CollectionQuery query = 1; }
-message TopicStatsQueryResponse { repeated presley.AdminTopicStats results = 1; int32 total_count = 2; }
+message TopicStatsQueryResponse { repeated sentinel.AdminTopicStats results = 1; int32 total_count = 2; }
 
 message WatchHealthGetRequest { string key = 1; }
-message WatchHealthPutRequest { string key = 1; presley.AdminWatchHealth value = 2; int64 lock_counter = 3; }
+message WatchHealthPutRequest { string key = 1; sentinel.AdminWatchHealth value = 2; int64 lock_counter = 3; }
 message WatchHealthGetAllRequest {}
 message WatchHealthKeysRequest {}
 message WatchHealthSizeRequest {}
 message WatchHealthClearRequest {}
-message WatchHealthValueResponse { presley.AdminWatchHealth value = 1; bool found = 2; }
-message WatchHealthEntriesResponse { map<string, presley.AdminWatchHealth> entries = 1; }
+message WatchHealthValueResponse { sentinel.AdminWatchHealth value = 1; bool found = 2; }
+message WatchHealthEntriesResponse { map<string, sentinel.AdminWatchHealth> entries = 1; }
 message WatchHealthKeysResponse { repeated string keys = 1; }
 message WatchHealthSizeResponse { int32 size = 1; }
 message WatchHealthQueryRequest { CollectionQuery query = 1; }
-message WatchHealthQueryResponse { repeated presley.AdminWatchHealth results = 1; int32 total_count = 2; }
+message WatchHealthQueryResponse { repeated sentinel.AdminWatchHealth results = 1; int32 total_count = 2; }
 
 message MutationRatesGetRequest { string key = 1; }
-message MutationRatesPutRequest { string key = 1; presley.AdminMutationRate value = 2; int64 lock_counter = 3; }
+message MutationRatesPutRequest { string key = 1; sentinel.AdminMutationRate value = 2; int64 lock_counter = 3; }
 message MutationRatesGetAllRequest {}
 message MutationRatesKeysRequest {}
 message MutationRatesSizeRequest {}
 message MutationRatesClearRequest {}
-message MutationRatesValueResponse { presley.AdminMutationRate value = 1; bool found = 2; }
-message MutationRatesEntriesResponse { map<string, presley.AdminMutationRate> entries = 1; }
+message MutationRatesValueResponse { sentinel.AdminMutationRate value = 1; bool found = 2; }
+message MutationRatesEntriesResponse { map<string, sentinel.AdminMutationRate> entries = 1; }
 message MutationRatesKeysResponse { repeated string keys = 1; }
 message MutationRatesSizeResponse { int32 size = 1; }
 message MutationRatesQueryRequest { CollectionQuery query = 1; }
-message MutationRatesQueryResponse { repeated presley.AdminMutationRate results = 1; int32 total_count = 2; }
+message MutationRatesQueryResponse { repeated sentinel.AdminMutationRate results = 1; int32 total_count = 2; }
 
 // ============================================================================
 // Auto-generated Backend Service (tacplus)

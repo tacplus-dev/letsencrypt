@@ -42,7 +42,7 @@ type FrontendServer struct {
 	ctx    context.Context
 }
 
-// New creates a new FrontendServer from a Config (runtime config from elvis).
+// New creates a new FrontendServer from a Config (runtime config from the backend).
 // Authorization is managed externally — the caller sets up the authorizer and
 // injects it into the wrapper before calling New.
 //

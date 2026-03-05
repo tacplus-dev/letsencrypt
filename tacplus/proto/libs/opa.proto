@@ -25,4 +25,9 @@ message OpaPolicy {
   // into the bundle field (base64-encoded tar.gz). It may be a directory or
   // a file
   string source = 5;
+
+  // issuer is the required token issuer URL. Verified in code BEFORE OPA
+  // evaluation — tokens from unexpected issuers are rejected before the
+  // policy runs.
+  string issuer = 6;
 }

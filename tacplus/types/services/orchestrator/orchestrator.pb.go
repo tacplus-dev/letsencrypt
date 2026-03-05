@@ -30,8 +30,8 @@ const (
 )
 
 // OrchestratorState is the orchestrator's backend state root.
-// It has CALL access to elvis.ClusterState.reload_config so it can
-// trigger a config reload on the elvis cluster.
+// It has CALL access to kernel.ClusterState.reload_config so it can
+// trigger a config reload on the kernel cluster.
 type OrchestratorState struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -108,9 +108,9 @@ var File_services_orchestrator_proto protoreflect.FileDescriptor
 
 const file_services_orchestrator_proto_rawDesc = "" +
 	"\n" +
-	"\x1bservices/orchestrator.proto\x12\forchestrator\x1a\x0flibs/spec.proto\"D\n" +
-	"\x11OrchestratorState:/\x9a\xa8\x1d\x11OrchestratorStateʨ\x1d\x16\n" +
-	"\x12elvis.ClusterState\x10\x04\"\n" +
+	"\x1bservices/orchestrator.proto\x12\forchestrator\x1a\x0flibs/spec.proto\"E\n" +
+	"\x11OrchestratorState:0\x9a\xa8\x1d\x11OrchestratorStateʨ\x1d\x17\n" +
+	"\x13kernel.ClusterState\x10\x04\"\n" +
 	"\n" +
 	"\bMapEmpty2!\n" +
 	"\x1fOrchestratorStateBackendServiceBaZ_gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/orchestratorb\x06proto3"

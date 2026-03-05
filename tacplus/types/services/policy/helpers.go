@@ -1660,14 +1660,14 @@ func ValidateSimulateEntitlementsRequest(m *SimulateEntitlementsRequest) error {
 		return nil
 	}
 
-	// Validate ClaimsJson (assert_required)
-	if m.ClaimsJson == "" {
-		return protoerrors.NewErrMissingInvalidData(nil, "field ClaimsJson is required")
-	}
-
 	// Validate ClaimsJson (assert_max_length: 65536)
 	if len(m.ClaimsJson) > 65536 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field ClaimsJson must be at most 65536 characters, got: %d", len(m.ClaimsJson))
+	}
+
+	// Validate ClaimsJson (assert_required)
+	if m.ClaimsJson == "" {
+		return protoerrors.NewErrMissingInvalidData(nil, "field ClaimsJson is required")
 	}
 
 	// Validate ClaimsJson (default max size: 32768 bytes)

@@ -38,7 +38,7 @@ import (
 	key_pb "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/key"
 	logger_pb "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/logger"
 	serviceconfig_pb "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/serviceconfig"
-	backend_svc_pb "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/elvis"
+	backend_svc_pb "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/kernel"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -55,7 +55,7 @@ const tokenLifetime = 10 * time.Second
 const tokenRefreshBuffer = 60 * time.Second
 
 // serviceAudience is the audience requested when exchanging for a service token.
-const serviceAudience = "elvis"
+const serviceAudience = "kernel"
 
 // exchangeTimeout is the maximum time for a single token exchange RPC.
 const exchangeTimeout = 10 * time.Second

@@ -17,14 +17,157 @@ import (
 	"bytes"
 	"encoding/json"
 	"strconv"
+	"strings"
 
 	"github.com/pelletier/go-toml/v2"
 	protoerrors "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/errors"
-	presley "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/presley"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 	"gopkg.in/yaml.v3"
 )
+
+// ============================================================
+// Enum Helpers
+// ============================================================
+// AdminGraphTypeValues returns all valid AdminGraphType values (excluding UNDEFINED)
+func AdminGraphTypeValues() []AdminGraphType {
+	return []AdminGraphType{
+		AdminGraphType_ADMIN_GRAPH_TYPE_COLLECTION,
+		AdminGraphType_ADMIN_GRAPH_TYPE_QUEUE,
+		AdminGraphType_ADMIN_GRAPH_TYPE_PRIORITY_QUEUE,
+		AdminGraphType_ADMIN_GRAPH_TYPE_TOPIC,
+		AdminGraphType_ADMIN_GRAPH_TYPE_VIEW,
+		AdminGraphType_ADMIN_GRAPH_TYPE_COMMAND,
+	}
+}
+
+// AdminGraphTypeStringValues returns all valid AdminGraphType names as strings
+func AdminGraphTypeStringValues() []string {
+	return []string{"collection", "queue", "priority-queue", "topic", "view", "command"}
+}
+
+// ParseAdminGraphType converts a string to a AdminGraphType enum value
+// Accepts both hyphen and underscore formats for compatibility (case-insensitive)
+func ParseAdminGraphType(s string) (AdminGraphType, error) {
+	// Normalize: convert to lowercase and replace underscores with hyphens for case-insensitive comparison
+	normalized := strings.ReplaceAll(strings.ToLower(s), "_", "-")
+	switch normalized {
+	case "":
+		return AdminGraphType_ADMIN_GRAPH_TYPE_SINGLETON, nil
+	case "collection", "admin-graph-type-collection":
+		return AdminGraphType_ADMIN_GRAPH_TYPE_COLLECTION, nil
+	case "queue", "admin-graph-type-queue":
+		return AdminGraphType_ADMIN_GRAPH_TYPE_QUEUE, nil
+	case "priority-queue", "admin-graph-type-priority-queue":
+		return AdminGraphType_ADMIN_GRAPH_TYPE_PRIORITY_QUEUE, nil
+	case "topic", "admin-graph-type-topic":
+		return AdminGraphType_ADMIN_GRAPH_TYPE_TOPIC, nil
+	case "view", "admin-graph-type-view":
+		return AdminGraphType_ADMIN_GRAPH_TYPE_VIEW, nil
+	case "command", "admin-graph-type-command":
+		return AdminGraphType_ADMIN_GRAPH_TYPE_COMMAND, nil
+	default:
+		return AdminGraphType_ADMIN_GRAPH_TYPE_SINGLETON, protoerrors.NewErrMissingInvalidData(nil, "invalid admingraphtype %s, expecting one of: %v", s, AdminGraphTypeStringValues())
+	}
+}
+
+// ParseAdminGraphTypes converts a comma-separated string to a slice of AdminGraphType enum values
+// Returns an error if any value is invalid
+func ParseAdminGraphTypes(s string) ([]AdminGraphType, error) {
+	if s == "" {
+		return nil, nil
+	}
+	parts := strings.Split(s, ",")
+	result := make([]AdminGraphType, 0, len(parts))
+	for _, part := range parts {
+		trimmed := strings.TrimSpace(part)
+		if trimmed == "" {
+			continue
+		}
+		val, err := ParseAdminGraphType(trimmed)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, val)
+	}
+	return result, nil
+}
+
+// AdminGraphTypeToString converts a AdminGraphType to its lowercase string representation
+func AdminGraphTypeToString(v AdminGraphType) string {
+	switch v {
+	case AdminGraphType_ADMIN_GRAPH_TYPE_COLLECTION:
+		return "collection"
+	case AdminGraphType_ADMIN_GRAPH_TYPE_QUEUE:
+		return "queue"
+	case AdminGraphType_ADMIN_GRAPH_TYPE_PRIORITY_QUEUE:
+		return "priority-queue"
+	case AdminGraphType_ADMIN_GRAPH_TYPE_TOPIC:
+		return "topic"
+	case AdminGraphType_ADMIN_GRAPH_TYPE_VIEW:
+		return "view"
+	case AdminGraphType_ADMIN_GRAPH_TYPE_COMMAND:
+		return "command"
+	default:
+		return ""
+	}
+}
+
+// ParseAdminGraphTypeLiberal parses a AdminGraphType liberally, accepting:
+// - Integer values (as string or int)
+// - Enum names in any case
+// - RFC-compliant JSON names
+func ParseAdminGraphTypeLiberal(s string) AdminGraphType {
+	if s == "" {
+		return AdminGraphType_ADMIN_GRAPH_TYPE_SINGLETON
+	}
+	// Try parsing as integer
+	if num, err := strconv.Atoi(s); err == nil {
+		return AdminGraphType(num)
+	}
+	// Normalize and try parsing
+	normalized := strings.ToLower(strings.TrimSpace(s))
+	normalized = strings.ReplaceAll(normalized, "_", "-")
+	normalized = strings.ReplaceAll(normalized, " ", "-")
+	switch normalized {
+	case "collection", "admin-graph-type-collection":
+		return AdminGraphType_ADMIN_GRAPH_TYPE_COLLECTION
+	case "queue", "admin-graph-type-queue":
+		return AdminGraphType_ADMIN_GRAPH_TYPE_QUEUE
+	case "priority-queue", "admin-graph-type-priority-queue":
+		return AdminGraphType_ADMIN_GRAPH_TYPE_PRIORITY_QUEUE
+	case "topic", "admin-graph-type-topic":
+		return AdminGraphType_ADMIN_GRAPH_TYPE_TOPIC
+	case "view", "admin-graph-type-view":
+		return AdminGraphType_ADMIN_GRAPH_TYPE_VIEW
+	case "command", "admin-graph-type-command":
+		return AdminGraphType_ADMIN_GRAPH_TYPE_COMMAND
+	default:
+		return AdminGraphType_ADMIN_GRAPH_TYPE_SINGLETON
+	}
+}
+
+// AdminGraphTypeToSpecName converts a AdminGraphType to its canonical protobuf spec name
+func AdminGraphTypeToSpecName(v AdminGraphType) string {
+	switch v {
+	case AdminGraphType_ADMIN_GRAPH_TYPE_SINGLETON:
+		return "ADMIN_GRAPH_TYPE_SINGLETON"
+	case AdminGraphType_ADMIN_GRAPH_TYPE_COLLECTION:
+		return "ADMIN_GRAPH_TYPE_COLLECTION"
+	case AdminGraphType_ADMIN_GRAPH_TYPE_QUEUE:
+		return "ADMIN_GRAPH_TYPE_QUEUE"
+	case AdminGraphType_ADMIN_GRAPH_TYPE_PRIORITY_QUEUE:
+		return "ADMIN_GRAPH_TYPE_PRIORITY_QUEUE"
+	case AdminGraphType_ADMIN_GRAPH_TYPE_TOPIC:
+		return "ADMIN_GRAPH_TYPE_TOPIC"
+	case AdminGraphType_ADMIN_GRAPH_TYPE_VIEW:
+		return "ADMIN_GRAPH_TYPE_VIEW"
+	case AdminGraphType_ADMIN_GRAPH_TYPE_COMMAND:
+		return "ADMIN_GRAPH_TYPE_COMMAND"
+	default:
+		return ""
+	}
+}
 
 // ============================================================
 // JSON/YAML/TOML Serialization Helpers
@@ -406,7 +549,7 @@ func NodeMetricsResponseToJSON(v *NodeMetricsResponse) ([]byte, error) {
 			result := make([]json.RawMessage, 0, len(v.Items))
 			for _, item := range v.Items {
 				if item != nil {
-					if data, err := presley.AdminNodeMetricsToJSON(item); err == nil {
+					if data, err := AdminNodeMetricsToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -479,10 +622,10 @@ func NodeMetricsResponseFromJSON(data []byte) (*NodeMetricsResponse, error) {
 	result := &NodeMetricsResponse{}
 	// Parse repeated message field: Items
 	if len(raw.Items) > 0 {
-		result.Items = make([]*presley.AdminNodeMetrics, 0, len(raw.Items))
+		result.Items = make([]*AdminNodeMetrics, 0, len(raw.Items))
 		for _, itemJSON := range raw.Items {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminNodeMetricsFromJSON(itemJSON)
+				parsed, err := AdminNodeMetricsFromJSON(itemJSON)
 				if err == nil {
 					result.Items = append(result.Items, parsed)
 				}
@@ -551,7 +694,7 @@ func GrpcStatsResponseToJSON(v *GrpcStatsResponse) ([]byte, error) {
 			result := make([]json.RawMessage, 0, len(v.Items))
 			for _, item := range v.Items {
 				if item != nil {
-					if data, err := presley.AdminGrpcStatsToJSON(item); err == nil {
+					if data, err := AdminGrpcStatsToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -624,10 +767,10 @@ func GrpcStatsResponseFromJSON(data []byte) (*GrpcStatsResponse, error) {
 	result := &GrpcStatsResponse{}
 	// Parse repeated message field: Items
 	if len(raw.Items) > 0 {
-		result.Items = make([]*presley.AdminGrpcStats, 0, len(raw.Items))
+		result.Items = make([]*AdminGrpcStats, 0, len(raw.Items))
 		for _, itemJSON := range raw.Items {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminGrpcStatsFromJSON(itemJSON)
+				parsed, err := AdminGrpcStatsFromJSON(itemJSON)
 				if err == nil {
 					result.Items = append(result.Items, parsed)
 				}
@@ -696,7 +839,7 @@ func PersistenceStatusResponseToJSON(v *PersistenceStatusResponse) ([]byte, erro
 			result := make([]json.RawMessage, 0, len(v.Items))
 			for _, item := range v.Items {
 				if item != nil {
-					if data, err := presley.AdminPersistenceStatusToJSON(item); err == nil {
+					if data, err := AdminPersistenceStatusToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -769,10 +912,10 @@ func PersistenceStatusResponseFromJSON(data []byte) (*PersistenceStatusResponse,
 	result := &PersistenceStatusResponse{}
 	// Parse repeated message field: Items
 	if len(raw.Items) > 0 {
-		result.Items = make([]*presley.AdminPersistenceStatus, 0, len(raw.Items))
+		result.Items = make([]*AdminPersistenceStatus, 0, len(raw.Items))
 		for _, itemJSON := range raw.Items {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminPersistenceStatusFromJSON(itemJSON)
+				parsed, err := AdminPersistenceStatusFromJSON(itemJSON)
 				if err == nil {
 					result.Items = append(result.Items, parsed)
 				}
@@ -841,7 +984,7 @@ func NetworkStatsResponseToJSON(v *NetworkStatsResponse) ([]byte, error) {
 			result := make([]json.RawMessage, 0, len(v.Items))
 			for _, item := range v.Items {
 				if item != nil {
-					if data, err := presley.AdminNetworkStatsToJSON(item); err == nil {
+					if data, err := AdminNetworkStatsToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -914,10 +1057,10 @@ func NetworkStatsResponseFromJSON(data []byte) (*NetworkStatsResponse, error) {
 	result := &NetworkStatsResponse{}
 	// Parse repeated message field: Items
 	if len(raw.Items) > 0 {
-		result.Items = make([]*presley.AdminNetworkStats, 0, len(raw.Items))
+		result.Items = make([]*AdminNetworkStats, 0, len(raw.Items))
 		for _, itemJSON := range raw.Items {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminNetworkStatsFromJSON(itemJSON)
+				parsed, err := AdminNetworkStatsFromJSON(itemJSON)
 				if err == nil {
 					result.Items = append(result.Items, parsed)
 				}
@@ -986,7 +1129,7 @@ func ThreadInfoResponseToJSON(v *ThreadInfoResponse) ([]byte, error) {
 			result := make([]json.RawMessage, 0, len(v.Items))
 			for _, item := range v.Items {
 				if item != nil {
-					if data, err := presley.AdminThreadInfoToJSON(item); err == nil {
+					if data, err := AdminThreadInfoToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -1059,10 +1202,10 @@ func ThreadInfoResponseFromJSON(data []byte) (*ThreadInfoResponse, error) {
 	result := &ThreadInfoResponse{}
 	// Parse repeated message field: Items
 	if len(raw.Items) > 0 {
-		result.Items = make([]*presley.AdminThreadInfo, 0, len(raw.Items))
+		result.Items = make([]*AdminThreadInfo, 0, len(raw.Items))
 		for _, itemJSON := range raw.Items {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminThreadInfoFromJSON(itemJSON)
+				parsed, err := AdminThreadInfoFromJSON(itemJSON)
 				if err == nil {
 					result.Items = append(result.Items, parsed)
 				}
@@ -1131,7 +1274,7 @@ func TokenCacheStatsResponseToJSON(v *TokenCacheStatsResponse) ([]byte, error) {
 			result := make([]json.RawMessage, 0, len(v.Items))
 			for _, item := range v.Items {
 				if item != nil {
-					if data, err := presley.AdminTokenCacheStatsToJSON(item); err == nil {
+					if data, err := AdminTokenCacheStatsToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -1204,10 +1347,10 @@ func TokenCacheStatsResponseFromJSON(data []byte) (*TokenCacheStatsResponse, err
 	result := &TokenCacheStatsResponse{}
 	// Parse repeated message field: Items
 	if len(raw.Items) > 0 {
-		result.Items = make([]*presley.AdminTokenCacheStats, 0, len(raw.Items))
+		result.Items = make([]*AdminTokenCacheStats, 0, len(raw.Items))
 		for _, itemJSON := range raw.Items {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminTokenCacheStatsFromJSON(itemJSON)
+				parsed, err := AdminTokenCacheStatsFromJSON(itemJSON)
 				if err == nil {
 					result.Items = append(result.Items, parsed)
 				}
@@ -1276,7 +1419,7 @@ func MapStatsResponseToJSON(v *MapStatsResponse) ([]byte, error) {
 			result := make([]json.RawMessage, 0, len(v.Items))
 			for _, item := range v.Items {
 				if item != nil {
-					if data, err := presley.AdminMapStatsToJSON(item); err == nil {
+					if data, err := AdminMapStatsToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -1349,10 +1492,10 @@ func MapStatsResponseFromJSON(data []byte) (*MapStatsResponse, error) {
 	result := &MapStatsResponse{}
 	// Parse repeated message field: Items
 	if len(raw.Items) > 0 {
-		result.Items = make([]*presley.AdminMapStats, 0, len(raw.Items))
+		result.Items = make([]*AdminMapStats, 0, len(raw.Items))
 		for _, itemJSON := range raw.Items {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminMapStatsFromJSON(itemJSON)
+				parsed, err := AdminMapStatsFromJSON(itemJSON)
 				if err == nil {
 					result.Items = append(result.Items, parsed)
 				}
@@ -1426,14 +1569,14 @@ func DashboardResponseToJSON(v *DashboardResponse) ([]byte, error) {
 			if v.ClusterInfo == nil {
 				return nil
 			}
-			data, _ := presley.AdminClusterInfoToJSON(v.ClusterInfo)
+			data, _ := AdminClusterInfoToJSON(v.ClusterInfo)
 			return data
 		}(),
 		ClusterHealth: func() json.RawMessage {
 			if v.ClusterHealth == nil {
 				return nil
 			}
-			data, _ := presley.AdminClusterHealthToJSON(v.ClusterHealth)
+			data, _ := AdminClusterHealthToJSON(v.ClusterHealth)
 			return data
 		}(),
 		NodeMetrics: func() []json.RawMessage {
@@ -1443,7 +1586,7 @@ func DashboardResponseToJSON(v *DashboardResponse) ([]byte, error) {
 			result := make([]json.RawMessage, 0, len(v.NodeMetrics))
 			for _, item := range v.NodeMetrics {
 				if item != nil {
-					if data, err := presley.AdminNodeMetricsToJSON(item); err == nil {
+					if data, err := AdminNodeMetricsToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -1457,7 +1600,7 @@ func DashboardResponseToJSON(v *DashboardResponse) ([]byte, error) {
 			result := make([]json.RawMessage, 0, len(v.GrpcStats))
 			for _, item := range v.GrpcStats {
 				if item != nil {
-					if data, err := presley.AdminGrpcStatsToJSON(item); err == nil {
+					if data, err := AdminGrpcStatsToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -1471,7 +1614,7 @@ func DashboardResponseToJSON(v *DashboardResponse) ([]byte, error) {
 			result := make([]json.RawMessage, 0, len(v.PersistenceStatus))
 			for _, item := range v.PersistenceStatus {
 				if item != nil {
-					if data, err := presley.AdminPersistenceStatusToJSON(item); err == nil {
+					if data, err := AdminPersistenceStatusToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -1485,7 +1628,7 @@ func DashboardResponseToJSON(v *DashboardResponse) ([]byte, error) {
 			result := make([]json.RawMessage, 0, len(v.NetworkStats))
 			for _, item := range v.NetworkStats {
 				if item != nil {
-					if data, err := presley.AdminNetworkStatsToJSON(item); err == nil {
+					if data, err := AdminNetworkStatsToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -1499,7 +1642,7 @@ func DashboardResponseToJSON(v *DashboardResponse) ([]byte, error) {
 			result := make([]json.RawMessage, 0, len(v.ThreadInfo))
 			for _, item := range v.ThreadInfo {
 				if item != nil {
-					if data, err := presley.AdminThreadInfoToJSON(item); err == nil {
+					if data, err := AdminThreadInfoToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -1513,7 +1656,7 @@ func DashboardResponseToJSON(v *DashboardResponse) ([]byte, error) {
 			result := make([]json.RawMessage, 0, len(v.TokenCacheStats))
 			for _, item := range v.TokenCacheStats {
 				if item != nil {
-					if data, err := presley.AdminTokenCacheStatsToJSON(item); err == nil {
+					if data, err := AdminTokenCacheStatsToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -1527,7 +1670,7 @@ func DashboardResponseToJSON(v *DashboardResponse) ([]byte, error) {
 			result := make([]json.RawMessage, 0, len(v.MapStats))
 			for _, item := range v.MapStats {
 				if item != nil {
-					if data, err := presley.AdminMapStatsToJSON(item); err == nil {
+					if data, err := AdminMapStatsToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -1600,24 +1743,24 @@ func DashboardResponseFromJSON(data []byte) (*DashboardResponse, error) {
 	result := &DashboardResponse{}
 	// Parse message field: ClusterInfo
 	if len(raw.ClusterInfo) > 0 {
-		parsed, err := presley.AdminClusterInfoFromJSON(raw.ClusterInfo)
+		parsed, err := AdminClusterInfoFromJSON(raw.ClusterInfo)
 		if err == nil {
 			result.ClusterInfo = parsed
 		}
 	}
 	// Parse message field: ClusterHealth
 	if len(raw.ClusterHealth) > 0 {
-		parsed, err := presley.AdminClusterHealthFromJSON(raw.ClusterHealth)
+		parsed, err := AdminClusterHealthFromJSON(raw.ClusterHealth)
 		if err == nil {
 			result.ClusterHealth = parsed
 		}
 	}
 	// Parse repeated message field: NodeMetrics
 	if len(raw.NodeMetrics) > 0 {
-		result.NodeMetrics = make([]*presley.AdminNodeMetrics, 0, len(raw.NodeMetrics))
+		result.NodeMetrics = make([]*AdminNodeMetrics, 0, len(raw.NodeMetrics))
 		for _, itemJSON := range raw.NodeMetrics {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminNodeMetricsFromJSON(itemJSON)
+				parsed, err := AdminNodeMetricsFromJSON(itemJSON)
 				if err == nil {
 					result.NodeMetrics = append(result.NodeMetrics, parsed)
 				}
@@ -1626,10 +1769,10 @@ func DashboardResponseFromJSON(data []byte) (*DashboardResponse, error) {
 	}
 	// Parse repeated message field: GrpcStats
 	if len(raw.GrpcStats) > 0 {
-		result.GrpcStats = make([]*presley.AdminGrpcStats, 0, len(raw.GrpcStats))
+		result.GrpcStats = make([]*AdminGrpcStats, 0, len(raw.GrpcStats))
 		for _, itemJSON := range raw.GrpcStats {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminGrpcStatsFromJSON(itemJSON)
+				parsed, err := AdminGrpcStatsFromJSON(itemJSON)
 				if err == nil {
 					result.GrpcStats = append(result.GrpcStats, parsed)
 				}
@@ -1638,10 +1781,10 @@ func DashboardResponseFromJSON(data []byte) (*DashboardResponse, error) {
 	}
 	// Parse repeated message field: PersistenceStatus
 	if len(raw.PersistenceStatus) > 0 {
-		result.PersistenceStatus = make([]*presley.AdminPersistenceStatus, 0, len(raw.PersistenceStatus))
+		result.PersistenceStatus = make([]*AdminPersistenceStatus, 0, len(raw.PersistenceStatus))
 		for _, itemJSON := range raw.PersistenceStatus {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminPersistenceStatusFromJSON(itemJSON)
+				parsed, err := AdminPersistenceStatusFromJSON(itemJSON)
 				if err == nil {
 					result.PersistenceStatus = append(result.PersistenceStatus, parsed)
 				}
@@ -1650,10 +1793,10 @@ func DashboardResponseFromJSON(data []byte) (*DashboardResponse, error) {
 	}
 	// Parse repeated message field: NetworkStats
 	if len(raw.NetworkStats) > 0 {
-		result.NetworkStats = make([]*presley.AdminNetworkStats, 0, len(raw.NetworkStats))
+		result.NetworkStats = make([]*AdminNetworkStats, 0, len(raw.NetworkStats))
 		for _, itemJSON := range raw.NetworkStats {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminNetworkStatsFromJSON(itemJSON)
+				parsed, err := AdminNetworkStatsFromJSON(itemJSON)
 				if err == nil {
 					result.NetworkStats = append(result.NetworkStats, parsed)
 				}
@@ -1662,10 +1805,10 @@ func DashboardResponseFromJSON(data []byte) (*DashboardResponse, error) {
 	}
 	// Parse repeated message field: ThreadInfo
 	if len(raw.ThreadInfo) > 0 {
-		result.ThreadInfo = make([]*presley.AdminThreadInfo, 0, len(raw.ThreadInfo))
+		result.ThreadInfo = make([]*AdminThreadInfo, 0, len(raw.ThreadInfo))
 		for _, itemJSON := range raw.ThreadInfo {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminThreadInfoFromJSON(itemJSON)
+				parsed, err := AdminThreadInfoFromJSON(itemJSON)
 				if err == nil {
 					result.ThreadInfo = append(result.ThreadInfo, parsed)
 				}
@@ -1674,10 +1817,10 @@ func DashboardResponseFromJSON(data []byte) (*DashboardResponse, error) {
 	}
 	// Parse repeated message field: TokenCacheStats
 	if len(raw.TokenCacheStats) > 0 {
-		result.TokenCacheStats = make([]*presley.AdminTokenCacheStats, 0, len(raw.TokenCacheStats))
+		result.TokenCacheStats = make([]*AdminTokenCacheStats, 0, len(raw.TokenCacheStats))
 		for _, itemJSON := range raw.TokenCacheStats {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminTokenCacheStatsFromJSON(itemJSON)
+				parsed, err := AdminTokenCacheStatsFromJSON(itemJSON)
 				if err == nil {
 					result.TokenCacheStats = append(result.TokenCacheStats, parsed)
 				}
@@ -1686,10 +1829,10 @@ func DashboardResponseFromJSON(data []byte) (*DashboardResponse, error) {
 	}
 	// Parse repeated message field: MapStats
 	if len(raw.MapStats) > 0 {
-		result.MapStats = make([]*presley.AdminMapStats, 0, len(raw.MapStats))
+		result.MapStats = make([]*AdminMapStats, 0, len(raw.MapStats))
 		for _, itemJSON := range raw.MapStats {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminMapStatsFromJSON(itemJSON)
+				parsed, err := AdminMapStatsFromJSON(itemJSON)
 				if err == nil {
 					result.MapStats = append(result.MapStats, parsed)
 				}
@@ -1726,6 +1869,3856 @@ func DashboardResponseToTOML(v *DashboardResponse) ([]byte, error) {
 	}
 	// Convert to JSON first
 	jsonData, err := DashboardResponseToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
+// AdminClusterInfoJSON represents AdminClusterInfo in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type adminclusterinfoJSON struct {
+	ClusterName    string            `json:"cluster_name,omitempty"`
+	State          string            `json:"state,omitempty"`
+	Members        []json.RawMessage `json:"members,omitempty"`
+	LocalMember    string            `json:"local_member,omitempty"`
+	PartitionCount int32             `json:"partition_count,omitempty"`
+	ClusterSize    int32             `json:"cluster_size,omitempty"`
+	Version        string            `json:"version,omitempty"`
+}
+
+// AdminClusterInfoToJSON converts AdminClusterInfo to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func AdminClusterInfoToJSON(v *AdminClusterInfo) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminclusterinfo is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := adminclusterinfoJSON{
+		ClusterName: v.ClusterName,
+		State:       v.State,
+		Members: func() []json.RawMessage {
+			if len(v.Members) == 0 {
+				return nil
+			}
+			result := make([]json.RawMessage, 0, len(v.Members))
+			for _, item := range v.Members {
+				if item != nil {
+					if data, err := AdminMemberToJSON(item); err == nil {
+						result = append(result, data)
+					}
+				}
+			}
+			return result
+		}(),
+		LocalMember:    v.LocalMember,
+		PartitionCount: v.PartitionCount,
+		ClusterSize:    v.ClusterSize,
+		Version:        v.Version,
+	}
+	return json.Marshal(helper)
+}
+
+// AdminClusterInfoFromBytes creates AdminClusterInfo from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func AdminClusterInfoFromBytes(data []byte) (*AdminClusterInfo, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := AdminClusterInfoFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := AdminClusterInfoFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := AdminClusterInfoFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &AdminClusterInfo{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse AdminClusterInfo: unsupported format or invalid data")
+}
+
+// AdminClusterInfoFromJSON creates AdminClusterInfo from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func AdminClusterInfoFromJSON(data []byte) (*AdminClusterInfo, error) {
+	// Unmarshal into helper struct with string enums
+	var raw adminclusterinfoJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &AdminClusterInfo{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &AdminClusterInfo{}
+	result.ClusterName = raw.ClusterName
+	result.State = raw.State
+	// Parse repeated message field: Members
+	if len(raw.Members) > 0 {
+		result.Members = make([]*AdminMember, 0, len(raw.Members))
+		for _, itemJSON := range raw.Members {
+			if len(itemJSON) > 0 {
+				parsed, err := AdminMemberFromJSON(itemJSON)
+				if err == nil {
+					result.Members = append(result.Members, parsed)
+				}
+			}
+		}
+	}
+	result.LocalMember = raw.LocalMember
+	result.PartitionCount = raw.PartitionCount
+	result.ClusterSize = raw.ClusterSize
+	result.Version = raw.Version
+	return result, nil
+}
+
+// AdminClusterInfoToYAML converts AdminClusterInfo to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func AdminClusterInfoToYAML(v *AdminClusterInfo) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminclusterinfo is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminClusterInfoToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// AdminClusterInfoToTOML converts AdminClusterInfo to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func AdminClusterInfoToTOML(v *AdminClusterInfo) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminclusterinfo is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminClusterInfoToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
+// AdminMemberJSON represents AdminMember in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type adminmemberJSON struct {
+	Uuid    string `json:"uuid,omitempty"`
+	Address string `json:"address,omitempty"`
+	Lite    bool   `json:"lite,omitempty"`
+	IsLocal bool   `json:"is_local,omitempty"`
+}
+
+// AdminMemberToJSON converts AdminMember to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func AdminMemberToJSON(v *AdminMember) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminmember is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := adminmemberJSON{
+		Uuid:    v.Uuid,
+		Address: v.Address,
+		Lite:    v.Lite,
+		IsLocal: v.IsLocal,
+	}
+	return json.Marshal(helper)
+}
+
+// AdminMemberFromBytes creates AdminMember from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func AdminMemberFromBytes(data []byte) (*AdminMember, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := AdminMemberFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := AdminMemberFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := AdminMemberFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &AdminMember{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse AdminMember: unsupported format or invalid data")
+}
+
+// AdminMemberFromJSON creates AdminMember from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func AdminMemberFromJSON(data []byte) (*AdminMember, error) {
+	// Unmarshal into helper struct with string enums
+	var raw adminmemberJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &AdminMember{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &AdminMember{}
+	result.Uuid = raw.Uuid
+	result.Address = raw.Address
+	result.Lite = raw.Lite
+	result.IsLocal = raw.IsLocal
+	return result, nil
+}
+
+// AdminMemberToYAML converts AdminMember to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func AdminMemberToYAML(v *AdminMember) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminmember is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminMemberToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// AdminMemberToTOML converts AdminMember to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func AdminMemberToTOML(v *AdminMember) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminmember is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminMemberToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
+// AdminClusterHealthJSON represents AdminClusterHealth in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type adminclusterhealthJSON struct {
+	ClusterSafe        bool   `json:"cluster_safe,omitempty"`
+	LocalMemberSafe    bool   `json:"local_member_safe,omitempty"`
+	ClusterState       string `json:"cluster_state,omitempty"`
+	Running            bool   `json:"running,omitempty"`
+	ClusterSize        int32  `json:"cluster_size,omitempty"`
+	HasQuorum          bool   `json:"has_quorum,omitempty"`
+	MigrationQueueSize int32  `json:"migration_queue_size,omitempty"`
+}
+
+// AdminClusterHealthToJSON converts AdminClusterHealth to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func AdminClusterHealthToJSON(v *AdminClusterHealth) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminclusterhealth is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := adminclusterhealthJSON{
+		ClusterSafe:        v.ClusterSafe,
+		LocalMemberSafe:    v.LocalMemberSafe,
+		ClusterState:       v.ClusterState,
+		Running:            v.Running,
+		ClusterSize:        v.ClusterSize,
+		HasQuorum:          v.HasQuorum,
+		MigrationQueueSize: v.MigrationQueueSize,
+	}
+	return json.Marshal(helper)
+}
+
+// AdminClusterHealthFromBytes creates AdminClusterHealth from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func AdminClusterHealthFromBytes(data []byte) (*AdminClusterHealth, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := AdminClusterHealthFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := AdminClusterHealthFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := AdminClusterHealthFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &AdminClusterHealth{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse AdminClusterHealth: unsupported format or invalid data")
+}
+
+// AdminClusterHealthFromJSON creates AdminClusterHealth from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func AdminClusterHealthFromJSON(data []byte) (*AdminClusterHealth, error) {
+	// Unmarshal into helper struct with string enums
+	var raw adminclusterhealthJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &AdminClusterHealth{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &AdminClusterHealth{}
+	result.ClusterSafe = raw.ClusterSafe
+	result.LocalMemberSafe = raw.LocalMemberSafe
+	result.ClusterState = raw.ClusterState
+	result.Running = raw.Running
+	result.ClusterSize = raw.ClusterSize
+	result.HasQuorum = raw.HasQuorum
+	result.MigrationQueueSize = raw.MigrationQueueSize
+	return result, nil
+}
+
+// AdminClusterHealthToYAML converts AdminClusterHealth to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func AdminClusterHealthToYAML(v *AdminClusterHealth) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminclusterhealth is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminClusterHealthToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// AdminClusterHealthToTOML converts AdminClusterHealth to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func AdminClusterHealthToTOML(v *AdminClusterHealth) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminclusterhealth is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminClusterHealthToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
+// AdminNodeMetricsJSON represents AdminNodeMetrics in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type adminnodemetricsJSON struct {
+	NodeId      string          `json:"node_id,omitempty"`
+	Memory      json.RawMessage `json:"memory,omitempty"`
+	Cpu         json.RawMessage `json:"cpu,omitempty"`
+	Disk        json.RawMessage `json:"disk,omitempty"`
+	TimestampMs int64           `json:"timestamp_ms,omitempty"`
+}
+
+// AdminNodeMetricsToJSON converts AdminNodeMetrics to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func AdminNodeMetricsToJSON(v *AdminNodeMetrics) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminnodemetrics is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := adminnodemetricsJSON{
+		NodeId: v.NodeId,
+		Memory: func() json.RawMessage {
+			if v.Memory == nil {
+				return nil
+			}
+			data, _ := AdminMemoryMetricsToJSON(v.Memory)
+			return data
+		}(),
+		Cpu: func() json.RawMessage {
+			if v.Cpu == nil {
+				return nil
+			}
+			data, _ := AdminCpuMetricsToJSON(v.Cpu)
+			return data
+		}(),
+		Disk: func() json.RawMessage {
+			if v.Disk == nil {
+				return nil
+			}
+			data, _ := AdminDiskMetricsToJSON(v.Disk)
+			return data
+		}(),
+		TimestampMs: v.TimestampMs,
+	}
+	return json.Marshal(helper)
+}
+
+// AdminNodeMetricsFromBytes creates AdminNodeMetrics from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func AdminNodeMetricsFromBytes(data []byte) (*AdminNodeMetrics, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := AdminNodeMetricsFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := AdminNodeMetricsFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := AdminNodeMetricsFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &AdminNodeMetrics{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse AdminNodeMetrics: unsupported format or invalid data")
+}
+
+// AdminNodeMetricsFromJSON creates AdminNodeMetrics from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func AdminNodeMetricsFromJSON(data []byte) (*AdminNodeMetrics, error) {
+	// Unmarshal into helper struct with string enums
+	var raw adminnodemetricsJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &AdminNodeMetrics{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &AdminNodeMetrics{}
+	result.NodeId = raw.NodeId
+	// Parse message field: Memory
+	if len(raw.Memory) > 0 {
+		parsed, err := AdminMemoryMetricsFromJSON(raw.Memory)
+		if err == nil {
+			result.Memory = parsed
+		}
+	}
+	// Parse message field: Cpu
+	if len(raw.Cpu) > 0 {
+		parsed, err := AdminCpuMetricsFromJSON(raw.Cpu)
+		if err == nil {
+			result.Cpu = parsed
+		}
+	}
+	// Parse message field: Disk
+	if len(raw.Disk) > 0 {
+		parsed, err := AdminDiskMetricsFromJSON(raw.Disk)
+		if err == nil {
+			result.Disk = parsed
+		}
+	}
+	result.TimestampMs = raw.TimestampMs
+	return result, nil
+}
+
+// AdminNodeMetricsToYAML converts AdminNodeMetrics to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func AdminNodeMetricsToYAML(v *AdminNodeMetrics) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminnodemetrics is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminNodeMetricsToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// AdminNodeMetricsToTOML converts AdminNodeMetrics to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func AdminNodeMetricsToTOML(v *AdminNodeMetrics) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminnodemetrics is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminNodeMetricsToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
+// AdminMemoryMetricsJSON represents AdminMemoryMetrics in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type adminmemorymetricsJSON struct {
+	HeapUsedBytes      int64 `json:"heap_used_bytes,omitempty"`
+	HeapMaxBytes       int64 `json:"heap_max_bytes,omitempty"`
+	HeapCommittedBytes int64 `json:"heap_committed_bytes,omitempty"`
+	NonHeapUsedBytes   int64 `json:"non_heap_used_bytes,omitempty"`
+	GcCount            int64 `json:"gc_count,omitempty"`
+	GcTimeMs           int64 `json:"gc_time_ms,omitempty"`
+}
+
+// AdminMemoryMetricsToJSON converts AdminMemoryMetrics to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func AdminMemoryMetricsToJSON(v *AdminMemoryMetrics) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminmemorymetrics is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := adminmemorymetricsJSON{
+		HeapUsedBytes:      v.HeapUsedBytes,
+		HeapMaxBytes:       v.HeapMaxBytes,
+		HeapCommittedBytes: v.HeapCommittedBytes,
+		NonHeapUsedBytes:   v.NonHeapUsedBytes,
+		GcCount:            v.GcCount,
+		GcTimeMs:           v.GcTimeMs,
+	}
+	return json.Marshal(helper)
+}
+
+// AdminMemoryMetricsFromBytes creates AdminMemoryMetrics from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func AdminMemoryMetricsFromBytes(data []byte) (*AdminMemoryMetrics, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := AdminMemoryMetricsFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := AdminMemoryMetricsFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := AdminMemoryMetricsFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &AdminMemoryMetrics{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse AdminMemoryMetrics: unsupported format or invalid data")
+}
+
+// AdminMemoryMetricsFromJSON creates AdminMemoryMetrics from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func AdminMemoryMetricsFromJSON(data []byte) (*AdminMemoryMetrics, error) {
+	// Unmarshal into helper struct with string enums
+	var raw adminmemorymetricsJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &AdminMemoryMetrics{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &AdminMemoryMetrics{}
+	result.HeapUsedBytes = raw.HeapUsedBytes
+	result.HeapMaxBytes = raw.HeapMaxBytes
+	result.HeapCommittedBytes = raw.HeapCommittedBytes
+	result.NonHeapUsedBytes = raw.NonHeapUsedBytes
+	result.GcCount = raw.GcCount
+	result.GcTimeMs = raw.GcTimeMs
+	return result, nil
+}
+
+// AdminMemoryMetricsToYAML converts AdminMemoryMetrics to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func AdminMemoryMetricsToYAML(v *AdminMemoryMetrics) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminmemorymetrics is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminMemoryMetricsToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// AdminMemoryMetricsToTOML converts AdminMemoryMetrics to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func AdminMemoryMetricsToTOML(v *AdminMemoryMetrics) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminmemorymetrics is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminMemoryMetricsToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
+// AdminCpuMetricsJSON represents AdminCpuMetrics in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type admincpumetricsJSON struct {
+	AvailableProcessors int32   `json:"available_processors,omitempty"`
+	ProcessCpuLoad      float64 `json:"process_cpu_load,omitempty"`
+	SystemCpuLoad       float64 `json:"system_cpu_load,omitempty"`
+	SystemLoadAverage   float64 `json:"system_load_average,omitempty"`
+	UptimeMs            int64   `json:"uptime_ms,omitempty"`
+}
+
+// AdminCpuMetricsToJSON converts AdminCpuMetrics to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func AdminCpuMetricsToJSON(v *AdminCpuMetrics) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "admincpumetrics is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := admincpumetricsJSON{
+		AvailableProcessors: v.AvailableProcessors,
+		ProcessCpuLoad:      v.ProcessCpuLoad,
+		SystemCpuLoad:       v.SystemCpuLoad,
+		SystemLoadAverage:   v.SystemLoadAverage,
+		UptimeMs:            v.UptimeMs,
+	}
+	return json.Marshal(helper)
+}
+
+// AdminCpuMetricsFromBytes creates AdminCpuMetrics from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func AdminCpuMetricsFromBytes(data []byte) (*AdminCpuMetrics, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := AdminCpuMetricsFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := AdminCpuMetricsFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := AdminCpuMetricsFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &AdminCpuMetrics{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse AdminCpuMetrics: unsupported format or invalid data")
+}
+
+// AdminCpuMetricsFromJSON creates AdminCpuMetrics from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func AdminCpuMetricsFromJSON(data []byte) (*AdminCpuMetrics, error) {
+	// Unmarshal into helper struct with string enums
+	var raw admincpumetricsJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &AdminCpuMetrics{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &AdminCpuMetrics{}
+	result.AvailableProcessors = raw.AvailableProcessors
+	result.ProcessCpuLoad = raw.ProcessCpuLoad
+	result.SystemCpuLoad = raw.SystemCpuLoad
+	result.SystemLoadAverage = raw.SystemLoadAverage
+	result.UptimeMs = raw.UptimeMs
+	return result, nil
+}
+
+// AdminCpuMetricsToYAML converts AdminCpuMetrics to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func AdminCpuMetricsToYAML(v *AdminCpuMetrics) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "admincpumetrics is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminCpuMetricsToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// AdminCpuMetricsToTOML converts AdminCpuMetrics to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func AdminCpuMetricsToTOML(v *AdminCpuMetrics) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "admincpumetrics is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminCpuMetricsToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
+// AdminDiskMetricsJSON represents AdminDiskMetrics in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type admindiskmetricsJSON struct {
+	PersistenceDir       string `json:"persistence_dir,omitempty"`
+	TotalBytes           int64  `json:"total_bytes,omitempty"`
+	UsableBytes          int64  `json:"usable_bytes,omitempty"`
+	UsedBytes            int64  `json:"used_bytes,omitempty"`
+	PersistenceSizeBytes int64  `json:"persistence_size_bytes,omitempty"`
+}
+
+// AdminDiskMetricsToJSON converts AdminDiskMetrics to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func AdminDiskMetricsToJSON(v *AdminDiskMetrics) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "admindiskmetrics is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := admindiskmetricsJSON{
+		PersistenceDir:       v.PersistenceDir,
+		TotalBytes:           v.TotalBytes,
+		UsableBytes:          v.UsableBytes,
+		UsedBytes:            v.UsedBytes,
+		PersistenceSizeBytes: v.PersistenceSizeBytes,
+	}
+	return json.Marshal(helper)
+}
+
+// AdminDiskMetricsFromBytes creates AdminDiskMetrics from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func AdminDiskMetricsFromBytes(data []byte) (*AdminDiskMetrics, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := AdminDiskMetricsFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := AdminDiskMetricsFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := AdminDiskMetricsFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &AdminDiskMetrics{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse AdminDiskMetrics: unsupported format or invalid data")
+}
+
+// AdminDiskMetricsFromJSON creates AdminDiskMetrics from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func AdminDiskMetricsFromJSON(data []byte) (*AdminDiskMetrics, error) {
+	// Unmarshal into helper struct with string enums
+	var raw admindiskmetricsJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &AdminDiskMetrics{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &AdminDiskMetrics{}
+	result.PersistenceDir = raw.PersistenceDir
+	result.TotalBytes = raw.TotalBytes
+	result.UsableBytes = raw.UsableBytes
+	result.UsedBytes = raw.UsedBytes
+	result.PersistenceSizeBytes = raw.PersistenceSizeBytes
+	return result, nil
+}
+
+// AdminDiskMetricsToYAML converts AdminDiskMetrics to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func AdminDiskMetricsToYAML(v *AdminDiskMetrics) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "admindiskmetrics is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminDiskMetricsToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// AdminDiskMetricsToTOML converts AdminDiskMetrics to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func AdminDiskMetricsToTOML(v *AdminDiskMetrics) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "admindiskmetrics is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminDiskMetricsToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
+// AdminGraphInfoJSON represents AdminGraphInfo in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type admingraphinfoJSON struct {
+	QualifiedName string `json:"qualified_name,omitempty"`
+	StateRoot     string `json:"state_root,omitempty"`
+	Boundary      string `json:"boundary,omitempty"`
+	GraphType     string `json:"graph_type,omitempty"`
+	Consistency   string `json:"consistency,omitempty"`
+	Persistence   bool   `json:"persistence,omitempty"`
+	ValueType     string `json:"value_type,omitempty"`
+}
+
+// AdminGraphInfoToJSON converts AdminGraphInfo to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func AdminGraphInfoToJSON(v *AdminGraphInfo) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "admingraphinfo is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := admingraphinfoJSON{
+		QualifiedName: v.QualifiedName,
+		StateRoot:     v.StateRoot,
+		Boundary:      v.Boundary,
+		GraphType:     AdminGraphTypeToString(v.GraphType),
+		Consistency:   v.Consistency,
+		Persistence:   v.Persistence,
+		ValueType:     v.ValueType,
+	}
+	return json.Marshal(helper)
+}
+
+// AdminGraphInfoFromBytes creates AdminGraphInfo from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func AdminGraphInfoFromBytes(data []byte) (*AdminGraphInfo, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := AdminGraphInfoFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := AdminGraphInfoFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := AdminGraphInfoFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &AdminGraphInfo{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse AdminGraphInfo: unsupported format or invalid data")
+}
+
+// AdminGraphInfoFromJSON creates AdminGraphInfo from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func AdminGraphInfoFromJSON(data []byte) (*AdminGraphInfo, error) {
+	// Unmarshal into helper struct with string enums
+	var raw admingraphinfoJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &AdminGraphInfo{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &AdminGraphInfo{}
+	result.QualifiedName = raw.QualifiedName
+	result.StateRoot = raw.StateRoot
+	result.Boundary = raw.Boundary
+	// Parse enum field: GraphType
+	if raw.GraphType != "" {
+		if parsed, err := ParseAdminGraphType(raw.GraphType); err == nil {
+			result.GraphType = parsed
+		}
+	}
+	result.Consistency = raw.Consistency
+	result.Persistence = raw.Persistence
+	result.ValueType = raw.ValueType
+	return result, nil
+}
+
+// AdminGraphInfoToYAML converts AdminGraphInfo to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func AdminGraphInfoToYAML(v *AdminGraphInfo) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "admingraphinfo is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminGraphInfoToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// AdminGraphInfoToTOML converts AdminGraphInfo to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func AdminGraphInfoToTOML(v *AdminGraphInfo) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "admingraphinfo is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminGraphInfoToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
+// AdminServiceConnectionJSON represents AdminServiceConnection in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type adminserviceconnectionJSON struct {
+	Id                 string            `json:"id,omitempty"`
+	ServiceId          string            `json:"service_id,omitempty"`
+	NodeId             string            `json:"node_id,omitempty"`
+	ActiveConnections  int32             `json:"active_connections,omitempty"`
+	TotalConnections   int64             `json:"total_connections,omitempty"`
+	TotalRpcs          int64             `json:"total_rpcs,omitempty"`
+	ActiveRpcs         int32             `json:"active_rpcs,omitempty"`
+	TotalUnaryReads    int64             `json:"total_unary_reads,omitempty"`
+	TotalUnaryWrites   int64             `json:"total_unary_writes,omitempty"`
+	ActiveStreams      int32             `json:"active_streams,omitempty"`
+	TotalStreamsOpened int64             `json:"total_streams_opened,omitempty"`
+	PollCount          int64             `json:"poll_count,omitempty"`
+	PollRate           float64           `json:"poll_rate,omitempty"`
+	AccessedGraphs     []string          `json:"accessed_graphs,omitempty"`
+	Peers              []json.RawMessage `json:"peers,omitempty"`
+	ConnectedAtMs      int64             `json:"connected_at_ms,omitempty"`
+	LastActivityMs     int64             `json:"last_activity_ms,omitempty"`
+	TimestampMs        int64             `json:"timestamp_ms,omitempty"`
+	RateLimitedCount   int64             `json:"rate_limited_count,omitempty"`
+	TotalErrors        int64             `json:"total_errors,omitempty"`
+	Latency            json.RawMessage   `json:"latency,omitempty"`
+	PerMethodLatency   []json.RawMessage `json:"per_method_latency,omitempty"`
+	BytesReceived      int64             `json:"bytes_received,omitempty"`
+	BytesSent          int64             `json:"bytes_sent,omitempty"`
+	PerMethodPayload   []json.RawMessage `json:"per_method_payload,omitempty"`
+}
+
+// AdminServiceConnectionToJSON converts AdminServiceConnection to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func AdminServiceConnectionToJSON(v *AdminServiceConnection) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminserviceconnection is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := adminserviceconnectionJSON{
+		Id:                 v.Id,
+		ServiceId:          v.ServiceId,
+		NodeId:             v.NodeId,
+		ActiveConnections:  v.ActiveConnections,
+		TotalConnections:   v.TotalConnections,
+		TotalRpcs:          v.TotalRpcs,
+		ActiveRpcs:         v.ActiveRpcs,
+		TotalUnaryReads:    v.TotalUnaryReads,
+		TotalUnaryWrites:   v.TotalUnaryWrites,
+		ActiveStreams:      v.ActiveStreams,
+		TotalStreamsOpened: v.TotalStreamsOpened,
+		PollCount:          v.PollCount,
+		PollRate:           v.PollRate,
+		AccessedGraphs:     v.AccessedGraphs,
+		Peers: func() []json.RawMessage {
+			if len(v.Peers) == 0 {
+				return nil
+			}
+			result := make([]json.RawMessage, 0, len(v.Peers))
+			for _, item := range v.Peers {
+				if item != nil {
+					if data, err := AdminPeerActivityToJSON(item); err == nil {
+						result = append(result, data)
+					}
+				}
+			}
+			return result
+		}(),
+		ConnectedAtMs:    v.ConnectedAtMs,
+		LastActivityMs:   v.LastActivityMs,
+		TimestampMs:      v.TimestampMs,
+		RateLimitedCount: v.RateLimitedCount,
+		TotalErrors:      v.TotalErrors,
+		Latency: func() json.RawMessage {
+			if v.Latency == nil {
+				return nil
+			}
+			data, _ := AdminLatencyStatsToJSON(v.Latency)
+			return data
+		}(),
+		PerMethodLatency: func() []json.RawMessage {
+			if len(v.PerMethodLatency) == 0 {
+				return nil
+			}
+			result := make([]json.RawMessage, 0, len(v.PerMethodLatency))
+			for _, item := range v.PerMethodLatency {
+				if item != nil {
+					if data, err := AdminMethodLatencyToJSON(item); err == nil {
+						result = append(result, data)
+					}
+				}
+			}
+			return result
+		}(),
+		BytesReceived: v.BytesReceived,
+		BytesSent:     v.BytesSent,
+		PerMethodPayload: func() []json.RawMessage {
+			if len(v.PerMethodPayload) == 0 {
+				return nil
+			}
+			result := make([]json.RawMessage, 0, len(v.PerMethodPayload))
+			for _, item := range v.PerMethodPayload {
+				if item != nil {
+					if data, err := AdminMethodPayloadToJSON(item); err == nil {
+						result = append(result, data)
+					}
+				}
+			}
+			return result
+		}(),
+	}
+	return json.Marshal(helper)
+}
+
+// AdminServiceConnectionFromBytes creates AdminServiceConnection from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func AdminServiceConnectionFromBytes(data []byte) (*AdminServiceConnection, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := AdminServiceConnectionFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := AdminServiceConnectionFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := AdminServiceConnectionFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &AdminServiceConnection{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse AdminServiceConnection: unsupported format or invalid data")
+}
+
+// AdminServiceConnectionFromJSON creates AdminServiceConnection from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func AdminServiceConnectionFromJSON(data []byte) (*AdminServiceConnection, error) {
+	// Unmarshal into helper struct with string enums
+	var raw adminserviceconnectionJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &AdminServiceConnection{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &AdminServiceConnection{}
+	result.Id = raw.Id
+	result.ServiceId = raw.ServiceId
+	result.NodeId = raw.NodeId
+	result.ActiveConnections = raw.ActiveConnections
+	result.TotalConnections = raw.TotalConnections
+	result.TotalRpcs = raw.TotalRpcs
+	result.ActiveRpcs = raw.ActiveRpcs
+	result.TotalUnaryReads = raw.TotalUnaryReads
+	result.TotalUnaryWrites = raw.TotalUnaryWrites
+	result.ActiveStreams = raw.ActiveStreams
+	result.TotalStreamsOpened = raw.TotalStreamsOpened
+	result.PollCount = raw.PollCount
+	result.PollRate = raw.PollRate
+	result.AccessedGraphs = raw.AccessedGraphs
+	// Parse repeated message field: Peers
+	if len(raw.Peers) > 0 {
+		result.Peers = make([]*AdminPeerActivity, 0, len(raw.Peers))
+		for _, itemJSON := range raw.Peers {
+			if len(itemJSON) > 0 {
+				parsed, err := AdminPeerActivityFromJSON(itemJSON)
+				if err == nil {
+					result.Peers = append(result.Peers, parsed)
+				}
+			}
+		}
+	}
+	result.ConnectedAtMs = raw.ConnectedAtMs
+	result.LastActivityMs = raw.LastActivityMs
+	result.TimestampMs = raw.TimestampMs
+	result.RateLimitedCount = raw.RateLimitedCount
+	result.TotalErrors = raw.TotalErrors
+	// Parse message field: Latency
+	if len(raw.Latency) > 0 {
+		parsed, err := AdminLatencyStatsFromJSON(raw.Latency)
+		if err == nil {
+			result.Latency = parsed
+		}
+	}
+	// Parse repeated message field: PerMethodLatency
+	if len(raw.PerMethodLatency) > 0 {
+		result.PerMethodLatency = make([]*AdminMethodLatency, 0, len(raw.PerMethodLatency))
+		for _, itemJSON := range raw.PerMethodLatency {
+			if len(itemJSON) > 0 {
+				parsed, err := AdminMethodLatencyFromJSON(itemJSON)
+				if err == nil {
+					result.PerMethodLatency = append(result.PerMethodLatency, parsed)
+				}
+			}
+		}
+	}
+	result.BytesReceived = raw.BytesReceived
+	result.BytesSent = raw.BytesSent
+	// Parse repeated message field: PerMethodPayload
+	if len(raw.PerMethodPayload) > 0 {
+		result.PerMethodPayload = make([]*AdminMethodPayload, 0, len(raw.PerMethodPayload))
+		for _, itemJSON := range raw.PerMethodPayload {
+			if len(itemJSON) > 0 {
+				parsed, err := AdminMethodPayloadFromJSON(itemJSON)
+				if err == nil {
+					result.PerMethodPayload = append(result.PerMethodPayload, parsed)
+				}
+			}
+		}
+	}
+	return result, nil
+}
+
+// AdminServiceConnectionToYAML converts AdminServiceConnection to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func AdminServiceConnectionToYAML(v *AdminServiceConnection) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminserviceconnection is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminServiceConnectionToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// AdminServiceConnectionToTOML converts AdminServiceConnection to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func AdminServiceConnectionToTOML(v *AdminServiceConnection) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminserviceconnection is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminServiceConnectionToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
+// AdminPeerActivityJSON represents AdminPeerActivity in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type adminpeeractivityJSON struct {
+	PeerAddress        string  `json:"peer_address,omitempty"`
+	ActiveRpcs         int32   `json:"active_rpcs,omitempty"`
+	TotalRpcs          int64   `json:"total_rpcs,omitempty"`
+	ActiveStreams      int32   `json:"active_streams,omitempty"`
+	TotalStreamsOpened int64   `json:"total_streams_opened,omitempty"`
+	PollCount          int64   `json:"poll_count,omitempty"`
+	PollRate           float64 `json:"poll_rate,omitempty"`
+	ConnectedAtMs      int64   `json:"connected_at_ms,omitempty"`
+	LastActivityMs     int64   `json:"last_activity_ms,omitempty"`
+	TotalErrors        int64   `json:"total_errors,omitempty"`
+	BytesReceived      int64   `json:"bytes_received,omitempty"`
+	BytesSent          int64   `json:"bytes_sent,omitempty"`
+}
+
+// AdminPeerActivityToJSON converts AdminPeerActivity to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func AdminPeerActivityToJSON(v *AdminPeerActivity) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminpeeractivity is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := adminpeeractivityJSON{
+		PeerAddress:        v.PeerAddress,
+		ActiveRpcs:         v.ActiveRpcs,
+		TotalRpcs:          v.TotalRpcs,
+		ActiveStreams:      v.ActiveStreams,
+		TotalStreamsOpened: v.TotalStreamsOpened,
+		PollCount:          v.PollCount,
+		PollRate:           v.PollRate,
+		ConnectedAtMs:      v.ConnectedAtMs,
+		LastActivityMs:     v.LastActivityMs,
+		TotalErrors:        v.TotalErrors,
+		BytesReceived:      v.BytesReceived,
+		BytesSent:          v.BytesSent,
+	}
+	return json.Marshal(helper)
+}
+
+// AdminPeerActivityFromBytes creates AdminPeerActivity from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func AdminPeerActivityFromBytes(data []byte) (*AdminPeerActivity, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := AdminPeerActivityFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := AdminPeerActivityFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := AdminPeerActivityFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &AdminPeerActivity{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse AdminPeerActivity: unsupported format or invalid data")
+}
+
+// AdminPeerActivityFromJSON creates AdminPeerActivity from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func AdminPeerActivityFromJSON(data []byte) (*AdminPeerActivity, error) {
+	// Unmarshal into helper struct with string enums
+	var raw adminpeeractivityJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &AdminPeerActivity{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &AdminPeerActivity{}
+	result.PeerAddress = raw.PeerAddress
+	result.ActiveRpcs = raw.ActiveRpcs
+	result.TotalRpcs = raw.TotalRpcs
+	result.ActiveStreams = raw.ActiveStreams
+	result.TotalStreamsOpened = raw.TotalStreamsOpened
+	result.PollCount = raw.PollCount
+	result.PollRate = raw.PollRate
+	result.ConnectedAtMs = raw.ConnectedAtMs
+	result.LastActivityMs = raw.LastActivityMs
+	result.TotalErrors = raw.TotalErrors
+	result.BytesReceived = raw.BytesReceived
+	result.BytesSent = raw.BytesSent
+	return result, nil
+}
+
+// AdminPeerActivityToYAML converts AdminPeerActivity to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func AdminPeerActivityToYAML(v *AdminPeerActivity) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminpeeractivity is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminPeerActivityToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// AdminPeerActivityToTOML converts AdminPeerActivity to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func AdminPeerActivityToTOML(v *AdminPeerActivity) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminpeeractivity is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminPeerActivityToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
+// AdminMapStatsJSON represents AdminMapStats in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type adminmapstatsJSON struct {
+	MapName               string `json:"map_name,omitempty"`
+	Size                  int32  `json:"size,omitempty"`
+	OwnedEntryCount       int64  `json:"owned_entry_count,omitempty"`
+	BackupEntryCount      int64  `json:"backup_entry_count,omitempty"`
+	HeapCostBytes         int64  `json:"heap_cost_bytes,omitempty"`
+	LastUpdateTimeMs      int64  `json:"last_update_time_ms,omitempty"`
+	PutCount              int64  `json:"put_count,omitempty"`
+	GetCount              int64  `json:"get_count,omitempty"`
+	HitCount              int64  `json:"hit_count,omitempty"`
+	TimestampMs           int64  `json:"timestamp_ms,omitempty"`
+	OwnedEntryMemoryCost  int64  `json:"owned_entry_memory_cost,omitempty"`
+	BackupEntryMemoryCost int64  `json:"backup_entry_memory_cost,omitempty"`
+	DirtyEntryCount       int64  `json:"dirty_entry_count,omitempty"`
+	LockedEntryCount      int64  `json:"locked_entry_count,omitempty"`
+	RemoveCount           int64  `json:"remove_count,omitempty"`
+	SetCount              int64  `json:"set_count,omitempty"`
+	EvictionCount         int64  `json:"eviction_count,omitempty"`
+	ExpirationCount       int64  `json:"expiration_count,omitempty"`
+	LastAccessTimeMs      int64  `json:"last_access_time_ms,omitempty"`
+	CreationTimeMs        int64  `json:"creation_time_ms,omitempty"`
+	BackupCount           int32  `json:"backup_count,omitempty"`
+	ValueType             string `json:"value_type,omitempty"`
+	GraphType             string `json:"graph_type,omitempty"`
+	QualifiedName         string `json:"qualified_name,omitempty"`
+	StateRoot             string `json:"state_root,omitempty"`
+	Consistency           string `json:"consistency,omitempty"`
+	Persistence           bool   `json:"persistence,omitempty"`
+}
+
+// AdminMapStatsToJSON converts AdminMapStats to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func AdminMapStatsToJSON(v *AdminMapStats) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminmapstats is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := adminmapstatsJSON{
+		MapName:               v.MapName,
+		Size:                  v.Size,
+		OwnedEntryCount:       v.OwnedEntryCount,
+		BackupEntryCount:      v.BackupEntryCount,
+		HeapCostBytes:         v.HeapCostBytes,
+		LastUpdateTimeMs:      v.LastUpdateTimeMs,
+		PutCount:              v.PutCount,
+		GetCount:              v.GetCount,
+		HitCount:              v.HitCount,
+		TimestampMs:           v.TimestampMs,
+		OwnedEntryMemoryCost:  v.OwnedEntryMemoryCost,
+		BackupEntryMemoryCost: v.BackupEntryMemoryCost,
+		DirtyEntryCount:       v.DirtyEntryCount,
+		LockedEntryCount:      v.LockedEntryCount,
+		RemoveCount:           v.RemoveCount,
+		SetCount:              v.SetCount,
+		EvictionCount:         v.EvictionCount,
+		ExpirationCount:       v.ExpirationCount,
+		LastAccessTimeMs:      v.LastAccessTimeMs,
+		CreationTimeMs:        v.CreationTimeMs,
+		BackupCount:           v.BackupCount,
+		ValueType:             v.ValueType,
+		GraphType:             AdminGraphTypeToString(v.GraphType),
+		QualifiedName:         v.QualifiedName,
+		StateRoot:             v.StateRoot,
+		Consistency:           v.Consistency,
+		Persistence:           v.Persistence,
+	}
+	return json.Marshal(helper)
+}
+
+// AdminMapStatsFromBytes creates AdminMapStats from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func AdminMapStatsFromBytes(data []byte) (*AdminMapStats, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := AdminMapStatsFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := AdminMapStatsFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := AdminMapStatsFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &AdminMapStats{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse AdminMapStats: unsupported format or invalid data")
+}
+
+// AdminMapStatsFromJSON creates AdminMapStats from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func AdminMapStatsFromJSON(data []byte) (*AdminMapStats, error) {
+	// Unmarshal into helper struct with string enums
+	var raw adminmapstatsJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &AdminMapStats{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &AdminMapStats{}
+	result.MapName = raw.MapName
+	result.Size = raw.Size
+	result.OwnedEntryCount = raw.OwnedEntryCount
+	result.BackupEntryCount = raw.BackupEntryCount
+	result.HeapCostBytes = raw.HeapCostBytes
+	result.LastUpdateTimeMs = raw.LastUpdateTimeMs
+	result.PutCount = raw.PutCount
+	result.GetCount = raw.GetCount
+	result.HitCount = raw.HitCount
+	result.TimestampMs = raw.TimestampMs
+	result.OwnedEntryMemoryCost = raw.OwnedEntryMemoryCost
+	result.BackupEntryMemoryCost = raw.BackupEntryMemoryCost
+	result.DirtyEntryCount = raw.DirtyEntryCount
+	result.LockedEntryCount = raw.LockedEntryCount
+	result.RemoveCount = raw.RemoveCount
+	result.SetCount = raw.SetCount
+	result.EvictionCount = raw.EvictionCount
+	result.ExpirationCount = raw.ExpirationCount
+	result.LastAccessTimeMs = raw.LastAccessTimeMs
+	result.CreationTimeMs = raw.CreationTimeMs
+	result.BackupCount = raw.BackupCount
+	result.ValueType = raw.ValueType
+	// Parse enum field: GraphType
+	if raw.GraphType != "" {
+		if parsed, err := ParseAdminGraphType(raw.GraphType); err == nil {
+			result.GraphType = parsed
+		}
+	}
+	result.QualifiedName = raw.QualifiedName
+	result.StateRoot = raw.StateRoot
+	result.Consistency = raw.Consistency
+	result.Persistence = raw.Persistence
+	return result, nil
+}
+
+// AdminMapStatsToYAML converts AdminMapStats to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func AdminMapStatsToYAML(v *AdminMapStats) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminmapstats is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminMapStatsToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// AdminMapStatsToTOML converts AdminMapStats to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func AdminMapStatsToTOML(v *AdminMapStats) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminmapstats is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminMapStatsToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
+// AdminGrpcStatsJSON represents AdminGrpcStats in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type admingrpcstatsJSON struct {
+	NodeId            string `json:"node_id,omitempty"`
+	ActiveConnections int32  `json:"active_connections,omitempty"`
+	TotalRpcs         int64  `json:"total_rpcs,omitempty"`
+	ActiveRpcs        int32  `json:"active_rpcs,omitempty"`
+	RateLimitedCount  int64  `json:"rate_limited_count,omitempty"`
+	ActiveStreams     int32  `json:"active_streams,omitempty"`
+	TimestampMs       int64  `json:"timestamp_ms,omitempty"`
+}
+
+// AdminGrpcStatsToJSON converts AdminGrpcStats to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func AdminGrpcStatsToJSON(v *AdminGrpcStats) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "admingrpcstats is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := admingrpcstatsJSON{
+		NodeId:            v.NodeId,
+		ActiveConnections: v.ActiveConnections,
+		TotalRpcs:         v.TotalRpcs,
+		ActiveRpcs:        v.ActiveRpcs,
+		RateLimitedCount:  v.RateLimitedCount,
+		ActiveStreams:     v.ActiveStreams,
+		TimestampMs:       v.TimestampMs,
+	}
+	return json.Marshal(helper)
+}
+
+// AdminGrpcStatsFromBytes creates AdminGrpcStats from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func AdminGrpcStatsFromBytes(data []byte) (*AdminGrpcStats, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := AdminGrpcStatsFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := AdminGrpcStatsFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := AdminGrpcStatsFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &AdminGrpcStats{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse AdminGrpcStats: unsupported format or invalid data")
+}
+
+// AdminGrpcStatsFromJSON creates AdminGrpcStats from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func AdminGrpcStatsFromJSON(data []byte) (*AdminGrpcStats, error) {
+	// Unmarshal into helper struct with string enums
+	var raw admingrpcstatsJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &AdminGrpcStats{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &AdminGrpcStats{}
+	result.NodeId = raw.NodeId
+	result.ActiveConnections = raw.ActiveConnections
+	result.TotalRpcs = raw.TotalRpcs
+	result.ActiveRpcs = raw.ActiveRpcs
+	result.RateLimitedCount = raw.RateLimitedCount
+	result.ActiveStreams = raw.ActiveStreams
+	result.TimestampMs = raw.TimestampMs
+	return result, nil
+}
+
+// AdminGrpcStatsToYAML converts AdminGrpcStats to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func AdminGrpcStatsToYAML(v *AdminGrpcStats) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "admingrpcstats is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminGrpcStatsToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// AdminGrpcStatsToTOML converts AdminGrpcStats to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func AdminGrpcStatsToTOML(v *AdminGrpcStats) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "admingrpcstats is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminGrpcStatsToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
+// AdminPersistenceStatusJSON represents AdminPersistenceStatus in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type adminpersistencestatusJSON struct {
+	NodeId             string `json:"node_id,omitempty"`
+	Enabled            bool   `json:"enabled,omitempty"`
+	PersistenceDir     string `json:"persistence_dir,omitempty"`
+	RedoLogEntryCount  int64  `json:"redo_log_entry_count,omitempty"`
+	RedoLogSizeBytes   int64  `json:"redo_log_size_bytes,omitempty"`
+	LastDumpTimeMs     int64  `json:"last_dump_time_ms,omitempty"`
+	LastDumpEntryCount int64  `json:"last_dump_entry_count,omitempty"`
+	DumpCount          int64  `json:"dump_count,omitempty"`
+	TimestampMs        int64  `json:"timestamp_ms,omitempty"`
+}
+
+// AdminPersistenceStatusToJSON converts AdminPersistenceStatus to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func AdminPersistenceStatusToJSON(v *AdminPersistenceStatus) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminpersistencestatus is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := adminpersistencestatusJSON{
+		NodeId:             v.NodeId,
+		Enabled:            v.Enabled,
+		PersistenceDir:     v.PersistenceDir,
+		RedoLogEntryCount:  v.RedoLogEntryCount,
+		RedoLogSizeBytes:   v.RedoLogSizeBytes,
+		LastDumpTimeMs:     v.LastDumpTimeMs,
+		LastDumpEntryCount: v.LastDumpEntryCount,
+		DumpCount:          v.DumpCount,
+		TimestampMs:        v.TimestampMs,
+	}
+	return json.Marshal(helper)
+}
+
+// AdminPersistenceStatusFromBytes creates AdminPersistenceStatus from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func AdminPersistenceStatusFromBytes(data []byte) (*AdminPersistenceStatus, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := AdminPersistenceStatusFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := AdminPersistenceStatusFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := AdminPersistenceStatusFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &AdminPersistenceStatus{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse AdminPersistenceStatus: unsupported format or invalid data")
+}
+
+// AdminPersistenceStatusFromJSON creates AdminPersistenceStatus from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func AdminPersistenceStatusFromJSON(data []byte) (*AdminPersistenceStatus, error) {
+	// Unmarshal into helper struct with string enums
+	var raw adminpersistencestatusJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &AdminPersistenceStatus{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &AdminPersistenceStatus{}
+	result.NodeId = raw.NodeId
+	result.Enabled = raw.Enabled
+	result.PersistenceDir = raw.PersistenceDir
+	result.RedoLogEntryCount = raw.RedoLogEntryCount
+	result.RedoLogSizeBytes = raw.RedoLogSizeBytes
+	result.LastDumpTimeMs = raw.LastDumpTimeMs
+	result.LastDumpEntryCount = raw.LastDumpEntryCount
+	result.DumpCount = raw.DumpCount
+	result.TimestampMs = raw.TimestampMs
+	return result, nil
+}
+
+// AdminPersistenceStatusToYAML converts AdminPersistenceStatus to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func AdminPersistenceStatusToYAML(v *AdminPersistenceStatus) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminpersistencestatus is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminPersistenceStatusToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// AdminPersistenceStatusToTOML converts AdminPersistenceStatus to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func AdminPersistenceStatusToTOML(v *AdminPersistenceStatus) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminpersistencestatus is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminPersistenceStatusToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
+// AdminNetworkStatsJSON represents AdminNetworkStats in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type adminnetworkstatsJSON struct {
+	NodeId                 string            `json:"node_id,omitempty"`
+	GrpcListenAddress      string            `json:"grpc_listen_address,omitempty"`
+	HazelcastListenAddress string            `json:"hazelcast_listen_address,omitempty"`
+	ActiveGrpcConnections  int32             `json:"active_grpc_connections,omitempty"`
+	MemberConnections      []json.RawMessage `json:"member_connections,omitempty"`
+	BytesSent              int64             `json:"bytes_sent,omitempty"`
+	BytesReceived          int64             `json:"bytes_received,omitempty"`
+	TimestampMs            int64             `json:"timestamp_ms,omitempty"`
+}
+
+// AdminNetworkStatsToJSON converts AdminNetworkStats to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func AdminNetworkStatsToJSON(v *AdminNetworkStats) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminnetworkstats is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := adminnetworkstatsJSON{
+		NodeId:                 v.NodeId,
+		GrpcListenAddress:      v.GrpcListenAddress,
+		HazelcastListenAddress: v.HazelcastListenAddress,
+		ActiveGrpcConnections:  v.ActiveGrpcConnections,
+		MemberConnections: func() []json.RawMessage {
+			if len(v.MemberConnections) == 0 {
+				return nil
+			}
+			result := make([]json.RawMessage, 0, len(v.MemberConnections))
+			for _, item := range v.MemberConnections {
+				if item != nil {
+					if data, err := AdminMemberConnectionToJSON(item); err == nil {
+						result = append(result, data)
+					}
+				}
+			}
+			return result
+		}(),
+		BytesSent:     v.BytesSent,
+		BytesReceived: v.BytesReceived,
+		TimestampMs:   v.TimestampMs,
+	}
+	return json.Marshal(helper)
+}
+
+// AdminNetworkStatsFromBytes creates AdminNetworkStats from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func AdminNetworkStatsFromBytes(data []byte) (*AdminNetworkStats, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := AdminNetworkStatsFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := AdminNetworkStatsFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := AdminNetworkStatsFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &AdminNetworkStats{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse AdminNetworkStats: unsupported format or invalid data")
+}
+
+// AdminNetworkStatsFromJSON creates AdminNetworkStats from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func AdminNetworkStatsFromJSON(data []byte) (*AdminNetworkStats, error) {
+	// Unmarshal into helper struct with string enums
+	var raw adminnetworkstatsJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &AdminNetworkStats{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &AdminNetworkStats{}
+	result.NodeId = raw.NodeId
+	result.GrpcListenAddress = raw.GrpcListenAddress
+	result.HazelcastListenAddress = raw.HazelcastListenAddress
+	result.ActiveGrpcConnections = raw.ActiveGrpcConnections
+	// Parse repeated message field: MemberConnections
+	if len(raw.MemberConnections) > 0 {
+		result.MemberConnections = make([]*AdminMemberConnection, 0, len(raw.MemberConnections))
+		for _, itemJSON := range raw.MemberConnections {
+			if len(itemJSON) > 0 {
+				parsed, err := AdminMemberConnectionFromJSON(itemJSON)
+				if err == nil {
+					result.MemberConnections = append(result.MemberConnections, parsed)
+				}
+			}
+		}
+	}
+	result.BytesSent = raw.BytesSent
+	result.BytesReceived = raw.BytesReceived
+	result.TimestampMs = raw.TimestampMs
+	return result, nil
+}
+
+// AdminNetworkStatsToYAML converts AdminNetworkStats to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func AdminNetworkStatsToYAML(v *AdminNetworkStats) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminnetworkstats is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminNetworkStatsToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// AdminNetworkStatsToTOML converts AdminNetworkStats to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func AdminNetworkStatsToTOML(v *AdminNetworkStats) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminnetworkstats is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminNetworkStatsToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
+// AdminMemberConnectionJSON represents AdminMemberConnection in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type adminmemberconnectionJSON struct {
+	Address         string `json:"address,omitempty"`
+	Connected       bool   `json:"connected,omitempty"`
+	ConnectionCount int32  `json:"connection_count,omitempty"`
+}
+
+// AdminMemberConnectionToJSON converts AdminMemberConnection to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func AdminMemberConnectionToJSON(v *AdminMemberConnection) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminmemberconnection is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := adminmemberconnectionJSON{
+		Address:         v.Address,
+		Connected:       v.Connected,
+		ConnectionCount: v.ConnectionCount,
+	}
+	return json.Marshal(helper)
+}
+
+// AdminMemberConnectionFromBytes creates AdminMemberConnection from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func AdminMemberConnectionFromBytes(data []byte) (*AdminMemberConnection, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := AdminMemberConnectionFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := AdminMemberConnectionFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := AdminMemberConnectionFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &AdminMemberConnection{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse AdminMemberConnection: unsupported format or invalid data")
+}
+
+// AdminMemberConnectionFromJSON creates AdminMemberConnection from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func AdminMemberConnectionFromJSON(data []byte) (*AdminMemberConnection, error) {
+	// Unmarshal into helper struct with string enums
+	var raw adminmemberconnectionJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &AdminMemberConnection{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &AdminMemberConnection{}
+	result.Address = raw.Address
+	result.Connected = raw.Connected
+	result.ConnectionCount = raw.ConnectionCount
+	return result, nil
+}
+
+// AdminMemberConnectionToYAML converts AdminMemberConnection to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func AdminMemberConnectionToYAML(v *AdminMemberConnection) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminmemberconnection is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminMemberConnectionToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// AdminMemberConnectionToTOML converts AdminMemberConnection to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func AdminMemberConnectionToTOML(v *AdminMemberConnection) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminmemberconnection is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminMemberConnectionToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
+// AdminThreadInfoJSON represents AdminThreadInfo in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type adminthreadinfoJSON struct {
+	NodeId            string   `json:"node_id,omitempty"`
+	ThreadCount       int32    `json:"thread_count,omitempty"`
+	PeakThreadCount   int32    `json:"peak_thread_count,omitempty"`
+	DaemonThreadCount int32    `json:"daemon_thread_count,omitempty"`
+	DeadlockedThreads []string `json:"deadlocked_threads,omitempty"`
+	TimestampMs       int64    `json:"timestamp_ms,omitempty"`
+}
+
+// AdminThreadInfoToJSON converts AdminThreadInfo to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func AdminThreadInfoToJSON(v *AdminThreadInfo) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminthreadinfo is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := adminthreadinfoJSON{
+		NodeId:            v.NodeId,
+		ThreadCount:       v.ThreadCount,
+		PeakThreadCount:   v.PeakThreadCount,
+		DaemonThreadCount: v.DaemonThreadCount,
+		DeadlockedThreads: v.DeadlockedThreads,
+		TimestampMs:       v.TimestampMs,
+	}
+	return json.Marshal(helper)
+}
+
+// AdminThreadInfoFromBytes creates AdminThreadInfo from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func AdminThreadInfoFromBytes(data []byte) (*AdminThreadInfo, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := AdminThreadInfoFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := AdminThreadInfoFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := AdminThreadInfoFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &AdminThreadInfo{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse AdminThreadInfo: unsupported format or invalid data")
+}
+
+// AdminThreadInfoFromJSON creates AdminThreadInfo from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func AdminThreadInfoFromJSON(data []byte) (*AdminThreadInfo, error) {
+	// Unmarshal into helper struct with string enums
+	var raw adminthreadinfoJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &AdminThreadInfo{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &AdminThreadInfo{}
+	result.NodeId = raw.NodeId
+	result.ThreadCount = raw.ThreadCount
+	result.PeakThreadCount = raw.PeakThreadCount
+	result.DaemonThreadCount = raw.DaemonThreadCount
+	result.DeadlockedThreads = raw.DeadlockedThreads
+	result.TimestampMs = raw.TimestampMs
+	return result, nil
+}
+
+// AdminThreadInfoToYAML converts AdminThreadInfo to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func AdminThreadInfoToYAML(v *AdminThreadInfo) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminthreadinfo is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminThreadInfoToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// AdminThreadInfoToTOML converts AdminThreadInfo to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func AdminThreadInfoToTOML(v *AdminThreadInfo) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminthreadinfo is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminThreadInfoToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
+// AdminTokenCacheStatsJSON represents AdminTokenCacheStats in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type admintokencachestatsJSON struct {
+	NodeId        string `json:"node_id,omitempty"`
+	CacheSize     int32  `json:"cache_size,omitempty"`
+	HitCount      int64  `json:"hit_count,omitempty"`
+	MissCount     int64  `json:"miss_count,omitempty"`
+	EvictionCount int64  `json:"eviction_count,omitempty"`
+	TimestampMs   int64  `json:"timestamp_ms,omitempty"`
+}
+
+// AdminTokenCacheStatsToJSON converts AdminTokenCacheStats to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func AdminTokenCacheStatsToJSON(v *AdminTokenCacheStats) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "admintokencachestats is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := admintokencachestatsJSON{
+		NodeId:        v.NodeId,
+		CacheSize:     v.CacheSize,
+		HitCount:      v.HitCount,
+		MissCount:     v.MissCount,
+		EvictionCount: v.EvictionCount,
+		TimestampMs:   v.TimestampMs,
+	}
+	return json.Marshal(helper)
+}
+
+// AdminTokenCacheStatsFromBytes creates AdminTokenCacheStats from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func AdminTokenCacheStatsFromBytes(data []byte) (*AdminTokenCacheStats, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := AdminTokenCacheStatsFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := AdminTokenCacheStatsFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := AdminTokenCacheStatsFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &AdminTokenCacheStats{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse AdminTokenCacheStats: unsupported format or invalid data")
+}
+
+// AdminTokenCacheStatsFromJSON creates AdminTokenCacheStats from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func AdminTokenCacheStatsFromJSON(data []byte) (*AdminTokenCacheStats, error) {
+	// Unmarshal into helper struct with string enums
+	var raw admintokencachestatsJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &AdminTokenCacheStats{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &AdminTokenCacheStats{}
+	result.NodeId = raw.NodeId
+	result.CacheSize = raw.CacheSize
+	result.HitCount = raw.HitCount
+	result.MissCount = raw.MissCount
+	result.EvictionCount = raw.EvictionCount
+	result.TimestampMs = raw.TimestampMs
+	return result, nil
+}
+
+// AdminTokenCacheStatsToYAML converts AdminTokenCacheStats to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func AdminTokenCacheStatsToYAML(v *AdminTokenCacheStats) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "admintokencachestats is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminTokenCacheStatsToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// AdminTokenCacheStatsToTOML converts AdminTokenCacheStats to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func AdminTokenCacheStatsToTOML(v *AdminTokenCacheStats) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "admintokencachestats is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminTokenCacheStatsToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
+// AdminLatencyStatsJSON represents AdminLatencyStats in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type adminlatencystatsJSON struct {
+	P50Us       int64   `json:"p50_us,omitempty"`
+	P90Us       int64   `json:"p90_us,omitempty"`
+	P95Us       int64   `json:"p95_us,omitempty"`
+	P99Us       int64   `json:"p99_us,omitempty"`
+	MaxUs       int64   `json:"max_us,omitempty"`
+	MinUs       int64   `json:"min_us,omitempty"`
+	MeanUs      float64 `json:"mean_us,omitempty"`
+	SampleCount int64   `json:"sample_count,omitempty"`
+}
+
+// AdminLatencyStatsToJSON converts AdminLatencyStats to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func AdminLatencyStatsToJSON(v *AdminLatencyStats) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminlatencystats is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := adminlatencystatsJSON{
+		P50Us:       v.P50Us,
+		P90Us:       v.P90Us,
+		P95Us:       v.P95Us,
+		P99Us:       v.P99Us,
+		MaxUs:       v.MaxUs,
+		MinUs:       v.MinUs,
+		MeanUs:      v.MeanUs,
+		SampleCount: v.SampleCount,
+	}
+	return json.Marshal(helper)
+}
+
+// AdminLatencyStatsFromBytes creates AdminLatencyStats from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func AdminLatencyStatsFromBytes(data []byte) (*AdminLatencyStats, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := AdminLatencyStatsFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := AdminLatencyStatsFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := AdminLatencyStatsFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &AdminLatencyStats{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse AdminLatencyStats: unsupported format or invalid data")
+}
+
+// AdminLatencyStatsFromJSON creates AdminLatencyStats from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func AdminLatencyStatsFromJSON(data []byte) (*AdminLatencyStats, error) {
+	// Unmarshal into helper struct with string enums
+	var raw adminlatencystatsJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &AdminLatencyStats{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &AdminLatencyStats{}
+	result.P50Us = raw.P50Us
+	result.P90Us = raw.P90Us
+	result.P95Us = raw.P95Us
+	result.P99Us = raw.P99Us
+	result.MaxUs = raw.MaxUs
+	result.MinUs = raw.MinUs
+	result.MeanUs = raw.MeanUs
+	result.SampleCount = raw.SampleCount
+	return result, nil
+}
+
+// AdminLatencyStatsToYAML converts AdminLatencyStats to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func AdminLatencyStatsToYAML(v *AdminLatencyStats) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminlatencystats is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminLatencyStatsToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// AdminLatencyStatsToTOML converts AdminLatencyStats to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func AdminLatencyStatsToTOML(v *AdminLatencyStats) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminlatencystats is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminLatencyStatsToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
+// AdminMethodLatencyJSON represents AdminMethodLatency in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type adminmethodlatencyJSON struct {
+	Method  string          `json:"method,omitempty"`
+	Latency json.RawMessage `json:"latency,omitempty"`
+}
+
+// AdminMethodLatencyToJSON converts AdminMethodLatency to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func AdminMethodLatencyToJSON(v *AdminMethodLatency) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminmethodlatency is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := adminmethodlatencyJSON{
+		Method: v.Method,
+		Latency: func() json.RawMessage {
+			if v.Latency == nil {
+				return nil
+			}
+			data, _ := AdminLatencyStatsToJSON(v.Latency)
+			return data
+		}(),
+	}
+	return json.Marshal(helper)
+}
+
+// AdminMethodLatencyFromBytes creates AdminMethodLatency from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func AdminMethodLatencyFromBytes(data []byte) (*AdminMethodLatency, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := AdminMethodLatencyFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := AdminMethodLatencyFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := AdminMethodLatencyFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &AdminMethodLatency{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse AdminMethodLatency: unsupported format or invalid data")
+}
+
+// AdminMethodLatencyFromJSON creates AdminMethodLatency from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func AdminMethodLatencyFromJSON(data []byte) (*AdminMethodLatency, error) {
+	// Unmarshal into helper struct with string enums
+	var raw adminmethodlatencyJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &AdminMethodLatency{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &AdminMethodLatency{}
+	result.Method = raw.Method
+	// Parse message field: Latency
+	if len(raw.Latency) > 0 {
+		parsed, err := AdminLatencyStatsFromJSON(raw.Latency)
+		if err == nil {
+			result.Latency = parsed
+		}
+	}
+	return result, nil
+}
+
+// AdminMethodLatencyToYAML converts AdminMethodLatency to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func AdminMethodLatencyToYAML(v *AdminMethodLatency) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminmethodlatency is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminMethodLatencyToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// AdminMethodLatencyToTOML converts AdminMethodLatency to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func AdminMethodLatencyToTOML(v *AdminMethodLatency) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminmethodlatency is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminMethodLatencyToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
+// AdminMethodPayloadJSON represents AdminMethodPayload in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type adminmethodpayloadJSON struct {
+	Method             string  `json:"method,omitempty"`
+	TotalRequestBytes  int64   `json:"total_request_bytes,omitempty"`
+	TotalResponseBytes int64   `json:"total_response_bytes,omitempty"`
+	RequestCount       int64   `json:"request_count,omitempty"`
+	AvgRequestBytes    float64 `json:"avg_request_bytes,omitempty"`
+	AvgResponseBytes   float64 `json:"avg_response_bytes,omitempty"`
+	MaxRequestBytes    int64   `json:"max_request_bytes,omitempty"`
+	MaxResponseBytes   int64   `json:"max_response_bytes,omitempty"`
+}
+
+// AdminMethodPayloadToJSON converts AdminMethodPayload to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func AdminMethodPayloadToJSON(v *AdminMethodPayload) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminmethodpayload is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := adminmethodpayloadJSON{
+		Method:             v.Method,
+		TotalRequestBytes:  v.TotalRequestBytes,
+		TotalResponseBytes: v.TotalResponseBytes,
+		RequestCount:       v.RequestCount,
+		AvgRequestBytes:    v.AvgRequestBytes,
+		AvgResponseBytes:   v.AvgResponseBytes,
+		MaxRequestBytes:    v.MaxRequestBytes,
+		MaxResponseBytes:   v.MaxResponseBytes,
+	}
+	return json.Marshal(helper)
+}
+
+// AdminMethodPayloadFromBytes creates AdminMethodPayload from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func AdminMethodPayloadFromBytes(data []byte) (*AdminMethodPayload, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := AdminMethodPayloadFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := AdminMethodPayloadFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := AdminMethodPayloadFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &AdminMethodPayload{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse AdminMethodPayload: unsupported format or invalid data")
+}
+
+// AdminMethodPayloadFromJSON creates AdminMethodPayload from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func AdminMethodPayloadFromJSON(data []byte) (*AdminMethodPayload, error) {
+	// Unmarshal into helper struct with string enums
+	var raw adminmethodpayloadJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &AdminMethodPayload{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &AdminMethodPayload{}
+	result.Method = raw.Method
+	result.TotalRequestBytes = raw.TotalRequestBytes
+	result.TotalResponseBytes = raw.TotalResponseBytes
+	result.RequestCount = raw.RequestCount
+	result.AvgRequestBytes = raw.AvgRequestBytes
+	result.AvgResponseBytes = raw.AvgResponseBytes
+	result.MaxRequestBytes = raw.MaxRequestBytes
+	result.MaxResponseBytes = raw.MaxResponseBytes
+	return result, nil
+}
+
+// AdminMethodPayloadToYAML converts AdminMethodPayload to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func AdminMethodPayloadToYAML(v *AdminMethodPayload) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminmethodpayload is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminMethodPayloadToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// AdminMethodPayloadToTOML converts AdminMethodPayload to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func AdminMethodPayloadToTOML(v *AdminMethodPayload) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminmethodpayload is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminMethodPayloadToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
+// AdminQueueStatsJSON represents AdminQueueStats in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type adminqueuestatsJSON struct {
+	QualifiedName   string  `json:"qualified_name,omitempty"`
+	StateRoot       string  `json:"state_root,omitempty"`
+	Boundary        string  `json:"boundary,omitempty"`
+	IsPriority      bool    `json:"is_priority,omitempty"`
+	Depth           int64   `json:"depth,omitempty"`
+	TotalOffered    int64   `json:"total_offered,omitempty"`
+	TotalPolled     int64   `json:"total_polled,omitempty"`
+	TotalRejected   int64   `json:"total_rejected,omitempty"`
+	OfferRate       float64 `json:"offer_rate,omitempty"`
+	ConsumeRate     float64 `json:"consume_rate,omitempty"`
+	LagRate         float64 `json:"lag_rate,omitempty"`
+	AvgWaitTimeMs   float64 `json:"avg_wait_time_ms,omitempty"`
+	MaxWaitTimeMs   int64   `json:"max_wait_time_ms,omitempty"`
+	ActiveConsumers int32   `json:"active_consumers,omitempty"`
+	HeapCostBytes   int64   `json:"heap_cost_bytes,omitempty"`
+	NodeId          string  `json:"node_id,omitempty"`
+	TimestampMs     int64   `json:"timestamp_ms,omitempty"`
+}
+
+// AdminQueueStatsToJSON converts AdminQueueStats to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func AdminQueueStatsToJSON(v *AdminQueueStats) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminqueuestats is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := adminqueuestatsJSON{
+		QualifiedName:   v.QualifiedName,
+		StateRoot:       v.StateRoot,
+		Boundary:        v.Boundary,
+		IsPriority:      v.IsPriority,
+		Depth:           v.Depth,
+		TotalOffered:    v.TotalOffered,
+		TotalPolled:     v.TotalPolled,
+		TotalRejected:   v.TotalRejected,
+		OfferRate:       v.OfferRate,
+		ConsumeRate:     v.ConsumeRate,
+		LagRate:         v.LagRate,
+		AvgWaitTimeMs:   v.AvgWaitTimeMs,
+		MaxWaitTimeMs:   v.MaxWaitTimeMs,
+		ActiveConsumers: v.ActiveConsumers,
+		HeapCostBytes:   v.HeapCostBytes,
+		NodeId:          v.NodeId,
+		TimestampMs:     v.TimestampMs,
+	}
+	return json.Marshal(helper)
+}
+
+// AdminQueueStatsFromBytes creates AdminQueueStats from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func AdminQueueStatsFromBytes(data []byte) (*AdminQueueStats, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := AdminQueueStatsFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := AdminQueueStatsFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := AdminQueueStatsFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &AdminQueueStats{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse AdminQueueStats: unsupported format or invalid data")
+}
+
+// AdminQueueStatsFromJSON creates AdminQueueStats from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func AdminQueueStatsFromJSON(data []byte) (*AdminQueueStats, error) {
+	// Unmarshal into helper struct with string enums
+	var raw adminqueuestatsJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &AdminQueueStats{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &AdminQueueStats{}
+	result.QualifiedName = raw.QualifiedName
+	result.StateRoot = raw.StateRoot
+	result.Boundary = raw.Boundary
+	result.IsPriority = raw.IsPriority
+	result.Depth = raw.Depth
+	result.TotalOffered = raw.TotalOffered
+	result.TotalPolled = raw.TotalPolled
+	result.TotalRejected = raw.TotalRejected
+	result.OfferRate = raw.OfferRate
+	result.ConsumeRate = raw.ConsumeRate
+	result.LagRate = raw.LagRate
+	result.AvgWaitTimeMs = raw.AvgWaitTimeMs
+	result.MaxWaitTimeMs = raw.MaxWaitTimeMs
+	result.ActiveConsumers = raw.ActiveConsumers
+	result.HeapCostBytes = raw.HeapCostBytes
+	result.NodeId = raw.NodeId
+	result.TimestampMs = raw.TimestampMs
+	return result, nil
+}
+
+// AdminQueueStatsToYAML converts AdminQueueStats to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func AdminQueueStatsToYAML(v *AdminQueueStats) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminqueuestats is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminQueueStatsToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// AdminQueueStatsToTOML converts AdminQueueStats to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func AdminQueueStatsToTOML(v *AdminQueueStats) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminqueuestats is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminQueueStatsToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
+// AdminTopicStatsJSON represents AdminTopicStats in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type admintopicstatsJSON struct {
+	QualifiedName   string            `json:"qualified_name,omitempty"`
+	StateRoot       string            `json:"state_root,omitempty"`
+	Boundary        string            `json:"boundary,omitempty"`
+	TotalPublished  int64             `json:"total_published,omitempty"`
+	TotalReceived   int64             `json:"total_received,omitempty"`
+	PublishRate     float64           `json:"publish_rate,omitempty"`
+	SubscriberCount int32             `json:"subscriber_count,omitempty"`
+	Subscribers     []json.RawMessage `json:"subscribers,omitempty"`
+	NodeId          string            `json:"node_id,omitempty"`
+	TimestampMs     int64             `json:"timestamp_ms,omitempty"`
+}
+
+// AdminTopicStatsToJSON converts AdminTopicStats to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func AdminTopicStatsToJSON(v *AdminTopicStats) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "admintopicstats is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := admintopicstatsJSON{
+		QualifiedName:   v.QualifiedName,
+		StateRoot:       v.StateRoot,
+		Boundary:        v.Boundary,
+		TotalPublished:  v.TotalPublished,
+		TotalReceived:   v.TotalReceived,
+		PublishRate:     v.PublishRate,
+		SubscriberCount: v.SubscriberCount,
+		Subscribers: func() []json.RawMessage {
+			if len(v.Subscribers) == 0 {
+				return nil
+			}
+			result := make([]json.RawMessage, 0, len(v.Subscribers))
+			for _, item := range v.Subscribers {
+				if item != nil {
+					if data, err := AdminTopicSubscriberToJSON(item); err == nil {
+						result = append(result, data)
+					}
+				}
+			}
+			return result
+		}(),
+		NodeId:      v.NodeId,
+		TimestampMs: v.TimestampMs,
+	}
+	return json.Marshal(helper)
+}
+
+// AdminTopicStatsFromBytes creates AdminTopicStats from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func AdminTopicStatsFromBytes(data []byte) (*AdminTopicStats, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := AdminTopicStatsFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := AdminTopicStatsFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := AdminTopicStatsFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &AdminTopicStats{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse AdminTopicStats: unsupported format or invalid data")
+}
+
+// AdminTopicStatsFromJSON creates AdminTopicStats from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func AdminTopicStatsFromJSON(data []byte) (*AdminTopicStats, error) {
+	// Unmarshal into helper struct with string enums
+	var raw admintopicstatsJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &AdminTopicStats{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &AdminTopicStats{}
+	result.QualifiedName = raw.QualifiedName
+	result.StateRoot = raw.StateRoot
+	result.Boundary = raw.Boundary
+	result.TotalPublished = raw.TotalPublished
+	result.TotalReceived = raw.TotalReceived
+	result.PublishRate = raw.PublishRate
+	result.SubscriberCount = raw.SubscriberCount
+	// Parse repeated message field: Subscribers
+	if len(raw.Subscribers) > 0 {
+		result.Subscribers = make([]*AdminTopicSubscriber, 0, len(raw.Subscribers))
+		for _, itemJSON := range raw.Subscribers {
+			if len(itemJSON) > 0 {
+				parsed, err := AdminTopicSubscriberFromJSON(itemJSON)
+				if err == nil {
+					result.Subscribers = append(result.Subscribers, parsed)
+				}
+			}
+		}
+	}
+	result.NodeId = raw.NodeId
+	result.TimestampMs = raw.TimestampMs
+	return result, nil
+}
+
+// AdminTopicStatsToYAML converts AdminTopicStats to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func AdminTopicStatsToYAML(v *AdminTopicStats) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "admintopicstats is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminTopicStatsToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// AdminTopicStatsToTOML converts AdminTopicStats to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func AdminTopicStatsToTOML(v *AdminTopicStats) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "admintopicstats is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminTopicStatsToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
+// AdminTopicSubscriberJSON represents AdminTopicSubscriber in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type admintopicsubscriberJSON struct {
+	ServiceId      string `json:"service_id,omitempty"`
+	TotalReceived  int64  `json:"total_received,omitempty"`
+	TotalDropped   int64  `json:"total_dropped,omitempty"`
+	Connected      bool   `json:"connected,omitempty"`
+	LastReceivedMs int64  `json:"last_received_ms,omitempty"`
+}
+
+// AdminTopicSubscriberToJSON converts AdminTopicSubscriber to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func AdminTopicSubscriberToJSON(v *AdminTopicSubscriber) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "admintopicsubscriber is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := admintopicsubscriberJSON{
+		ServiceId:      v.ServiceId,
+		TotalReceived:  v.TotalReceived,
+		TotalDropped:   v.TotalDropped,
+		Connected:      v.Connected,
+		LastReceivedMs: v.LastReceivedMs,
+	}
+	return json.Marshal(helper)
+}
+
+// AdminTopicSubscriberFromBytes creates AdminTopicSubscriber from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func AdminTopicSubscriberFromBytes(data []byte) (*AdminTopicSubscriber, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := AdminTopicSubscriberFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := AdminTopicSubscriberFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := AdminTopicSubscriberFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &AdminTopicSubscriber{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse AdminTopicSubscriber: unsupported format or invalid data")
+}
+
+// AdminTopicSubscriberFromJSON creates AdminTopicSubscriber from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func AdminTopicSubscriberFromJSON(data []byte) (*AdminTopicSubscriber, error) {
+	// Unmarshal into helper struct with string enums
+	var raw admintopicsubscriberJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &AdminTopicSubscriber{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &AdminTopicSubscriber{}
+	result.ServiceId = raw.ServiceId
+	result.TotalReceived = raw.TotalReceived
+	result.TotalDropped = raw.TotalDropped
+	result.Connected = raw.Connected
+	result.LastReceivedMs = raw.LastReceivedMs
+	return result, nil
+}
+
+// AdminTopicSubscriberToYAML converts AdminTopicSubscriber to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func AdminTopicSubscriberToYAML(v *AdminTopicSubscriber) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "admintopicsubscriber is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminTopicSubscriberToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// AdminTopicSubscriberToTOML converts AdminTopicSubscriber to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func AdminTopicSubscriberToTOML(v *AdminTopicSubscriber) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "admintopicsubscriber is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminTopicSubscriberToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
+// AdminWatchHealthJSON represents AdminWatchHealth in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type adminwatchhealthJSON struct {
+	WatchId            string `json:"watch_id,omitempty"`
+	ServiceId          string `json:"service_id,omitempty"`
+	NodeId             string `json:"node_id,omitempty"`
+	Method             string `json:"method,omitempty"`
+	Graph              string `json:"graph,omitempty"`
+	MessagesSent       int64  `json:"messages_sent,omitempty"`
+	MessagesPending    int32  `json:"messages_pending,omitempty"`
+	ConsumerHealthy    bool   `json:"consumer_healthy,omitempty"`
+	BackpressureEvents int64  `json:"backpressure_events,omitempty"`
+	LastSentMs         int64  `json:"last_sent_ms,omitempty"`
+	LastMutationMs     int64  `json:"last_mutation_ms,omitempty"`
+	LagMs              int64  `json:"lag_ms,omitempty"`
+	OpenedAtMs         int64  `json:"opened_at_ms,omitempty"`
+	DurationMs         int64  `json:"duration_ms,omitempty"`
+	PeerAddress        string `json:"peer_address,omitempty"`
+	TimestampMs        int64  `json:"timestamp_ms,omitempty"`
+}
+
+// AdminWatchHealthToJSON converts AdminWatchHealth to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func AdminWatchHealthToJSON(v *AdminWatchHealth) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminwatchhealth is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := adminwatchhealthJSON{
+		WatchId:            v.WatchId,
+		ServiceId:          v.ServiceId,
+		NodeId:             v.NodeId,
+		Method:             v.Method,
+		Graph:              v.Graph,
+		MessagesSent:       v.MessagesSent,
+		MessagesPending:    v.MessagesPending,
+		ConsumerHealthy:    v.ConsumerHealthy,
+		BackpressureEvents: v.BackpressureEvents,
+		LastSentMs:         v.LastSentMs,
+		LastMutationMs:     v.LastMutationMs,
+		LagMs:              v.LagMs,
+		OpenedAtMs:         v.OpenedAtMs,
+		DurationMs:         v.DurationMs,
+		PeerAddress:        v.PeerAddress,
+		TimestampMs:        v.TimestampMs,
+	}
+	return json.Marshal(helper)
+}
+
+// AdminWatchHealthFromBytes creates AdminWatchHealth from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func AdminWatchHealthFromBytes(data []byte) (*AdminWatchHealth, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := AdminWatchHealthFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := AdminWatchHealthFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := AdminWatchHealthFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &AdminWatchHealth{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse AdminWatchHealth: unsupported format or invalid data")
+}
+
+// AdminWatchHealthFromJSON creates AdminWatchHealth from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func AdminWatchHealthFromJSON(data []byte) (*AdminWatchHealth, error) {
+	// Unmarshal into helper struct with string enums
+	var raw adminwatchhealthJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &AdminWatchHealth{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &AdminWatchHealth{}
+	result.WatchId = raw.WatchId
+	result.ServiceId = raw.ServiceId
+	result.NodeId = raw.NodeId
+	result.Method = raw.Method
+	result.Graph = raw.Graph
+	result.MessagesSent = raw.MessagesSent
+	result.MessagesPending = raw.MessagesPending
+	result.ConsumerHealthy = raw.ConsumerHealthy
+	result.BackpressureEvents = raw.BackpressureEvents
+	result.LastSentMs = raw.LastSentMs
+	result.LastMutationMs = raw.LastMutationMs
+	result.LagMs = raw.LagMs
+	result.OpenedAtMs = raw.OpenedAtMs
+	result.DurationMs = raw.DurationMs
+	result.PeerAddress = raw.PeerAddress
+	result.TimestampMs = raw.TimestampMs
+	return result, nil
+}
+
+// AdminWatchHealthToYAML converts AdminWatchHealth to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func AdminWatchHealthToYAML(v *AdminWatchHealth) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminwatchhealth is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminWatchHealthToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// AdminWatchHealthToTOML converts AdminWatchHealth to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func AdminWatchHealthToTOML(v *AdminWatchHealth) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminwatchhealth is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminWatchHealthToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
+// AdminMutationRateJSON represents AdminMutationRate in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type adminmutationrateJSON struct {
+	QualifiedName     string  `json:"qualified_name,omitempty"`
+	StateRoot         string  `json:"state_root,omitempty"`
+	Boundary          string  `json:"boundary,omitempty"`
+	GraphType         string  `json:"graph_type,omitempty"`
+	TotalMutations    int64   `json:"total_mutations,omitempty"`
+	IntervalMutations int64   `json:"interval_mutations,omitempty"`
+	MutationRate      float64 `json:"mutation_rate,omitempty"`
+	PutCount          int64   `json:"put_count,omitempty"`
+	SetCount          int64   `json:"set_count,omitempty"`
+	DeleteCount       int64   `json:"delete_count,omitempty"`
+	NodeId            string  `json:"node_id,omitempty"`
+	TimestampMs       int64   `json:"timestamp_ms,omitempty"`
+}
+
+// AdminMutationRateToJSON converts AdminMutationRate to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func AdminMutationRateToJSON(v *AdminMutationRate) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminmutationrate is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := adminmutationrateJSON{
+		QualifiedName:     v.QualifiedName,
+		StateRoot:         v.StateRoot,
+		Boundary:          v.Boundary,
+		GraphType:         AdminGraphTypeToString(v.GraphType),
+		TotalMutations:    v.TotalMutations,
+		IntervalMutations: v.IntervalMutations,
+		MutationRate:      v.MutationRate,
+		PutCount:          v.PutCount,
+		SetCount:          v.SetCount,
+		DeleteCount:       v.DeleteCount,
+		NodeId:            v.NodeId,
+		TimestampMs:       v.TimestampMs,
+	}
+	return json.Marshal(helper)
+}
+
+// AdminMutationRateFromBytes creates AdminMutationRate from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func AdminMutationRateFromBytes(data []byte) (*AdminMutationRate, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := AdminMutationRateFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := AdminMutationRateFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := AdminMutationRateFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &AdminMutationRate{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse AdminMutationRate: unsupported format or invalid data")
+}
+
+// AdminMutationRateFromJSON creates AdminMutationRate from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func AdminMutationRateFromJSON(data []byte) (*AdminMutationRate, error) {
+	// Unmarshal into helper struct with string enums
+	var raw adminmutationrateJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &AdminMutationRate{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &AdminMutationRate{}
+	result.QualifiedName = raw.QualifiedName
+	result.StateRoot = raw.StateRoot
+	result.Boundary = raw.Boundary
+	// Parse enum field: GraphType
+	if raw.GraphType != "" {
+		if parsed, err := ParseAdminGraphType(raw.GraphType); err == nil {
+			result.GraphType = parsed
+		}
+	}
+	result.TotalMutations = raw.TotalMutations
+	result.IntervalMutations = raw.IntervalMutations
+	result.MutationRate = raw.MutationRate
+	result.PutCount = raw.PutCount
+	result.SetCount = raw.SetCount
+	result.DeleteCount = raw.DeleteCount
+	result.NodeId = raw.NodeId
+	result.TimestampMs = raw.TimestampMs
+	return result, nil
+}
+
+// AdminMutationRateToYAML converts AdminMutationRate to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func AdminMutationRateToYAML(v *AdminMutationRate) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminmutationrate is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminMutationRateToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// AdminMutationRateToTOML converts AdminMutationRate to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func AdminMutationRateToTOML(v *AdminMutationRate) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "adminmutationrate is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := AdminMutationRateToJSON(v)
 	if err != nil {
 		return nil, err
 	}
@@ -2023,12 +6016,12 @@ func DashboardResponseToEnvVar(v *DashboardResponse) map[string]string {
 	}
 	result := make(map[string]string)
 	if v.ClusterInfo != nil {
-		for k, val := range presley.AdminClusterInfoToEnvVar(v.ClusterInfo) {
+		for k, val := range AdminClusterInfoToEnvVar(v.ClusterInfo) {
 			result[k] = val
 		}
 	}
 	if v.ClusterHealth != nil {
-		for k, val := range presley.AdminClusterHealthToEnvVar(v.ClusterHealth) {
+		for k, val := range AdminClusterHealthToEnvVar(v.ClusterHealth) {
 			result[k] = val
 		}
 	}
@@ -2038,15 +6031,1952 @@ func DashboardResponseToEnvVar(v *DashboardResponse) map[string]string {
 // DashboardResponseFromEnvVar creates DashboardResponse from environment variable key-value pairs.
 func DashboardResponseFromEnvVar(env map[string]string) (*DashboardResponse, error) {
 	result := &DashboardResponse{}
-	if sub, err := presley.AdminClusterInfoFromEnvVar(env); err != nil {
+	if sub, err := AdminClusterInfoFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
 		result.ClusterInfo = sub
 	}
-	if sub, err := presley.AdminClusterHealthFromEnvVar(env); err != nil {
+	if sub, err := AdminClusterHealthFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
 		result.ClusterHealth = sub
+	}
+	return result, nil
+}
+
+// AdminClusterInfoToEnvVar converts AdminClusterInfo to environment variable key-value pairs.
+func AdminClusterInfoToEnvVar(v *AdminClusterInfo) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_CLUSTER_INFO_CLUSTER_NAME"] = v.ClusterName
+	result["PROTO_SERVICES_SENTINEL_ADMIN_CLUSTER_INFO_STATE"] = v.State
+	result["PROTO_SERVICES_SENTINEL_ADMIN_CLUSTER_INFO_LOCAL_MEMBER"] = v.LocalMember
+	result["PROTO_SERVICES_SENTINEL_ADMIN_CLUSTER_INFO_PARTITION_COUNT"] = strconv.FormatInt(int64(v.PartitionCount), 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_CLUSTER_INFO_CLUSTER_SIZE"] = strconv.FormatInt(int64(v.ClusterSize), 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_CLUSTER_INFO_VERSION"] = v.Version
+	return result
+}
+
+// AdminClusterInfoFromEnvVar creates AdminClusterInfo from environment variable key-value pairs.
+func AdminClusterInfoFromEnvVar(env map[string]string) (*AdminClusterInfo, error) {
+	result := &AdminClusterInfo{}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_CLUSTER_INFO_CLUSTER_NAME"]; ok && val != "" {
+		result.ClusterName = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_CLUSTER_INFO_STATE"]; ok && val != "" {
+		result.State = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_CLUSTER_INFO_LOCAL_MEMBER"]; ok && val != "" {
+		result.LocalMember = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_CLUSTER_INFO_PARTITION_COUNT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		result.PartitionCount = int32(parsed)
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_CLUSTER_INFO_CLUSTER_SIZE"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		result.ClusterSize = int32(parsed)
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_CLUSTER_INFO_VERSION"]; ok && val != "" {
+		result.Version = val
+	}
+	return result, nil
+}
+
+// AdminMemberToEnvVar converts AdminMember to environment variable key-value pairs.
+func AdminMemberToEnvVar(v *AdminMember) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MEMBER_UUID"] = v.Uuid
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MEMBER_ADDRESS"] = v.Address
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MEMBER_LITE"] = strconv.FormatBool(v.Lite)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MEMBER_IS_LOCAL"] = strconv.FormatBool(v.IsLocal)
+	return result
+}
+
+// AdminMemberFromEnvVar creates AdminMember from environment variable key-value pairs.
+func AdminMemberFromEnvVar(env map[string]string) (*AdminMember, error) {
+	result := &AdminMember{}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MEMBER_UUID"]; ok && val != "" {
+		result.Uuid = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MEMBER_ADDRESS"]; ok && val != "" {
+		result.Address = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MEMBER_LITE"]; ok && val != "" {
+		parsed, err := strconv.ParseBool(val)
+		if err != nil {
+			return nil, err
+		}
+		result.Lite = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MEMBER_IS_LOCAL"]; ok && val != "" {
+		parsed, err := strconv.ParseBool(val)
+		if err != nil {
+			return nil, err
+		}
+		result.IsLocal = parsed
+	}
+	return result, nil
+}
+
+// AdminClusterHealthToEnvVar converts AdminClusterHealth to environment variable key-value pairs.
+func AdminClusterHealthToEnvVar(v *AdminClusterHealth) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_CLUSTER_HEALTH_CLUSTER_SAFE"] = strconv.FormatBool(v.ClusterSafe)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_CLUSTER_HEALTH_LOCAL_MEMBER_SAFE"] = strconv.FormatBool(v.LocalMemberSafe)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_CLUSTER_HEALTH_CLUSTER_STATE"] = v.ClusterState
+	result["PROTO_SERVICES_SENTINEL_ADMIN_CLUSTER_HEALTH_RUNNING"] = strconv.FormatBool(v.Running)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_CLUSTER_HEALTH_CLUSTER_SIZE"] = strconv.FormatInt(int64(v.ClusterSize), 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_CLUSTER_HEALTH_HAS_QUORUM"] = strconv.FormatBool(v.HasQuorum)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_CLUSTER_HEALTH_MIGRATION_QUEUE_SIZE"] = strconv.FormatInt(int64(v.MigrationQueueSize), 10)
+	return result
+}
+
+// AdminClusterHealthFromEnvVar creates AdminClusterHealth from environment variable key-value pairs.
+func AdminClusterHealthFromEnvVar(env map[string]string) (*AdminClusterHealth, error) {
+	result := &AdminClusterHealth{}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_CLUSTER_HEALTH_CLUSTER_SAFE"]; ok && val != "" {
+		parsed, err := strconv.ParseBool(val)
+		if err != nil {
+			return nil, err
+		}
+		result.ClusterSafe = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_CLUSTER_HEALTH_LOCAL_MEMBER_SAFE"]; ok && val != "" {
+		parsed, err := strconv.ParseBool(val)
+		if err != nil {
+			return nil, err
+		}
+		result.LocalMemberSafe = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_CLUSTER_HEALTH_CLUSTER_STATE"]; ok && val != "" {
+		result.ClusterState = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_CLUSTER_HEALTH_RUNNING"]; ok && val != "" {
+		parsed, err := strconv.ParseBool(val)
+		if err != nil {
+			return nil, err
+		}
+		result.Running = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_CLUSTER_HEALTH_CLUSTER_SIZE"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		result.ClusterSize = int32(parsed)
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_CLUSTER_HEALTH_HAS_QUORUM"]; ok && val != "" {
+		parsed, err := strconv.ParseBool(val)
+		if err != nil {
+			return nil, err
+		}
+		result.HasQuorum = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_CLUSTER_HEALTH_MIGRATION_QUEUE_SIZE"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		result.MigrationQueueSize = int32(parsed)
+	}
+	return result, nil
+}
+
+// AdminNodeMetricsToEnvVar converts AdminNodeMetrics to environment variable key-value pairs.
+func AdminNodeMetricsToEnvVar(v *AdminNodeMetrics) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_NODE_METRICS_NODE_ID"] = v.NodeId
+	if v.Memory != nil {
+		for k, val := range AdminMemoryMetricsToEnvVar(v.Memory) {
+			result[k] = val
+		}
+	}
+	if v.Cpu != nil {
+		for k, val := range AdminCpuMetricsToEnvVar(v.Cpu) {
+			result[k] = val
+		}
+	}
+	if v.Disk != nil {
+		for k, val := range AdminDiskMetricsToEnvVar(v.Disk) {
+			result[k] = val
+		}
+	}
+	result["PROTO_SERVICES_SENTINEL_ADMIN_NODE_METRICS_TIMESTAMP_MS"] = strconv.FormatInt(v.TimestampMs, 10)
+	return result
+}
+
+// AdminNodeMetricsFromEnvVar creates AdminNodeMetrics from environment variable key-value pairs.
+func AdminNodeMetricsFromEnvVar(env map[string]string) (*AdminNodeMetrics, error) {
+	result := &AdminNodeMetrics{}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_NODE_METRICS_NODE_ID"]; ok && val != "" {
+		result.NodeId = val
+	}
+	if sub, err := AdminMemoryMetricsFromEnvVar(env); err != nil {
+		return nil, err
+	} else if sub != nil {
+		result.Memory = sub
+	}
+	if sub, err := AdminCpuMetricsFromEnvVar(env); err != nil {
+		return nil, err
+	} else if sub != nil {
+		result.Cpu = sub
+	}
+	if sub, err := AdminDiskMetricsFromEnvVar(env); err != nil {
+		return nil, err
+	} else if sub != nil {
+		result.Disk = sub
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_NODE_METRICS_TIMESTAMP_MS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.TimestampMs = parsed
+	}
+	return result, nil
+}
+
+// AdminMemoryMetricsToEnvVar converts AdminMemoryMetrics to environment variable key-value pairs.
+func AdminMemoryMetricsToEnvVar(v *AdminMemoryMetrics) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MEMORY_METRICS_HEAP_USED_BYTES"] = strconv.FormatInt(v.HeapUsedBytes, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MEMORY_METRICS_HEAP_MAX_BYTES"] = strconv.FormatInt(v.HeapMaxBytes, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MEMORY_METRICS_HEAP_COMMITTED_BYTES"] = strconv.FormatInt(v.HeapCommittedBytes, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MEMORY_METRICS_NON_HEAP_USED_BYTES"] = strconv.FormatInt(v.NonHeapUsedBytes, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MEMORY_METRICS_GC_COUNT"] = strconv.FormatInt(v.GcCount, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MEMORY_METRICS_GC_TIME_MS"] = strconv.FormatInt(v.GcTimeMs, 10)
+	return result
+}
+
+// AdminMemoryMetricsFromEnvVar creates AdminMemoryMetrics from environment variable key-value pairs.
+func AdminMemoryMetricsFromEnvVar(env map[string]string) (*AdminMemoryMetrics, error) {
+	result := &AdminMemoryMetrics{}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MEMORY_METRICS_HEAP_USED_BYTES"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.HeapUsedBytes = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MEMORY_METRICS_HEAP_MAX_BYTES"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.HeapMaxBytes = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MEMORY_METRICS_HEAP_COMMITTED_BYTES"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.HeapCommittedBytes = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MEMORY_METRICS_NON_HEAP_USED_BYTES"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.NonHeapUsedBytes = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MEMORY_METRICS_GC_COUNT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.GcCount = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MEMORY_METRICS_GC_TIME_MS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.GcTimeMs = parsed
+	}
+	return result, nil
+}
+
+// AdminCpuMetricsToEnvVar converts AdminCpuMetrics to environment variable key-value pairs.
+func AdminCpuMetricsToEnvVar(v *AdminCpuMetrics) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_CPU_METRICS_AVAILABLE_PROCESSORS"] = strconv.FormatInt(int64(v.AvailableProcessors), 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_CPU_METRICS_PROCESS_CPU_LOAD"] = strconv.FormatFloat(v.ProcessCpuLoad, 'f', -1, 64)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_CPU_METRICS_SYSTEM_CPU_LOAD"] = strconv.FormatFloat(v.SystemCpuLoad, 'f', -1, 64)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_CPU_METRICS_SYSTEM_LOAD_AVERAGE"] = strconv.FormatFloat(v.SystemLoadAverage, 'f', -1, 64)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_CPU_METRICS_UPTIME_MS"] = strconv.FormatInt(v.UptimeMs, 10)
+	return result
+}
+
+// AdminCpuMetricsFromEnvVar creates AdminCpuMetrics from environment variable key-value pairs.
+func AdminCpuMetricsFromEnvVar(env map[string]string) (*AdminCpuMetrics, error) {
+	result := &AdminCpuMetrics{}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_CPU_METRICS_AVAILABLE_PROCESSORS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		result.AvailableProcessors = int32(parsed)
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_CPU_METRICS_PROCESS_CPU_LOAD"]; ok && val != "" {
+		parsed, err := strconv.ParseFloat(val, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.ProcessCpuLoad = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_CPU_METRICS_SYSTEM_CPU_LOAD"]; ok && val != "" {
+		parsed, err := strconv.ParseFloat(val, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.SystemCpuLoad = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_CPU_METRICS_SYSTEM_LOAD_AVERAGE"]; ok && val != "" {
+		parsed, err := strconv.ParseFloat(val, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.SystemLoadAverage = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_CPU_METRICS_UPTIME_MS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.UptimeMs = parsed
+	}
+	return result, nil
+}
+
+// AdminDiskMetricsToEnvVar converts AdminDiskMetrics to environment variable key-value pairs.
+func AdminDiskMetricsToEnvVar(v *AdminDiskMetrics) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_DISK_METRICS_PERSISTENCE_DIR"] = v.PersistenceDir
+	result["PROTO_SERVICES_SENTINEL_ADMIN_DISK_METRICS_TOTAL_BYTES"] = strconv.FormatInt(v.TotalBytes, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_DISK_METRICS_USABLE_BYTES"] = strconv.FormatInt(v.UsableBytes, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_DISK_METRICS_USED_BYTES"] = strconv.FormatInt(v.UsedBytes, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_DISK_METRICS_PERSISTENCE_SIZE_BYTES"] = strconv.FormatInt(v.PersistenceSizeBytes, 10)
+	return result
+}
+
+// AdminDiskMetricsFromEnvVar creates AdminDiskMetrics from environment variable key-value pairs.
+func AdminDiskMetricsFromEnvVar(env map[string]string) (*AdminDiskMetrics, error) {
+	result := &AdminDiskMetrics{}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_DISK_METRICS_PERSISTENCE_DIR"]; ok && val != "" {
+		result.PersistenceDir = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_DISK_METRICS_TOTAL_BYTES"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.TotalBytes = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_DISK_METRICS_USABLE_BYTES"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.UsableBytes = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_DISK_METRICS_USED_BYTES"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.UsedBytes = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_DISK_METRICS_PERSISTENCE_SIZE_BYTES"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.PersistenceSizeBytes = parsed
+	}
+	return result, nil
+}
+
+// AdminGraphInfoToEnvVar converts AdminGraphInfo to environment variable key-value pairs.
+func AdminGraphInfoToEnvVar(v *AdminGraphInfo) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_GRAPH_INFO_QUALIFIED_NAME"] = v.QualifiedName
+	result["PROTO_SERVICES_SENTINEL_ADMIN_GRAPH_INFO_STATE_ROOT"] = v.StateRoot
+	result["PROTO_SERVICES_SENTINEL_ADMIN_GRAPH_INFO_BOUNDARY"] = v.Boundary
+	result["PROTO_SERVICES_SENTINEL_ADMIN_GRAPH_INFO_GRAPH_TYPE"] = AdminGraphTypeToString(v.GraphType)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_GRAPH_INFO_CONSISTENCY"] = v.Consistency
+	result["PROTO_SERVICES_SENTINEL_ADMIN_GRAPH_INFO_PERSISTENCE"] = strconv.FormatBool(v.Persistence)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_GRAPH_INFO_VALUE_TYPE"] = v.ValueType
+	return result
+}
+
+// AdminGraphInfoFromEnvVar creates AdminGraphInfo from environment variable key-value pairs.
+func AdminGraphInfoFromEnvVar(env map[string]string) (*AdminGraphInfo, error) {
+	result := &AdminGraphInfo{}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_GRAPH_INFO_QUALIFIED_NAME"]; ok && val != "" {
+		result.QualifiedName = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_GRAPH_INFO_STATE_ROOT"]; ok && val != "" {
+		result.StateRoot = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_GRAPH_INFO_BOUNDARY"]; ok && val != "" {
+		result.Boundary = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_GRAPH_INFO_GRAPH_TYPE"]; ok && val != "" {
+		parsed, err := ParseAdminGraphType(val)
+		if err != nil {
+			return nil, err
+		}
+		result.GraphType = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_GRAPH_INFO_CONSISTENCY"]; ok && val != "" {
+		result.Consistency = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_GRAPH_INFO_PERSISTENCE"]; ok && val != "" {
+		parsed, err := strconv.ParseBool(val)
+		if err != nil {
+			return nil, err
+		}
+		result.Persistence = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_GRAPH_INFO_VALUE_TYPE"]; ok && val != "" {
+		result.ValueType = val
+	}
+	return result, nil
+}
+
+// AdminServiceConnectionToEnvVar converts AdminServiceConnection to environment variable key-value pairs.
+func AdminServiceConnectionToEnvVar(v *AdminServiceConnection) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_ID"] = v.Id
+	result["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_SERVICE_ID"] = v.ServiceId
+	result["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_NODE_ID"] = v.NodeId
+	result["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_ACTIVE_CONNECTIONS"] = strconv.FormatInt(int64(v.ActiveConnections), 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_TOTAL_CONNECTIONS"] = strconv.FormatInt(v.TotalConnections, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_TOTAL_RPCS"] = strconv.FormatInt(v.TotalRpcs, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_ACTIVE_RPCS"] = strconv.FormatInt(int64(v.ActiveRpcs), 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_TOTAL_UNARY_READS"] = strconv.FormatInt(v.TotalUnaryReads, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_TOTAL_UNARY_WRITES"] = strconv.FormatInt(v.TotalUnaryWrites, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_ACTIVE_STREAMS"] = strconv.FormatInt(int64(v.ActiveStreams), 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_TOTAL_STREAMS_OPENED"] = strconv.FormatInt(v.TotalStreamsOpened, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_POLL_COUNT"] = strconv.FormatInt(v.PollCount, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_POLL_RATE"] = strconv.FormatFloat(v.PollRate, 'f', -1, 64)
+	if len(v.AccessedGraphs) > 0 {
+		result["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_ACCESSED_GRAPHS"] = strings.Join(v.AccessedGraphs, ",")
+	}
+	result["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_CONNECTED_AT_MS"] = strconv.FormatInt(v.ConnectedAtMs, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_LAST_ACTIVITY_MS"] = strconv.FormatInt(v.LastActivityMs, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_TIMESTAMP_MS"] = strconv.FormatInt(v.TimestampMs, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_RATE_LIMITED_COUNT"] = strconv.FormatInt(v.RateLimitedCount, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_TOTAL_ERRORS"] = strconv.FormatInt(v.TotalErrors, 10)
+	if v.Latency != nil {
+		for k, val := range AdminLatencyStatsToEnvVar(v.Latency) {
+			result[k] = val
+		}
+	}
+	result["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_BYTES_RECEIVED"] = strconv.FormatInt(v.BytesReceived, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_BYTES_SENT"] = strconv.FormatInt(v.BytesSent, 10)
+	return result
+}
+
+// AdminServiceConnectionFromEnvVar creates AdminServiceConnection from environment variable key-value pairs.
+func AdminServiceConnectionFromEnvVar(env map[string]string) (*AdminServiceConnection, error) {
+	result := &AdminServiceConnection{}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_ID"]; ok && val != "" {
+		result.Id = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_SERVICE_ID"]; ok && val != "" {
+		result.ServiceId = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_NODE_ID"]; ok && val != "" {
+		result.NodeId = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_ACTIVE_CONNECTIONS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		result.ActiveConnections = int32(parsed)
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_TOTAL_CONNECTIONS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.TotalConnections = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_TOTAL_RPCS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.TotalRpcs = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_ACTIVE_RPCS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		result.ActiveRpcs = int32(parsed)
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_TOTAL_UNARY_READS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.TotalUnaryReads = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_TOTAL_UNARY_WRITES"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.TotalUnaryWrites = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_ACTIVE_STREAMS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		result.ActiveStreams = int32(parsed)
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_TOTAL_STREAMS_OPENED"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.TotalStreamsOpened = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_POLL_COUNT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.PollCount = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_POLL_RATE"]; ok && val != "" {
+		parsed, err := strconv.ParseFloat(val, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.PollRate = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_ACCESSED_GRAPHS"]; ok && val != "" {
+		result.AccessedGraphs = strings.Split(val, ",")
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_CONNECTED_AT_MS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.ConnectedAtMs = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_LAST_ACTIVITY_MS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.LastActivityMs = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_TIMESTAMP_MS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.TimestampMs = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_RATE_LIMITED_COUNT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.RateLimitedCount = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_TOTAL_ERRORS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.TotalErrors = parsed
+	}
+	if sub, err := AdminLatencyStatsFromEnvVar(env); err != nil {
+		return nil, err
+	} else if sub != nil {
+		result.Latency = sub
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_BYTES_RECEIVED"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.BytesReceived = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_SERVICE_CONNECTION_BYTES_SENT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.BytesSent = parsed
+	}
+	return result, nil
+}
+
+// AdminPeerActivityToEnvVar converts AdminPeerActivity to environment variable key-value pairs.
+func AdminPeerActivityToEnvVar(v *AdminPeerActivity) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_PEER_ACTIVITY_PEER_ADDRESS"] = v.PeerAddress
+	result["PROTO_SERVICES_SENTINEL_ADMIN_PEER_ACTIVITY_ACTIVE_RPCS"] = strconv.FormatInt(int64(v.ActiveRpcs), 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_PEER_ACTIVITY_TOTAL_RPCS"] = strconv.FormatInt(v.TotalRpcs, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_PEER_ACTIVITY_ACTIVE_STREAMS"] = strconv.FormatInt(int64(v.ActiveStreams), 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_PEER_ACTIVITY_TOTAL_STREAMS_OPENED"] = strconv.FormatInt(v.TotalStreamsOpened, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_PEER_ACTIVITY_POLL_COUNT"] = strconv.FormatInt(v.PollCount, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_PEER_ACTIVITY_POLL_RATE"] = strconv.FormatFloat(v.PollRate, 'f', -1, 64)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_PEER_ACTIVITY_CONNECTED_AT_MS"] = strconv.FormatInt(v.ConnectedAtMs, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_PEER_ACTIVITY_LAST_ACTIVITY_MS"] = strconv.FormatInt(v.LastActivityMs, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_PEER_ACTIVITY_TOTAL_ERRORS"] = strconv.FormatInt(v.TotalErrors, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_PEER_ACTIVITY_BYTES_RECEIVED"] = strconv.FormatInt(v.BytesReceived, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_PEER_ACTIVITY_BYTES_SENT"] = strconv.FormatInt(v.BytesSent, 10)
+	return result
+}
+
+// AdminPeerActivityFromEnvVar creates AdminPeerActivity from environment variable key-value pairs.
+func AdminPeerActivityFromEnvVar(env map[string]string) (*AdminPeerActivity, error) {
+	result := &AdminPeerActivity{}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_PEER_ACTIVITY_PEER_ADDRESS"]; ok && val != "" {
+		result.PeerAddress = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_PEER_ACTIVITY_ACTIVE_RPCS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		result.ActiveRpcs = int32(parsed)
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_PEER_ACTIVITY_TOTAL_RPCS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.TotalRpcs = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_PEER_ACTIVITY_ACTIVE_STREAMS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		result.ActiveStreams = int32(parsed)
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_PEER_ACTIVITY_TOTAL_STREAMS_OPENED"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.TotalStreamsOpened = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_PEER_ACTIVITY_POLL_COUNT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.PollCount = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_PEER_ACTIVITY_POLL_RATE"]; ok && val != "" {
+		parsed, err := strconv.ParseFloat(val, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.PollRate = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_PEER_ACTIVITY_CONNECTED_AT_MS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.ConnectedAtMs = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_PEER_ACTIVITY_LAST_ACTIVITY_MS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.LastActivityMs = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_PEER_ACTIVITY_TOTAL_ERRORS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.TotalErrors = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_PEER_ACTIVITY_BYTES_RECEIVED"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.BytesReceived = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_PEER_ACTIVITY_BYTES_SENT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.BytesSent = parsed
+	}
+	return result, nil
+}
+
+// AdminMapStatsToEnvVar converts AdminMapStats to environment variable key-value pairs.
+func AdminMapStatsToEnvVar(v *AdminMapStats) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_MAP_NAME"] = v.MapName
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_SIZE"] = strconv.FormatInt(int64(v.Size), 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_OWNED_ENTRY_COUNT"] = strconv.FormatInt(v.OwnedEntryCount, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_BACKUP_ENTRY_COUNT"] = strconv.FormatInt(v.BackupEntryCount, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_HEAP_COST_BYTES"] = strconv.FormatInt(v.HeapCostBytes, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_LAST_UPDATE_TIME_MS"] = strconv.FormatInt(v.LastUpdateTimeMs, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_PUT_COUNT"] = strconv.FormatInt(v.PutCount, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_GET_COUNT"] = strconv.FormatInt(v.GetCount, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_HIT_COUNT"] = strconv.FormatInt(v.HitCount, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_TIMESTAMP_MS"] = strconv.FormatInt(v.TimestampMs, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_OWNED_ENTRY_MEMORY_COST"] = strconv.FormatInt(v.OwnedEntryMemoryCost, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_BACKUP_ENTRY_MEMORY_COST"] = strconv.FormatInt(v.BackupEntryMemoryCost, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_DIRTY_ENTRY_COUNT"] = strconv.FormatInt(v.DirtyEntryCount, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_LOCKED_ENTRY_COUNT"] = strconv.FormatInt(v.LockedEntryCount, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_REMOVE_COUNT"] = strconv.FormatInt(v.RemoveCount, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_SET_COUNT"] = strconv.FormatInt(v.SetCount, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_EVICTION_COUNT"] = strconv.FormatInt(v.EvictionCount, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_EXPIRATION_COUNT"] = strconv.FormatInt(v.ExpirationCount, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_LAST_ACCESS_TIME_MS"] = strconv.FormatInt(v.LastAccessTimeMs, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_CREATION_TIME_MS"] = strconv.FormatInt(v.CreationTimeMs, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_BACKUP_COUNT"] = strconv.FormatInt(int64(v.BackupCount), 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_VALUE_TYPE"] = v.ValueType
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_GRAPH_TYPE"] = AdminGraphTypeToString(v.GraphType)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_QUALIFIED_NAME"] = v.QualifiedName
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_STATE_ROOT"] = v.StateRoot
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_CONSISTENCY"] = v.Consistency
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_PERSISTENCE"] = strconv.FormatBool(v.Persistence)
+	return result
+}
+
+// AdminMapStatsFromEnvVar creates AdminMapStats from environment variable key-value pairs.
+func AdminMapStatsFromEnvVar(env map[string]string) (*AdminMapStats, error) {
+	result := &AdminMapStats{}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_MAP_NAME"]; ok && val != "" {
+		result.MapName = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_SIZE"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		result.Size = int32(parsed)
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_OWNED_ENTRY_COUNT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.OwnedEntryCount = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_BACKUP_ENTRY_COUNT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.BackupEntryCount = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_HEAP_COST_BYTES"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.HeapCostBytes = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_LAST_UPDATE_TIME_MS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.LastUpdateTimeMs = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_PUT_COUNT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.PutCount = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_GET_COUNT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.GetCount = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_HIT_COUNT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.HitCount = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_TIMESTAMP_MS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.TimestampMs = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_OWNED_ENTRY_MEMORY_COST"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.OwnedEntryMemoryCost = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_BACKUP_ENTRY_MEMORY_COST"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.BackupEntryMemoryCost = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_DIRTY_ENTRY_COUNT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.DirtyEntryCount = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_LOCKED_ENTRY_COUNT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.LockedEntryCount = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_REMOVE_COUNT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.RemoveCount = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_SET_COUNT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.SetCount = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_EVICTION_COUNT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.EvictionCount = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_EXPIRATION_COUNT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.ExpirationCount = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_LAST_ACCESS_TIME_MS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.LastAccessTimeMs = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_CREATION_TIME_MS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.CreationTimeMs = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_BACKUP_COUNT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		result.BackupCount = int32(parsed)
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_VALUE_TYPE"]; ok && val != "" {
+		result.ValueType = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_GRAPH_TYPE"]; ok && val != "" {
+		parsed, err := ParseAdminGraphType(val)
+		if err != nil {
+			return nil, err
+		}
+		result.GraphType = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_QUALIFIED_NAME"]; ok && val != "" {
+		result.QualifiedName = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_STATE_ROOT"]; ok && val != "" {
+		result.StateRoot = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_CONSISTENCY"]; ok && val != "" {
+		result.Consistency = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MAP_STATS_PERSISTENCE"]; ok && val != "" {
+		parsed, err := strconv.ParseBool(val)
+		if err != nil {
+			return nil, err
+		}
+		result.Persistence = parsed
+	}
+	return result, nil
+}
+
+// AdminGrpcStatsToEnvVar converts AdminGrpcStats to environment variable key-value pairs.
+func AdminGrpcStatsToEnvVar(v *AdminGrpcStats) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_GRPC_STATS_NODE_ID"] = v.NodeId
+	result["PROTO_SERVICES_SENTINEL_ADMIN_GRPC_STATS_ACTIVE_CONNECTIONS"] = strconv.FormatInt(int64(v.ActiveConnections), 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_GRPC_STATS_TOTAL_RPCS"] = strconv.FormatInt(v.TotalRpcs, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_GRPC_STATS_ACTIVE_RPCS"] = strconv.FormatInt(int64(v.ActiveRpcs), 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_GRPC_STATS_RATE_LIMITED_COUNT"] = strconv.FormatInt(v.RateLimitedCount, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_GRPC_STATS_ACTIVE_STREAMS"] = strconv.FormatInt(int64(v.ActiveStreams), 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_GRPC_STATS_TIMESTAMP_MS"] = strconv.FormatInt(v.TimestampMs, 10)
+	return result
+}
+
+// AdminGrpcStatsFromEnvVar creates AdminGrpcStats from environment variable key-value pairs.
+func AdminGrpcStatsFromEnvVar(env map[string]string) (*AdminGrpcStats, error) {
+	result := &AdminGrpcStats{}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_GRPC_STATS_NODE_ID"]; ok && val != "" {
+		result.NodeId = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_GRPC_STATS_ACTIVE_CONNECTIONS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		result.ActiveConnections = int32(parsed)
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_GRPC_STATS_TOTAL_RPCS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.TotalRpcs = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_GRPC_STATS_ACTIVE_RPCS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		result.ActiveRpcs = int32(parsed)
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_GRPC_STATS_RATE_LIMITED_COUNT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.RateLimitedCount = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_GRPC_STATS_ACTIVE_STREAMS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		result.ActiveStreams = int32(parsed)
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_GRPC_STATS_TIMESTAMP_MS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.TimestampMs = parsed
+	}
+	return result, nil
+}
+
+// AdminPersistenceStatusToEnvVar converts AdminPersistenceStatus to environment variable key-value pairs.
+func AdminPersistenceStatusToEnvVar(v *AdminPersistenceStatus) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_PERSISTENCE_STATUS_NODE_ID"] = v.NodeId
+	result["PROTO_SERVICES_SENTINEL_ADMIN_PERSISTENCE_STATUS_ENABLED"] = strconv.FormatBool(v.Enabled)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_PERSISTENCE_STATUS_PERSISTENCE_DIR"] = v.PersistenceDir
+	result["PROTO_SERVICES_SENTINEL_ADMIN_PERSISTENCE_STATUS_REDO_LOG_ENTRY_COUNT"] = strconv.FormatInt(v.RedoLogEntryCount, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_PERSISTENCE_STATUS_REDO_LOG_SIZE_BYTES"] = strconv.FormatInt(v.RedoLogSizeBytes, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_PERSISTENCE_STATUS_LAST_DUMP_TIME_MS"] = strconv.FormatInt(v.LastDumpTimeMs, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_PERSISTENCE_STATUS_LAST_DUMP_ENTRY_COUNT"] = strconv.FormatInt(v.LastDumpEntryCount, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_PERSISTENCE_STATUS_DUMP_COUNT"] = strconv.FormatInt(v.DumpCount, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_PERSISTENCE_STATUS_TIMESTAMP_MS"] = strconv.FormatInt(v.TimestampMs, 10)
+	return result
+}
+
+// AdminPersistenceStatusFromEnvVar creates AdminPersistenceStatus from environment variable key-value pairs.
+func AdminPersistenceStatusFromEnvVar(env map[string]string) (*AdminPersistenceStatus, error) {
+	result := &AdminPersistenceStatus{}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_PERSISTENCE_STATUS_NODE_ID"]; ok && val != "" {
+		result.NodeId = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_PERSISTENCE_STATUS_ENABLED"]; ok && val != "" {
+		parsed, err := strconv.ParseBool(val)
+		if err != nil {
+			return nil, err
+		}
+		result.Enabled = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_PERSISTENCE_STATUS_PERSISTENCE_DIR"]; ok && val != "" {
+		result.PersistenceDir = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_PERSISTENCE_STATUS_REDO_LOG_ENTRY_COUNT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.RedoLogEntryCount = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_PERSISTENCE_STATUS_REDO_LOG_SIZE_BYTES"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.RedoLogSizeBytes = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_PERSISTENCE_STATUS_LAST_DUMP_TIME_MS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.LastDumpTimeMs = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_PERSISTENCE_STATUS_LAST_DUMP_ENTRY_COUNT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.LastDumpEntryCount = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_PERSISTENCE_STATUS_DUMP_COUNT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.DumpCount = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_PERSISTENCE_STATUS_TIMESTAMP_MS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.TimestampMs = parsed
+	}
+	return result, nil
+}
+
+// AdminNetworkStatsToEnvVar converts AdminNetworkStats to environment variable key-value pairs.
+func AdminNetworkStatsToEnvVar(v *AdminNetworkStats) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_NETWORK_STATS_NODE_ID"] = v.NodeId
+	result["PROTO_SERVICES_SENTINEL_ADMIN_NETWORK_STATS_GRPC_LISTEN_ADDRESS"] = v.GrpcListenAddress
+	result["PROTO_SERVICES_SENTINEL_ADMIN_NETWORK_STATS_HAZELCAST_LISTEN_ADDRESS"] = v.HazelcastListenAddress
+	result["PROTO_SERVICES_SENTINEL_ADMIN_NETWORK_STATS_ACTIVE_GRPC_CONNECTIONS"] = strconv.FormatInt(int64(v.ActiveGrpcConnections), 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_NETWORK_STATS_BYTES_SENT"] = strconv.FormatInt(v.BytesSent, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_NETWORK_STATS_BYTES_RECEIVED"] = strconv.FormatInt(v.BytesReceived, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_NETWORK_STATS_TIMESTAMP_MS"] = strconv.FormatInt(v.TimestampMs, 10)
+	return result
+}
+
+// AdminNetworkStatsFromEnvVar creates AdminNetworkStats from environment variable key-value pairs.
+func AdminNetworkStatsFromEnvVar(env map[string]string) (*AdminNetworkStats, error) {
+	result := &AdminNetworkStats{}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_NETWORK_STATS_NODE_ID"]; ok && val != "" {
+		result.NodeId = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_NETWORK_STATS_GRPC_LISTEN_ADDRESS"]; ok && val != "" {
+		result.GrpcListenAddress = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_NETWORK_STATS_HAZELCAST_LISTEN_ADDRESS"]; ok && val != "" {
+		result.HazelcastListenAddress = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_NETWORK_STATS_ACTIVE_GRPC_CONNECTIONS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		result.ActiveGrpcConnections = int32(parsed)
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_NETWORK_STATS_BYTES_SENT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.BytesSent = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_NETWORK_STATS_BYTES_RECEIVED"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.BytesReceived = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_NETWORK_STATS_TIMESTAMP_MS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.TimestampMs = parsed
+	}
+	return result, nil
+}
+
+// AdminMemberConnectionToEnvVar converts AdminMemberConnection to environment variable key-value pairs.
+func AdminMemberConnectionToEnvVar(v *AdminMemberConnection) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MEMBER_CONNECTION_ADDRESS"] = v.Address
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MEMBER_CONNECTION_CONNECTED"] = strconv.FormatBool(v.Connected)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MEMBER_CONNECTION_CONNECTION_COUNT"] = strconv.FormatInt(int64(v.ConnectionCount), 10)
+	return result
+}
+
+// AdminMemberConnectionFromEnvVar creates AdminMemberConnection from environment variable key-value pairs.
+func AdminMemberConnectionFromEnvVar(env map[string]string) (*AdminMemberConnection, error) {
+	result := &AdminMemberConnection{}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MEMBER_CONNECTION_ADDRESS"]; ok && val != "" {
+		result.Address = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MEMBER_CONNECTION_CONNECTED"]; ok && val != "" {
+		parsed, err := strconv.ParseBool(val)
+		if err != nil {
+			return nil, err
+		}
+		result.Connected = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MEMBER_CONNECTION_CONNECTION_COUNT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		result.ConnectionCount = int32(parsed)
+	}
+	return result, nil
+}
+
+// AdminThreadInfoToEnvVar converts AdminThreadInfo to environment variable key-value pairs.
+func AdminThreadInfoToEnvVar(v *AdminThreadInfo) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_THREAD_INFO_NODE_ID"] = v.NodeId
+	result["PROTO_SERVICES_SENTINEL_ADMIN_THREAD_INFO_THREAD_COUNT"] = strconv.FormatInt(int64(v.ThreadCount), 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_THREAD_INFO_PEAK_THREAD_COUNT"] = strconv.FormatInt(int64(v.PeakThreadCount), 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_THREAD_INFO_DAEMON_THREAD_COUNT"] = strconv.FormatInt(int64(v.DaemonThreadCount), 10)
+	if len(v.DeadlockedThreads) > 0 {
+		result["PROTO_SERVICES_SENTINEL_ADMIN_THREAD_INFO_DEADLOCKED_THREADS"] = strings.Join(v.DeadlockedThreads, ",")
+	}
+	result["PROTO_SERVICES_SENTINEL_ADMIN_THREAD_INFO_TIMESTAMP_MS"] = strconv.FormatInt(v.TimestampMs, 10)
+	return result
+}
+
+// AdminThreadInfoFromEnvVar creates AdminThreadInfo from environment variable key-value pairs.
+func AdminThreadInfoFromEnvVar(env map[string]string) (*AdminThreadInfo, error) {
+	result := &AdminThreadInfo{}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_THREAD_INFO_NODE_ID"]; ok && val != "" {
+		result.NodeId = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_THREAD_INFO_THREAD_COUNT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		result.ThreadCount = int32(parsed)
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_THREAD_INFO_PEAK_THREAD_COUNT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		result.PeakThreadCount = int32(parsed)
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_THREAD_INFO_DAEMON_THREAD_COUNT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		result.DaemonThreadCount = int32(parsed)
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_THREAD_INFO_DEADLOCKED_THREADS"]; ok && val != "" {
+		result.DeadlockedThreads = strings.Split(val, ",")
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_THREAD_INFO_TIMESTAMP_MS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.TimestampMs = parsed
+	}
+	return result, nil
+}
+
+// AdminTokenCacheStatsToEnvVar converts AdminTokenCacheStats to environment variable key-value pairs.
+func AdminTokenCacheStatsToEnvVar(v *AdminTokenCacheStats) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_TOKEN_CACHE_STATS_NODE_ID"] = v.NodeId
+	result["PROTO_SERVICES_SENTINEL_ADMIN_TOKEN_CACHE_STATS_CACHE_SIZE"] = strconv.FormatInt(int64(v.CacheSize), 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_TOKEN_CACHE_STATS_HIT_COUNT"] = strconv.FormatInt(v.HitCount, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_TOKEN_CACHE_STATS_MISS_COUNT"] = strconv.FormatInt(v.MissCount, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_TOKEN_CACHE_STATS_EVICTION_COUNT"] = strconv.FormatInt(v.EvictionCount, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_TOKEN_CACHE_STATS_TIMESTAMP_MS"] = strconv.FormatInt(v.TimestampMs, 10)
+	return result
+}
+
+// AdminTokenCacheStatsFromEnvVar creates AdminTokenCacheStats from environment variable key-value pairs.
+func AdminTokenCacheStatsFromEnvVar(env map[string]string) (*AdminTokenCacheStats, error) {
+	result := &AdminTokenCacheStats{}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_TOKEN_CACHE_STATS_NODE_ID"]; ok && val != "" {
+		result.NodeId = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_TOKEN_CACHE_STATS_CACHE_SIZE"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		result.CacheSize = int32(parsed)
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_TOKEN_CACHE_STATS_HIT_COUNT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.HitCount = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_TOKEN_CACHE_STATS_MISS_COUNT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.MissCount = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_TOKEN_CACHE_STATS_EVICTION_COUNT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.EvictionCount = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_TOKEN_CACHE_STATS_TIMESTAMP_MS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.TimestampMs = parsed
+	}
+	return result, nil
+}
+
+// AdminLatencyStatsToEnvVar converts AdminLatencyStats to environment variable key-value pairs.
+func AdminLatencyStatsToEnvVar(v *AdminLatencyStats) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_LATENCY_STATS_P50_US"] = strconv.FormatInt(v.P50Us, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_LATENCY_STATS_P90_US"] = strconv.FormatInt(v.P90Us, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_LATENCY_STATS_P95_US"] = strconv.FormatInt(v.P95Us, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_LATENCY_STATS_P99_US"] = strconv.FormatInt(v.P99Us, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_LATENCY_STATS_MAX_US"] = strconv.FormatInt(v.MaxUs, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_LATENCY_STATS_MIN_US"] = strconv.FormatInt(v.MinUs, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_LATENCY_STATS_MEAN_US"] = strconv.FormatFloat(v.MeanUs, 'f', -1, 64)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_LATENCY_STATS_SAMPLE_COUNT"] = strconv.FormatInt(v.SampleCount, 10)
+	return result
+}
+
+// AdminLatencyStatsFromEnvVar creates AdminLatencyStats from environment variable key-value pairs.
+func AdminLatencyStatsFromEnvVar(env map[string]string) (*AdminLatencyStats, error) {
+	result := &AdminLatencyStats{}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_LATENCY_STATS_P50_US"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.P50Us = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_LATENCY_STATS_P90_US"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.P90Us = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_LATENCY_STATS_P95_US"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.P95Us = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_LATENCY_STATS_P99_US"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.P99Us = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_LATENCY_STATS_MAX_US"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.MaxUs = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_LATENCY_STATS_MIN_US"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.MinUs = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_LATENCY_STATS_MEAN_US"]; ok && val != "" {
+		parsed, err := strconv.ParseFloat(val, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.MeanUs = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_LATENCY_STATS_SAMPLE_COUNT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.SampleCount = parsed
+	}
+	return result, nil
+}
+
+// AdminMethodLatencyToEnvVar converts AdminMethodLatency to environment variable key-value pairs.
+func AdminMethodLatencyToEnvVar(v *AdminMethodLatency) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_METHOD_LATENCY_METHOD"] = v.Method
+	if v.Latency != nil {
+		for k, val := range AdminLatencyStatsToEnvVar(v.Latency) {
+			result[k] = val
+		}
+	}
+	return result
+}
+
+// AdminMethodLatencyFromEnvVar creates AdminMethodLatency from environment variable key-value pairs.
+func AdminMethodLatencyFromEnvVar(env map[string]string) (*AdminMethodLatency, error) {
+	result := &AdminMethodLatency{}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_METHOD_LATENCY_METHOD"]; ok && val != "" {
+		result.Method = val
+	}
+	if sub, err := AdminLatencyStatsFromEnvVar(env); err != nil {
+		return nil, err
+	} else if sub != nil {
+		result.Latency = sub
+	}
+	return result, nil
+}
+
+// AdminMethodPayloadToEnvVar converts AdminMethodPayload to environment variable key-value pairs.
+func AdminMethodPayloadToEnvVar(v *AdminMethodPayload) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_METHOD_PAYLOAD_METHOD"] = v.Method
+	result["PROTO_SERVICES_SENTINEL_ADMIN_METHOD_PAYLOAD_TOTAL_REQUEST_BYTES"] = strconv.FormatInt(v.TotalRequestBytes, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_METHOD_PAYLOAD_TOTAL_RESPONSE_BYTES"] = strconv.FormatInt(v.TotalResponseBytes, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_METHOD_PAYLOAD_REQUEST_COUNT"] = strconv.FormatInt(v.RequestCount, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_METHOD_PAYLOAD_AVG_REQUEST_BYTES"] = strconv.FormatFloat(v.AvgRequestBytes, 'f', -1, 64)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_METHOD_PAYLOAD_AVG_RESPONSE_BYTES"] = strconv.FormatFloat(v.AvgResponseBytes, 'f', -1, 64)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_METHOD_PAYLOAD_MAX_REQUEST_BYTES"] = strconv.FormatInt(v.MaxRequestBytes, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_METHOD_PAYLOAD_MAX_RESPONSE_BYTES"] = strconv.FormatInt(v.MaxResponseBytes, 10)
+	return result
+}
+
+// AdminMethodPayloadFromEnvVar creates AdminMethodPayload from environment variable key-value pairs.
+func AdminMethodPayloadFromEnvVar(env map[string]string) (*AdminMethodPayload, error) {
+	result := &AdminMethodPayload{}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_METHOD_PAYLOAD_METHOD"]; ok && val != "" {
+		result.Method = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_METHOD_PAYLOAD_TOTAL_REQUEST_BYTES"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.TotalRequestBytes = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_METHOD_PAYLOAD_TOTAL_RESPONSE_BYTES"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.TotalResponseBytes = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_METHOD_PAYLOAD_REQUEST_COUNT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.RequestCount = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_METHOD_PAYLOAD_AVG_REQUEST_BYTES"]; ok && val != "" {
+		parsed, err := strconv.ParseFloat(val, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.AvgRequestBytes = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_METHOD_PAYLOAD_AVG_RESPONSE_BYTES"]; ok && val != "" {
+		parsed, err := strconv.ParseFloat(val, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.AvgResponseBytes = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_METHOD_PAYLOAD_MAX_REQUEST_BYTES"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.MaxRequestBytes = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_METHOD_PAYLOAD_MAX_RESPONSE_BYTES"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.MaxResponseBytes = parsed
+	}
+	return result, nil
+}
+
+// AdminQueueStatsToEnvVar converts AdminQueueStats to environment variable key-value pairs.
+func AdminQueueStatsToEnvVar(v *AdminQueueStats) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_QUEUE_STATS_QUALIFIED_NAME"] = v.QualifiedName
+	result["PROTO_SERVICES_SENTINEL_ADMIN_QUEUE_STATS_STATE_ROOT"] = v.StateRoot
+	result["PROTO_SERVICES_SENTINEL_ADMIN_QUEUE_STATS_BOUNDARY"] = v.Boundary
+	result["PROTO_SERVICES_SENTINEL_ADMIN_QUEUE_STATS_IS_PRIORITY"] = strconv.FormatBool(v.IsPriority)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_QUEUE_STATS_DEPTH"] = strconv.FormatInt(v.Depth, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_QUEUE_STATS_TOTAL_OFFERED"] = strconv.FormatInt(v.TotalOffered, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_QUEUE_STATS_TOTAL_POLLED"] = strconv.FormatInt(v.TotalPolled, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_QUEUE_STATS_TOTAL_REJECTED"] = strconv.FormatInt(v.TotalRejected, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_QUEUE_STATS_OFFER_RATE"] = strconv.FormatFloat(v.OfferRate, 'f', -1, 64)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_QUEUE_STATS_CONSUME_RATE"] = strconv.FormatFloat(v.ConsumeRate, 'f', -1, 64)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_QUEUE_STATS_LAG_RATE"] = strconv.FormatFloat(v.LagRate, 'f', -1, 64)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_QUEUE_STATS_AVG_WAIT_TIME_MS"] = strconv.FormatFloat(v.AvgWaitTimeMs, 'f', -1, 64)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_QUEUE_STATS_MAX_WAIT_TIME_MS"] = strconv.FormatInt(v.MaxWaitTimeMs, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_QUEUE_STATS_ACTIVE_CONSUMERS"] = strconv.FormatInt(int64(v.ActiveConsumers), 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_QUEUE_STATS_HEAP_COST_BYTES"] = strconv.FormatInt(v.HeapCostBytes, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_QUEUE_STATS_NODE_ID"] = v.NodeId
+	result["PROTO_SERVICES_SENTINEL_ADMIN_QUEUE_STATS_TIMESTAMP_MS"] = strconv.FormatInt(v.TimestampMs, 10)
+	return result
+}
+
+// AdminQueueStatsFromEnvVar creates AdminQueueStats from environment variable key-value pairs.
+func AdminQueueStatsFromEnvVar(env map[string]string) (*AdminQueueStats, error) {
+	result := &AdminQueueStats{}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_QUEUE_STATS_QUALIFIED_NAME"]; ok && val != "" {
+		result.QualifiedName = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_QUEUE_STATS_STATE_ROOT"]; ok && val != "" {
+		result.StateRoot = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_QUEUE_STATS_BOUNDARY"]; ok && val != "" {
+		result.Boundary = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_QUEUE_STATS_IS_PRIORITY"]; ok && val != "" {
+		parsed, err := strconv.ParseBool(val)
+		if err != nil {
+			return nil, err
+		}
+		result.IsPriority = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_QUEUE_STATS_DEPTH"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.Depth = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_QUEUE_STATS_TOTAL_OFFERED"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.TotalOffered = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_QUEUE_STATS_TOTAL_POLLED"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.TotalPolled = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_QUEUE_STATS_TOTAL_REJECTED"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.TotalRejected = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_QUEUE_STATS_OFFER_RATE"]; ok && val != "" {
+		parsed, err := strconv.ParseFloat(val, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.OfferRate = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_QUEUE_STATS_CONSUME_RATE"]; ok && val != "" {
+		parsed, err := strconv.ParseFloat(val, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.ConsumeRate = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_QUEUE_STATS_LAG_RATE"]; ok && val != "" {
+		parsed, err := strconv.ParseFloat(val, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.LagRate = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_QUEUE_STATS_AVG_WAIT_TIME_MS"]; ok && val != "" {
+		parsed, err := strconv.ParseFloat(val, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.AvgWaitTimeMs = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_QUEUE_STATS_MAX_WAIT_TIME_MS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.MaxWaitTimeMs = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_QUEUE_STATS_ACTIVE_CONSUMERS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		result.ActiveConsumers = int32(parsed)
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_QUEUE_STATS_HEAP_COST_BYTES"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.HeapCostBytes = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_QUEUE_STATS_NODE_ID"]; ok && val != "" {
+		result.NodeId = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_QUEUE_STATS_TIMESTAMP_MS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.TimestampMs = parsed
+	}
+	return result, nil
+}
+
+// AdminTopicStatsToEnvVar converts AdminTopicStats to environment variable key-value pairs.
+func AdminTopicStatsToEnvVar(v *AdminTopicStats) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_TOPIC_STATS_QUALIFIED_NAME"] = v.QualifiedName
+	result["PROTO_SERVICES_SENTINEL_ADMIN_TOPIC_STATS_STATE_ROOT"] = v.StateRoot
+	result["PROTO_SERVICES_SENTINEL_ADMIN_TOPIC_STATS_BOUNDARY"] = v.Boundary
+	result["PROTO_SERVICES_SENTINEL_ADMIN_TOPIC_STATS_TOTAL_PUBLISHED"] = strconv.FormatInt(v.TotalPublished, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_TOPIC_STATS_TOTAL_RECEIVED"] = strconv.FormatInt(v.TotalReceived, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_TOPIC_STATS_PUBLISH_RATE"] = strconv.FormatFloat(v.PublishRate, 'f', -1, 64)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_TOPIC_STATS_SUBSCRIBER_COUNT"] = strconv.FormatInt(int64(v.SubscriberCount), 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_TOPIC_STATS_NODE_ID"] = v.NodeId
+	result["PROTO_SERVICES_SENTINEL_ADMIN_TOPIC_STATS_TIMESTAMP_MS"] = strconv.FormatInt(v.TimestampMs, 10)
+	return result
+}
+
+// AdminTopicStatsFromEnvVar creates AdminTopicStats from environment variable key-value pairs.
+func AdminTopicStatsFromEnvVar(env map[string]string) (*AdminTopicStats, error) {
+	result := &AdminTopicStats{}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_TOPIC_STATS_QUALIFIED_NAME"]; ok && val != "" {
+		result.QualifiedName = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_TOPIC_STATS_STATE_ROOT"]; ok && val != "" {
+		result.StateRoot = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_TOPIC_STATS_BOUNDARY"]; ok && val != "" {
+		result.Boundary = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_TOPIC_STATS_TOTAL_PUBLISHED"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.TotalPublished = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_TOPIC_STATS_TOTAL_RECEIVED"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.TotalReceived = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_TOPIC_STATS_PUBLISH_RATE"]; ok && val != "" {
+		parsed, err := strconv.ParseFloat(val, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.PublishRate = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_TOPIC_STATS_SUBSCRIBER_COUNT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		result.SubscriberCount = int32(parsed)
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_TOPIC_STATS_NODE_ID"]; ok && val != "" {
+		result.NodeId = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_TOPIC_STATS_TIMESTAMP_MS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.TimestampMs = parsed
+	}
+	return result, nil
+}
+
+// AdminTopicSubscriberToEnvVar converts AdminTopicSubscriber to environment variable key-value pairs.
+func AdminTopicSubscriberToEnvVar(v *AdminTopicSubscriber) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_TOPIC_SUBSCRIBER_SERVICE_ID"] = v.ServiceId
+	result["PROTO_SERVICES_SENTINEL_ADMIN_TOPIC_SUBSCRIBER_TOTAL_RECEIVED"] = strconv.FormatInt(v.TotalReceived, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_TOPIC_SUBSCRIBER_TOTAL_DROPPED"] = strconv.FormatInt(v.TotalDropped, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_TOPIC_SUBSCRIBER_CONNECTED"] = strconv.FormatBool(v.Connected)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_TOPIC_SUBSCRIBER_LAST_RECEIVED_MS"] = strconv.FormatInt(v.LastReceivedMs, 10)
+	return result
+}
+
+// AdminTopicSubscriberFromEnvVar creates AdminTopicSubscriber from environment variable key-value pairs.
+func AdminTopicSubscriberFromEnvVar(env map[string]string) (*AdminTopicSubscriber, error) {
+	result := &AdminTopicSubscriber{}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_TOPIC_SUBSCRIBER_SERVICE_ID"]; ok && val != "" {
+		result.ServiceId = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_TOPIC_SUBSCRIBER_TOTAL_RECEIVED"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.TotalReceived = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_TOPIC_SUBSCRIBER_TOTAL_DROPPED"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.TotalDropped = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_TOPIC_SUBSCRIBER_CONNECTED"]; ok && val != "" {
+		parsed, err := strconv.ParseBool(val)
+		if err != nil {
+			return nil, err
+		}
+		result.Connected = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_TOPIC_SUBSCRIBER_LAST_RECEIVED_MS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.LastReceivedMs = parsed
+	}
+	return result, nil
+}
+
+// AdminWatchHealthToEnvVar converts AdminWatchHealth to environment variable key-value pairs.
+func AdminWatchHealthToEnvVar(v *AdminWatchHealth) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_WATCH_HEALTH_WATCH_ID"] = v.WatchId
+	result["PROTO_SERVICES_SENTINEL_ADMIN_WATCH_HEALTH_SERVICE_ID"] = v.ServiceId
+	result["PROTO_SERVICES_SENTINEL_ADMIN_WATCH_HEALTH_NODE_ID"] = v.NodeId
+	result["PROTO_SERVICES_SENTINEL_ADMIN_WATCH_HEALTH_METHOD"] = v.Method
+	result["PROTO_SERVICES_SENTINEL_ADMIN_WATCH_HEALTH_GRAPH"] = v.Graph
+	result["PROTO_SERVICES_SENTINEL_ADMIN_WATCH_HEALTH_MESSAGES_SENT"] = strconv.FormatInt(v.MessagesSent, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_WATCH_HEALTH_MESSAGES_PENDING"] = strconv.FormatInt(int64(v.MessagesPending), 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_WATCH_HEALTH_CONSUMER_HEALTHY"] = strconv.FormatBool(v.ConsumerHealthy)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_WATCH_HEALTH_BACKPRESSURE_EVENTS"] = strconv.FormatInt(v.BackpressureEvents, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_WATCH_HEALTH_LAST_SENT_MS"] = strconv.FormatInt(v.LastSentMs, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_WATCH_HEALTH_LAST_MUTATION_MS"] = strconv.FormatInt(v.LastMutationMs, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_WATCH_HEALTH_LAG_MS"] = strconv.FormatInt(v.LagMs, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_WATCH_HEALTH_OPENED_AT_MS"] = strconv.FormatInt(v.OpenedAtMs, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_WATCH_HEALTH_DURATION_MS"] = strconv.FormatInt(v.DurationMs, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_WATCH_HEALTH_PEER_ADDRESS"] = v.PeerAddress
+	result["PROTO_SERVICES_SENTINEL_ADMIN_WATCH_HEALTH_TIMESTAMP_MS"] = strconv.FormatInt(v.TimestampMs, 10)
+	return result
+}
+
+// AdminWatchHealthFromEnvVar creates AdminWatchHealth from environment variable key-value pairs.
+func AdminWatchHealthFromEnvVar(env map[string]string) (*AdminWatchHealth, error) {
+	result := &AdminWatchHealth{}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_WATCH_HEALTH_WATCH_ID"]; ok && val != "" {
+		result.WatchId = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_WATCH_HEALTH_SERVICE_ID"]; ok && val != "" {
+		result.ServiceId = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_WATCH_HEALTH_NODE_ID"]; ok && val != "" {
+		result.NodeId = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_WATCH_HEALTH_METHOD"]; ok && val != "" {
+		result.Method = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_WATCH_HEALTH_GRAPH"]; ok && val != "" {
+		result.Graph = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_WATCH_HEALTH_MESSAGES_SENT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.MessagesSent = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_WATCH_HEALTH_MESSAGES_PENDING"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		result.MessagesPending = int32(parsed)
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_WATCH_HEALTH_CONSUMER_HEALTHY"]; ok && val != "" {
+		parsed, err := strconv.ParseBool(val)
+		if err != nil {
+			return nil, err
+		}
+		result.ConsumerHealthy = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_WATCH_HEALTH_BACKPRESSURE_EVENTS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.BackpressureEvents = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_WATCH_HEALTH_LAST_SENT_MS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.LastSentMs = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_WATCH_HEALTH_LAST_MUTATION_MS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.LastMutationMs = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_WATCH_HEALTH_LAG_MS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.LagMs = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_WATCH_HEALTH_OPENED_AT_MS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.OpenedAtMs = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_WATCH_HEALTH_DURATION_MS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.DurationMs = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_WATCH_HEALTH_PEER_ADDRESS"]; ok && val != "" {
+		result.PeerAddress = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_WATCH_HEALTH_TIMESTAMP_MS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.TimestampMs = parsed
+	}
+	return result, nil
+}
+
+// AdminMutationRateToEnvVar converts AdminMutationRate to environment variable key-value pairs.
+func AdminMutationRateToEnvVar(v *AdminMutationRate) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MUTATION_RATE_QUALIFIED_NAME"] = v.QualifiedName
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MUTATION_RATE_STATE_ROOT"] = v.StateRoot
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MUTATION_RATE_BOUNDARY"] = v.Boundary
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MUTATION_RATE_GRAPH_TYPE"] = AdminGraphTypeToString(v.GraphType)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MUTATION_RATE_TOTAL_MUTATIONS"] = strconv.FormatInt(v.TotalMutations, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MUTATION_RATE_INTERVAL_MUTATIONS"] = strconv.FormatInt(v.IntervalMutations, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MUTATION_RATE_MUTATION_RATE"] = strconv.FormatFloat(v.MutationRate, 'f', -1, 64)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MUTATION_RATE_PUT_COUNT"] = strconv.FormatInt(v.PutCount, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MUTATION_RATE_SET_COUNT"] = strconv.FormatInt(v.SetCount, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MUTATION_RATE_DELETE_COUNT"] = strconv.FormatInt(v.DeleteCount, 10)
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MUTATION_RATE_NODE_ID"] = v.NodeId
+	result["PROTO_SERVICES_SENTINEL_ADMIN_MUTATION_RATE_TIMESTAMP_MS"] = strconv.FormatInt(v.TimestampMs, 10)
+	return result
+}
+
+// AdminMutationRateFromEnvVar creates AdminMutationRate from environment variable key-value pairs.
+func AdminMutationRateFromEnvVar(env map[string]string) (*AdminMutationRate, error) {
+	result := &AdminMutationRate{}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MUTATION_RATE_QUALIFIED_NAME"]; ok && val != "" {
+		result.QualifiedName = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MUTATION_RATE_STATE_ROOT"]; ok && val != "" {
+		result.StateRoot = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MUTATION_RATE_BOUNDARY"]; ok && val != "" {
+		result.Boundary = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MUTATION_RATE_GRAPH_TYPE"]; ok && val != "" {
+		parsed, err := ParseAdminGraphType(val)
+		if err != nil {
+			return nil, err
+		}
+		result.GraphType = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MUTATION_RATE_TOTAL_MUTATIONS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.TotalMutations = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MUTATION_RATE_INTERVAL_MUTATIONS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.IntervalMutations = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MUTATION_RATE_MUTATION_RATE"]; ok && val != "" {
+		parsed, err := strconv.ParseFloat(val, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.MutationRate = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MUTATION_RATE_PUT_COUNT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.PutCount = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MUTATION_RATE_SET_COUNT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.SetCount = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MUTATION_RATE_DELETE_COUNT"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.DeleteCount = parsed
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MUTATION_RATE_NODE_ID"]; ok && val != "" {
+		result.NodeId = val
+	}
+	if val, ok := env["PROTO_SERVICES_SENTINEL_ADMIN_MUTATION_RATE_TIMESTAMP_MS"]; ok && val != "" {
+		parsed, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result.TimestampMs = parsed
 	}
 	return result, nil
 }
@@ -2190,6 +8120,524 @@ func ValidateDashboardResponse(m *DashboardResponse) error {
 	return nil
 }
 
+// ValidateAdminClusterInfo validates all fields in AdminClusterInfo according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidateAdminClusterInfo(m *AdminClusterInfo) error {
+	if m == nil {
+		return nil
+	}
+
+	// Validate ClusterName (default max size: 32768 bytes)
+	if len(m.ClusterName) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field ClusterName exceeds max size of 32768 bytes, got: %d", len(m.ClusterName))
+	}
+
+	// Validate State (default max size: 32768 bytes)
+	if len(m.State) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field State exceeds max size of 32768 bytes, got: %d", len(m.State))
+	}
+
+	// Validate LocalMember (default max size: 32768 bytes)
+	if len(m.LocalMember) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field LocalMember exceeds max size of 32768 bytes, got: %d", len(m.LocalMember))
+	}
+
+	// Validate Version (default max size: 32768 bytes)
+	if len(m.Version) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Version exceeds max size of 32768 bytes, got: %d", len(m.Version))
+	}
+
+	return nil
+}
+
+// ValidateAdminMember validates all fields in AdminMember according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidateAdminMember(m *AdminMember) error {
+	if m == nil {
+		return nil
+	}
+
+	// Validate Uuid (default max size: 32768 bytes)
+	if len(m.Uuid) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Uuid exceeds max size of 32768 bytes, got: %d", len(m.Uuid))
+	}
+
+	// Validate Address (default max size: 32768 bytes)
+	if len(m.Address) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Address exceeds max size of 32768 bytes, got: %d", len(m.Address))
+	}
+
+	return nil
+}
+
+// ValidateAdminClusterHealth validates all fields in AdminClusterHealth according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidateAdminClusterHealth(m *AdminClusterHealth) error {
+	if m == nil {
+		return nil
+	}
+
+	// Validate ClusterState (default max size: 32768 bytes)
+	if len(m.ClusterState) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field ClusterState exceeds max size of 32768 bytes, got: %d", len(m.ClusterState))
+	}
+
+	return nil
+}
+
+// ValidateAdminNodeMetrics validates all fields in AdminNodeMetrics according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidateAdminNodeMetrics(m *AdminNodeMetrics) error {
+	if m == nil {
+		return nil
+	}
+
+	// Validate NodeId (default max size: 32768 bytes)
+	if len(m.NodeId) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field NodeId exceeds max size of 32768 bytes, got: %d", len(m.NodeId))
+	}
+
+	return nil
+}
+
+// ValidateAdminMemoryMetrics validates all fields in AdminMemoryMetrics according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidateAdminMemoryMetrics(m *AdminMemoryMetrics) error {
+	if m == nil {
+		return nil
+	}
+
+	// No field validations defined
+	return nil
+}
+
+// ValidateAdminCpuMetrics validates all fields in AdminCpuMetrics according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidateAdminCpuMetrics(m *AdminCpuMetrics) error {
+	if m == nil {
+		return nil
+	}
+
+	// No field validations defined
+	return nil
+}
+
+// ValidateAdminDiskMetrics validates all fields in AdminDiskMetrics according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidateAdminDiskMetrics(m *AdminDiskMetrics) error {
+	if m == nil {
+		return nil
+	}
+
+	// Validate PersistenceDir (default max size: 32768 bytes)
+	if len(m.PersistenceDir) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field PersistenceDir exceeds max size of 32768 bytes, got: %d", len(m.PersistenceDir))
+	}
+
+	return nil
+}
+
+// ValidateAdminGraphInfo validates all fields in AdminGraphInfo according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidateAdminGraphInfo(m *AdminGraphInfo) error {
+	if m == nil {
+		return nil
+	}
+
+	// Validate QualifiedName (default max size: 32768 bytes)
+	if len(m.QualifiedName) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field QualifiedName exceeds max size of 32768 bytes, got: %d", len(m.QualifiedName))
+	}
+
+	// Validate StateRoot (default max size: 32768 bytes)
+	if len(m.StateRoot) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field StateRoot exceeds max size of 32768 bytes, got: %d", len(m.StateRoot))
+	}
+
+	// Validate Boundary (default max size: 32768 bytes)
+	if len(m.Boundary) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Boundary exceeds max size of 32768 bytes, got: %d", len(m.Boundary))
+	}
+
+	// Validate Consistency (default max size: 32768 bytes)
+	if len(m.Consistency) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Consistency exceeds max size of 32768 bytes, got: %d", len(m.Consistency))
+	}
+
+	// Validate ValueType (default max size: 32768 bytes)
+	if len(m.ValueType) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field ValueType exceeds max size of 32768 bytes, got: %d", len(m.ValueType))
+	}
+
+	return nil
+}
+
+// ValidateAdminServiceConnection validates all fields in AdminServiceConnection according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidateAdminServiceConnection(m *AdminServiceConnection) error {
+	if m == nil {
+		return nil
+	}
+
+	// Validate Id (default max size: 32768 bytes)
+	if len(m.Id) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Id exceeds max size of 32768 bytes, got: %d", len(m.Id))
+	}
+
+	// Validate ServiceId (default max size: 32768 bytes)
+	if len(m.ServiceId) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field ServiceId exceeds max size of 32768 bytes, got: %d", len(m.ServiceId))
+	}
+
+	// Validate NodeId (default max size: 32768 bytes)
+	if len(m.NodeId) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field NodeId exceeds max size of 32768 bytes, got: %d", len(m.NodeId))
+	}
+
+	return nil
+}
+
+// ValidateAdminPeerActivity validates all fields in AdminPeerActivity according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidateAdminPeerActivity(m *AdminPeerActivity) error {
+	if m == nil {
+		return nil
+	}
+
+	// Validate PeerAddress (default max size: 32768 bytes)
+	if len(m.PeerAddress) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field PeerAddress exceeds max size of 32768 bytes, got: %d", len(m.PeerAddress))
+	}
+
+	return nil
+}
+
+// ValidateAdminMapStats validates all fields in AdminMapStats according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidateAdminMapStats(m *AdminMapStats) error {
+	if m == nil {
+		return nil
+	}
+
+	// Validate MapName (default max size: 32768 bytes)
+	if len(m.MapName) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field MapName exceeds max size of 32768 bytes, got: %d", len(m.MapName))
+	}
+
+	// Validate ValueType (default max size: 32768 bytes)
+	if len(m.ValueType) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field ValueType exceeds max size of 32768 bytes, got: %d", len(m.ValueType))
+	}
+
+	// Validate QualifiedName (default max size: 32768 bytes)
+	if len(m.QualifiedName) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field QualifiedName exceeds max size of 32768 bytes, got: %d", len(m.QualifiedName))
+	}
+
+	// Validate StateRoot (default max size: 32768 bytes)
+	if len(m.StateRoot) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field StateRoot exceeds max size of 32768 bytes, got: %d", len(m.StateRoot))
+	}
+
+	// Validate Consistency (default max size: 32768 bytes)
+	if len(m.Consistency) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Consistency exceeds max size of 32768 bytes, got: %d", len(m.Consistency))
+	}
+
+	return nil
+}
+
+// ValidateAdminGrpcStats validates all fields in AdminGrpcStats according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidateAdminGrpcStats(m *AdminGrpcStats) error {
+	if m == nil {
+		return nil
+	}
+
+	// Validate NodeId (default max size: 32768 bytes)
+	if len(m.NodeId) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field NodeId exceeds max size of 32768 bytes, got: %d", len(m.NodeId))
+	}
+
+	return nil
+}
+
+// ValidateAdminPersistenceStatus validates all fields in AdminPersistenceStatus according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidateAdminPersistenceStatus(m *AdminPersistenceStatus) error {
+	if m == nil {
+		return nil
+	}
+
+	// Validate NodeId (default max size: 32768 bytes)
+	if len(m.NodeId) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field NodeId exceeds max size of 32768 bytes, got: %d", len(m.NodeId))
+	}
+
+	// Validate PersistenceDir (default max size: 32768 bytes)
+	if len(m.PersistenceDir) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field PersistenceDir exceeds max size of 32768 bytes, got: %d", len(m.PersistenceDir))
+	}
+
+	return nil
+}
+
+// ValidateAdminNetworkStats validates all fields in AdminNetworkStats according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidateAdminNetworkStats(m *AdminNetworkStats) error {
+	if m == nil {
+		return nil
+	}
+
+	// Validate NodeId (default max size: 32768 bytes)
+	if len(m.NodeId) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field NodeId exceeds max size of 32768 bytes, got: %d", len(m.NodeId))
+	}
+
+	// Validate GrpcListenAddress (default max size: 32768 bytes)
+	if len(m.GrpcListenAddress) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field GrpcListenAddress exceeds max size of 32768 bytes, got: %d", len(m.GrpcListenAddress))
+	}
+
+	// Validate HazelcastListenAddress (default max size: 32768 bytes)
+	if len(m.HazelcastListenAddress) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field HazelcastListenAddress exceeds max size of 32768 bytes, got: %d", len(m.HazelcastListenAddress))
+	}
+
+	return nil
+}
+
+// ValidateAdminMemberConnection validates all fields in AdminMemberConnection according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidateAdminMemberConnection(m *AdminMemberConnection) error {
+	if m == nil {
+		return nil
+	}
+
+	// Validate Address (default max size: 32768 bytes)
+	if len(m.Address) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Address exceeds max size of 32768 bytes, got: %d", len(m.Address))
+	}
+
+	return nil
+}
+
+// ValidateAdminThreadInfo validates all fields in AdminThreadInfo according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidateAdminThreadInfo(m *AdminThreadInfo) error {
+	if m == nil {
+		return nil
+	}
+
+	// Validate NodeId (default max size: 32768 bytes)
+	if len(m.NodeId) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field NodeId exceeds max size of 32768 bytes, got: %d", len(m.NodeId))
+	}
+
+	return nil
+}
+
+// ValidateAdminTokenCacheStats validates all fields in AdminTokenCacheStats according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidateAdminTokenCacheStats(m *AdminTokenCacheStats) error {
+	if m == nil {
+		return nil
+	}
+
+	// Validate NodeId (default max size: 32768 bytes)
+	if len(m.NodeId) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field NodeId exceeds max size of 32768 bytes, got: %d", len(m.NodeId))
+	}
+
+	return nil
+}
+
+// ValidateAdminLatencyStats validates all fields in AdminLatencyStats according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidateAdminLatencyStats(m *AdminLatencyStats) error {
+	if m == nil {
+		return nil
+	}
+
+	// No field validations defined
+	return nil
+}
+
+// ValidateAdminMethodLatency validates all fields in AdminMethodLatency according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidateAdminMethodLatency(m *AdminMethodLatency) error {
+	if m == nil {
+		return nil
+	}
+
+	// Validate Method (default max size: 32768 bytes)
+	if len(m.Method) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Method exceeds max size of 32768 bytes, got: %d", len(m.Method))
+	}
+
+	return nil
+}
+
+// ValidateAdminMethodPayload validates all fields in AdminMethodPayload according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidateAdminMethodPayload(m *AdminMethodPayload) error {
+	if m == nil {
+		return nil
+	}
+
+	// Validate Method (default max size: 32768 bytes)
+	if len(m.Method) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Method exceeds max size of 32768 bytes, got: %d", len(m.Method))
+	}
+
+	return nil
+}
+
+// ValidateAdminQueueStats validates all fields in AdminQueueStats according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidateAdminQueueStats(m *AdminQueueStats) error {
+	if m == nil {
+		return nil
+	}
+
+	// Validate QualifiedName (default max size: 32768 bytes)
+	if len(m.QualifiedName) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field QualifiedName exceeds max size of 32768 bytes, got: %d", len(m.QualifiedName))
+	}
+
+	// Validate StateRoot (default max size: 32768 bytes)
+	if len(m.StateRoot) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field StateRoot exceeds max size of 32768 bytes, got: %d", len(m.StateRoot))
+	}
+
+	// Validate Boundary (default max size: 32768 bytes)
+	if len(m.Boundary) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Boundary exceeds max size of 32768 bytes, got: %d", len(m.Boundary))
+	}
+
+	// Validate NodeId (default max size: 32768 bytes)
+	if len(m.NodeId) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field NodeId exceeds max size of 32768 bytes, got: %d", len(m.NodeId))
+	}
+
+	return nil
+}
+
+// ValidateAdminTopicStats validates all fields in AdminTopicStats according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidateAdminTopicStats(m *AdminTopicStats) error {
+	if m == nil {
+		return nil
+	}
+
+	// Validate QualifiedName (default max size: 32768 bytes)
+	if len(m.QualifiedName) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field QualifiedName exceeds max size of 32768 bytes, got: %d", len(m.QualifiedName))
+	}
+
+	// Validate StateRoot (default max size: 32768 bytes)
+	if len(m.StateRoot) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field StateRoot exceeds max size of 32768 bytes, got: %d", len(m.StateRoot))
+	}
+
+	// Validate Boundary (default max size: 32768 bytes)
+	if len(m.Boundary) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Boundary exceeds max size of 32768 bytes, got: %d", len(m.Boundary))
+	}
+
+	// Validate NodeId (default max size: 32768 bytes)
+	if len(m.NodeId) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field NodeId exceeds max size of 32768 bytes, got: %d", len(m.NodeId))
+	}
+
+	return nil
+}
+
+// ValidateAdminTopicSubscriber validates all fields in AdminTopicSubscriber according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidateAdminTopicSubscriber(m *AdminTopicSubscriber) error {
+	if m == nil {
+		return nil
+	}
+
+	// Validate ServiceId (default max size: 32768 bytes)
+	if len(m.ServiceId) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field ServiceId exceeds max size of 32768 bytes, got: %d", len(m.ServiceId))
+	}
+
+	return nil
+}
+
+// ValidateAdminWatchHealth validates all fields in AdminWatchHealth according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidateAdminWatchHealth(m *AdminWatchHealth) error {
+	if m == nil {
+		return nil
+	}
+
+	// Validate WatchId (default max size: 32768 bytes)
+	if len(m.WatchId) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field WatchId exceeds max size of 32768 bytes, got: %d", len(m.WatchId))
+	}
+
+	// Validate ServiceId (default max size: 32768 bytes)
+	if len(m.ServiceId) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field ServiceId exceeds max size of 32768 bytes, got: %d", len(m.ServiceId))
+	}
+
+	// Validate NodeId (default max size: 32768 bytes)
+	if len(m.NodeId) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field NodeId exceeds max size of 32768 bytes, got: %d", len(m.NodeId))
+	}
+
+	// Validate Method (default max size: 32768 bytes)
+	if len(m.Method) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Method exceeds max size of 32768 bytes, got: %d", len(m.Method))
+	}
+
+	// Validate Graph (default max size: 32768 bytes)
+	if len(m.Graph) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Graph exceeds max size of 32768 bytes, got: %d", len(m.Graph))
+	}
+
+	// Validate PeerAddress (default max size: 32768 bytes)
+	if len(m.PeerAddress) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field PeerAddress exceeds max size of 32768 bytes, got: %d", len(m.PeerAddress))
+	}
+
+	return nil
+}
+
+// ValidateAdminMutationRate validates all fields in AdminMutationRate according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidateAdminMutationRate(m *AdminMutationRate) error {
+	if m == nil {
+		return nil
+	}
+
+	// Validate QualifiedName (default max size: 32768 bytes)
+	if len(m.QualifiedName) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field QualifiedName exceeds max size of 32768 bytes, got: %d", len(m.QualifiedName))
+	}
+
+	// Validate StateRoot (default max size: 32768 bytes)
+	if len(m.StateRoot) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field StateRoot exceeds max size of 32768 bytes, got: %d", len(m.StateRoot))
+	}
+
+	// Validate Boundary (default max size: 32768 bytes)
+	if len(m.Boundary) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Boundary exceeds max size of 32768 bytes, got: %d", len(m.Boundary))
+	}
+
+	// Validate NodeId (default max size: 32768 bytes)
+	if len(m.NodeId) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field NodeId exceeds max size of 32768 bytes, got: %d", len(m.NodeId))
+	}
+
+	return nil
+}
+
 // ValidateMapEmpty validates all fields in MapEmpty according to their annotations.
 // Returns a BlueErr if validation fails, or nil if all validations pass.
 func ValidateMapEmpty(m *MapEmpty) error {
@@ -2200,6 +8648,65 @@ func ValidateMapEmpty(m *MapEmpty) error {
 	// No field validations defined
 	return nil
 }
+
+// ============================================================
+// Capacity Constants (for utilization monitoring)
+// ============================================================
+const (
+	MaxSizeAdminclusterinfoClusterName             int = 32768
+	MaxSizeAdminclusterinfoState                   int = 32768
+	MaxSizeAdminclusterinfoLocalMember             int = 32768
+	MaxSizeAdminclusterinfoVersion                 int = 32768
+	MaxSizeAdminmemberUuid                         int = 32768
+	MaxSizeAdminmemberAddress                      int = 32768
+	MaxSizeAdminclusterhealthClusterState          int = 32768
+	MaxSizeAdminnodemetricsNodeId                  int = 32768
+	MaxSizeAdmindiskmetricsPersistenceDir          int = 32768
+	MaxSizeAdmingraphinfoQualifiedName             int = 32768
+	MaxSizeAdmingraphinfoStateRoot                 int = 32768
+	MaxSizeAdmingraphinfoBoundary                  int = 32768
+	MaxSizeAdmingraphinfoConsistency               int = 32768
+	MaxSizeAdmingraphinfoValueType                 int = 32768
+	MaxSizeAdminserviceconnectionId                int = 32768
+	MaxSizeAdminserviceconnectionServiceId         int = 32768
+	MaxSizeAdminserviceconnectionNodeId            int = 32768
+	MaxSizeAdminpeeractivityPeerAddress            int = 32768
+	MaxSizeAdminmapstatsMapName                    int = 32768
+	MaxSizeAdminmapstatsValueType                  int = 32768
+	MaxSizeAdminmapstatsQualifiedName              int = 32768
+	MaxSizeAdminmapstatsStateRoot                  int = 32768
+	MaxSizeAdminmapstatsConsistency                int = 32768
+	MaxSizeAdmingrpcstatsNodeId                    int = 32768
+	MaxSizeAdminpersistencestatusNodeId            int = 32768
+	MaxSizeAdminpersistencestatusPersistenceDir    int = 32768
+	MaxSizeAdminnetworkstatsNodeId                 int = 32768
+	MaxSizeAdminnetworkstatsGrpcListenAddress      int = 32768
+	MaxSizeAdminnetworkstatsHazelcastListenAddress int = 32768
+	MaxSizeAdminmemberconnectionAddress            int = 32768
+	MaxSizeAdminthreadinfoNodeId                   int = 32768
+	MaxSizeAdmintokencachestatsNodeId              int = 32768
+	MaxSizeAdminmethodlatencyMethod                int = 32768
+	MaxSizeAdminmethodpayloadMethod                int = 32768
+	MaxSizeAdminqueuestatsQualifiedName            int = 32768
+	MaxSizeAdminqueuestatsStateRoot                int = 32768
+	MaxSizeAdminqueuestatsBoundary                 int = 32768
+	MaxSizeAdminqueuestatsNodeId                   int = 32768
+	MaxSizeAdmintopicstatsQualifiedName            int = 32768
+	MaxSizeAdmintopicstatsStateRoot                int = 32768
+	MaxSizeAdmintopicstatsBoundary                 int = 32768
+	MaxSizeAdmintopicstatsNodeId                   int = 32768
+	MaxSizeAdmintopicsubscriberServiceId           int = 32768
+	MaxSizeAdminwatchhealthWatchId                 int = 32768
+	MaxSizeAdminwatchhealthServiceId               int = 32768
+	MaxSizeAdminwatchhealthNodeId                  int = 32768
+	MaxSizeAdminwatchhealthMethod                  int = 32768
+	MaxSizeAdminwatchhealthGraph                   int = 32768
+	MaxSizeAdminwatchhealthPeerAddress             int = 32768
+	MaxSizeAdminmutationrateQualifiedName          int = 32768
+	MaxSizeAdminmutationrateStateRoot              int = 32768
+	MaxSizeAdminmutationrateBoundary               int = 32768
+	MaxSizeAdminmutationrateNodeId                 int = 32768
+)
 
 // ============================================================
 // Merge: WatchDashboardRequest
@@ -2288,9 +8795,13 @@ func MergeMapStatsResponse(dst, src *MapStatsResponse) {
 func MergeDashboardResponse(dst, src *DashboardResponse) {
 	if dst.ClusterInfo == nil {
 		dst.ClusterInfo = src.ClusterInfo
+	} else if src.ClusterInfo != nil {
+		MergeAdminClusterInfo(dst.ClusterInfo, src.ClusterInfo)
 	}
 	if dst.ClusterHealth == nil {
 		dst.ClusterHealth = src.ClusterHealth
+	} else if src.ClusterHealth != nil {
+		MergeAdminClusterHealth(dst.ClusterHealth, src.ClusterHealth)
 	}
 	if len(dst.NodeMetrics) == 0 {
 		dst.NodeMetrics = src.NodeMetrics
@@ -2312,5 +8823,871 @@ func MergeDashboardResponse(dst, src *DashboardResponse) {
 	}
 	if len(dst.MapStats) == 0 {
 		dst.MapStats = src.MapStats
+	}
+}
+
+// ============================================================
+// Merge: AdminClusterInfo
+// ============================================================
+// MergeAdminClusterInfo fills zero-valued fields in dst from src.
+func MergeAdminClusterInfo(dst, src *AdminClusterInfo) {
+	if dst.ClusterName == "" {
+		dst.ClusterName = src.ClusterName
+	}
+	if dst.State == "" {
+		dst.State = src.State
+	}
+	if len(dst.Members) == 0 {
+		dst.Members = src.Members
+	}
+	if dst.LocalMember == "" {
+		dst.LocalMember = src.LocalMember
+	}
+	if dst.PartitionCount == 0 {
+		dst.PartitionCount = src.PartitionCount
+	}
+	if dst.ClusterSize == 0 {
+		dst.ClusterSize = src.ClusterSize
+	}
+	if dst.Version == "" {
+		dst.Version = src.Version
+	}
+}
+
+// ============================================================
+// Merge: AdminMember
+// ============================================================
+// MergeAdminMember fills zero-valued fields in dst from src.
+func MergeAdminMember(dst, src *AdminMember) {
+	if dst.Uuid == "" {
+		dst.Uuid = src.Uuid
+	}
+	if dst.Address == "" {
+		dst.Address = src.Address
+	}
+	if !dst.Lite {
+		dst.Lite = src.Lite
+	}
+	if !dst.IsLocal {
+		dst.IsLocal = src.IsLocal
+	}
+}
+
+// ============================================================
+// Merge: AdminClusterHealth
+// ============================================================
+// MergeAdminClusterHealth fills zero-valued fields in dst from src.
+func MergeAdminClusterHealth(dst, src *AdminClusterHealth) {
+	if !dst.ClusterSafe {
+		dst.ClusterSafe = src.ClusterSafe
+	}
+	if !dst.LocalMemberSafe {
+		dst.LocalMemberSafe = src.LocalMemberSafe
+	}
+	if dst.ClusterState == "" {
+		dst.ClusterState = src.ClusterState
+	}
+	if !dst.Running {
+		dst.Running = src.Running
+	}
+	if dst.ClusterSize == 0 {
+		dst.ClusterSize = src.ClusterSize
+	}
+	if !dst.HasQuorum {
+		dst.HasQuorum = src.HasQuorum
+	}
+	if dst.MigrationQueueSize == 0 {
+		dst.MigrationQueueSize = src.MigrationQueueSize
+	}
+}
+
+// ============================================================
+// Merge: AdminNodeMetrics
+// ============================================================
+// MergeAdminNodeMetrics fills zero-valued fields in dst from src.
+func MergeAdminNodeMetrics(dst, src *AdminNodeMetrics) {
+	if dst.NodeId == "" {
+		dst.NodeId = src.NodeId
+	}
+	if dst.Memory == nil {
+		dst.Memory = src.Memory
+	} else if src.Memory != nil {
+		MergeAdminMemoryMetrics(dst.Memory, src.Memory)
+	}
+	if dst.Cpu == nil {
+		dst.Cpu = src.Cpu
+	} else if src.Cpu != nil {
+		MergeAdminCpuMetrics(dst.Cpu, src.Cpu)
+	}
+	if dst.Disk == nil {
+		dst.Disk = src.Disk
+	} else if src.Disk != nil {
+		MergeAdminDiskMetrics(dst.Disk, src.Disk)
+	}
+	if dst.TimestampMs == 0 {
+		dst.TimestampMs = src.TimestampMs
+	}
+}
+
+// ============================================================
+// Merge: AdminMemoryMetrics
+// ============================================================
+// MergeAdminMemoryMetrics fills zero-valued fields in dst from src.
+func MergeAdminMemoryMetrics(dst, src *AdminMemoryMetrics) {
+	if dst.HeapUsedBytes == 0 {
+		dst.HeapUsedBytes = src.HeapUsedBytes
+	}
+	if dst.HeapMaxBytes == 0 {
+		dst.HeapMaxBytes = src.HeapMaxBytes
+	}
+	if dst.HeapCommittedBytes == 0 {
+		dst.HeapCommittedBytes = src.HeapCommittedBytes
+	}
+	if dst.NonHeapUsedBytes == 0 {
+		dst.NonHeapUsedBytes = src.NonHeapUsedBytes
+	}
+	if dst.GcCount == 0 {
+		dst.GcCount = src.GcCount
+	}
+	if dst.GcTimeMs == 0 {
+		dst.GcTimeMs = src.GcTimeMs
+	}
+}
+
+// ============================================================
+// Merge: AdminCpuMetrics
+// ============================================================
+// MergeAdminCpuMetrics fills zero-valued fields in dst from src.
+func MergeAdminCpuMetrics(dst, src *AdminCpuMetrics) {
+	if dst.AvailableProcessors == 0 {
+		dst.AvailableProcessors = src.AvailableProcessors
+	}
+	if dst.ProcessCpuLoad == 0 {
+		dst.ProcessCpuLoad = src.ProcessCpuLoad
+	}
+	if dst.SystemCpuLoad == 0 {
+		dst.SystemCpuLoad = src.SystemCpuLoad
+	}
+	if dst.SystemLoadAverage == 0 {
+		dst.SystemLoadAverage = src.SystemLoadAverage
+	}
+	if dst.UptimeMs == 0 {
+		dst.UptimeMs = src.UptimeMs
+	}
+}
+
+// ============================================================
+// Merge: AdminDiskMetrics
+// ============================================================
+// MergeAdminDiskMetrics fills zero-valued fields in dst from src.
+func MergeAdminDiskMetrics(dst, src *AdminDiskMetrics) {
+	if dst.PersistenceDir == "" {
+		dst.PersistenceDir = src.PersistenceDir
+	}
+	if dst.TotalBytes == 0 {
+		dst.TotalBytes = src.TotalBytes
+	}
+	if dst.UsableBytes == 0 {
+		dst.UsableBytes = src.UsableBytes
+	}
+	if dst.UsedBytes == 0 {
+		dst.UsedBytes = src.UsedBytes
+	}
+	if dst.PersistenceSizeBytes == 0 {
+		dst.PersistenceSizeBytes = src.PersistenceSizeBytes
+	}
+}
+
+// ============================================================
+// Merge: AdminGraphInfo
+// ============================================================
+// MergeAdminGraphInfo fills zero-valued fields in dst from src.
+func MergeAdminGraphInfo(dst, src *AdminGraphInfo) {
+	if dst.QualifiedName == "" {
+		dst.QualifiedName = src.QualifiedName
+	}
+	if dst.StateRoot == "" {
+		dst.StateRoot = src.StateRoot
+	}
+	if dst.Boundary == "" {
+		dst.Boundary = src.Boundary
+	}
+	if dst.GraphType == 0 {
+		dst.GraphType = src.GraphType
+	}
+	if dst.Consistency == "" {
+		dst.Consistency = src.Consistency
+	}
+	if !dst.Persistence {
+		dst.Persistence = src.Persistence
+	}
+	if dst.ValueType == "" {
+		dst.ValueType = src.ValueType
+	}
+}
+
+// ============================================================
+// Merge: AdminServiceConnection
+// ============================================================
+// MergeAdminServiceConnection fills zero-valued fields in dst from src.
+func MergeAdminServiceConnection(dst, src *AdminServiceConnection) {
+	if dst.Id == "" {
+		dst.Id = src.Id
+	}
+	if dst.ServiceId == "" {
+		dst.ServiceId = src.ServiceId
+	}
+	if dst.NodeId == "" {
+		dst.NodeId = src.NodeId
+	}
+	if dst.ActiveConnections == 0 {
+		dst.ActiveConnections = src.ActiveConnections
+	}
+	if dst.TotalConnections == 0 {
+		dst.TotalConnections = src.TotalConnections
+	}
+	if dst.TotalRpcs == 0 {
+		dst.TotalRpcs = src.TotalRpcs
+	}
+	if dst.ActiveRpcs == 0 {
+		dst.ActiveRpcs = src.ActiveRpcs
+	}
+	if dst.TotalUnaryReads == 0 {
+		dst.TotalUnaryReads = src.TotalUnaryReads
+	}
+	if dst.TotalUnaryWrites == 0 {
+		dst.TotalUnaryWrites = src.TotalUnaryWrites
+	}
+	if dst.ActiveStreams == 0 {
+		dst.ActiveStreams = src.ActiveStreams
+	}
+	if dst.TotalStreamsOpened == 0 {
+		dst.TotalStreamsOpened = src.TotalStreamsOpened
+	}
+	if dst.PollCount == 0 {
+		dst.PollCount = src.PollCount
+	}
+	if dst.PollRate == 0 {
+		dst.PollRate = src.PollRate
+	}
+	if len(dst.AccessedGraphs) == 0 {
+		dst.AccessedGraphs = src.AccessedGraphs
+	}
+	if len(dst.Peers) == 0 {
+		dst.Peers = src.Peers
+	}
+	if dst.ConnectedAtMs == 0 {
+		dst.ConnectedAtMs = src.ConnectedAtMs
+	}
+	if dst.LastActivityMs == 0 {
+		dst.LastActivityMs = src.LastActivityMs
+	}
+	if dst.TimestampMs == 0 {
+		dst.TimestampMs = src.TimestampMs
+	}
+	if dst.RateLimitedCount == 0 {
+		dst.RateLimitedCount = src.RateLimitedCount
+	}
+	if dst.TotalErrors == 0 {
+		dst.TotalErrors = src.TotalErrors
+	}
+	if dst.Latency == nil {
+		dst.Latency = src.Latency
+	} else if src.Latency != nil {
+		MergeAdminLatencyStats(dst.Latency, src.Latency)
+	}
+	if len(dst.PerMethodLatency) == 0 {
+		dst.PerMethodLatency = src.PerMethodLatency
+	}
+	if dst.BytesReceived == 0 {
+		dst.BytesReceived = src.BytesReceived
+	}
+	if dst.BytesSent == 0 {
+		dst.BytesSent = src.BytesSent
+	}
+	if len(dst.PerMethodPayload) == 0 {
+		dst.PerMethodPayload = src.PerMethodPayload
+	}
+}
+
+// ============================================================
+// Merge: AdminPeerActivity
+// ============================================================
+// MergeAdminPeerActivity fills zero-valued fields in dst from src.
+func MergeAdminPeerActivity(dst, src *AdminPeerActivity) {
+	if dst.PeerAddress == "" {
+		dst.PeerAddress = src.PeerAddress
+	}
+	if dst.ActiveRpcs == 0 {
+		dst.ActiveRpcs = src.ActiveRpcs
+	}
+	if dst.TotalRpcs == 0 {
+		dst.TotalRpcs = src.TotalRpcs
+	}
+	if dst.ActiveStreams == 0 {
+		dst.ActiveStreams = src.ActiveStreams
+	}
+	if dst.TotalStreamsOpened == 0 {
+		dst.TotalStreamsOpened = src.TotalStreamsOpened
+	}
+	if dst.PollCount == 0 {
+		dst.PollCount = src.PollCount
+	}
+	if dst.PollRate == 0 {
+		dst.PollRate = src.PollRate
+	}
+	if dst.ConnectedAtMs == 0 {
+		dst.ConnectedAtMs = src.ConnectedAtMs
+	}
+	if dst.LastActivityMs == 0 {
+		dst.LastActivityMs = src.LastActivityMs
+	}
+	if dst.TotalErrors == 0 {
+		dst.TotalErrors = src.TotalErrors
+	}
+	if dst.BytesReceived == 0 {
+		dst.BytesReceived = src.BytesReceived
+	}
+	if dst.BytesSent == 0 {
+		dst.BytesSent = src.BytesSent
+	}
+}
+
+// ============================================================
+// Merge: AdminMapStats
+// ============================================================
+// MergeAdminMapStats fills zero-valued fields in dst from src.
+func MergeAdminMapStats(dst, src *AdminMapStats) {
+	if dst.MapName == "" {
+		dst.MapName = src.MapName
+	}
+	if dst.Size == 0 {
+		dst.Size = src.Size
+	}
+	if dst.OwnedEntryCount == 0 {
+		dst.OwnedEntryCount = src.OwnedEntryCount
+	}
+	if dst.BackupEntryCount == 0 {
+		dst.BackupEntryCount = src.BackupEntryCount
+	}
+	if dst.HeapCostBytes == 0 {
+		dst.HeapCostBytes = src.HeapCostBytes
+	}
+	if dst.LastUpdateTimeMs == 0 {
+		dst.LastUpdateTimeMs = src.LastUpdateTimeMs
+	}
+	if dst.PutCount == 0 {
+		dst.PutCount = src.PutCount
+	}
+	if dst.GetCount == 0 {
+		dst.GetCount = src.GetCount
+	}
+	if dst.HitCount == 0 {
+		dst.HitCount = src.HitCount
+	}
+	if dst.TimestampMs == 0 {
+		dst.TimestampMs = src.TimestampMs
+	}
+	if dst.OwnedEntryMemoryCost == 0 {
+		dst.OwnedEntryMemoryCost = src.OwnedEntryMemoryCost
+	}
+	if dst.BackupEntryMemoryCost == 0 {
+		dst.BackupEntryMemoryCost = src.BackupEntryMemoryCost
+	}
+	if dst.DirtyEntryCount == 0 {
+		dst.DirtyEntryCount = src.DirtyEntryCount
+	}
+	if dst.LockedEntryCount == 0 {
+		dst.LockedEntryCount = src.LockedEntryCount
+	}
+	if dst.RemoveCount == 0 {
+		dst.RemoveCount = src.RemoveCount
+	}
+	if dst.SetCount == 0 {
+		dst.SetCount = src.SetCount
+	}
+	if dst.EvictionCount == 0 {
+		dst.EvictionCount = src.EvictionCount
+	}
+	if dst.ExpirationCount == 0 {
+		dst.ExpirationCount = src.ExpirationCount
+	}
+	if dst.LastAccessTimeMs == 0 {
+		dst.LastAccessTimeMs = src.LastAccessTimeMs
+	}
+	if dst.CreationTimeMs == 0 {
+		dst.CreationTimeMs = src.CreationTimeMs
+	}
+	if dst.BackupCount == 0 {
+		dst.BackupCount = src.BackupCount
+	}
+	if dst.ValueType == "" {
+		dst.ValueType = src.ValueType
+	}
+	if dst.GraphType == 0 {
+		dst.GraphType = src.GraphType
+	}
+	if dst.QualifiedName == "" {
+		dst.QualifiedName = src.QualifiedName
+	}
+	if dst.StateRoot == "" {
+		dst.StateRoot = src.StateRoot
+	}
+	if dst.Consistency == "" {
+		dst.Consistency = src.Consistency
+	}
+	if !dst.Persistence {
+		dst.Persistence = src.Persistence
+	}
+}
+
+// ============================================================
+// Merge: AdminGrpcStats
+// ============================================================
+// MergeAdminGrpcStats fills zero-valued fields in dst from src.
+func MergeAdminGrpcStats(dst, src *AdminGrpcStats) {
+	if dst.NodeId == "" {
+		dst.NodeId = src.NodeId
+	}
+	if dst.ActiveConnections == 0 {
+		dst.ActiveConnections = src.ActiveConnections
+	}
+	if dst.TotalRpcs == 0 {
+		dst.TotalRpcs = src.TotalRpcs
+	}
+	if dst.ActiveRpcs == 0 {
+		dst.ActiveRpcs = src.ActiveRpcs
+	}
+	if dst.RateLimitedCount == 0 {
+		dst.RateLimitedCount = src.RateLimitedCount
+	}
+	if dst.ActiveStreams == 0 {
+		dst.ActiveStreams = src.ActiveStreams
+	}
+	if dst.TimestampMs == 0 {
+		dst.TimestampMs = src.TimestampMs
+	}
+}
+
+// ============================================================
+// Merge: AdminPersistenceStatus
+// ============================================================
+// MergeAdminPersistenceStatus fills zero-valued fields in dst from src.
+func MergeAdminPersistenceStatus(dst, src *AdminPersistenceStatus) {
+	if dst.NodeId == "" {
+		dst.NodeId = src.NodeId
+	}
+	if !dst.Enabled {
+		dst.Enabled = src.Enabled
+	}
+	if dst.PersistenceDir == "" {
+		dst.PersistenceDir = src.PersistenceDir
+	}
+	if dst.RedoLogEntryCount == 0 {
+		dst.RedoLogEntryCount = src.RedoLogEntryCount
+	}
+	if dst.RedoLogSizeBytes == 0 {
+		dst.RedoLogSizeBytes = src.RedoLogSizeBytes
+	}
+	if dst.LastDumpTimeMs == 0 {
+		dst.LastDumpTimeMs = src.LastDumpTimeMs
+	}
+	if dst.LastDumpEntryCount == 0 {
+		dst.LastDumpEntryCount = src.LastDumpEntryCount
+	}
+	if dst.DumpCount == 0 {
+		dst.DumpCount = src.DumpCount
+	}
+	if dst.TimestampMs == 0 {
+		dst.TimestampMs = src.TimestampMs
+	}
+}
+
+// ============================================================
+// Merge: AdminNetworkStats
+// ============================================================
+// MergeAdminNetworkStats fills zero-valued fields in dst from src.
+func MergeAdminNetworkStats(dst, src *AdminNetworkStats) {
+	if dst.NodeId == "" {
+		dst.NodeId = src.NodeId
+	}
+	if dst.GrpcListenAddress == "" {
+		dst.GrpcListenAddress = src.GrpcListenAddress
+	}
+	if dst.HazelcastListenAddress == "" {
+		dst.HazelcastListenAddress = src.HazelcastListenAddress
+	}
+	if dst.ActiveGrpcConnections == 0 {
+		dst.ActiveGrpcConnections = src.ActiveGrpcConnections
+	}
+	if len(dst.MemberConnections) == 0 {
+		dst.MemberConnections = src.MemberConnections
+	}
+	if dst.BytesSent == 0 {
+		dst.BytesSent = src.BytesSent
+	}
+	if dst.BytesReceived == 0 {
+		dst.BytesReceived = src.BytesReceived
+	}
+	if dst.TimestampMs == 0 {
+		dst.TimestampMs = src.TimestampMs
+	}
+}
+
+// ============================================================
+// Merge: AdminMemberConnection
+// ============================================================
+// MergeAdminMemberConnection fills zero-valued fields in dst from src.
+func MergeAdminMemberConnection(dst, src *AdminMemberConnection) {
+	if dst.Address == "" {
+		dst.Address = src.Address
+	}
+	if !dst.Connected {
+		dst.Connected = src.Connected
+	}
+	if dst.ConnectionCount == 0 {
+		dst.ConnectionCount = src.ConnectionCount
+	}
+}
+
+// ============================================================
+// Merge: AdminThreadInfo
+// ============================================================
+// MergeAdminThreadInfo fills zero-valued fields in dst from src.
+func MergeAdminThreadInfo(dst, src *AdminThreadInfo) {
+	if dst.NodeId == "" {
+		dst.NodeId = src.NodeId
+	}
+	if dst.ThreadCount == 0 {
+		dst.ThreadCount = src.ThreadCount
+	}
+	if dst.PeakThreadCount == 0 {
+		dst.PeakThreadCount = src.PeakThreadCount
+	}
+	if dst.DaemonThreadCount == 0 {
+		dst.DaemonThreadCount = src.DaemonThreadCount
+	}
+	if len(dst.DeadlockedThreads) == 0 {
+		dst.DeadlockedThreads = src.DeadlockedThreads
+	}
+	if dst.TimestampMs == 0 {
+		dst.TimestampMs = src.TimestampMs
+	}
+}
+
+// ============================================================
+// Merge: AdminTokenCacheStats
+// ============================================================
+// MergeAdminTokenCacheStats fills zero-valued fields in dst from src.
+func MergeAdminTokenCacheStats(dst, src *AdminTokenCacheStats) {
+	if dst.NodeId == "" {
+		dst.NodeId = src.NodeId
+	}
+	if dst.CacheSize == 0 {
+		dst.CacheSize = src.CacheSize
+	}
+	if dst.HitCount == 0 {
+		dst.HitCount = src.HitCount
+	}
+	if dst.MissCount == 0 {
+		dst.MissCount = src.MissCount
+	}
+	if dst.EvictionCount == 0 {
+		dst.EvictionCount = src.EvictionCount
+	}
+	if dst.TimestampMs == 0 {
+		dst.TimestampMs = src.TimestampMs
+	}
+}
+
+// ============================================================
+// Merge: AdminLatencyStats
+// ============================================================
+// MergeAdminLatencyStats fills zero-valued fields in dst from src.
+func MergeAdminLatencyStats(dst, src *AdminLatencyStats) {
+	if dst.P50Us == 0 {
+		dst.P50Us = src.P50Us
+	}
+	if dst.P90Us == 0 {
+		dst.P90Us = src.P90Us
+	}
+	if dst.P95Us == 0 {
+		dst.P95Us = src.P95Us
+	}
+	if dst.P99Us == 0 {
+		dst.P99Us = src.P99Us
+	}
+	if dst.MaxUs == 0 {
+		dst.MaxUs = src.MaxUs
+	}
+	if dst.MinUs == 0 {
+		dst.MinUs = src.MinUs
+	}
+	if dst.MeanUs == 0 {
+		dst.MeanUs = src.MeanUs
+	}
+	if dst.SampleCount == 0 {
+		dst.SampleCount = src.SampleCount
+	}
+}
+
+// ============================================================
+// Merge: AdminMethodLatency
+// ============================================================
+// MergeAdminMethodLatency fills zero-valued fields in dst from src.
+func MergeAdminMethodLatency(dst, src *AdminMethodLatency) {
+	if dst.Method == "" {
+		dst.Method = src.Method
+	}
+	if dst.Latency == nil {
+		dst.Latency = src.Latency
+	} else if src.Latency != nil {
+		MergeAdminLatencyStats(dst.Latency, src.Latency)
+	}
+}
+
+// ============================================================
+// Merge: AdminMethodPayload
+// ============================================================
+// MergeAdminMethodPayload fills zero-valued fields in dst from src.
+func MergeAdminMethodPayload(dst, src *AdminMethodPayload) {
+	if dst.Method == "" {
+		dst.Method = src.Method
+	}
+	if dst.TotalRequestBytes == 0 {
+		dst.TotalRequestBytes = src.TotalRequestBytes
+	}
+	if dst.TotalResponseBytes == 0 {
+		dst.TotalResponseBytes = src.TotalResponseBytes
+	}
+	if dst.RequestCount == 0 {
+		dst.RequestCount = src.RequestCount
+	}
+	if dst.AvgRequestBytes == 0 {
+		dst.AvgRequestBytes = src.AvgRequestBytes
+	}
+	if dst.AvgResponseBytes == 0 {
+		dst.AvgResponseBytes = src.AvgResponseBytes
+	}
+	if dst.MaxRequestBytes == 0 {
+		dst.MaxRequestBytes = src.MaxRequestBytes
+	}
+	if dst.MaxResponseBytes == 0 {
+		dst.MaxResponseBytes = src.MaxResponseBytes
+	}
+}
+
+// ============================================================
+// Merge: AdminQueueStats
+// ============================================================
+// MergeAdminQueueStats fills zero-valued fields in dst from src.
+func MergeAdminQueueStats(dst, src *AdminQueueStats) {
+	if dst.QualifiedName == "" {
+		dst.QualifiedName = src.QualifiedName
+	}
+	if dst.StateRoot == "" {
+		dst.StateRoot = src.StateRoot
+	}
+	if dst.Boundary == "" {
+		dst.Boundary = src.Boundary
+	}
+	if !dst.IsPriority {
+		dst.IsPriority = src.IsPriority
+	}
+	if dst.Depth == 0 {
+		dst.Depth = src.Depth
+	}
+	if dst.TotalOffered == 0 {
+		dst.TotalOffered = src.TotalOffered
+	}
+	if dst.TotalPolled == 0 {
+		dst.TotalPolled = src.TotalPolled
+	}
+	if dst.TotalRejected == 0 {
+		dst.TotalRejected = src.TotalRejected
+	}
+	if dst.OfferRate == 0 {
+		dst.OfferRate = src.OfferRate
+	}
+	if dst.ConsumeRate == 0 {
+		dst.ConsumeRate = src.ConsumeRate
+	}
+	if dst.LagRate == 0 {
+		dst.LagRate = src.LagRate
+	}
+	if dst.AvgWaitTimeMs == 0 {
+		dst.AvgWaitTimeMs = src.AvgWaitTimeMs
+	}
+	if dst.MaxWaitTimeMs == 0 {
+		dst.MaxWaitTimeMs = src.MaxWaitTimeMs
+	}
+	if dst.ActiveConsumers == 0 {
+		dst.ActiveConsumers = src.ActiveConsumers
+	}
+	if dst.HeapCostBytes == 0 {
+		dst.HeapCostBytes = src.HeapCostBytes
+	}
+	if dst.NodeId == "" {
+		dst.NodeId = src.NodeId
+	}
+	if dst.TimestampMs == 0 {
+		dst.TimestampMs = src.TimestampMs
+	}
+}
+
+// ============================================================
+// Merge: AdminTopicStats
+// ============================================================
+// MergeAdminTopicStats fills zero-valued fields in dst from src.
+func MergeAdminTopicStats(dst, src *AdminTopicStats) {
+	if dst.QualifiedName == "" {
+		dst.QualifiedName = src.QualifiedName
+	}
+	if dst.StateRoot == "" {
+		dst.StateRoot = src.StateRoot
+	}
+	if dst.Boundary == "" {
+		dst.Boundary = src.Boundary
+	}
+	if dst.TotalPublished == 0 {
+		dst.TotalPublished = src.TotalPublished
+	}
+	if dst.TotalReceived == 0 {
+		dst.TotalReceived = src.TotalReceived
+	}
+	if dst.PublishRate == 0 {
+		dst.PublishRate = src.PublishRate
+	}
+	if dst.SubscriberCount == 0 {
+		dst.SubscriberCount = src.SubscriberCount
+	}
+	if len(dst.Subscribers) == 0 {
+		dst.Subscribers = src.Subscribers
+	}
+	if dst.NodeId == "" {
+		dst.NodeId = src.NodeId
+	}
+	if dst.TimestampMs == 0 {
+		dst.TimestampMs = src.TimestampMs
+	}
+}
+
+// ============================================================
+// Merge: AdminTopicSubscriber
+// ============================================================
+// MergeAdminTopicSubscriber fills zero-valued fields in dst from src.
+func MergeAdminTopicSubscriber(dst, src *AdminTopicSubscriber) {
+	if dst.ServiceId == "" {
+		dst.ServiceId = src.ServiceId
+	}
+	if dst.TotalReceived == 0 {
+		dst.TotalReceived = src.TotalReceived
+	}
+	if dst.TotalDropped == 0 {
+		dst.TotalDropped = src.TotalDropped
+	}
+	if !dst.Connected {
+		dst.Connected = src.Connected
+	}
+	if dst.LastReceivedMs == 0 {
+		dst.LastReceivedMs = src.LastReceivedMs
+	}
+}
+
+// ============================================================
+// Merge: AdminWatchHealth
+// ============================================================
+// MergeAdminWatchHealth fills zero-valued fields in dst from src.
+func MergeAdminWatchHealth(dst, src *AdminWatchHealth) {
+	if dst.WatchId == "" {
+		dst.WatchId = src.WatchId
+	}
+	if dst.ServiceId == "" {
+		dst.ServiceId = src.ServiceId
+	}
+	if dst.NodeId == "" {
+		dst.NodeId = src.NodeId
+	}
+	if dst.Method == "" {
+		dst.Method = src.Method
+	}
+	if dst.Graph == "" {
+		dst.Graph = src.Graph
+	}
+	if dst.MessagesSent == 0 {
+		dst.MessagesSent = src.MessagesSent
+	}
+	if dst.MessagesPending == 0 {
+		dst.MessagesPending = src.MessagesPending
+	}
+	if !dst.ConsumerHealthy {
+		dst.ConsumerHealthy = src.ConsumerHealthy
+	}
+	if dst.BackpressureEvents == 0 {
+		dst.BackpressureEvents = src.BackpressureEvents
+	}
+	if dst.LastSentMs == 0 {
+		dst.LastSentMs = src.LastSentMs
+	}
+	if dst.LastMutationMs == 0 {
+		dst.LastMutationMs = src.LastMutationMs
+	}
+	if dst.LagMs == 0 {
+		dst.LagMs = src.LagMs
+	}
+	if dst.OpenedAtMs == 0 {
+		dst.OpenedAtMs = src.OpenedAtMs
+	}
+	if dst.DurationMs == 0 {
+		dst.DurationMs = src.DurationMs
+	}
+	if dst.PeerAddress == "" {
+		dst.PeerAddress = src.PeerAddress
+	}
+	if dst.TimestampMs == 0 {
+		dst.TimestampMs = src.TimestampMs
+	}
+}
+
+// ============================================================
+// Merge: AdminMutationRate
+// ============================================================
+// MergeAdminMutationRate fills zero-valued fields in dst from src.
+func MergeAdminMutationRate(dst, src *AdminMutationRate) {
+	if dst.QualifiedName == "" {
+		dst.QualifiedName = src.QualifiedName
+	}
+	if dst.StateRoot == "" {
+		dst.StateRoot = src.StateRoot
+	}
+	if dst.Boundary == "" {
+		dst.Boundary = src.Boundary
+	}
+	if dst.GraphType == 0 {
+		dst.GraphType = src.GraphType
+	}
+	if dst.TotalMutations == 0 {
+		dst.TotalMutations = src.TotalMutations
+	}
+	if dst.IntervalMutations == 0 {
+		dst.IntervalMutations = src.IntervalMutations
+	}
+	if dst.MutationRate == 0 {
+		dst.MutationRate = src.MutationRate
+	}
+	if dst.PutCount == 0 {
+		dst.PutCount = src.PutCount
+	}
+	if dst.SetCount == 0 {
+		dst.SetCount = src.SetCount
+	}
+	if dst.DeleteCount == 0 {
+		dst.DeleteCount = src.DeleteCount
+	}
+	if dst.NodeId == "" {
+		dst.NodeId = src.NodeId
+	}
+	if dst.TimestampMs == 0 {
+		dst.TimestampMs = src.TimestampMs
 	}
 }

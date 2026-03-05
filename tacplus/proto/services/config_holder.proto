@@ -49,7 +49,7 @@ message PolicyConfigState {
 }
 
 // ServiceConfigState delivers runtime configuration (OPA policy) to all services.
-// Elvis writes the OPA policy; frontends subscribe via OnChange.
+// The backend writes the OPA policy; frontends subscribe via OnChange.
 message ServiceConfigState {
 
   serviceconfig.Config config = 1;

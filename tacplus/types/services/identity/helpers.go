@@ -8255,14 +8255,14 @@ func ValidateConfig(m *Config) error {
 		return protoerrors.NewErrMissingInvalidData(nil, "field RefreshTokenLifetimeSeconds must be positive (> 0), got: %d", m.RefreshTokenLifetimeSeconds)
 	}
 
-	// Validate KeyLifetimeSeconds (assert_duration_min: 3600)
-	if m.KeyLifetimeSeconds < 3600 {
-		return protoerrors.NewErrMissingInvalidData(nil, "field KeyLifetimeSeconds must be >= 3600, got: %d", m.KeyLifetimeSeconds)
-	}
-
 	// Validate KeyLifetimeSeconds (assert_duration: POSITIVE)
 	if m.KeyLifetimeSeconds <= 0 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field KeyLifetimeSeconds must be positive (> 0), got: %d", m.KeyLifetimeSeconds)
+	}
+
+	// Validate KeyLifetimeSeconds (assert_duration_min: 3600)
+	if m.KeyLifetimeSeconds < 3600 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field KeyLifetimeSeconds must be >= 3600, got: %d", m.KeyLifetimeSeconds)
 	}
 
 	// Validate NonceExpireSeconds (assert_duration: POSITIVE)
@@ -8491,16 +8491,16 @@ func ValidateExternalJwk(m *ExternalJwk) error {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Key is required")
 	}
 
+	// Validate Issuer (assert_required)
+	if m.Issuer == "" {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Issuer is required")
+	}
+
 	// Validate Issuer (assert_url: URL_SCHEME_HTTPS)
 	if m.Issuer != "" {
 		if err := utils.ValidateAssertURL_URL_SCHEME_HTTPS(m.Issuer); err != nil {
 			return protoerrors.NewErrMissingInvalidData(err, "field Issuer URL validation failed")
 		}
-	}
-
-	// Validate Issuer (assert_required)
-	if m.Issuer == "" {
-		return protoerrors.NewErrMissingInvalidData(nil, "field Issuer is required")
 	}
 
 	// Validate FetchedAt (assert_gt: 0)
@@ -8675,16 +8675,16 @@ func ValidateCallbackResponse(m *CallbackResponse) error {
 		return protoerrors.NewErrMissingInvalidData(nil, "field AccessToken must be at least 1 characters, got: %d", len(m.AccessToken))
 	}
 
+	// Validate CallbackUrl (assert_required)
+	if m.CallbackUrl == "" {
+		return protoerrors.NewErrMissingInvalidData(nil, "field CallbackUrl is required")
+	}
+
 	// Validate CallbackUrl (assert_url: URL_SCHEME_HTTPS)
 	if m.CallbackUrl != "" {
 		if err := utils.ValidateAssertURL_URL_SCHEME_HTTPS(m.CallbackUrl); err != nil {
 			return protoerrors.NewErrMissingInvalidData(err, "field CallbackUrl URL validation failed")
 		}
-	}
-
-	// Validate CallbackUrl (assert_required)
-	if m.CallbackUrl == "" {
-		return protoerrors.NewErrMissingInvalidData(nil, "field CallbackUrl is required")
 	}
 
 	// Validate AccessTokenExpiresIn (assert_gt: 0)

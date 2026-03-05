@@ -661,20 +661,20 @@ func (x *OpenIdConfiguration) GetDpopSigningAlgValuesSupported() []string {
 	return nil
 }
 
-// CredPair binds a public key to an assigned identity. A service holding
-// the matching private key mints a throwaway JWT (kid + signature only),
-// exchanges it via TokenExchanger for a refresh token bound to the
-// CredPair's identity, then exchanges the refresh token for access tokens.
+// CredPair holds a public key for the CredPair token exchange flow.
+// A service holding the matching private key mints a throwaway JWT
+// (kid + signature only), exchanges it via TokenExchanger for a refresh
+// token, then exchanges the refresh token for access tokens.
 //
-// The private key lives only in the client's config (backendclient.proto),
-// never on the server.
+// Identity mapping (kid → service name) is handled separately by
+// ServiceEntitlementMapping. The private key lives only in the client's
+// config (backendclient.proto), never on the server.
 type CredPair struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The public key for signature verification.
-	// kid (public_key.kid) is used as the collection key.
-	PublicKey *Jwk `protobuf:"bytes,1,opt,name=public_key,json=publicKey,proto3" json:"public_key,omitempty"`
-	// The principal name bound to this key.
-	Principal     string `protobuf:"bytes,2,opt,name=principal,proto3" json:"principal,omitempty"`
+	// kid (public_key.kid) is used as the collection key and as the
+	// credential_id in ServiceEntitlementMapping.
+	PublicKey     *Jwk `protobuf:"bytes,1,opt,name=public_key,json=publicKey,proto3" json:"public_key,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -714,13 +714,6 @@ func (x *CredPair) GetPublicKey() *Jwk {
 		return x.PublicKey
 	}
 	return nil
-}
-
-func (x *CredPair) GetPrincipal() string {
-	if x != nil {
-		return x.Principal
-	}
-	return ""
 }
 
 var File_libs_jwk_proto protoreflect.FileDescriptor
@@ -783,11 +776,10 @@ const file_libs_jwk_proto_rawDesc = "" +
 	"0token_endpoint_auth_signing_alg_values_supported\x18$ \x03(\tR*tokenEndpointAuthSigningAlgValuesSupported\x12@\n" +
 	"\x1cbackchannel_logout_supported\x18% \x01(\bR\x1abackchannelLogoutSupported\x12O\n" +
 	"$backchannel_logout_session_supported\x18& \x01(\bR!backchannelLogoutSessionSupported\x12H\n" +
-	"!dpop_signing_alg_values_supported\x18' \x03(\tR\x1ddpopSigningAlgValuesSupported\"]\n" +
+	"!dpop_signing_alg_values_supported\x18' \x03(\tR\x1ddpopSigningAlgValuesSupported\"9\n" +
 	"\bCredPair\x12-\n" +
 	"\n" +
-	"public_key\x18\x01 \x01(\v2\b.jwk.JwkB\x04\x88\xa6\x1d\x01R\tpublicKey\x12\"\n" +
-	"\tprincipal\x18\x02 \x01(\tB\x04\x88\xa6\x1d\x01R\tprincipal*f\n" +
+	"public_key\x18\x01 \x01(\v2\b.jwk.JwkB\x04\x88\xa6\x1d\x01R\tpublicKey*f\n" +
 	"\n" +
 	"JwkUseType\x12\x1a\n" +
 	"\x16JWK_USE_TYPE_UNDEFINED\x10\x00\x12\x1d\n" +

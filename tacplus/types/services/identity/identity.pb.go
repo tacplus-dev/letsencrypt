@@ -221,7 +221,7 @@ type Config struct {
 	RefreshTokenLifetimeSeconds int64 `protobuf:"varint,3,opt,name=refresh_token_lifetime_seconds,json=refreshTokenLifetimeSeconds,proto3" json:"refresh_token_lifetime_seconds,omitempty"`
 	// key_lifetime_seconds controls how long each instance's signing key is used.
 	// On rotation the instance generates a new key pair, publishes the new JWK
-	// to elvis (consumers receive it immediately via Watch), and starts
+	// to kernel (consumers receive it immediately via Watch), and starts
 	// signing with the new key. The old JWK remains in verifying_keys until
 	// all tokens signed by it have expired (access_token_lifetime_seconds).
 	// Minimum: 3600 (1 hour). Default: 86400 (24 hours).

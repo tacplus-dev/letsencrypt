@@ -38,6 +38,7 @@ type opapolicyJSON struct {
 	Created    int64  `json:"created,omitempty"`
 	Version    string `json:"version,omitempty"`
 	Source     string `json:"source,omitempty"`
+	Issuer     string `json:"issuer,omitempty"`
 }
 
 // OpaPolicyToJSON converts OpaPolicy to JSON bytes.
@@ -53,6 +54,7 @@ func OpaPolicyToJSON(v *OpaPolicy) ([]byte, error) {
 		Created:    v.Created,
 		Version:    v.Version,
 		Source:     v.Source,
+		Issuer:     v.Issuer,
 	}
 	return json.Marshal(helper)
 }
@@ -122,6 +124,7 @@ func OpaPolicyFromJSON(data []byte) (*OpaPolicy, error) {
 	result.Created = raw.Created
 	result.Version = raw.Version
 	result.Source = raw.Source
+	result.Issuer = raw.Issuer
 	return result, nil
 }
 
@@ -178,6 +181,7 @@ func OpaPolicyToEnvVar(v *OpaPolicy) map[string]string {
 	result["PROTO_LIBS_OPA_OPA_POLICY_CREATED"] = strconv.FormatInt(v.Created, 10)
 	result["PROTO_LIBS_OPA_OPA_POLICY_VERSION"] = v.Version
 	result["PROTO_LIBS_OPA_OPA_POLICY_SOURCE"] = v.Source
+	result["PROTO_LIBS_OPA_OPA_POLICY_ISSUER"] = v.Issuer
 	return result
 }
 
@@ -202,6 +206,9 @@ func OpaPolicyFromEnvVar(env map[string]string) (*OpaPolicy, error) {
 	}
 	if val, ok := env["PROTO_LIBS_OPA_OPA_POLICY_SOURCE"]; ok && val != "" {
 		result.Source = val
+	}
+	if val, ok := env["PROTO_LIBS_OPA_OPA_POLICY_ISSUER"]; ok && val != "" {
+		result.Issuer = val
 	}
 	return result, nil
 }
@@ -243,6 +250,18 @@ func ValidateOpaPolicy(m *OpaPolicy) error {
 		}
 	}
 
+	// Validate Issuer (assert_required)
+	if m.Issuer == "" {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Issuer is required")
+	}
+
+	// Validate Issuer (assert_url: URL_SCHEME_HTTPS)
+	if m.Issuer != "" {
+		if err := utils.ValidateAssertURL_URL_SCHEME_HTTPS(m.Issuer); err != nil {
+			return protoerrors.NewErrMissingInvalidData(err, "field Issuer URL validation failed")
+		}
+	}
+
 	// Validate EntryPoint (default max size: 32768 bytes)
 	if len(m.EntryPoint) > 32768 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field EntryPoint exceeds max size of 32768 bytes, got: %d", len(m.EntryPoint))
@@ -263,6 +282,11 @@ func ValidateOpaPolicy(m *OpaPolicy) error {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Source exceeds max size of 32768 bytes, got: %d", len(m.Source))
 	}
 
+	// Validate Issuer (default max size: 32768 bytes)
+	if len(m.Issuer) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Issuer exceeds max size of 32768 bytes, got: %d", len(m.Issuer))
+	}
+
 	return nil
 }
 
@@ -274,6 +298,7 @@ const (
 	MaxSizeOpapolicyBundle     int = 5242880
 	MaxSizeOpapolicyVersion    int = 32768
 	MaxSizeOpapolicySource     int = 32768
+	MaxSizeOpapolicyIssuer     int = 32768
 )
 
 // ============================================================
@@ -295,5 +320,8 @@ func MergeOpaPolicy(dst, src *OpaPolicy) {
 	}
 	if dst.Source == "" {
 		dst.Source = src.Source
+	}
+	if dst.Issuer == "" {
+		dst.Issuer = src.Issuer
 	}
 }

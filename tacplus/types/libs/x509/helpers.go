@@ -1157,14 +1157,14 @@ func ValidateX509CertRequest(m *X509CertRequest) error {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Exp must be positive (> 0), got: %d", m.Exp)
 	}
 
-	// Validate Issuer (assert_required)
-	if m.Issuer == "" {
-		return protoerrors.NewErrMissingInvalidData(nil, "field Issuer is required")
-	}
-
 	// Validate Issuer (assert_min_length: 1)
 	if len(m.Issuer) < 1 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Issuer must be at least 1 characters, got: %d", len(m.Issuer))
+	}
+
+	// Validate Issuer (assert_required)
+	if m.Issuer == "" {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Issuer is required")
 	}
 
 	// Validate Issuer (default max size: 32768 bytes)

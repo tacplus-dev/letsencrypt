@@ -156,18 +156,17 @@ message OpenIdConfiguration {
 // Credential Pairs
 // ============================================================================
 
-// CredPair binds a public key to an assigned identity. A service holding
-// the matching private key mints a throwaway JWT (kid + signature only),
-// exchanges it via TokenExchanger for a refresh token bound to the
-// CredPair's identity, then exchanges the refresh token for access tokens.
+// CredPair holds a public key for the CredPair token exchange flow.
+// A service holding the matching private key mints a throwaway JWT
+// (kid + signature only), exchanges it via TokenExchanger for a refresh
+// token, then exchanges the refresh token for access tokens.
 //
-// The private key lives only in the client's config (backendclient.proto),
-// never on the server.
+// Identity mapping (kid → service name) is handled separately by
+// ServiceEntitlementMapping. The private key lives only in the client's
+// config (backendclient.proto), never on the server.
 message CredPair {
   // The public key for signature verification.
-  // kid (public_key.kid) is used as the collection key.
+  // kid (public_key.kid) is used as the collection key and as the
+  // credential_id in ServiceEntitlementMapping.
   Jwk public_key = 1;
-
-  // The principal name bound to this key.
-  string principal = 2;
 }

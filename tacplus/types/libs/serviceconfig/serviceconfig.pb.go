@@ -93,10 +93,10 @@ func (MemberStatus) EnumDescriptor() ([]byte, []int) {
 	return file_libs_serviceconfig_proto_rawDescGZIP(), []int{0}
 }
 
-// BootstrapConfig holds the minimum configuration needed to connect to elvis.
+// BootstrapConfig holds the minimum configuration needed to connect to the backend.
 // Loaded from YAML at boot, immutable for the lifetime of the process.
 // All runtime-tunable settings (listen address, TLS, logging, timeouts)
-// are in Config, delivered via ServiceConfigState from elvis.
+// are in Config, delivered via ServiceConfigState from the backend.
 type BootstrapConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The backend service endpoints (cluster).
@@ -177,7 +177,7 @@ func (x *BootstrapConfig) GetTrustedCas() []*x509.X509Cert {
 	return nil
 }
 
-// Config holds runtime configuration delivered by elvis to all services via
+// Config holds runtime configuration delivered by the backend to all services via
 // the ServiceConfigState boundary. This config can change at any time;
 // services subscribe to updates and apply them dynamically.
 type Config struct {

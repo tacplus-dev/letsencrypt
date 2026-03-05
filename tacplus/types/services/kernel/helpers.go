@@ -9,9 +9,9 @@
 // If changes are needed, update the tacplus compiler at:
 // gitlab.com/secondstarcavalier/controlplane/services/tacplus
 //
-// Source: services/elvis.proto
+// Source: services/kernel.proto
 
-package elvis
+package kernel
 
 import (
 	"bytes"
@@ -31,7 +31,7 @@ import (
 	outputformat "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/outputformat"
 	x509 "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/x509"
 	config_holder "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/config_holder"
-	presley "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/presley"
+	sentinel "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/sentinel"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 	"gopkg.in/yaml.v3"
@@ -2817,14 +2817,14 @@ func ClusterStateToJSON(v *ClusterState) ([]byte, error) {
 			if v.ClusterInfo == nil {
 				return nil
 			}
-			data, _ := presley.AdminClusterInfoToJSON(v.ClusterInfo)
+			data, _ := sentinel.AdminClusterInfoToJSON(v.ClusterInfo)
 			return data
 		}(),
 		ClusterHealth: func() json.RawMessage {
 			if v.ClusterHealth == nil {
 				return nil
 			}
-			data, _ := presley.AdminClusterHealthToJSON(v.ClusterHealth)
+			data, _ := sentinel.AdminClusterHealthToJSON(v.ClusterHealth)
 			return data
 		}(),
 		NodeMetrics: func() []json.RawMessage {
@@ -2834,7 +2834,7 @@ func ClusterStateToJSON(v *ClusterState) ([]byte, error) {
 			result := make([]json.RawMessage, 0, len(v.NodeMetrics))
 			for _, item := range v.NodeMetrics {
 				if item != nil {
-					if data, err := presley.AdminNodeMetricsToJSON(item); err == nil {
+					if data, err := sentinel.AdminNodeMetricsToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -2848,7 +2848,7 @@ func ClusterStateToJSON(v *ClusterState) ([]byte, error) {
 			result := make([]json.RawMessage, 0, len(v.GrpcStats))
 			for _, item := range v.GrpcStats {
 				if item != nil {
-					if data, err := presley.AdminGrpcStatsToJSON(item); err == nil {
+					if data, err := sentinel.AdminGrpcStatsToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -2862,7 +2862,7 @@ func ClusterStateToJSON(v *ClusterState) ([]byte, error) {
 			result := make([]json.RawMessage, 0, len(v.PersistenceStatus))
 			for _, item := range v.PersistenceStatus {
 				if item != nil {
-					if data, err := presley.AdminPersistenceStatusToJSON(item); err == nil {
+					if data, err := sentinel.AdminPersistenceStatusToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -2876,7 +2876,7 @@ func ClusterStateToJSON(v *ClusterState) ([]byte, error) {
 			result := make([]json.RawMessage, 0, len(v.NetworkStats))
 			for _, item := range v.NetworkStats {
 				if item != nil {
-					if data, err := presley.AdminNetworkStatsToJSON(item); err == nil {
+					if data, err := sentinel.AdminNetworkStatsToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -2890,7 +2890,7 @@ func ClusterStateToJSON(v *ClusterState) ([]byte, error) {
 			result := make([]json.RawMessage, 0, len(v.ThreadInfo))
 			for _, item := range v.ThreadInfo {
 				if item != nil {
-					if data, err := presley.AdminThreadInfoToJSON(item); err == nil {
+					if data, err := sentinel.AdminThreadInfoToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -2904,7 +2904,7 @@ func ClusterStateToJSON(v *ClusterState) ([]byte, error) {
 			result := make([]json.RawMessage, 0, len(v.TokenCacheStats))
 			for _, item := range v.TokenCacheStats {
 				if item != nil {
-					if data, err := presley.AdminTokenCacheStatsToJSON(item); err == nil {
+					if data, err := sentinel.AdminTokenCacheStatsToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -2918,7 +2918,7 @@ func ClusterStateToJSON(v *ClusterState) ([]byte, error) {
 			result := make([]json.RawMessage, 0, len(v.MapStats))
 			for _, item := range v.MapStats {
 				if item != nil {
-					if data, err := presley.AdminMapStatsToJSON(item); err == nil {
+					if data, err := sentinel.AdminMapStatsToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -2946,7 +2946,7 @@ func ClusterStateToJSON(v *ClusterState) ([]byte, error) {
 			result := make([]json.RawMessage, 0, len(v.GraphRegistry))
 			for _, item := range v.GraphRegistry {
 				if item != nil {
-					if data, err := presley.AdminGraphInfoToJSON(item); err == nil {
+					if data, err := sentinel.AdminGraphInfoToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -2960,7 +2960,7 @@ func ClusterStateToJSON(v *ClusterState) ([]byte, error) {
 			result := make([]json.RawMessage, 0, len(v.ServiceConnections))
 			for _, item := range v.ServiceConnections {
 				if item != nil {
-					if data, err := presley.AdminServiceConnectionToJSON(item); err == nil {
+					if data, err := sentinel.AdminServiceConnectionToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -2974,7 +2974,7 @@ func ClusterStateToJSON(v *ClusterState) ([]byte, error) {
 			result := make([]json.RawMessage, 0, len(v.QueueStats))
 			for _, item := range v.QueueStats {
 				if item != nil {
-					if data, err := presley.AdminQueueStatsToJSON(item); err == nil {
+					if data, err := sentinel.AdminQueueStatsToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -2988,7 +2988,7 @@ func ClusterStateToJSON(v *ClusterState) ([]byte, error) {
 			result := make([]json.RawMessage, 0, len(v.TopicStats))
 			for _, item := range v.TopicStats {
 				if item != nil {
-					if data, err := presley.AdminTopicStatsToJSON(item); err == nil {
+					if data, err := sentinel.AdminTopicStatsToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -3002,7 +3002,7 @@ func ClusterStateToJSON(v *ClusterState) ([]byte, error) {
 			result := make([]json.RawMessage, 0, len(v.WatchHealth))
 			for _, item := range v.WatchHealth {
 				if item != nil {
-					if data, err := presley.AdminWatchHealthToJSON(item); err == nil {
+					if data, err := sentinel.AdminWatchHealthToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -3016,7 +3016,7 @@ func ClusterStateToJSON(v *ClusterState) ([]byte, error) {
 			result := make([]json.RawMessage, 0, len(v.MutationRates))
 			for _, item := range v.MutationRates {
 				if item != nil {
-					if data, err := presley.AdminMutationRateToJSON(item); err == nil {
+					if data, err := sentinel.AdminMutationRateToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -3110,24 +3110,24 @@ func ClusterStateFromJSON(data []byte) (*ClusterState, error) {
 	result := &ClusterState{}
 	// Parse message field: ClusterInfo
 	if len(raw.ClusterInfo) > 0 {
-		parsed, err := presley.AdminClusterInfoFromJSON(raw.ClusterInfo)
+		parsed, err := sentinel.AdminClusterInfoFromJSON(raw.ClusterInfo)
 		if err == nil {
 			result.ClusterInfo = parsed
 		}
 	}
 	// Parse message field: ClusterHealth
 	if len(raw.ClusterHealth) > 0 {
-		parsed, err := presley.AdminClusterHealthFromJSON(raw.ClusterHealth)
+		parsed, err := sentinel.AdminClusterHealthFromJSON(raw.ClusterHealth)
 		if err == nil {
 			result.ClusterHealth = parsed
 		}
 	}
 	// Parse repeated message field: NodeMetrics
 	if len(raw.NodeMetrics) > 0 {
-		result.NodeMetrics = make([]*presley.AdminNodeMetrics, 0, len(raw.NodeMetrics))
+		result.NodeMetrics = make([]*sentinel.AdminNodeMetrics, 0, len(raw.NodeMetrics))
 		for _, itemJSON := range raw.NodeMetrics {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminNodeMetricsFromJSON(itemJSON)
+				parsed, err := sentinel.AdminNodeMetricsFromJSON(itemJSON)
 				if err == nil {
 					result.NodeMetrics = append(result.NodeMetrics, parsed)
 				}
@@ -3136,10 +3136,10 @@ func ClusterStateFromJSON(data []byte) (*ClusterState, error) {
 	}
 	// Parse repeated message field: GrpcStats
 	if len(raw.GrpcStats) > 0 {
-		result.GrpcStats = make([]*presley.AdminGrpcStats, 0, len(raw.GrpcStats))
+		result.GrpcStats = make([]*sentinel.AdminGrpcStats, 0, len(raw.GrpcStats))
 		for _, itemJSON := range raw.GrpcStats {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminGrpcStatsFromJSON(itemJSON)
+				parsed, err := sentinel.AdminGrpcStatsFromJSON(itemJSON)
 				if err == nil {
 					result.GrpcStats = append(result.GrpcStats, parsed)
 				}
@@ -3148,10 +3148,10 @@ func ClusterStateFromJSON(data []byte) (*ClusterState, error) {
 	}
 	// Parse repeated message field: PersistenceStatus
 	if len(raw.PersistenceStatus) > 0 {
-		result.PersistenceStatus = make([]*presley.AdminPersistenceStatus, 0, len(raw.PersistenceStatus))
+		result.PersistenceStatus = make([]*sentinel.AdminPersistenceStatus, 0, len(raw.PersistenceStatus))
 		for _, itemJSON := range raw.PersistenceStatus {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminPersistenceStatusFromJSON(itemJSON)
+				parsed, err := sentinel.AdminPersistenceStatusFromJSON(itemJSON)
 				if err == nil {
 					result.PersistenceStatus = append(result.PersistenceStatus, parsed)
 				}
@@ -3160,10 +3160,10 @@ func ClusterStateFromJSON(data []byte) (*ClusterState, error) {
 	}
 	// Parse repeated message field: NetworkStats
 	if len(raw.NetworkStats) > 0 {
-		result.NetworkStats = make([]*presley.AdminNetworkStats, 0, len(raw.NetworkStats))
+		result.NetworkStats = make([]*sentinel.AdminNetworkStats, 0, len(raw.NetworkStats))
 		for _, itemJSON := range raw.NetworkStats {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminNetworkStatsFromJSON(itemJSON)
+				parsed, err := sentinel.AdminNetworkStatsFromJSON(itemJSON)
 				if err == nil {
 					result.NetworkStats = append(result.NetworkStats, parsed)
 				}
@@ -3172,10 +3172,10 @@ func ClusterStateFromJSON(data []byte) (*ClusterState, error) {
 	}
 	// Parse repeated message field: ThreadInfo
 	if len(raw.ThreadInfo) > 0 {
-		result.ThreadInfo = make([]*presley.AdminThreadInfo, 0, len(raw.ThreadInfo))
+		result.ThreadInfo = make([]*sentinel.AdminThreadInfo, 0, len(raw.ThreadInfo))
 		for _, itemJSON := range raw.ThreadInfo {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminThreadInfoFromJSON(itemJSON)
+				parsed, err := sentinel.AdminThreadInfoFromJSON(itemJSON)
 				if err == nil {
 					result.ThreadInfo = append(result.ThreadInfo, parsed)
 				}
@@ -3184,10 +3184,10 @@ func ClusterStateFromJSON(data []byte) (*ClusterState, error) {
 	}
 	// Parse repeated message field: TokenCacheStats
 	if len(raw.TokenCacheStats) > 0 {
-		result.TokenCacheStats = make([]*presley.AdminTokenCacheStats, 0, len(raw.TokenCacheStats))
+		result.TokenCacheStats = make([]*sentinel.AdminTokenCacheStats, 0, len(raw.TokenCacheStats))
 		for _, itemJSON := range raw.TokenCacheStats {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminTokenCacheStatsFromJSON(itemJSON)
+				parsed, err := sentinel.AdminTokenCacheStatsFromJSON(itemJSON)
 				if err == nil {
 					result.TokenCacheStats = append(result.TokenCacheStats, parsed)
 				}
@@ -3196,10 +3196,10 @@ func ClusterStateFromJSON(data []byte) (*ClusterState, error) {
 	}
 	// Parse repeated message field: MapStats
 	if len(raw.MapStats) > 0 {
-		result.MapStats = make([]*presley.AdminMapStats, 0, len(raw.MapStats))
+		result.MapStats = make([]*sentinel.AdminMapStats, 0, len(raw.MapStats))
 		for _, itemJSON := range raw.MapStats {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminMapStatsFromJSON(itemJSON)
+				parsed, err := sentinel.AdminMapStatsFromJSON(itemJSON)
 				if err == nil {
 					result.MapStats = append(result.MapStats, parsed)
 				}
@@ -3222,10 +3222,10 @@ func ClusterStateFromJSON(data []byte) (*ClusterState, error) {
 	}
 	// Parse repeated message field: GraphRegistry
 	if len(raw.GraphRegistry) > 0 {
-		result.GraphRegistry = make([]*presley.AdminGraphInfo, 0, len(raw.GraphRegistry))
+		result.GraphRegistry = make([]*sentinel.AdminGraphInfo, 0, len(raw.GraphRegistry))
 		for _, itemJSON := range raw.GraphRegistry {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminGraphInfoFromJSON(itemJSON)
+				parsed, err := sentinel.AdminGraphInfoFromJSON(itemJSON)
 				if err == nil {
 					result.GraphRegistry = append(result.GraphRegistry, parsed)
 				}
@@ -3234,10 +3234,10 @@ func ClusterStateFromJSON(data []byte) (*ClusterState, error) {
 	}
 	// Parse repeated message field: ServiceConnections
 	if len(raw.ServiceConnections) > 0 {
-		result.ServiceConnections = make([]*presley.AdminServiceConnection, 0, len(raw.ServiceConnections))
+		result.ServiceConnections = make([]*sentinel.AdminServiceConnection, 0, len(raw.ServiceConnections))
 		for _, itemJSON := range raw.ServiceConnections {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminServiceConnectionFromJSON(itemJSON)
+				parsed, err := sentinel.AdminServiceConnectionFromJSON(itemJSON)
 				if err == nil {
 					result.ServiceConnections = append(result.ServiceConnections, parsed)
 				}
@@ -3246,10 +3246,10 @@ func ClusterStateFromJSON(data []byte) (*ClusterState, error) {
 	}
 	// Parse repeated message field: QueueStats
 	if len(raw.QueueStats) > 0 {
-		result.QueueStats = make([]*presley.AdminQueueStats, 0, len(raw.QueueStats))
+		result.QueueStats = make([]*sentinel.AdminQueueStats, 0, len(raw.QueueStats))
 		for _, itemJSON := range raw.QueueStats {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminQueueStatsFromJSON(itemJSON)
+				parsed, err := sentinel.AdminQueueStatsFromJSON(itemJSON)
 				if err == nil {
 					result.QueueStats = append(result.QueueStats, parsed)
 				}
@@ -3258,10 +3258,10 @@ func ClusterStateFromJSON(data []byte) (*ClusterState, error) {
 	}
 	// Parse repeated message field: TopicStats
 	if len(raw.TopicStats) > 0 {
-		result.TopicStats = make([]*presley.AdminTopicStats, 0, len(raw.TopicStats))
+		result.TopicStats = make([]*sentinel.AdminTopicStats, 0, len(raw.TopicStats))
 		for _, itemJSON := range raw.TopicStats {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminTopicStatsFromJSON(itemJSON)
+				parsed, err := sentinel.AdminTopicStatsFromJSON(itemJSON)
 				if err == nil {
 					result.TopicStats = append(result.TopicStats, parsed)
 				}
@@ -3270,10 +3270,10 @@ func ClusterStateFromJSON(data []byte) (*ClusterState, error) {
 	}
 	// Parse repeated message field: WatchHealth
 	if len(raw.WatchHealth) > 0 {
-		result.WatchHealth = make([]*presley.AdminWatchHealth, 0, len(raw.WatchHealth))
+		result.WatchHealth = make([]*sentinel.AdminWatchHealth, 0, len(raw.WatchHealth))
 		for _, itemJSON := range raw.WatchHealth {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminWatchHealthFromJSON(itemJSON)
+				parsed, err := sentinel.AdminWatchHealthFromJSON(itemJSON)
 				if err == nil {
 					result.WatchHealth = append(result.WatchHealth, parsed)
 				}
@@ -3282,10 +3282,10 @@ func ClusterStateFromJSON(data []byte) (*ClusterState, error) {
 	}
 	// Parse repeated message field: MutationRates
 	if len(raw.MutationRates) > 0 {
-		result.MutationRates = make([]*presley.AdminMutationRate, 0, len(raw.MutationRates))
+		result.MutationRates = make([]*sentinel.AdminMutationRate, 0, len(raw.MutationRates))
 		for _, itemJSON := range raw.MutationRates {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminMutationRateFromJSON(itemJSON)
+				parsed, err := sentinel.AdminMutationRateFromJSON(itemJSON)
 				if err == nil {
 					result.MutationRates = append(result.MutationRates, parsed)
 				}
@@ -7778,7 +7778,7 @@ func NodeMetricsPutRequestToJSON(v *NodeMetricsPutRequest) ([]byte, error) {
 			if v.Value == nil {
 				return nil
 			}
-			data, _ := presley.AdminNodeMetricsToJSON(v.Value)
+			data, _ := sentinel.AdminNodeMetricsToJSON(v.Value)
 			return data
 		}(),
 		LockCounter: v.LockCounter,
@@ -7849,7 +7849,7 @@ func NodeMetricsPutRequestFromJSON(data []byte) (*NodeMetricsPutRequest, error) 
 	result.Key = raw.Key
 	// Parse message field: Value
 	if len(raw.Value) > 0 {
-		parsed, err := presley.AdminNodeMetricsFromJSON(raw.Value)
+		parsed, err := sentinel.AdminNodeMetricsFromJSON(raw.Value)
 		if err == nil {
 			result.Value = parsed
 		}
@@ -8383,7 +8383,7 @@ func NodeMetricsValueResponseToJSON(v *NodeMetricsValueResponse) ([]byte, error)
 			if v.Value == nil {
 				return nil
 			}
-			data, _ := presley.AdminNodeMetricsToJSON(v.Value)
+			data, _ := sentinel.AdminNodeMetricsToJSON(v.Value)
 			return data
 		}(),
 		Found: v.Found,
@@ -8453,7 +8453,7 @@ func NodeMetricsValueResponseFromJSON(data []byte) (*NodeMetricsValueResponse, e
 	result := &NodeMetricsValueResponse{}
 	// Parse message field: Value
 	if len(raw.Value) > 0 {
-		parsed, err := presley.AdminNodeMetricsFromJSON(raw.Value)
+		parsed, err := sentinel.AdminNodeMetricsFromJSON(raw.Value)
 		if err == nil {
 			result.Value = parsed
 		}
@@ -9014,7 +9014,7 @@ func NodeMetricsQueryResponseToJSON(v *NodeMetricsQueryResponse) ([]byte, error)
 			result := make([]json.RawMessage, 0, len(v.Results))
 			for _, item := range v.Results {
 				if item != nil {
-					if data, err := presley.AdminNodeMetricsToJSON(item); err == nil {
+					if data, err := sentinel.AdminNodeMetricsToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -9088,10 +9088,10 @@ func NodeMetricsQueryResponseFromJSON(data []byte) (*NodeMetricsQueryResponse, e
 	result := &NodeMetricsQueryResponse{}
 	// Parse repeated message field: Results
 	if len(raw.Results) > 0 {
-		result.Results = make([]*presley.AdminNodeMetrics, 0, len(raw.Results))
+		result.Results = make([]*sentinel.AdminNodeMetrics, 0, len(raw.Results))
 		for _, itemJSON := range raw.Results {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminNodeMetricsFromJSON(itemJSON)
+				parsed, err := sentinel.AdminNodeMetricsFromJSON(itemJSON)
 				if err == nil {
 					result.Results = append(result.Results, parsed)
 				}
@@ -9282,7 +9282,7 @@ func GrpcStatsPutRequestToJSON(v *GrpcStatsPutRequest) ([]byte, error) {
 			if v.Value == nil {
 				return nil
 			}
-			data, _ := presley.AdminGrpcStatsToJSON(v.Value)
+			data, _ := sentinel.AdminGrpcStatsToJSON(v.Value)
 			return data
 		}(),
 		LockCounter: v.LockCounter,
@@ -9353,7 +9353,7 @@ func GrpcStatsPutRequestFromJSON(data []byte) (*GrpcStatsPutRequest, error) {
 	result.Key = raw.Key
 	// Parse message field: Value
 	if len(raw.Value) > 0 {
-		parsed, err := presley.AdminGrpcStatsFromJSON(raw.Value)
+		parsed, err := sentinel.AdminGrpcStatsFromJSON(raw.Value)
 		if err == nil {
 			result.Value = parsed
 		}
@@ -9887,7 +9887,7 @@ func GrpcStatsValueResponseToJSON(v *GrpcStatsValueResponse) ([]byte, error) {
 			if v.Value == nil {
 				return nil
 			}
-			data, _ := presley.AdminGrpcStatsToJSON(v.Value)
+			data, _ := sentinel.AdminGrpcStatsToJSON(v.Value)
 			return data
 		}(),
 		Found: v.Found,
@@ -9957,7 +9957,7 @@ func GrpcStatsValueResponseFromJSON(data []byte) (*GrpcStatsValueResponse, error
 	result := &GrpcStatsValueResponse{}
 	// Parse message field: Value
 	if len(raw.Value) > 0 {
-		parsed, err := presley.AdminGrpcStatsFromJSON(raw.Value)
+		parsed, err := sentinel.AdminGrpcStatsFromJSON(raw.Value)
 		if err == nil {
 			result.Value = parsed
 		}
@@ -10518,7 +10518,7 @@ func GrpcStatsQueryResponseToJSON(v *GrpcStatsQueryResponse) ([]byte, error) {
 			result := make([]json.RawMessage, 0, len(v.Results))
 			for _, item := range v.Results {
 				if item != nil {
-					if data, err := presley.AdminGrpcStatsToJSON(item); err == nil {
+					if data, err := sentinel.AdminGrpcStatsToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -10592,10 +10592,10 @@ func GrpcStatsQueryResponseFromJSON(data []byte) (*GrpcStatsQueryResponse, error
 	result := &GrpcStatsQueryResponse{}
 	// Parse repeated message field: Results
 	if len(raw.Results) > 0 {
-		result.Results = make([]*presley.AdminGrpcStats, 0, len(raw.Results))
+		result.Results = make([]*sentinel.AdminGrpcStats, 0, len(raw.Results))
 		for _, itemJSON := range raw.Results {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminGrpcStatsFromJSON(itemJSON)
+				parsed, err := sentinel.AdminGrpcStatsFromJSON(itemJSON)
 				if err == nil {
 					result.Results = append(result.Results, parsed)
 				}
@@ -10786,7 +10786,7 @@ func PersistenceStatusPutRequestToJSON(v *PersistenceStatusPutRequest) ([]byte, 
 			if v.Value == nil {
 				return nil
 			}
-			data, _ := presley.AdminPersistenceStatusToJSON(v.Value)
+			data, _ := sentinel.AdminPersistenceStatusToJSON(v.Value)
 			return data
 		}(),
 		LockCounter: v.LockCounter,
@@ -10857,7 +10857,7 @@ func PersistenceStatusPutRequestFromJSON(data []byte) (*PersistenceStatusPutRequ
 	result.Key = raw.Key
 	// Parse message field: Value
 	if len(raw.Value) > 0 {
-		parsed, err := presley.AdminPersistenceStatusFromJSON(raw.Value)
+		parsed, err := sentinel.AdminPersistenceStatusFromJSON(raw.Value)
 		if err == nil {
 			result.Value = parsed
 		}
@@ -11391,7 +11391,7 @@ func PersistenceStatusValueResponseToJSON(v *PersistenceStatusValueResponse) ([]
 			if v.Value == nil {
 				return nil
 			}
-			data, _ := presley.AdminPersistenceStatusToJSON(v.Value)
+			data, _ := sentinel.AdminPersistenceStatusToJSON(v.Value)
 			return data
 		}(),
 		Found: v.Found,
@@ -11461,7 +11461,7 @@ func PersistenceStatusValueResponseFromJSON(data []byte) (*PersistenceStatusValu
 	result := &PersistenceStatusValueResponse{}
 	// Parse message field: Value
 	if len(raw.Value) > 0 {
-		parsed, err := presley.AdminPersistenceStatusFromJSON(raw.Value)
+		parsed, err := sentinel.AdminPersistenceStatusFromJSON(raw.Value)
 		if err == nil {
 			result.Value = parsed
 		}
@@ -12022,7 +12022,7 @@ func PersistenceStatusQueryResponseToJSON(v *PersistenceStatusQueryResponse) ([]
 			result := make([]json.RawMessage, 0, len(v.Results))
 			for _, item := range v.Results {
 				if item != nil {
-					if data, err := presley.AdminPersistenceStatusToJSON(item); err == nil {
+					if data, err := sentinel.AdminPersistenceStatusToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -12096,10 +12096,10 @@ func PersistenceStatusQueryResponseFromJSON(data []byte) (*PersistenceStatusQuer
 	result := &PersistenceStatusQueryResponse{}
 	// Parse repeated message field: Results
 	if len(raw.Results) > 0 {
-		result.Results = make([]*presley.AdminPersistenceStatus, 0, len(raw.Results))
+		result.Results = make([]*sentinel.AdminPersistenceStatus, 0, len(raw.Results))
 		for _, itemJSON := range raw.Results {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminPersistenceStatusFromJSON(itemJSON)
+				parsed, err := sentinel.AdminPersistenceStatusFromJSON(itemJSON)
 				if err == nil {
 					result.Results = append(result.Results, parsed)
 				}
@@ -12290,7 +12290,7 @@ func NetworkStatsPutRequestToJSON(v *NetworkStatsPutRequest) ([]byte, error) {
 			if v.Value == nil {
 				return nil
 			}
-			data, _ := presley.AdminNetworkStatsToJSON(v.Value)
+			data, _ := sentinel.AdminNetworkStatsToJSON(v.Value)
 			return data
 		}(),
 		LockCounter: v.LockCounter,
@@ -12361,7 +12361,7 @@ func NetworkStatsPutRequestFromJSON(data []byte) (*NetworkStatsPutRequest, error
 	result.Key = raw.Key
 	// Parse message field: Value
 	if len(raw.Value) > 0 {
-		parsed, err := presley.AdminNetworkStatsFromJSON(raw.Value)
+		parsed, err := sentinel.AdminNetworkStatsFromJSON(raw.Value)
 		if err == nil {
 			result.Value = parsed
 		}
@@ -12895,7 +12895,7 @@ func NetworkStatsValueResponseToJSON(v *NetworkStatsValueResponse) ([]byte, erro
 			if v.Value == nil {
 				return nil
 			}
-			data, _ := presley.AdminNetworkStatsToJSON(v.Value)
+			data, _ := sentinel.AdminNetworkStatsToJSON(v.Value)
 			return data
 		}(),
 		Found: v.Found,
@@ -12965,7 +12965,7 @@ func NetworkStatsValueResponseFromJSON(data []byte) (*NetworkStatsValueResponse,
 	result := &NetworkStatsValueResponse{}
 	// Parse message field: Value
 	if len(raw.Value) > 0 {
-		parsed, err := presley.AdminNetworkStatsFromJSON(raw.Value)
+		parsed, err := sentinel.AdminNetworkStatsFromJSON(raw.Value)
 		if err == nil {
 			result.Value = parsed
 		}
@@ -13526,7 +13526,7 @@ func NetworkStatsQueryResponseToJSON(v *NetworkStatsQueryResponse) ([]byte, erro
 			result := make([]json.RawMessage, 0, len(v.Results))
 			for _, item := range v.Results {
 				if item != nil {
-					if data, err := presley.AdminNetworkStatsToJSON(item); err == nil {
+					if data, err := sentinel.AdminNetworkStatsToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -13600,10 +13600,10 @@ func NetworkStatsQueryResponseFromJSON(data []byte) (*NetworkStatsQueryResponse,
 	result := &NetworkStatsQueryResponse{}
 	// Parse repeated message field: Results
 	if len(raw.Results) > 0 {
-		result.Results = make([]*presley.AdminNetworkStats, 0, len(raw.Results))
+		result.Results = make([]*sentinel.AdminNetworkStats, 0, len(raw.Results))
 		for _, itemJSON := range raw.Results {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminNetworkStatsFromJSON(itemJSON)
+				parsed, err := sentinel.AdminNetworkStatsFromJSON(itemJSON)
 				if err == nil {
 					result.Results = append(result.Results, parsed)
 				}
@@ -13794,7 +13794,7 @@ func ThreadInfoPutRequestToJSON(v *ThreadInfoPutRequest) ([]byte, error) {
 			if v.Value == nil {
 				return nil
 			}
-			data, _ := presley.AdminThreadInfoToJSON(v.Value)
+			data, _ := sentinel.AdminThreadInfoToJSON(v.Value)
 			return data
 		}(),
 		LockCounter: v.LockCounter,
@@ -13865,7 +13865,7 @@ func ThreadInfoPutRequestFromJSON(data []byte) (*ThreadInfoPutRequest, error) {
 	result.Key = raw.Key
 	// Parse message field: Value
 	if len(raw.Value) > 0 {
-		parsed, err := presley.AdminThreadInfoFromJSON(raw.Value)
+		parsed, err := sentinel.AdminThreadInfoFromJSON(raw.Value)
 		if err == nil {
 			result.Value = parsed
 		}
@@ -14399,7 +14399,7 @@ func ThreadInfoValueResponseToJSON(v *ThreadInfoValueResponse) ([]byte, error) {
 			if v.Value == nil {
 				return nil
 			}
-			data, _ := presley.AdminThreadInfoToJSON(v.Value)
+			data, _ := sentinel.AdminThreadInfoToJSON(v.Value)
 			return data
 		}(),
 		Found: v.Found,
@@ -14469,7 +14469,7 @@ func ThreadInfoValueResponseFromJSON(data []byte) (*ThreadInfoValueResponse, err
 	result := &ThreadInfoValueResponse{}
 	// Parse message field: Value
 	if len(raw.Value) > 0 {
-		parsed, err := presley.AdminThreadInfoFromJSON(raw.Value)
+		parsed, err := sentinel.AdminThreadInfoFromJSON(raw.Value)
 		if err == nil {
 			result.Value = parsed
 		}
@@ -15030,7 +15030,7 @@ func ThreadInfoQueryResponseToJSON(v *ThreadInfoQueryResponse) ([]byte, error) {
 			result := make([]json.RawMessage, 0, len(v.Results))
 			for _, item := range v.Results {
 				if item != nil {
-					if data, err := presley.AdminThreadInfoToJSON(item); err == nil {
+					if data, err := sentinel.AdminThreadInfoToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -15104,10 +15104,10 @@ func ThreadInfoQueryResponseFromJSON(data []byte) (*ThreadInfoQueryResponse, err
 	result := &ThreadInfoQueryResponse{}
 	// Parse repeated message field: Results
 	if len(raw.Results) > 0 {
-		result.Results = make([]*presley.AdminThreadInfo, 0, len(raw.Results))
+		result.Results = make([]*sentinel.AdminThreadInfo, 0, len(raw.Results))
 		for _, itemJSON := range raw.Results {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminThreadInfoFromJSON(itemJSON)
+				parsed, err := sentinel.AdminThreadInfoFromJSON(itemJSON)
 				if err == nil {
 					result.Results = append(result.Results, parsed)
 				}
@@ -15298,7 +15298,7 @@ func TokenCacheStatsPutRequestToJSON(v *TokenCacheStatsPutRequest) ([]byte, erro
 			if v.Value == nil {
 				return nil
 			}
-			data, _ := presley.AdminTokenCacheStatsToJSON(v.Value)
+			data, _ := sentinel.AdminTokenCacheStatsToJSON(v.Value)
 			return data
 		}(),
 		LockCounter: v.LockCounter,
@@ -15369,7 +15369,7 @@ func TokenCacheStatsPutRequestFromJSON(data []byte) (*TokenCacheStatsPutRequest,
 	result.Key = raw.Key
 	// Parse message field: Value
 	if len(raw.Value) > 0 {
-		parsed, err := presley.AdminTokenCacheStatsFromJSON(raw.Value)
+		parsed, err := sentinel.AdminTokenCacheStatsFromJSON(raw.Value)
 		if err == nil {
 			result.Value = parsed
 		}
@@ -15903,7 +15903,7 @@ func TokenCacheStatsValueResponseToJSON(v *TokenCacheStatsValueResponse) ([]byte
 			if v.Value == nil {
 				return nil
 			}
-			data, _ := presley.AdminTokenCacheStatsToJSON(v.Value)
+			data, _ := sentinel.AdminTokenCacheStatsToJSON(v.Value)
 			return data
 		}(),
 		Found: v.Found,
@@ -15973,7 +15973,7 @@ func TokenCacheStatsValueResponseFromJSON(data []byte) (*TokenCacheStatsValueRes
 	result := &TokenCacheStatsValueResponse{}
 	// Parse message field: Value
 	if len(raw.Value) > 0 {
-		parsed, err := presley.AdminTokenCacheStatsFromJSON(raw.Value)
+		parsed, err := sentinel.AdminTokenCacheStatsFromJSON(raw.Value)
 		if err == nil {
 			result.Value = parsed
 		}
@@ -16534,7 +16534,7 @@ func TokenCacheStatsQueryResponseToJSON(v *TokenCacheStatsQueryResponse) ([]byte
 			result := make([]json.RawMessage, 0, len(v.Results))
 			for _, item := range v.Results {
 				if item != nil {
-					if data, err := presley.AdminTokenCacheStatsToJSON(item); err == nil {
+					if data, err := sentinel.AdminTokenCacheStatsToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -16608,10 +16608,10 @@ func TokenCacheStatsQueryResponseFromJSON(data []byte) (*TokenCacheStatsQueryRes
 	result := &TokenCacheStatsQueryResponse{}
 	// Parse repeated message field: Results
 	if len(raw.Results) > 0 {
-		result.Results = make([]*presley.AdminTokenCacheStats, 0, len(raw.Results))
+		result.Results = make([]*sentinel.AdminTokenCacheStats, 0, len(raw.Results))
 		for _, itemJSON := range raw.Results {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminTokenCacheStatsFromJSON(itemJSON)
+				parsed, err := sentinel.AdminTokenCacheStatsFromJSON(itemJSON)
 				if err == nil {
 					result.Results = append(result.Results, parsed)
 				}
@@ -16802,7 +16802,7 @@ func MapStatsPutRequestToJSON(v *MapStatsPutRequest) ([]byte, error) {
 			if v.Value == nil {
 				return nil
 			}
-			data, _ := presley.AdminMapStatsToJSON(v.Value)
+			data, _ := sentinel.AdminMapStatsToJSON(v.Value)
 			return data
 		}(),
 		LockCounter: v.LockCounter,
@@ -16873,7 +16873,7 @@ func MapStatsPutRequestFromJSON(data []byte) (*MapStatsPutRequest, error) {
 	result.Key = raw.Key
 	// Parse message field: Value
 	if len(raw.Value) > 0 {
-		parsed, err := presley.AdminMapStatsFromJSON(raw.Value)
+		parsed, err := sentinel.AdminMapStatsFromJSON(raw.Value)
 		if err == nil {
 			result.Value = parsed
 		}
@@ -17407,7 +17407,7 @@ func MapStatsValueResponseToJSON(v *MapStatsValueResponse) ([]byte, error) {
 			if v.Value == nil {
 				return nil
 			}
-			data, _ := presley.AdminMapStatsToJSON(v.Value)
+			data, _ := sentinel.AdminMapStatsToJSON(v.Value)
 			return data
 		}(),
 		Found: v.Found,
@@ -17477,7 +17477,7 @@ func MapStatsValueResponseFromJSON(data []byte) (*MapStatsValueResponse, error) 
 	result := &MapStatsValueResponse{}
 	// Parse message field: Value
 	if len(raw.Value) > 0 {
-		parsed, err := presley.AdminMapStatsFromJSON(raw.Value)
+		parsed, err := sentinel.AdminMapStatsFromJSON(raw.Value)
 		if err == nil {
 			result.Value = parsed
 		}
@@ -18038,7 +18038,7 @@ func MapStatsQueryResponseToJSON(v *MapStatsQueryResponse) ([]byte, error) {
 			result := make([]json.RawMessage, 0, len(v.Results))
 			for _, item := range v.Results {
 				if item != nil {
-					if data, err := presley.AdminMapStatsToJSON(item); err == nil {
+					if data, err := sentinel.AdminMapStatsToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -18112,10 +18112,10 @@ func MapStatsQueryResponseFromJSON(data []byte) (*MapStatsQueryResponse, error) 
 	result := &MapStatsQueryResponse{}
 	// Parse repeated message field: Results
 	if len(raw.Results) > 0 {
-		result.Results = make([]*presley.AdminMapStats, 0, len(raw.Results))
+		result.Results = make([]*sentinel.AdminMapStats, 0, len(raw.Results))
 		for _, itemJSON := range raw.Results {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminMapStatsFromJSON(itemJSON)
+				parsed, err := sentinel.AdminMapStatsFromJSON(itemJSON)
 				if err == nil {
 					result.Results = append(result.Results, parsed)
 				}
@@ -18306,7 +18306,7 @@ func GraphRegistryPutRequestToJSON(v *GraphRegistryPutRequest) ([]byte, error) {
 			if v.Value == nil {
 				return nil
 			}
-			data, _ := presley.AdminGraphInfoToJSON(v.Value)
+			data, _ := sentinel.AdminGraphInfoToJSON(v.Value)
 			return data
 		}(),
 		LockCounter: v.LockCounter,
@@ -18377,7 +18377,7 @@ func GraphRegistryPutRequestFromJSON(data []byte) (*GraphRegistryPutRequest, err
 	result.Key = raw.Key
 	// Parse message field: Value
 	if len(raw.Value) > 0 {
-		parsed, err := presley.AdminGraphInfoFromJSON(raw.Value)
+		parsed, err := sentinel.AdminGraphInfoFromJSON(raw.Value)
 		if err == nil {
 			result.Value = parsed
 		}
@@ -18911,7 +18911,7 @@ func GraphRegistryValueResponseToJSON(v *GraphRegistryValueResponse) ([]byte, er
 			if v.Value == nil {
 				return nil
 			}
-			data, _ := presley.AdminGraphInfoToJSON(v.Value)
+			data, _ := sentinel.AdminGraphInfoToJSON(v.Value)
 			return data
 		}(),
 		Found: v.Found,
@@ -18981,7 +18981,7 @@ func GraphRegistryValueResponseFromJSON(data []byte) (*GraphRegistryValueRespons
 	result := &GraphRegistryValueResponse{}
 	// Parse message field: Value
 	if len(raw.Value) > 0 {
-		parsed, err := presley.AdminGraphInfoFromJSON(raw.Value)
+		parsed, err := sentinel.AdminGraphInfoFromJSON(raw.Value)
 		if err == nil {
 			result.Value = parsed
 		}
@@ -19542,7 +19542,7 @@ func GraphRegistryQueryResponseToJSON(v *GraphRegistryQueryResponse) ([]byte, er
 			result := make([]json.RawMessage, 0, len(v.Results))
 			for _, item := range v.Results {
 				if item != nil {
-					if data, err := presley.AdminGraphInfoToJSON(item); err == nil {
+					if data, err := sentinel.AdminGraphInfoToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -19616,10 +19616,10 @@ func GraphRegistryQueryResponseFromJSON(data []byte) (*GraphRegistryQueryRespons
 	result := &GraphRegistryQueryResponse{}
 	// Parse repeated message field: Results
 	if len(raw.Results) > 0 {
-		result.Results = make([]*presley.AdminGraphInfo, 0, len(raw.Results))
+		result.Results = make([]*sentinel.AdminGraphInfo, 0, len(raw.Results))
 		for _, itemJSON := range raw.Results {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminGraphInfoFromJSON(itemJSON)
+				parsed, err := sentinel.AdminGraphInfoFromJSON(itemJSON)
 				if err == nil {
 					result.Results = append(result.Results, parsed)
 				}
@@ -19810,7 +19810,7 @@ func ServiceConnectionsPutRequestToJSON(v *ServiceConnectionsPutRequest) ([]byte
 			if v.Value == nil {
 				return nil
 			}
-			data, _ := presley.AdminServiceConnectionToJSON(v.Value)
+			data, _ := sentinel.AdminServiceConnectionToJSON(v.Value)
 			return data
 		}(),
 		LockCounter: v.LockCounter,
@@ -19881,7 +19881,7 @@ func ServiceConnectionsPutRequestFromJSON(data []byte) (*ServiceConnectionsPutRe
 	result.Key = raw.Key
 	// Parse message field: Value
 	if len(raw.Value) > 0 {
-		parsed, err := presley.AdminServiceConnectionFromJSON(raw.Value)
+		parsed, err := sentinel.AdminServiceConnectionFromJSON(raw.Value)
 		if err == nil {
 			result.Value = parsed
 		}
@@ -20415,7 +20415,7 @@ func ServiceConnectionsValueResponseToJSON(v *ServiceConnectionsValueResponse) (
 			if v.Value == nil {
 				return nil
 			}
-			data, _ := presley.AdminServiceConnectionToJSON(v.Value)
+			data, _ := sentinel.AdminServiceConnectionToJSON(v.Value)
 			return data
 		}(),
 		Found: v.Found,
@@ -20485,7 +20485,7 @@ func ServiceConnectionsValueResponseFromJSON(data []byte) (*ServiceConnectionsVa
 	result := &ServiceConnectionsValueResponse{}
 	// Parse message field: Value
 	if len(raw.Value) > 0 {
-		parsed, err := presley.AdminServiceConnectionFromJSON(raw.Value)
+		parsed, err := sentinel.AdminServiceConnectionFromJSON(raw.Value)
 		if err == nil {
 			result.Value = parsed
 		}
@@ -21046,7 +21046,7 @@ func ServiceConnectionsQueryResponseToJSON(v *ServiceConnectionsQueryResponse) (
 			result := make([]json.RawMessage, 0, len(v.Results))
 			for _, item := range v.Results {
 				if item != nil {
-					if data, err := presley.AdminServiceConnectionToJSON(item); err == nil {
+					if data, err := sentinel.AdminServiceConnectionToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -21120,10 +21120,10 @@ func ServiceConnectionsQueryResponseFromJSON(data []byte) (*ServiceConnectionsQu
 	result := &ServiceConnectionsQueryResponse{}
 	// Parse repeated message field: Results
 	if len(raw.Results) > 0 {
-		result.Results = make([]*presley.AdminServiceConnection, 0, len(raw.Results))
+		result.Results = make([]*sentinel.AdminServiceConnection, 0, len(raw.Results))
 		for _, itemJSON := range raw.Results {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminServiceConnectionFromJSON(itemJSON)
+				parsed, err := sentinel.AdminServiceConnectionFromJSON(itemJSON)
 				if err == nil {
 					result.Results = append(result.Results, parsed)
 				}
@@ -21314,7 +21314,7 @@ func QueueStatsPutRequestToJSON(v *QueueStatsPutRequest) ([]byte, error) {
 			if v.Value == nil {
 				return nil
 			}
-			data, _ := presley.AdminQueueStatsToJSON(v.Value)
+			data, _ := sentinel.AdminQueueStatsToJSON(v.Value)
 			return data
 		}(),
 		LockCounter: v.LockCounter,
@@ -21385,7 +21385,7 @@ func QueueStatsPutRequestFromJSON(data []byte) (*QueueStatsPutRequest, error) {
 	result.Key = raw.Key
 	// Parse message field: Value
 	if len(raw.Value) > 0 {
-		parsed, err := presley.AdminQueueStatsFromJSON(raw.Value)
+		parsed, err := sentinel.AdminQueueStatsFromJSON(raw.Value)
 		if err == nil {
 			result.Value = parsed
 		}
@@ -21919,7 +21919,7 @@ func QueueStatsValueResponseToJSON(v *QueueStatsValueResponse) ([]byte, error) {
 			if v.Value == nil {
 				return nil
 			}
-			data, _ := presley.AdminQueueStatsToJSON(v.Value)
+			data, _ := sentinel.AdminQueueStatsToJSON(v.Value)
 			return data
 		}(),
 		Found: v.Found,
@@ -21989,7 +21989,7 @@ func QueueStatsValueResponseFromJSON(data []byte) (*QueueStatsValueResponse, err
 	result := &QueueStatsValueResponse{}
 	// Parse message field: Value
 	if len(raw.Value) > 0 {
-		parsed, err := presley.AdminQueueStatsFromJSON(raw.Value)
+		parsed, err := sentinel.AdminQueueStatsFromJSON(raw.Value)
 		if err == nil {
 			result.Value = parsed
 		}
@@ -22550,7 +22550,7 @@ func QueueStatsQueryResponseToJSON(v *QueueStatsQueryResponse) ([]byte, error) {
 			result := make([]json.RawMessage, 0, len(v.Results))
 			for _, item := range v.Results {
 				if item != nil {
-					if data, err := presley.AdminQueueStatsToJSON(item); err == nil {
+					if data, err := sentinel.AdminQueueStatsToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -22624,10 +22624,10 @@ func QueueStatsQueryResponseFromJSON(data []byte) (*QueueStatsQueryResponse, err
 	result := &QueueStatsQueryResponse{}
 	// Parse repeated message field: Results
 	if len(raw.Results) > 0 {
-		result.Results = make([]*presley.AdminQueueStats, 0, len(raw.Results))
+		result.Results = make([]*sentinel.AdminQueueStats, 0, len(raw.Results))
 		for _, itemJSON := range raw.Results {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminQueueStatsFromJSON(itemJSON)
+				parsed, err := sentinel.AdminQueueStatsFromJSON(itemJSON)
 				if err == nil {
 					result.Results = append(result.Results, parsed)
 				}
@@ -22818,7 +22818,7 @@ func TopicStatsPutRequestToJSON(v *TopicStatsPutRequest) ([]byte, error) {
 			if v.Value == nil {
 				return nil
 			}
-			data, _ := presley.AdminTopicStatsToJSON(v.Value)
+			data, _ := sentinel.AdminTopicStatsToJSON(v.Value)
 			return data
 		}(),
 		LockCounter: v.LockCounter,
@@ -22889,7 +22889,7 @@ func TopicStatsPutRequestFromJSON(data []byte) (*TopicStatsPutRequest, error) {
 	result.Key = raw.Key
 	// Parse message field: Value
 	if len(raw.Value) > 0 {
-		parsed, err := presley.AdminTopicStatsFromJSON(raw.Value)
+		parsed, err := sentinel.AdminTopicStatsFromJSON(raw.Value)
 		if err == nil {
 			result.Value = parsed
 		}
@@ -23423,7 +23423,7 @@ func TopicStatsValueResponseToJSON(v *TopicStatsValueResponse) ([]byte, error) {
 			if v.Value == nil {
 				return nil
 			}
-			data, _ := presley.AdminTopicStatsToJSON(v.Value)
+			data, _ := sentinel.AdminTopicStatsToJSON(v.Value)
 			return data
 		}(),
 		Found: v.Found,
@@ -23493,7 +23493,7 @@ func TopicStatsValueResponseFromJSON(data []byte) (*TopicStatsValueResponse, err
 	result := &TopicStatsValueResponse{}
 	// Parse message field: Value
 	if len(raw.Value) > 0 {
-		parsed, err := presley.AdminTopicStatsFromJSON(raw.Value)
+		parsed, err := sentinel.AdminTopicStatsFromJSON(raw.Value)
 		if err == nil {
 			result.Value = parsed
 		}
@@ -24054,7 +24054,7 @@ func TopicStatsQueryResponseToJSON(v *TopicStatsQueryResponse) ([]byte, error) {
 			result := make([]json.RawMessage, 0, len(v.Results))
 			for _, item := range v.Results {
 				if item != nil {
-					if data, err := presley.AdminTopicStatsToJSON(item); err == nil {
+					if data, err := sentinel.AdminTopicStatsToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -24128,10 +24128,10 @@ func TopicStatsQueryResponseFromJSON(data []byte) (*TopicStatsQueryResponse, err
 	result := &TopicStatsQueryResponse{}
 	// Parse repeated message field: Results
 	if len(raw.Results) > 0 {
-		result.Results = make([]*presley.AdminTopicStats, 0, len(raw.Results))
+		result.Results = make([]*sentinel.AdminTopicStats, 0, len(raw.Results))
 		for _, itemJSON := range raw.Results {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminTopicStatsFromJSON(itemJSON)
+				parsed, err := sentinel.AdminTopicStatsFromJSON(itemJSON)
 				if err == nil {
 					result.Results = append(result.Results, parsed)
 				}
@@ -24322,7 +24322,7 @@ func WatchHealthPutRequestToJSON(v *WatchHealthPutRequest) ([]byte, error) {
 			if v.Value == nil {
 				return nil
 			}
-			data, _ := presley.AdminWatchHealthToJSON(v.Value)
+			data, _ := sentinel.AdminWatchHealthToJSON(v.Value)
 			return data
 		}(),
 		LockCounter: v.LockCounter,
@@ -24393,7 +24393,7 @@ func WatchHealthPutRequestFromJSON(data []byte) (*WatchHealthPutRequest, error) 
 	result.Key = raw.Key
 	// Parse message field: Value
 	if len(raw.Value) > 0 {
-		parsed, err := presley.AdminWatchHealthFromJSON(raw.Value)
+		parsed, err := sentinel.AdminWatchHealthFromJSON(raw.Value)
 		if err == nil {
 			result.Value = parsed
 		}
@@ -24927,7 +24927,7 @@ func WatchHealthValueResponseToJSON(v *WatchHealthValueResponse) ([]byte, error)
 			if v.Value == nil {
 				return nil
 			}
-			data, _ := presley.AdminWatchHealthToJSON(v.Value)
+			data, _ := sentinel.AdminWatchHealthToJSON(v.Value)
 			return data
 		}(),
 		Found: v.Found,
@@ -24997,7 +24997,7 @@ func WatchHealthValueResponseFromJSON(data []byte) (*WatchHealthValueResponse, e
 	result := &WatchHealthValueResponse{}
 	// Parse message field: Value
 	if len(raw.Value) > 0 {
-		parsed, err := presley.AdminWatchHealthFromJSON(raw.Value)
+		parsed, err := sentinel.AdminWatchHealthFromJSON(raw.Value)
 		if err == nil {
 			result.Value = parsed
 		}
@@ -25558,7 +25558,7 @@ func WatchHealthQueryResponseToJSON(v *WatchHealthQueryResponse) ([]byte, error)
 			result := make([]json.RawMessage, 0, len(v.Results))
 			for _, item := range v.Results {
 				if item != nil {
-					if data, err := presley.AdminWatchHealthToJSON(item); err == nil {
+					if data, err := sentinel.AdminWatchHealthToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -25632,10 +25632,10 @@ func WatchHealthQueryResponseFromJSON(data []byte) (*WatchHealthQueryResponse, e
 	result := &WatchHealthQueryResponse{}
 	// Parse repeated message field: Results
 	if len(raw.Results) > 0 {
-		result.Results = make([]*presley.AdminWatchHealth, 0, len(raw.Results))
+		result.Results = make([]*sentinel.AdminWatchHealth, 0, len(raw.Results))
 		for _, itemJSON := range raw.Results {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminWatchHealthFromJSON(itemJSON)
+				parsed, err := sentinel.AdminWatchHealthFromJSON(itemJSON)
 				if err == nil {
 					result.Results = append(result.Results, parsed)
 				}
@@ -25826,7 +25826,7 @@ func MutationRatesPutRequestToJSON(v *MutationRatesPutRequest) ([]byte, error) {
 			if v.Value == nil {
 				return nil
 			}
-			data, _ := presley.AdminMutationRateToJSON(v.Value)
+			data, _ := sentinel.AdminMutationRateToJSON(v.Value)
 			return data
 		}(),
 		LockCounter: v.LockCounter,
@@ -25897,7 +25897,7 @@ func MutationRatesPutRequestFromJSON(data []byte) (*MutationRatesPutRequest, err
 	result.Key = raw.Key
 	// Parse message field: Value
 	if len(raw.Value) > 0 {
-		parsed, err := presley.AdminMutationRateFromJSON(raw.Value)
+		parsed, err := sentinel.AdminMutationRateFromJSON(raw.Value)
 		if err == nil {
 			result.Value = parsed
 		}
@@ -26431,7 +26431,7 @@ func MutationRatesValueResponseToJSON(v *MutationRatesValueResponse) ([]byte, er
 			if v.Value == nil {
 				return nil
 			}
-			data, _ := presley.AdminMutationRateToJSON(v.Value)
+			data, _ := sentinel.AdminMutationRateToJSON(v.Value)
 			return data
 		}(),
 		Found: v.Found,
@@ -26501,7 +26501,7 @@ func MutationRatesValueResponseFromJSON(data []byte) (*MutationRatesValueRespons
 	result := &MutationRatesValueResponse{}
 	// Parse message field: Value
 	if len(raw.Value) > 0 {
-		parsed, err := presley.AdminMutationRateFromJSON(raw.Value)
+		parsed, err := sentinel.AdminMutationRateFromJSON(raw.Value)
 		if err == nil {
 			result.Value = parsed
 		}
@@ -27062,7 +27062,7 @@ func MutationRatesQueryResponseToJSON(v *MutationRatesQueryResponse) ([]byte, er
 			result := make([]json.RawMessage, 0, len(v.Results))
 			for _, item := range v.Results {
 				if item != nil {
-					if data, err := presley.AdminMutationRateToJSON(item); err == nil {
+					if data, err := sentinel.AdminMutationRateToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -27136,10 +27136,10 @@ func MutationRatesQueryResponseFromJSON(data []byte) (*MutationRatesQueryRespons
 	result := &MutationRatesQueryResponse{}
 	// Parse repeated message field: Results
 	if len(raw.Results) > 0 {
-		result.Results = make([]*presley.AdminMutationRate, 0, len(raw.Results))
+		result.Results = make([]*sentinel.AdminMutationRate, 0, len(raw.Results))
 		for _, itemJSON := range raw.Results {
 			if len(itemJSON) > 0 {
-				parsed, err := presley.AdminMutationRateFromJSON(itemJSON)
+				parsed, err := sentinel.AdminMutationRateFromJSON(itemJSON)
 				if err == nil {
 					result.Results = append(result.Results, parsed)
 				}
@@ -28563,15 +28563,15 @@ func BootstrapConfigToEnvVar(v *BootstrapConfig) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_BOOTSTRAP_CONFIG_CLUSTER_NAME"] = v.ClusterName
+	result["PROTO_SERVICES_KERNEL_BOOTSTRAP_CONFIG_CLUSTER_NAME"] = v.ClusterName
 	if v.Listener != nil {
 		for k, val := range host.HostToEnvVar(v.Listener) {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_ELVIS_BOOTSTRAP_CONFIG_NODE_COUNT"] = strconv.FormatInt(int64(v.NodeCount), 10)
-	result["PROTO_SERVICES_ELVIS_BOOTSTRAP_CONFIG_SECRET"] = v.Secret
-	result["PROTO_SERVICES_ELVIS_BOOTSTRAP_CONFIG_PARTITION_COUNT"] = strconv.FormatInt(int64(v.PartitionCount), 10)
+	result["PROTO_SERVICES_KERNEL_BOOTSTRAP_CONFIG_NODE_COUNT"] = strconv.FormatInt(int64(v.NodeCount), 10)
+	result["PROTO_SERVICES_KERNEL_BOOTSTRAP_CONFIG_SECRET"] = v.Secret
+	result["PROTO_SERVICES_KERNEL_BOOTSTRAP_CONFIG_PARTITION_COUNT"] = strconv.FormatInt(int64(v.PartitionCount), 10)
 	if v.Network != nil {
 		for k, val := range NetworkConfigToEnvVar(v.Network) {
 			result[k] = val
@@ -28582,28 +28582,28 @@ func BootstrapConfigToEnvVar(v *BootstrapConfig) map[string]string {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_ELVIS_BOOTSTRAP_CONFIG_ENABLE_METRICS"] = strconv.FormatBool(v.EnableMetrics)
-	result["PROTO_SERVICES_ELVIS_BOOTSTRAP_CONFIG_ENABLE_TRACING"] = strconv.FormatBool(v.EnableTracing)
+	result["PROTO_SERVICES_KERNEL_BOOTSTRAP_CONFIG_ENABLE_METRICS"] = strconv.FormatBool(v.EnableMetrics)
+	result["PROTO_SERVICES_KERNEL_BOOTSTRAP_CONFIG_ENABLE_TRACING"] = strconv.FormatBool(v.EnableTracing)
 	if v.CpSubsystem != nil {
 		for k, val := range CPSubsystemConfigToEnvVar(v.CpSubsystem) {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_ELVIS_BOOTSTRAP_CONFIG_PERSISTENCE_DIR"] = v.PersistenceDir
-	result["PROTO_SERVICES_ELVIS_BOOTSTRAP_CONFIG_PERSISTENCE_FORMAT"] = outputformat.OutputFormatToString(v.PersistenceFormat)
+	result["PROTO_SERVICES_KERNEL_BOOTSTRAP_CONFIG_PERSISTENCE_DIR"] = v.PersistenceDir
+	result["PROTO_SERVICES_KERNEL_BOOTSTRAP_CONFIG_PERSISTENCE_FORMAT"] = outputformat.OutputFormatToString(v.PersistenceFormat)
 	if v.Tls != nil {
 		for k, val := range x509.X509CertPairToEnvVar(v.Tls) {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_ELVIS_BOOTSTRAP_CONFIG_RAFT_PORT"] = strconv.FormatInt(int64(v.RaftPort), 10)
+	result["PROTO_SERVICES_KERNEL_BOOTSTRAP_CONFIG_RAFT_PORT"] = strconv.FormatInt(int64(v.RaftPort), 10)
 	return result
 }
 
 // BootstrapConfigFromEnvVar creates BootstrapConfig from environment variable key-value pairs.
 func BootstrapConfigFromEnvVar(env map[string]string) (*BootstrapConfig, error) {
 	result := &BootstrapConfig{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_BOOTSTRAP_CONFIG_CLUSTER_NAME"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_BOOTSTRAP_CONFIG_CLUSTER_NAME"]; ok && val != "" {
 		result.ClusterName = val
 	}
 	if sub, err := host.HostFromEnvVar(env); err != nil {
@@ -28611,17 +28611,17 @@ func BootstrapConfigFromEnvVar(env map[string]string) (*BootstrapConfig, error) 
 	} else if sub != nil {
 		result.Listener = sub
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_BOOTSTRAP_CONFIG_NODE_COUNT"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_BOOTSTRAP_CONFIG_NODE_COUNT"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
 		}
 		result.NodeCount = int32(parsed)
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_BOOTSTRAP_CONFIG_SECRET"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_BOOTSTRAP_CONFIG_SECRET"]; ok && val != "" {
 		result.Secret = val
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_BOOTSTRAP_CONFIG_PARTITION_COUNT"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_BOOTSTRAP_CONFIG_PARTITION_COUNT"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -28638,14 +28638,14 @@ func BootstrapConfigFromEnvVar(env map[string]string) (*BootstrapConfig, error) 
 	} else if sub != nil {
 		result.Logger = sub
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_BOOTSTRAP_CONFIG_ENABLE_METRICS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_BOOTSTRAP_CONFIG_ENABLE_METRICS"]; ok && val != "" {
 		parsed, err := strconv.ParseBool(val)
 		if err != nil {
 			return nil, err
 		}
 		result.EnableMetrics = parsed
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_BOOTSTRAP_CONFIG_ENABLE_TRACING"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_BOOTSTRAP_CONFIG_ENABLE_TRACING"]; ok && val != "" {
 		parsed, err := strconv.ParseBool(val)
 		if err != nil {
 			return nil, err
@@ -28657,10 +28657,10 @@ func BootstrapConfigFromEnvVar(env map[string]string) (*BootstrapConfig, error) 
 	} else if sub != nil {
 		result.CpSubsystem = sub
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_BOOTSTRAP_CONFIG_PERSISTENCE_DIR"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_BOOTSTRAP_CONFIG_PERSISTENCE_DIR"]; ok && val != "" {
 		result.PersistenceDir = val
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_BOOTSTRAP_CONFIG_PERSISTENCE_FORMAT"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_BOOTSTRAP_CONFIG_PERSISTENCE_FORMAT"]; ok && val != "" {
 		parsed, err := outputformat.ParseOutputFormat(val)
 		if err != nil {
 			return nil, err
@@ -28672,7 +28672,7 @@ func BootstrapConfigFromEnvVar(env map[string]string) (*BootstrapConfig, error) 
 	} else if sub != nil {
 		result.Tls = sub
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_BOOTSTRAP_CONFIG_RAFT_PORT"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_BOOTSTRAP_CONFIG_RAFT_PORT"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -28688,30 +28688,30 @@ func NetworkConfigToEnvVar(v *NetworkConfig) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_NETWORK_CONFIG_CONNECT_TIMEOUT_SECONDS"] = strconv.FormatInt(v.ConnectTimeoutSeconds, 10)
-	result["PROTO_SERVICES_ELVIS_NETWORK_CONFIG_HEARTBEAT_INTERVAL_SECONDS"] = strconv.FormatInt(v.HeartbeatIntervalSeconds, 10)
-	result["PROTO_SERVICES_ELVIS_NETWORK_CONFIG_HEARTBEAT_TIMEOUT_SECONDS"] = strconv.FormatInt(v.HeartbeatTimeoutSeconds, 10)
+	result["PROTO_SERVICES_KERNEL_NETWORK_CONFIG_CONNECT_TIMEOUT_SECONDS"] = strconv.FormatInt(v.ConnectTimeoutSeconds, 10)
+	result["PROTO_SERVICES_KERNEL_NETWORK_CONFIG_HEARTBEAT_INTERVAL_SECONDS"] = strconv.FormatInt(v.HeartbeatIntervalSeconds, 10)
+	result["PROTO_SERVICES_KERNEL_NETWORK_CONFIG_HEARTBEAT_TIMEOUT_SECONDS"] = strconv.FormatInt(v.HeartbeatTimeoutSeconds, 10)
 	return result
 }
 
 // NetworkConfigFromEnvVar creates NetworkConfig from environment variable key-value pairs.
 func NetworkConfigFromEnvVar(env map[string]string) (*NetworkConfig, error) {
 	result := &NetworkConfig{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_NETWORK_CONFIG_CONNECT_TIMEOUT_SECONDS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_NETWORK_CONFIG_CONNECT_TIMEOUT_SECONDS"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
 		}
 		result.ConnectTimeoutSeconds = parsed
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_NETWORK_CONFIG_HEARTBEAT_INTERVAL_SECONDS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_NETWORK_CONFIG_HEARTBEAT_INTERVAL_SECONDS"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
 		}
 		result.HeartbeatIntervalSeconds = parsed
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_NETWORK_CONFIG_HEARTBEAT_TIMEOUT_SECONDS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_NETWORK_CONFIG_HEARTBEAT_TIMEOUT_SECONDS"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
@@ -28727,46 +28727,46 @@ func CPSubsystemConfigToEnvVar(v *CPSubsystemConfig) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_C_P_SUBSYSTEM_CONFIG_ENABLED"] = strconv.FormatBool(v.Enabled)
-	result["PROTO_SERVICES_ELVIS_C_P_SUBSYSTEM_CONFIG_CP_MEMBER_COUNT"] = strconv.FormatInt(int64(v.CpMemberCount), 10)
-	result["PROTO_SERVICES_ELVIS_C_P_SUBSYSTEM_CONFIG_SESSION_TIMEOUT_SECONDS"] = strconv.FormatInt(v.SessionTimeoutSeconds, 10)
-	result["PROTO_SERVICES_ELVIS_C_P_SUBSYSTEM_CONFIG_SESSION_HEARTBEAT_INTERVAL_SECONDS"] = strconv.FormatInt(v.SessionHeartbeatIntervalSeconds, 10)
-	result["PROTO_SERVICES_ELVIS_C_P_SUBSYSTEM_CONFIG_MISSING_CP_MEMBER_AUTO_REMOVAL_SECONDS"] = strconv.FormatInt(v.MissingCpMemberAutoRemovalSeconds, 10)
+	result["PROTO_SERVICES_KERNEL_C_P_SUBSYSTEM_CONFIG_ENABLED"] = strconv.FormatBool(v.Enabled)
+	result["PROTO_SERVICES_KERNEL_C_P_SUBSYSTEM_CONFIG_CP_MEMBER_COUNT"] = strconv.FormatInt(int64(v.CpMemberCount), 10)
+	result["PROTO_SERVICES_KERNEL_C_P_SUBSYSTEM_CONFIG_SESSION_TIMEOUT_SECONDS"] = strconv.FormatInt(v.SessionTimeoutSeconds, 10)
+	result["PROTO_SERVICES_KERNEL_C_P_SUBSYSTEM_CONFIG_SESSION_HEARTBEAT_INTERVAL_SECONDS"] = strconv.FormatInt(v.SessionHeartbeatIntervalSeconds, 10)
+	result["PROTO_SERVICES_KERNEL_C_P_SUBSYSTEM_CONFIG_MISSING_CP_MEMBER_AUTO_REMOVAL_SECONDS"] = strconv.FormatInt(v.MissingCpMemberAutoRemovalSeconds, 10)
 	return result
 }
 
 // CPSubsystemConfigFromEnvVar creates CPSubsystemConfig from environment variable key-value pairs.
 func CPSubsystemConfigFromEnvVar(env map[string]string) (*CPSubsystemConfig, error) {
 	result := &CPSubsystemConfig{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_C_P_SUBSYSTEM_CONFIG_ENABLED"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_C_P_SUBSYSTEM_CONFIG_ENABLED"]; ok && val != "" {
 		parsed, err := strconv.ParseBool(val)
 		if err != nil {
 			return nil, err
 		}
 		result.Enabled = parsed
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_C_P_SUBSYSTEM_CONFIG_CP_MEMBER_COUNT"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_C_P_SUBSYSTEM_CONFIG_CP_MEMBER_COUNT"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
 		}
 		result.CpMemberCount = int32(parsed)
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_C_P_SUBSYSTEM_CONFIG_SESSION_TIMEOUT_SECONDS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_C_P_SUBSYSTEM_CONFIG_SESSION_TIMEOUT_SECONDS"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
 		}
 		result.SessionTimeoutSeconds = parsed
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_C_P_SUBSYSTEM_CONFIG_SESSION_HEARTBEAT_INTERVAL_SECONDS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_C_P_SUBSYSTEM_CONFIG_SESSION_HEARTBEAT_INTERVAL_SECONDS"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
 		}
 		result.SessionHeartbeatIntervalSeconds = parsed
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_C_P_SUBSYSTEM_CONFIG_MISSING_CP_MEMBER_AUTO_REMOVAL_SECONDS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_C_P_SUBSYSTEM_CONFIG_MISSING_CP_MEMBER_AUTO_REMOVAL_SECONDS"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
@@ -28782,22 +28782,22 @@ func RateLimitConfigToEnvVar(v *RateLimitConfig) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_RATE_LIMIT_CONFIG_POLLING_RATE"] = strconv.FormatFloat(v.PollingRate, 'f', -1, 64)
-	result["PROTO_SERVICES_ELVIS_RATE_LIMIT_CONFIG_UNARY_RATE"] = strconv.FormatFloat(v.UnaryRate, 'f', -1, 64)
+	result["PROTO_SERVICES_KERNEL_RATE_LIMIT_CONFIG_POLLING_RATE"] = strconv.FormatFloat(v.PollingRate, 'f', -1, 64)
+	result["PROTO_SERVICES_KERNEL_RATE_LIMIT_CONFIG_UNARY_RATE"] = strconv.FormatFloat(v.UnaryRate, 'f', -1, 64)
 	return result
 }
 
 // RateLimitConfigFromEnvVar creates RateLimitConfig from environment variable key-value pairs.
 func RateLimitConfigFromEnvVar(env map[string]string) (*RateLimitConfig, error) {
 	result := &RateLimitConfig{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_RATE_LIMIT_CONFIG_POLLING_RATE"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_RATE_LIMIT_CONFIG_POLLING_RATE"]; ok && val != "" {
 		parsed, err := strconv.ParseFloat(val, 64)
 		if err != nil {
 			return nil, err
 		}
 		result.PollingRate = parsed
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_RATE_LIMIT_CONFIG_UNARY_RATE"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_RATE_LIMIT_CONFIG_UNARY_RATE"]; ok && val != "" {
 		parsed, err := strconv.ParseFloat(val, 64)
 		if err != nil {
 			return nil, err
@@ -28813,46 +28813,46 @@ func RedoLogEntryToEnvVar(v *RedoLogEntry) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_REDO_LOG_ENTRY_MAP_NAME"] = v.MapName
-	result["PROTO_SERVICES_ELVIS_REDO_LOG_ENTRY_KEY"] = v.Key
-	result["PROTO_SERVICES_ELVIS_REDO_LOG_ENTRY_VALUE"] = base64.StdEncoding.EncodeToString(v.Value)
-	result["PROTO_SERVICES_ELVIS_REDO_LOG_ENTRY_OP"] = OpTypeToString(v.Op)
-	result["PROTO_SERVICES_ELVIS_REDO_LOG_ENTRY_TIMESTAMP_MS"] = strconv.FormatInt(v.TimestampMs, 10)
-	result["PROTO_SERVICES_ELVIS_REDO_LOG_ENTRY_CONSISTENCY"] = ConsistencyTypeToString(v.Consistency)
+	result["PROTO_SERVICES_KERNEL_REDO_LOG_ENTRY_MAP_NAME"] = v.MapName
+	result["PROTO_SERVICES_KERNEL_REDO_LOG_ENTRY_KEY"] = v.Key
+	result["PROTO_SERVICES_KERNEL_REDO_LOG_ENTRY_VALUE"] = base64.StdEncoding.EncodeToString(v.Value)
+	result["PROTO_SERVICES_KERNEL_REDO_LOG_ENTRY_OP"] = OpTypeToString(v.Op)
+	result["PROTO_SERVICES_KERNEL_REDO_LOG_ENTRY_TIMESTAMP_MS"] = strconv.FormatInt(v.TimestampMs, 10)
+	result["PROTO_SERVICES_KERNEL_REDO_LOG_ENTRY_CONSISTENCY"] = ConsistencyTypeToString(v.Consistency)
 	return result
 }
 
 // RedoLogEntryFromEnvVar creates RedoLogEntry from environment variable key-value pairs.
 func RedoLogEntryFromEnvVar(env map[string]string) (*RedoLogEntry, error) {
 	result := &RedoLogEntry{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_REDO_LOG_ENTRY_MAP_NAME"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_REDO_LOG_ENTRY_MAP_NAME"]; ok && val != "" {
 		result.MapName = val
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_REDO_LOG_ENTRY_KEY"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_REDO_LOG_ENTRY_KEY"]; ok && val != "" {
 		result.Key = val
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_REDO_LOG_ENTRY_VALUE"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_REDO_LOG_ENTRY_VALUE"]; ok && val != "" {
 		parsed, err := base64.StdEncoding.DecodeString(val)
 		if err != nil {
 			return nil, err
 		}
 		result.Value = parsed
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_REDO_LOG_ENTRY_OP"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_REDO_LOG_ENTRY_OP"]; ok && val != "" {
 		parsed, err := ParseOpType(val)
 		if err != nil {
 			return nil, err
 		}
 		result.Op = parsed
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_REDO_LOG_ENTRY_TIMESTAMP_MS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_REDO_LOG_ENTRY_TIMESTAMP_MS"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
 		}
 		result.TimestampMs = parsed
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_REDO_LOG_ENTRY_CONSISTENCY"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_REDO_LOG_ENTRY_CONSISTENCY"]; ok && val != "" {
 		parsed, err := ParseConsistencyType(val)
 		if err != nil {
 			return nil, err
@@ -28868,30 +28868,30 @@ func FullDumpHeaderToEnvVar(v *FullDumpHeader) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_FULL_DUMP_HEADER_TIMESTAMP_MS"] = strconv.FormatInt(v.TimestampMs, 10)
-	result["PROTO_SERVICES_ELVIS_FULL_DUMP_HEADER_ENTRY_COUNT"] = strconv.FormatInt(int64(v.EntryCount), 10)
-	result["PROTO_SERVICES_ELVIS_FULL_DUMP_HEADER_NODE_ID"] = v.NodeId
+	result["PROTO_SERVICES_KERNEL_FULL_DUMP_HEADER_TIMESTAMP_MS"] = strconv.FormatInt(v.TimestampMs, 10)
+	result["PROTO_SERVICES_KERNEL_FULL_DUMP_HEADER_ENTRY_COUNT"] = strconv.FormatInt(int64(v.EntryCount), 10)
+	result["PROTO_SERVICES_KERNEL_FULL_DUMP_HEADER_NODE_ID"] = v.NodeId
 	return result
 }
 
 // FullDumpHeaderFromEnvVar creates FullDumpHeader from environment variable key-value pairs.
 func FullDumpHeaderFromEnvVar(env map[string]string) (*FullDumpHeader, error) {
 	result := &FullDumpHeader{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_FULL_DUMP_HEADER_TIMESTAMP_MS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_FULL_DUMP_HEADER_TIMESTAMP_MS"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
 		}
 		result.TimestampMs = parsed
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_FULL_DUMP_HEADER_ENTRY_COUNT"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_FULL_DUMP_HEADER_ENTRY_COUNT"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
 		}
 		result.EntryCount = int32(parsed)
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_FULL_DUMP_HEADER_NODE_ID"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_FULL_DUMP_HEADER_NODE_ID"]; ok && val != "" {
 		result.NodeId = val
 	}
 	return result, nil
@@ -28903,18 +28903,18 @@ func SecurityConfigToEnvVar(v *SecurityConfig) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_SECURITY_CONFIG_AUDIENCE"] = v.Audience
-	result["PROTO_SERVICES_ELVIS_SECURITY_CONFIG_TOKEN_TTL_SECONDS"] = strconv.FormatInt(v.TokenTtlSeconds, 10)
+	result["PROTO_SERVICES_KERNEL_SECURITY_CONFIG_AUDIENCE"] = v.Audience
+	result["PROTO_SERVICES_KERNEL_SECURITY_CONFIG_TOKEN_TTL_SECONDS"] = strconv.FormatInt(v.TokenTtlSeconds, 10)
 	return result
 }
 
 // SecurityConfigFromEnvVar creates SecurityConfig from environment variable key-value pairs.
 func SecurityConfigFromEnvVar(env map[string]string) (*SecurityConfig, error) {
 	result := &SecurityConfig{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_SECURITY_CONFIG_AUDIENCE"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_SECURITY_CONFIG_AUDIENCE"]; ok && val != "" {
 		result.Audience = val
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_SECURITY_CONFIG_TOKEN_TTL_SECONDS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_SECURITY_CONFIG_TOKEN_TTL_SECONDS"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
@@ -28930,26 +28930,26 @@ func TokenExchangerConfigToEnvVar(v *TokenExchangerConfig) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_TOKEN_EXCHANGER_CONFIG_REFRESH_AUDIENCE"] = v.RefreshAudience
-	result["PROTO_SERVICES_ELVIS_TOKEN_EXCHANGER_CONFIG_KEY_ROTATION_INTERVAL_SECONDS"] = strconv.FormatInt(v.KeyRotationIntervalSeconds, 10)
-	result["PROTO_SERVICES_ELVIS_TOKEN_EXCHANGER_CONFIG_DEFAULT_TOKEN_EXPIRY_SECONDS"] = strconv.FormatInt(v.DefaultTokenExpirySeconds, 10)
+	result["PROTO_SERVICES_KERNEL_TOKEN_EXCHANGER_CONFIG_REFRESH_AUDIENCE"] = v.RefreshAudience
+	result["PROTO_SERVICES_KERNEL_TOKEN_EXCHANGER_CONFIG_KEY_ROTATION_INTERVAL_SECONDS"] = strconv.FormatInt(v.KeyRotationIntervalSeconds, 10)
+	result["PROTO_SERVICES_KERNEL_TOKEN_EXCHANGER_CONFIG_DEFAULT_TOKEN_EXPIRY_SECONDS"] = strconv.FormatInt(v.DefaultTokenExpirySeconds, 10)
 	return result
 }
 
 // TokenExchangerConfigFromEnvVar creates TokenExchangerConfig from environment variable key-value pairs.
 func TokenExchangerConfigFromEnvVar(env map[string]string) (*TokenExchangerConfig, error) {
 	result := &TokenExchangerConfig{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_TOKEN_EXCHANGER_CONFIG_REFRESH_AUDIENCE"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_TOKEN_EXCHANGER_CONFIG_REFRESH_AUDIENCE"]; ok && val != "" {
 		result.RefreshAudience = val
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_TOKEN_EXCHANGER_CONFIG_KEY_ROTATION_INTERVAL_SECONDS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_TOKEN_EXCHANGER_CONFIG_KEY_ROTATION_INTERVAL_SECONDS"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
 		}
 		result.KeyRotationIntervalSeconds = parsed
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_TOKEN_EXCHANGER_CONFIG_DEFAULT_TOKEN_EXPIRY_SECONDS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_TOKEN_EXCHANGER_CONFIG_DEFAULT_TOKEN_EXPIRY_SECONDS"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
@@ -28965,10 +28965,10 @@ func TokenRequestToEnvVar(v *TokenRequest) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_TOKEN_REQUEST_INPUT_TOKEN"] = v.InputToken
-	result["PROTO_SERVICES_ELVIS_TOKEN_REQUEST_AUD"] = v.Aud
-	result["PROTO_SERVICES_ELVIS_TOKEN_REQUEST_EXP"] = strconv.FormatInt(v.Exp, 10)
-	result["PROTO_SERVICES_ELVIS_TOKEN_REQUEST_CONTINUITY_TOKEN"] = v.ContinuityToken
+	result["PROTO_SERVICES_KERNEL_TOKEN_REQUEST_INPUT_TOKEN"] = v.InputToken
+	result["PROTO_SERVICES_KERNEL_TOKEN_REQUEST_AUD"] = v.Aud
+	result["PROTO_SERVICES_KERNEL_TOKEN_REQUEST_EXP"] = strconv.FormatInt(v.Exp, 10)
+	result["PROTO_SERVICES_KERNEL_TOKEN_REQUEST_CONTINUITY_TOKEN"] = v.ContinuityToken
 	if v.CloudProof != nil {
 		for k, val := range cloudidentity.CloudIdentityProofToEnvVar(v.CloudProof) {
 			result[k] = val
@@ -28980,20 +28980,20 @@ func TokenRequestToEnvVar(v *TokenRequest) map[string]string {
 // TokenRequestFromEnvVar creates TokenRequest from environment variable key-value pairs.
 func TokenRequestFromEnvVar(env map[string]string) (*TokenRequest, error) {
 	result := &TokenRequest{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_TOKEN_REQUEST_INPUT_TOKEN"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_TOKEN_REQUEST_INPUT_TOKEN"]; ok && val != "" {
 		result.InputToken = val
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_TOKEN_REQUEST_AUD"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_TOKEN_REQUEST_AUD"]; ok && val != "" {
 		result.Aud = val
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_TOKEN_REQUEST_EXP"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_TOKEN_REQUEST_EXP"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
 		}
 		result.Exp = parsed
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_TOKEN_REQUEST_CONTINUITY_TOKEN"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_TOKEN_REQUEST_CONTINUITY_TOKEN"]; ok && val != "" {
 		result.ContinuityToken = val
 	}
 	if sub, err := cloudidentity.CloudIdentityProofFromEnvVar(env); err != nil {
@@ -29095,18 +29095,18 @@ func UrlLoaderToEnvVar(v *UrlLoader) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_URL_LOADER_URL"] = v.Url
-	result["PROTO_SERVICES_ELVIS_URL_LOADER_TOKEN"] = v.Token
+	result["PROTO_SERVICES_KERNEL_URL_LOADER_URL"] = v.Url
+	result["PROTO_SERVICES_KERNEL_URL_LOADER_TOKEN"] = v.Token
 	return result
 }
 
 // UrlLoaderFromEnvVar creates UrlLoader from environment variable key-value pairs.
 func UrlLoaderFromEnvVar(env map[string]string) (*UrlLoader, error) {
 	result := &UrlLoader{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_URL_LOADER_URL"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_URL_LOADER_URL"]; ok && val != "" {
 		result.Url = val
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_URL_LOADER_TOKEN"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_URL_LOADER_TOKEN"]; ok && val != "" {
 		result.Token = val
 	}
 	return result, nil
@@ -29118,14 +29118,14 @@ func FileLoaderToEnvVar(v *FileLoader) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_FILE_LOADER_PATH"] = v.Path
+	result["PROTO_SERVICES_KERNEL_FILE_LOADER_PATH"] = v.Path
 	return result
 }
 
 // FileLoaderFromEnvVar creates FileLoader from environment variable key-value pairs.
 func FileLoaderFromEnvVar(env map[string]string) (*FileLoader, error) {
 	result := &FileLoader{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_FILE_LOADER_PATH"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_FILE_LOADER_PATH"]; ok && val != "" {
 		result.Path = val
 	}
 	return result, nil
@@ -29138,12 +29138,12 @@ func ClusterStateToEnvVar(v *ClusterState) map[string]string {
 	}
 	result := make(map[string]string)
 	if v.ClusterInfo != nil {
-		for k, val := range presley.AdminClusterInfoToEnvVar(v.ClusterInfo) {
+		for k, val := range sentinel.AdminClusterInfoToEnvVar(v.ClusterInfo) {
 			result[k] = val
 		}
 	}
 	if v.ClusterHealth != nil {
-		for k, val := range presley.AdminClusterHealthToEnvVar(v.ClusterHealth) {
+		for k, val := range sentinel.AdminClusterHealthToEnvVar(v.ClusterHealth) {
 			result[k] = val
 		}
 	}
@@ -29178,12 +29178,12 @@ func ClusterStateToEnvVar(v *ClusterState) map[string]string {
 // ClusterStateFromEnvVar creates ClusterState from environment variable key-value pairs.
 func ClusterStateFromEnvVar(env map[string]string) (*ClusterState, error) {
 	result := &ClusterState{}
-	if sub, err := presley.AdminClusterInfoFromEnvVar(env); err != nil {
+	if sub, err := sentinel.AdminClusterInfoFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
 		result.ClusterInfo = sub
 	}
-	if sub, err := presley.AdminClusterHealthFromEnvVar(env); err != nil {
+	if sub, err := sentinel.AdminClusterHealthFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
 		result.ClusterHealth = sub
@@ -29222,18 +29222,18 @@ func AdminSetLogLevelRequestToEnvVar(v *AdminSetLogLevelRequest) map[string]stri
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_ADMIN_SET_LOG_LEVEL_REQUEST_LOGGER_NAME"] = v.LoggerName
-	result["PROTO_SERVICES_ELVIS_ADMIN_SET_LOG_LEVEL_REQUEST_LEVEL"] = v.Level
+	result["PROTO_SERVICES_KERNEL_ADMIN_SET_LOG_LEVEL_REQUEST_LOGGER_NAME"] = v.LoggerName
+	result["PROTO_SERVICES_KERNEL_ADMIN_SET_LOG_LEVEL_REQUEST_LEVEL"] = v.Level
 	return result
 }
 
 // AdminSetLogLevelRequestFromEnvVar creates AdminSetLogLevelRequest from environment variable key-value pairs.
 func AdminSetLogLevelRequestFromEnvVar(env map[string]string) (*AdminSetLogLevelRequest, error) {
 	result := &AdminSetLogLevelRequest{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_ADMIN_SET_LOG_LEVEL_REQUEST_LOGGER_NAME"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_ADMIN_SET_LOG_LEVEL_REQUEST_LOGGER_NAME"]; ok && val != "" {
 		result.LoggerName = val
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_ADMIN_SET_LOG_LEVEL_REQUEST_LEVEL"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_ADMIN_SET_LOG_LEVEL_REQUEST_LEVEL"]; ok && val != "" {
 		result.Level = val
 	}
 	return result, nil
@@ -29245,14 +29245,14 @@ func AdminReloadConfigRequestToEnvVar(v *AdminReloadConfigRequest) map[string]st
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_ADMIN_RELOAD_CONFIG_REQUEST_FORCE_RELOAD"] = strconv.FormatBool(v.ForceReload)
+	result["PROTO_SERVICES_KERNEL_ADMIN_RELOAD_CONFIG_REQUEST_FORCE_RELOAD"] = strconv.FormatBool(v.ForceReload)
 	return result
 }
 
 // AdminReloadConfigRequestFromEnvVar creates AdminReloadConfigRequest from environment variable key-value pairs.
 func AdminReloadConfigRequestFromEnvVar(env map[string]string) (*AdminReloadConfigRequest, error) {
 	result := &AdminReloadConfigRequest{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_ADMIN_RELOAD_CONFIG_REQUEST_FORCE_RELOAD"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_ADMIN_RELOAD_CONFIG_REQUEST_FORCE_RELOAD"]; ok && val != "" {
 		parsed, err := strconv.ParseBool(val)
 		if err != nil {
 			return nil, err
@@ -29268,14 +29268,14 @@ func AdminConfigDumpToEnvVar(v *AdminConfigDump) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_ADMIN_CONFIG_DUMP_HAZELCAST_CONFIG_XML"] = v.HazelcastConfigXml
+	result["PROTO_SERVICES_KERNEL_ADMIN_CONFIG_DUMP_HAZELCAST_CONFIG_XML"] = v.HazelcastConfigXml
 	return result
 }
 
 // AdminConfigDumpFromEnvVar creates AdminConfigDump from environment variable key-value pairs.
 func AdminConfigDumpFromEnvVar(env map[string]string) (*AdminConfigDump, error) {
 	result := &AdminConfigDump{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_ADMIN_CONFIG_DUMP_HAZELCAST_CONFIG_XML"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_ADMIN_CONFIG_DUMP_HAZELCAST_CONFIG_XML"]; ok && val != "" {
 		result.HazelcastConfigXml = val
 	}
 	return result, nil
@@ -29317,8 +29317,8 @@ func PredicateToEnvVar(v *Predicate) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_PREDICATE_FIELD_NAME"] = v.FieldName
-	result["PROTO_SERVICES_ELVIS_PREDICATE_OP"] = ComparisonOpToString(v.Op)
+	result["PROTO_SERVICES_KERNEL_PREDICATE_FIELD_NAME"] = v.FieldName
+	result["PROTO_SERVICES_KERNEL_PREDICATE_OP"] = ComparisonOpToString(v.Op)
 	if v.Value != nil {
 		for k, val := range QueryValueToEnvVar(v.Value) {
 			result[k] = val
@@ -29330,10 +29330,10 @@ func PredicateToEnvVar(v *Predicate) map[string]string {
 // PredicateFromEnvVar creates Predicate from environment variable key-value pairs.
 func PredicateFromEnvVar(env map[string]string) (*Predicate, error) {
 	result := &Predicate{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_PREDICATE_FIELD_NAME"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_PREDICATE_FIELD_NAME"]; ok && val != "" {
 		result.FieldName = val
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_PREDICATE_OP"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_PREDICATE_OP"]; ok && val != "" {
 		parsed, err := ParseComparisonOp(val)
 		if err != nil {
 			return nil, err
@@ -29354,14 +29354,14 @@ func PredicateGroupToEnvVar(v *PredicateGroup) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_PREDICATE_GROUP_OP"] = LogicalOpToString(v.Op)
+	result["PROTO_SERVICES_KERNEL_PREDICATE_GROUP_OP"] = LogicalOpToString(v.Op)
 	return result
 }
 
 // PredicateGroupFromEnvVar creates PredicateGroup from environment variable key-value pairs.
 func PredicateGroupFromEnvVar(env map[string]string) (*PredicateGroup, error) {
 	result := &PredicateGroup{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_PREDICATE_GROUP_OP"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_PREDICATE_GROUP_OP"]; ok && val != "" {
 		parsed, err := ParseLogicalOp(val)
 		if err != nil {
 			return nil, err
@@ -29377,18 +29377,18 @@ func SortFieldToEnvVar(v *SortField) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_SORT_FIELD_FIELD_NAME"] = v.FieldName
-	result["PROTO_SERVICES_ELVIS_SORT_FIELD_DIRECTION"] = SortDirectionToString(v.Direction)
+	result["PROTO_SERVICES_KERNEL_SORT_FIELD_FIELD_NAME"] = v.FieldName
+	result["PROTO_SERVICES_KERNEL_SORT_FIELD_DIRECTION"] = SortDirectionToString(v.Direction)
 	return result
 }
 
 // SortFieldFromEnvVar creates SortField from environment variable key-value pairs.
 func SortFieldFromEnvVar(env map[string]string) (*SortField, error) {
 	result := &SortField{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_SORT_FIELD_FIELD_NAME"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_SORT_FIELD_FIELD_NAME"]; ok && val != "" {
 		result.FieldName = val
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_SORT_FIELD_DIRECTION"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_SORT_FIELD_DIRECTION"]; ok && val != "" {
 		parsed, err := ParseSortDirection(val)
 		if err != nil {
 			return nil, err
@@ -29409,8 +29409,8 @@ func CollectionQueryToEnvVar(v *CollectionQuery) map[string]string {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_ELVIS_COLLECTION_QUERY_LIMIT"] = strconv.FormatInt(int64(v.Limit), 10)
-	result["PROTO_SERVICES_ELVIS_COLLECTION_QUERY_OFFSET"] = strconv.FormatInt(int64(v.Offset), 10)
+	result["PROTO_SERVICES_KERNEL_COLLECTION_QUERY_LIMIT"] = strconv.FormatInt(int64(v.Limit), 10)
+	result["PROTO_SERVICES_KERNEL_COLLECTION_QUERY_OFFSET"] = strconv.FormatInt(int64(v.Offset), 10)
 	return result
 }
 
@@ -29422,14 +29422,14 @@ func CollectionQueryFromEnvVar(env map[string]string) (*CollectionQuery, error) 
 	} else if sub != nil {
 		result.Where = sub
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_COLLECTION_QUERY_LIMIT"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_COLLECTION_QUERY_LIMIT"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
 		}
 		result.Limit = int32(parsed)
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_COLLECTION_QUERY_OFFSET"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_COLLECTION_QUERY_OFFSET"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -29445,14 +29445,14 @@ func VerifyingKeysGetRequestToEnvVar(v *VerifyingKeysGetRequest) map[string]stri
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_VERIFYING_KEYS_GET_REQUEST_KEY"] = v.Key
+	result["PROTO_SERVICES_KERNEL_VERIFYING_KEYS_GET_REQUEST_KEY"] = v.Key
 	return result
 }
 
 // VerifyingKeysGetRequestFromEnvVar creates VerifyingKeysGetRequest from environment variable key-value pairs.
 func VerifyingKeysGetRequestFromEnvVar(env map[string]string) (*VerifyingKeysGetRequest, error) {
 	result := &VerifyingKeysGetRequest{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_VERIFYING_KEYS_GET_REQUEST_KEY"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_VERIFYING_KEYS_GET_REQUEST_KEY"]; ok && val != "" {
 		result.Key = val
 	}
 	return result, nil
@@ -29464,20 +29464,20 @@ func VerifyingKeysPutRequestToEnvVar(v *VerifyingKeysPutRequest) map[string]stri
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_VERIFYING_KEYS_PUT_REQUEST_KEY"] = v.Key
+	result["PROTO_SERVICES_KERNEL_VERIFYING_KEYS_PUT_REQUEST_KEY"] = v.Key
 	if v.Value != nil {
 		for k, val := range jwk.JwkToEnvVar(v.Value) {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_ELVIS_VERIFYING_KEYS_PUT_REQUEST_LOCK_COUNTER"] = strconv.FormatInt(v.LockCounter, 10)
+	result["PROTO_SERVICES_KERNEL_VERIFYING_KEYS_PUT_REQUEST_LOCK_COUNTER"] = strconv.FormatInt(v.LockCounter, 10)
 	return result
 }
 
 // VerifyingKeysPutRequestFromEnvVar creates VerifyingKeysPutRequest from environment variable key-value pairs.
 func VerifyingKeysPutRequestFromEnvVar(env map[string]string) (*VerifyingKeysPutRequest, error) {
 	result := &VerifyingKeysPutRequest{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_VERIFYING_KEYS_PUT_REQUEST_KEY"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_VERIFYING_KEYS_PUT_REQUEST_KEY"]; ok && val != "" {
 		result.Key = val
 	}
 	if sub, err := jwk.JwkFromEnvVar(env); err != nil {
@@ -29485,7 +29485,7 @@ func VerifyingKeysPutRequestFromEnvVar(env map[string]string) (*VerifyingKeysPut
 	} else if sub != nil {
 		result.Value = sub
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_VERIFYING_KEYS_PUT_REQUEST_LOCK_COUNTER"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_VERIFYING_KEYS_PUT_REQUEST_LOCK_COUNTER"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
@@ -29566,7 +29566,7 @@ func VerifyingKeysValueResponseToEnvVar(v *VerifyingKeysValueResponse) map[strin
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_ELVIS_VERIFYING_KEYS_VALUE_RESPONSE_FOUND"] = strconv.FormatBool(v.Found)
+	result["PROTO_SERVICES_KERNEL_VERIFYING_KEYS_VALUE_RESPONSE_FOUND"] = strconv.FormatBool(v.Found)
 	return result
 }
 
@@ -29578,7 +29578,7 @@ func VerifyingKeysValueResponseFromEnvVar(env map[string]string) (*VerifyingKeys
 	} else if sub != nil {
 		result.Value = sub
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_VERIFYING_KEYS_VALUE_RESPONSE_FOUND"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_VERIFYING_KEYS_VALUE_RESPONSE_FOUND"]; ok && val != "" {
 		parsed, err := strconv.ParseBool(val)
 		if err != nil {
 			return nil, err
@@ -29610,7 +29610,7 @@ func VerifyingKeysKeysResponseToEnvVar(v *VerifyingKeysKeysResponse) map[string]
 	}
 	result := make(map[string]string)
 	if len(v.Keys) > 0 {
-		result["PROTO_SERVICES_ELVIS_VERIFYING_KEYS_KEYS_RESPONSE_KEYS"] = strings.Join(v.Keys, ",")
+		result["PROTO_SERVICES_KERNEL_VERIFYING_KEYS_KEYS_RESPONSE_KEYS"] = strings.Join(v.Keys, ",")
 	}
 	return result
 }
@@ -29618,7 +29618,7 @@ func VerifyingKeysKeysResponseToEnvVar(v *VerifyingKeysKeysResponse) map[string]
 // VerifyingKeysKeysResponseFromEnvVar creates VerifyingKeysKeysResponse from environment variable key-value pairs.
 func VerifyingKeysKeysResponseFromEnvVar(env map[string]string) (*VerifyingKeysKeysResponse, error) {
 	result := &VerifyingKeysKeysResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_VERIFYING_KEYS_KEYS_RESPONSE_KEYS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_VERIFYING_KEYS_KEYS_RESPONSE_KEYS"]; ok && val != "" {
 		result.Keys = strings.Split(val, ",")
 	}
 	return result, nil
@@ -29630,14 +29630,14 @@ func VerifyingKeysSizeResponseToEnvVar(v *VerifyingKeysSizeResponse) map[string]
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_VERIFYING_KEYS_SIZE_RESPONSE_SIZE"] = strconv.FormatInt(int64(v.Size), 10)
+	result["PROTO_SERVICES_KERNEL_VERIFYING_KEYS_SIZE_RESPONSE_SIZE"] = strconv.FormatInt(int64(v.Size), 10)
 	return result
 }
 
 // VerifyingKeysSizeResponseFromEnvVar creates VerifyingKeysSizeResponse from environment variable key-value pairs.
 func VerifyingKeysSizeResponseFromEnvVar(env map[string]string) (*VerifyingKeysSizeResponse, error) {
 	result := &VerifyingKeysSizeResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_VERIFYING_KEYS_SIZE_RESPONSE_SIZE"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_VERIFYING_KEYS_SIZE_RESPONSE_SIZE"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -29678,14 +29678,14 @@ func VerifyingKeysQueryResponseToEnvVar(v *VerifyingKeysQueryResponse) map[strin
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_VERIFYING_KEYS_QUERY_RESPONSE_TOTAL_COUNT"] = strconv.FormatInt(int64(v.TotalCount), 10)
+	result["PROTO_SERVICES_KERNEL_VERIFYING_KEYS_QUERY_RESPONSE_TOTAL_COUNT"] = strconv.FormatInt(int64(v.TotalCount), 10)
 	return result
 }
 
 // VerifyingKeysQueryResponseFromEnvVar creates VerifyingKeysQueryResponse from environment variable key-value pairs.
 func VerifyingKeysQueryResponseFromEnvVar(env map[string]string) (*VerifyingKeysQueryResponse, error) {
 	result := &VerifyingKeysQueryResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_VERIFYING_KEYS_QUERY_RESPONSE_TOTAL_COUNT"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_VERIFYING_KEYS_QUERY_RESPONSE_TOTAL_COUNT"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -29701,14 +29701,14 @@ func TrustedCasGetRequestToEnvVar(v *TrustedCasGetRequest) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_TRUSTED_CAS_GET_REQUEST_KEY"] = v.Key
+	result["PROTO_SERVICES_KERNEL_TRUSTED_CAS_GET_REQUEST_KEY"] = v.Key
 	return result
 }
 
 // TrustedCasGetRequestFromEnvVar creates TrustedCasGetRequest from environment variable key-value pairs.
 func TrustedCasGetRequestFromEnvVar(env map[string]string) (*TrustedCasGetRequest, error) {
 	result := &TrustedCasGetRequest{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_TRUSTED_CAS_GET_REQUEST_KEY"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_TRUSTED_CAS_GET_REQUEST_KEY"]; ok && val != "" {
 		result.Key = val
 	}
 	return result, nil
@@ -29720,20 +29720,20 @@ func TrustedCasPutRequestToEnvVar(v *TrustedCasPutRequest) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_TRUSTED_CAS_PUT_REQUEST_KEY"] = v.Key
+	result["PROTO_SERVICES_KERNEL_TRUSTED_CAS_PUT_REQUEST_KEY"] = v.Key
 	if v.Value != nil {
 		for k, val := range x509.X509CertToEnvVar(v.Value) {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_ELVIS_TRUSTED_CAS_PUT_REQUEST_LOCK_COUNTER"] = strconv.FormatInt(v.LockCounter, 10)
+	result["PROTO_SERVICES_KERNEL_TRUSTED_CAS_PUT_REQUEST_LOCK_COUNTER"] = strconv.FormatInt(v.LockCounter, 10)
 	return result
 }
 
 // TrustedCasPutRequestFromEnvVar creates TrustedCasPutRequest from environment variable key-value pairs.
 func TrustedCasPutRequestFromEnvVar(env map[string]string) (*TrustedCasPutRequest, error) {
 	result := &TrustedCasPutRequest{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_TRUSTED_CAS_PUT_REQUEST_KEY"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_TRUSTED_CAS_PUT_REQUEST_KEY"]; ok && val != "" {
 		result.Key = val
 	}
 	if sub, err := x509.X509CertFromEnvVar(env); err != nil {
@@ -29741,7 +29741,7 @@ func TrustedCasPutRequestFromEnvVar(env map[string]string) (*TrustedCasPutReques
 	} else if sub != nil {
 		result.Value = sub
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_TRUSTED_CAS_PUT_REQUEST_LOCK_COUNTER"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_TRUSTED_CAS_PUT_REQUEST_LOCK_COUNTER"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
@@ -29822,7 +29822,7 @@ func TrustedCasValueResponseToEnvVar(v *TrustedCasValueResponse) map[string]stri
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_ELVIS_TRUSTED_CAS_VALUE_RESPONSE_FOUND"] = strconv.FormatBool(v.Found)
+	result["PROTO_SERVICES_KERNEL_TRUSTED_CAS_VALUE_RESPONSE_FOUND"] = strconv.FormatBool(v.Found)
 	return result
 }
 
@@ -29834,7 +29834,7 @@ func TrustedCasValueResponseFromEnvVar(env map[string]string) (*TrustedCasValueR
 	} else if sub != nil {
 		result.Value = sub
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_TRUSTED_CAS_VALUE_RESPONSE_FOUND"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_TRUSTED_CAS_VALUE_RESPONSE_FOUND"]; ok && val != "" {
 		parsed, err := strconv.ParseBool(val)
 		if err != nil {
 			return nil, err
@@ -29866,7 +29866,7 @@ func TrustedCasKeysResponseToEnvVar(v *TrustedCasKeysResponse) map[string]string
 	}
 	result := make(map[string]string)
 	if len(v.Keys) > 0 {
-		result["PROTO_SERVICES_ELVIS_TRUSTED_CAS_KEYS_RESPONSE_KEYS"] = strings.Join(v.Keys, ",")
+		result["PROTO_SERVICES_KERNEL_TRUSTED_CAS_KEYS_RESPONSE_KEYS"] = strings.Join(v.Keys, ",")
 	}
 	return result
 }
@@ -29874,7 +29874,7 @@ func TrustedCasKeysResponseToEnvVar(v *TrustedCasKeysResponse) map[string]string
 // TrustedCasKeysResponseFromEnvVar creates TrustedCasKeysResponse from environment variable key-value pairs.
 func TrustedCasKeysResponseFromEnvVar(env map[string]string) (*TrustedCasKeysResponse, error) {
 	result := &TrustedCasKeysResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_TRUSTED_CAS_KEYS_RESPONSE_KEYS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_TRUSTED_CAS_KEYS_RESPONSE_KEYS"]; ok && val != "" {
 		result.Keys = strings.Split(val, ",")
 	}
 	return result, nil
@@ -29886,14 +29886,14 @@ func TrustedCasSizeResponseToEnvVar(v *TrustedCasSizeResponse) map[string]string
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_TRUSTED_CAS_SIZE_RESPONSE_SIZE"] = strconv.FormatInt(int64(v.Size), 10)
+	result["PROTO_SERVICES_KERNEL_TRUSTED_CAS_SIZE_RESPONSE_SIZE"] = strconv.FormatInt(int64(v.Size), 10)
 	return result
 }
 
 // TrustedCasSizeResponseFromEnvVar creates TrustedCasSizeResponse from environment variable key-value pairs.
 func TrustedCasSizeResponseFromEnvVar(env map[string]string) (*TrustedCasSizeResponse, error) {
 	result := &TrustedCasSizeResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_TRUSTED_CAS_SIZE_RESPONSE_SIZE"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_TRUSTED_CAS_SIZE_RESPONSE_SIZE"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -29934,14 +29934,14 @@ func TrustedCasQueryResponseToEnvVar(v *TrustedCasQueryResponse) map[string]stri
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_TRUSTED_CAS_QUERY_RESPONSE_TOTAL_COUNT"] = strconv.FormatInt(int64(v.TotalCount), 10)
+	result["PROTO_SERVICES_KERNEL_TRUSTED_CAS_QUERY_RESPONSE_TOTAL_COUNT"] = strconv.FormatInt(int64(v.TotalCount), 10)
 	return result
 }
 
 // TrustedCasQueryResponseFromEnvVar creates TrustedCasQueryResponse from environment variable key-value pairs.
 func TrustedCasQueryResponseFromEnvVar(env map[string]string) (*TrustedCasQueryResponse, error) {
 	result := &TrustedCasQueryResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_TRUSTED_CAS_QUERY_RESPONSE_TOTAL_COUNT"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_TRUSTED_CAS_QUERY_RESPONSE_TOTAL_COUNT"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -29957,14 +29957,14 @@ func NodeMetricsGetRequestToEnvVar(v *NodeMetricsGetRequest) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_NODE_METRICS_GET_REQUEST_KEY"] = v.Key
+	result["PROTO_SERVICES_KERNEL_NODE_METRICS_GET_REQUEST_KEY"] = v.Key
 	return result
 }
 
 // NodeMetricsGetRequestFromEnvVar creates NodeMetricsGetRequest from environment variable key-value pairs.
 func NodeMetricsGetRequestFromEnvVar(env map[string]string) (*NodeMetricsGetRequest, error) {
 	result := &NodeMetricsGetRequest{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_NODE_METRICS_GET_REQUEST_KEY"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_NODE_METRICS_GET_REQUEST_KEY"]; ok && val != "" {
 		result.Key = val
 	}
 	return result, nil
@@ -29976,28 +29976,28 @@ func NodeMetricsPutRequestToEnvVar(v *NodeMetricsPutRequest) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_NODE_METRICS_PUT_REQUEST_KEY"] = v.Key
+	result["PROTO_SERVICES_KERNEL_NODE_METRICS_PUT_REQUEST_KEY"] = v.Key
 	if v.Value != nil {
-		for k, val := range presley.AdminNodeMetricsToEnvVar(v.Value) {
+		for k, val := range sentinel.AdminNodeMetricsToEnvVar(v.Value) {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_ELVIS_NODE_METRICS_PUT_REQUEST_LOCK_COUNTER"] = strconv.FormatInt(v.LockCounter, 10)
+	result["PROTO_SERVICES_KERNEL_NODE_METRICS_PUT_REQUEST_LOCK_COUNTER"] = strconv.FormatInt(v.LockCounter, 10)
 	return result
 }
 
 // NodeMetricsPutRequestFromEnvVar creates NodeMetricsPutRequest from environment variable key-value pairs.
 func NodeMetricsPutRequestFromEnvVar(env map[string]string) (*NodeMetricsPutRequest, error) {
 	result := &NodeMetricsPutRequest{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_NODE_METRICS_PUT_REQUEST_KEY"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_NODE_METRICS_PUT_REQUEST_KEY"]; ok && val != "" {
 		result.Key = val
 	}
-	if sub, err := presley.AdminNodeMetricsFromEnvVar(env); err != nil {
+	if sub, err := sentinel.AdminNodeMetricsFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
 		result.Value = sub
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_NODE_METRICS_PUT_REQUEST_LOCK_COUNTER"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_NODE_METRICS_PUT_REQUEST_LOCK_COUNTER"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
@@ -30074,23 +30074,23 @@ func NodeMetricsValueResponseToEnvVar(v *NodeMetricsValueResponse) map[string]st
 	}
 	result := make(map[string]string)
 	if v.Value != nil {
-		for k, val := range presley.AdminNodeMetricsToEnvVar(v.Value) {
+		for k, val := range sentinel.AdminNodeMetricsToEnvVar(v.Value) {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_ELVIS_NODE_METRICS_VALUE_RESPONSE_FOUND"] = strconv.FormatBool(v.Found)
+	result["PROTO_SERVICES_KERNEL_NODE_METRICS_VALUE_RESPONSE_FOUND"] = strconv.FormatBool(v.Found)
 	return result
 }
 
 // NodeMetricsValueResponseFromEnvVar creates NodeMetricsValueResponse from environment variable key-value pairs.
 func NodeMetricsValueResponseFromEnvVar(env map[string]string) (*NodeMetricsValueResponse, error) {
 	result := &NodeMetricsValueResponse{}
-	if sub, err := presley.AdminNodeMetricsFromEnvVar(env); err != nil {
+	if sub, err := sentinel.AdminNodeMetricsFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
 		result.Value = sub
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_NODE_METRICS_VALUE_RESPONSE_FOUND"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_NODE_METRICS_VALUE_RESPONSE_FOUND"]; ok && val != "" {
 		parsed, err := strconv.ParseBool(val)
 		if err != nil {
 			return nil, err
@@ -30122,7 +30122,7 @@ func NodeMetricsKeysResponseToEnvVar(v *NodeMetricsKeysResponse) map[string]stri
 	}
 	result := make(map[string]string)
 	if len(v.Keys) > 0 {
-		result["PROTO_SERVICES_ELVIS_NODE_METRICS_KEYS_RESPONSE_KEYS"] = strings.Join(v.Keys, ",")
+		result["PROTO_SERVICES_KERNEL_NODE_METRICS_KEYS_RESPONSE_KEYS"] = strings.Join(v.Keys, ",")
 	}
 	return result
 }
@@ -30130,7 +30130,7 @@ func NodeMetricsKeysResponseToEnvVar(v *NodeMetricsKeysResponse) map[string]stri
 // NodeMetricsKeysResponseFromEnvVar creates NodeMetricsKeysResponse from environment variable key-value pairs.
 func NodeMetricsKeysResponseFromEnvVar(env map[string]string) (*NodeMetricsKeysResponse, error) {
 	result := &NodeMetricsKeysResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_NODE_METRICS_KEYS_RESPONSE_KEYS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_NODE_METRICS_KEYS_RESPONSE_KEYS"]; ok && val != "" {
 		result.Keys = strings.Split(val, ",")
 	}
 	return result, nil
@@ -30142,14 +30142,14 @@ func NodeMetricsSizeResponseToEnvVar(v *NodeMetricsSizeResponse) map[string]stri
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_NODE_METRICS_SIZE_RESPONSE_SIZE"] = strconv.FormatInt(int64(v.Size), 10)
+	result["PROTO_SERVICES_KERNEL_NODE_METRICS_SIZE_RESPONSE_SIZE"] = strconv.FormatInt(int64(v.Size), 10)
 	return result
 }
 
 // NodeMetricsSizeResponseFromEnvVar creates NodeMetricsSizeResponse from environment variable key-value pairs.
 func NodeMetricsSizeResponseFromEnvVar(env map[string]string) (*NodeMetricsSizeResponse, error) {
 	result := &NodeMetricsSizeResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_NODE_METRICS_SIZE_RESPONSE_SIZE"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_NODE_METRICS_SIZE_RESPONSE_SIZE"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -30190,14 +30190,14 @@ func NodeMetricsQueryResponseToEnvVar(v *NodeMetricsQueryResponse) map[string]st
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_NODE_METRICS_QUERY_RESPONSE_TOTAL_COUNT"] = strconv.FormatInt(int64(v.TotalCount), 10)
+	result["PROTO_SERVICES_KERNEL_NODE_METRICS_QUERY_RESPONSE_TOTAL_COUNT"] = strconv.FormatInt(int64(v.TotalCount), 10)
 	return result
 }
 
 // NodeMetricsQueryResponseFromEnvVar creates NodeMetricsQueryResponse from environment variable key-value pairs.
 func NodeMetricsQueryResponseFromEnvVar(env map[string]string) (*NodeMetricsQueryResponse, error) {
 	result := &NodeMetricsQueryResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_NODE_METRICS_QUERY_RESPONSE_TOTAL_COUNT"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_NODE_METRICS_QUERY_RESPONSE_TOTAL_COUNT"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -30213,14 +30213,14 @@ func GrpcStatsGetRequestToEnvVar(v *GrpcStatsGetRequest) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_GRPC_STATS_GET_REQUEST_KEY"] = v.Key
+	result["PROTO_SERVICES_KERNEL_GRPC_STATS_GET_REQUEST_KEY"] = v.Key
 	return result
 }
 
 // GrpcStatsGetRequestFromEnvVar creates GrpcStatsGetRequest from environment variable key-value pairs.
 func GrpcStatsGetRequestFromEnvVar(env map[string]string) (*GrpcStatsGetRequest, error) {
 	result := &GrpcStatsGetRequest{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_GRPC_STATS_GET_REQUEST_KEY"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_GRPC_STATS_GET_REQUEST_KEY"]; ok && val != "" {
 		result.Key = val
 	}
 	return result, nil
@@ -30232,28 +30232,28 @@ func GrpcStatsPutRequestToEnvVar(v *GrpcStatsPutRequest) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_GRPC_STATS_PUT_REQUEST_KEY"] = v.Key
+	result["PROTO_SERVICES_KERNEL_GRPC_STATS_PUT_REQUEST_KEY"] = v.Key
 	if v.Value != nil {
-		for k, val := range presley.AdminGrpcStatsToEnvVar(v.Value) {
+		for k, val := range sentinel.AdminGrpcStatsToEnvVar(v.Value) {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_ELVIS_GRPC_STATS_PUT_REQUEST_LOCK_COUNTER"] = strconv.FormatInt(v.LockCounter, 10)
+	result["PROTO_SERVICES_KERNEL_GRPC_STATS_PUT_REQUEST_LOCK_COUNTER"] = strconv.FormatInt(v.LockCounter, 10)
 	return result
 }
 
 // GrpcStatsPutRequestFromEnvVar creates GrpcStatsPutRequest from environment variable key-value pairs.
 func GrpcStatsPutRequestFromEnvVar(env map[string]string) (*GrpcStatsPutRequest, error) {
 	result := &GrpcStatsPutRequest{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_GRPC_STATS_PUT_REQUEST_KEY"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_GRPC_STATS_PUT_REQUEST_KEY"]; ok && val != "" {
 		result.Key = val
 	}
-	if sub, err := presley.AdminGrpcStatsFromEnvVar(env); err != nil {
+	if sub, err := sentinel.AdminGrpcStatsFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
 		result.Value = sub
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_GRPC_STATS_PUT_REQUEST_LOCK_COUNTER"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_GRPC_STATS_PUT_REQUEST_LOCK_COUNTER"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
@@ -30330,23 +30330,23 @@ func GrpcStatsValueResponseToEnvVar(v *GrpcStatsValueResponse) map[string]string
 	}
 	result := make(map[string]string)
 	if v.Value != nil {
-		for k, val := range presley.AdminGrpcStatsToEnvVar(v.Value) {
+		for k, val := range sentinel.AdminGrpcStatsToEnvVar(v.Value) {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_ELVIS_GRPC_STATS_VALUE_RESPONSE_FOUND"] = strconv.FormatBool(v.Found)
+	result["PROTO_SERVICES_KERNEL_GRPC_STATS_VALUE_RESPONSE_FOUND"] = strconv.FormatBool(v.Found)
 	return result
 }
 
 // GrpcStatsValueResponseFromEnvVar creates GrpcStatsValueResponse from environment variable key-value pairs.
 func GrpcStatsValueResponseFromEnvVar(env map[string]string) (*GrpcStatsValueResponse, error) {
 	result := &GrpcStatsValueResponse{}
-	if sub, err := presley.AdminGrpcStatsFromEnvVar(env); err != nil {
+	if sub, err := sentinel.AdminGrpcStatsFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
 		result.Value = sub
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_GRPC_STATS_VALUE_RESPONSE_FOUND"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_GRPC_STATS_VALUE_RESPONSE_FOUND"]; ok && val != "" {
 		parsed, err := strconv.ParseBool(val)
 		if err != nil {
 			return nil, err
@@ -30378,7 +30378,7 @@ func GrpcStatsKeysResponseToEnvVar(v *GrpcStatsKeysResponse) map[string]string {
 	}
 	result := make(map[string]string)
 	if len(v.Keys) > 0 {
-		result["PROTO_SERVICES_ELVIS_GRPC_STATS_KEYS_RESPONSE_KEYS"] = strings.Join(v.Keys, ",")
+		result["PROTO_SERVICES_KERNEL_GRPC_STATS_KEYS_RESPONSE_KEYS"] = strings.Join(v.Keys, ",")
 	}
 	return result
 }
@@ -30386,7 +30386,7 @@ func GrpcStatsKeysResponseToEnvVar(v *GrpcStatsKeysResponse) map[string]string {
 // GrpcStatsKeysResponseFromEnvVar creates GrpcStatsKeysResponse from environment variable key-value pairs.
 func GrpcStatsKeysResponseFromEnvVar(env map[string]string) (*GrpcStatsKeysResponse, error) {
 	result := &GrpcStatsKeysResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_GRPC_STATS_KEYS_RESPONSE_KEYS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_GRPC_STATS_KEYS_RESPONSE_KEYS"]; ok && val != "" {
 		result.Keys = strings.Split(val, ",")
 	}
 	return result, nil
@@ -30398,14 +30398,14 @@ func GrpcStatsSizeResponseToEnvVar(v *GrpcStatsSizeResponse) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_GRPC_STATS_SIZE_RESPONSE_SIZE"] = strconv.FormatInt(int64(v.Size), 10)
+	result["PROTO_SERVICES_KERNEL_GRPC_STATS_SIZE_RESPONSE_SIZE"] = strconv.FormatInt(int64(v.Size), 10)
 	return result
 }
 
 // GrpcStatsSizeResponseFromEnvVar creates GrpcStatsSizeResponse from environment variable key-value pairs.
 func GrpcStatsSizeResponseFromEnvVar(env map[string]string) (*GrpcStatsSizeResponse, error) {
 	result := &GrpcStatsSizeResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_GRPC_STATS_SIZE_RESPONSE_SIZE"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_GRPC_STATS_SIZE_RESPONSE_SIZE"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -30446,14 +30446,14 @@ func GrpcStatsQueryResponseToEnvVar(v *GrpcStatsQueryResponse) map[string]string
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_GRPC_STATS_QUERY_RESPONSE_TOTAL_COUNT"] = strconv.FormatInt(int64(v.TotalCount), 10)
+	result["PROTO_SERVICES_KERNEL_GRPC_STATS_QUERY_RESPONSE_TOTAL_COUNT"] = strconv.FormatInt(int64(v.TotalCount), 10)
 	return result
 }
 
 // GrpcStatsQueryResponseFromEnvVar creates GrpcStatsQueryResponse from environment variable key-value pairs.
 func GrpcStatsQueryResponseFromEnvVar(env map[string]string) (*GrpcStatsQueryResponse, error) {
 	result := &GrpcStatsQueryResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_GRPC_STATS_QUERY_RESPONSE_TOTAL_COUNT"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_GRPC_STATS_QUERY_RESPONSE_TOTAL_COUNT"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -30469,14 +30469,14 @@ func PersistenceStatusGetRequestToEnvVar(v *PersistenceStatusGetRequest) map[str
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_PERSISTENCE_STATUS_GET_REQUEST_KEY"] = v.Key
+	result["PROTO_SERVICES_KERNEL_PERSISTENCE_STATUS_GET_REQUEST_KEY"] = v.Key
 	return result
 }
 
 // PersistenceStatusGetRequestFromEnvVar creates PersistenceStatusGetRequest from environment variable key-value pairs.
 func PersistenceStatusGetRequestFromEnvVar(env map[string]string) (*PersistenceStatusGetRequest, error) {
 	result := &PersistenceStatusGetRequest{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_PERSISTENCE_STATUS_GET_REQUEST_KEY"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_PERSISTENCE_STATUS_GET_REQUEST_KEY"]; ok && val != "" {
 		result.Key = val
 	}
 	return result, nil
@@ -30488,28 +30488,28 @@ func PersistenceStatusPutRequestToEnvVar(v *PersistenceStatusPutRequest) map[str
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_PERSISTENCE_STATUS_PUT_REQUEST_KEY"] = v.Key
+	result["PROTO_SERVICES_KERNEL_PERSISTENCE_STATUS_PUT_REQUEST_KEY"] = v.Key
 	if v.Value != nil {
-		for k, val := range presley.AdminPersistenceStatusToEnvVar(v.Value) {
+		for k, val := range sentinel.AdminPersistenceStatusToEnvVar(v.Value) {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_ELVIS_PERSISTENCE_STATUS_PUT_REQUEST_LOCK_COUNTER"] = strconv.FormatInt(v.LockCounter, 10)
+	result["PROTO_SERVICES_KERNEL_PERSISTENCE_STATUS_PUT_REQUEST_LOCK_COUNTER"] = strconv.FormatInt(v.LockCounter, 10)
 	return result
 }
 
 // PersistenceStatusPutRequestFromEnvVar creates PersistenceStatusPutRequest from environment variable key-value pairs.
 func PersistenceStatusPutRequestFromEnvVar(env map[string]string) (*PersistenceStatusPutRequest, error) {
 	result := &PersistenceStatusPutRequest{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_PERSISTENCE_STATUS_PUT_REQUEST_KEY"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_PERSISTENCE_STATUS_PUT_REQUEST_KEY"]; ok && val != "" {
 		result.Key = val
 	}
-	if sub, err := presley.AdminPersistenceStatusFromEnvVar(env); err != nil {
+	if sub, err := sentinel.AdminPersistenceStatusFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
 		result.Value = sub
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_PERSISTENCE_STATUS_PUT_REQUEST_LOCK_COUNTER"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_PERSISTENCE_STATUS_PUT_REQUEST_LOCK_COUNTER"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
@@ -30586,23 +30586,23 @@ func PersistenceStatusValueResponseToEnvVar(v *PersistenceStatusValueResponse) m
 	}
 	result := make(map[string]string)
 	if v.Value != nil {
-		for k, val := range presley.AdminPersistenceStatusToEnvVar(v.Value) {
+		for k, val := range sentinel.AdminPersistenceStatusToEnvVar(v.Value) {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_ELVIS_PERSISTENCE_STATUS_VALUE_RESPONSE_FOUND"] = strconv.FormatBool(v.Found)
+	result["PROTO_SERVICES_KERNEL_PERSISTENCE_STATUS_VALUE_RESPONSE_FOUND"] = strconv.FormatBool(v.Found)
 	return result
 }
 
 // PersistenceStatusValueResponseFromEnvVar creates PersistenceStatusValueResponse from environment variable key-value pairs.
 func PersistenceStatusValueResponseFromEnvVar(env map[string]string) (*PersistenceStatusValueResponse, error) {
 	result := &PersistenceStatusValueResponse{}
-	if sub, err := presley.AdminPersistenceStatusFromEnvVar(env); err != nil {
+	if sub, err := sentinel.AdminPersistenceStatusFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
 		result.Value = sub
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_PERSISTENCE_STATUS_VALUE_RESPONSE_FOUND"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_PERSISTENCE_STATUS_VALUE_RESPONSE_FOUND"]; ok && val != "" {
 		parsed, err := strconv.ParseBool(val)
 		if err != nil {
 			return nil, err
@@ -30634,7 +30634,7 @@ func PersistenceStatusKeysResponseToEnvVar(v *PersistenceStatusKeysResponse) map
 	}
 	result := make(map[string]string)
 	if len(v.Keys) > 0 {
-		result["PROTO_SERVICES_ELVIS_PERSISTENCE_STATUS_KEYS_RESPONSE_KEYS"] = strings.Join(v.Keys, ",")
+		result["PROTO_SERVICES_KERNEL_PERSISTENCE_STATUS_KEYS_RESPONSE_KEYS"] = strings.Join(v.Keys, ",")
 	}
 	return result
 }
@@ -30642,7 +30642,7 @@ func PersistenceStatusKeysResponseToEnvVar(v *PersistenceStatusKeysResponse) map
 // PersistenceStatusKeysResponseFromEnvVar creates PersistenceStatusKeysResponse from environment variable key-value pairs.
 func PersistenceStatusKeysResponseFromEnvVar(env map[string]string) (*PersistenceStatusKeysResponse, error) {
 	result := &PersistenceStatusKeysResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_PERSISTENCE_STATUS_KEYS_RESPONSE_KEYS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_PERSISTENCE_STATUS_KEYS_RESPONSE_KEYS"]; ok && val != "" {
 		result.Keys = strings.Split(val, ",")
 	}
 	return result, nil
@@ -30654,14 +30654,14 @@ func PersistenceStatusSizeResponseToEnvVar(v *PersistenceStatusSizeResponse) map
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_PERSISTENCE_STATUS_SIZE_RESPONSE_SIZE"] = strconv.FormatInt(int64(v.Size), 10)
+	result["PROTO_SERVICES_KERNEL_PERSISTENCE_STATUS_SIZE_RESPONSE_SIZE"] = strconv.FormatInt(int64(v.Size), 10)
 	return result
 }
 
 // PersistenceStatusSizeResponseFromEnvVar creates PersistenceStatusSizeResponse from environment variable key-value pairs.
 func PersistenceStatusSizeResponseFromEnvVar(env map[string]string) (*PersistenceStatusSizeResponse, error) {
 	result := &PersistenceStatusSizeResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_PERSISTENCE_STATUS_SIZE_RESPONSE_SIZE"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_PERSISTENCE_STATUS_SIZE_RESPONSE_SIZE"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -30702,14 +30702,14 @@ func PersistenceStatusQueryResponseToEnvVar(v *PersistenceStatusQueryResponse) m
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_PERSISTENCE_STATUS_QUERY_RESPONSE_TOTAL_COUNT"] = strconv.FormatInt(int64(v.TotalCount), 10)
+	result["PROTO_SERVICES_KERNEL_PERSISTENCE_STATUS_QUERY_RESPONSE_TOTAL_COUNT"] = strconv.FormatInt(int64(v.TotalCount), 10)
 	return result
 }
 
 // PersistenceStatusQueryResponseFromEnvVar creates PersistenceStatusQueryResponse from environment variable key-value pairs.
 func PersistenceStatusQueryResponseFromEnvVar(env map[string]string) (*PersistenceStatusQueryResponse, error) {
 	result := &PersistenceStatusQueryResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_PERSISTENCE_STATUS_QUERY_RESPONSE_TOTAL_COUNT"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_PERSISTENCE_STATUS_QUERY_RESPONSE_TOTAL_COUNT"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -30725,14 +30725,14 @@ func NetworkStatsGetRequestToEnvVar(v *NetworkStatsGetRequest) map[string]string
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_NETWORK_STATS_GET_REQUEST_KEY"] = v.Key
+	result["PROTO_SERVICES_KERNEL_NETWORK_STATS_GET_REQUEST_KEY"] = v.Key
 	return result
 }
 
 // NetworkStatsGetRequestFromEnvVar creates NetworkStatsGetRequest from environment variable key-value pairs.
 func NetworkStatsGetRequestFromEnvVar(env map[string]string) (*NetworkStatsGetRequest, error) {
 	result := &NetworkStatsGetRequest{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_NETWORK_STATS_GET_REQUEST_KEY"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_NETWORK_STATS_GET_REQUEST_KEY"]; ok && val != "" {
 		result.Key = val
 	}
 	return result, nil
@@ -30744,28 +30744,28 @@ func NetworkStatsPutRequestToEnvVar(v *NetworkStatsPutRequest) map[string]string
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_NETWORK_STATS_PUT_REQUEST_KEY"] = v.Key
+	result["PROTO_SERVICES_KERNEL_NETWORK_STATS_PUT_REQUEST_KEY"] = v.Key
 	if v.Value != nil {
-		for k, val := range presley.AdminNetworkStatsToEnvVar(v.Value) {
+		for k, val := range sentinel.AdminNetworkStatsToEnvVar(v.Value) {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_ELVIS_NETWORK_STATS_PUT_REQUEST_LOCK_COUNTER"] = strconv.FormatInt(v.LockCounter, 10)
+	result["PROTO_SERVICES_KERNEL_NETWORK_STATS_PUT_REQUEST_LOCK_COUNTER"] = strconv.FormatInt(v.LockCounter, 10)
 	return result
 }
 
 // NetworkStatsPutRequestFromEnvVar creates NetworkStatsPutRequest from environment variable key-value pairs.
 func NetworkStatsPutRequestFromEnvVar(env map[string]string) (*NetworkStatsPutRequest, error) {
 	result := &NetworkStatsPutRequest{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_NETWORK_STATS_PUT_REQUEST_KEY"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_NETWORK_STATS_PUT_REQUEST_KEY"]; ok && val != "" {
 		result.Key = val
 	}
-	if sub, err := presley.AdminNetworkStatsFromEnvVar(env); err != nil {
+	if sub, err := sentinel.AdminNetworkStatsFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
 		result.Value = sub
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_NETWORK_STATS_PUT_REQUEST_LOCK_COUNTER"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_NETWORK_STATS_PUT_REQUEST_LOCK_COUNTER"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
@@ -30842,23 +30842,23 @@ func NetworkStatsValueResponseToEnvVar(v *NetworkStatsValueResponse) map[string]
 	}
 	result := make(map[string]string)
 	if v.Value != nil {
-		for k, val := range presley.AdminNetworkStatsToEnvVar(v.Value) {
+		for k, val := range sentinel.AdminNetworkStatsToEnvVar(v.Value) {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_ELVIS_NETWORK_STATS_VALUE_RESPONSE_FOUND"] = strconv.FormatBool(v.Found)
+	result["PROTO_SERVICES_KERNEL_NETWORK_STATS_VALUE_RESPONSE_FOUND"] = strconv.FormatBool(v.Found)
 	return result
 }
 
 // NetworkStatsValueResponseFromEnvVar creates NetworkStatsValueResponse from environment variable key-value pairs.
 func NetworkStatsValueResponseFromEnvVar(env map[string]string) (*NetworkStatsValueResponse, error) {
 	result := &NetworkStatsValueResponse{}
-	if sub, err := presley.AdminNetworkStatsFromEnvVar(env); err != nil {
+	if sub, err := sentinel.AdminNetworkStatsFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
 		result.Value = sub
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_NETWORK_STATS_VALUE_RESPONSE_FOUND"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_NETWORK_STATS_VALUE_RESPONSE_FOUND"]; ok && val != "" {
 		parsed, err := strconv.ParseBool(val)
 		if err != nil {
 			return nil, err
@@ -30890,7 +30890,7 @@ func NetworkStatsKeysResponseToEnvVar(v *NetworkStatsKeysResponse) map[string]st
 	}
 	result := make(map[string]string)
 	if len(v.Keys) > 0 {
-		result["PROTO_SERVICES_ELVIS_NETWORK_STATS_KEYS_RESPONSE_KEYS"] = strings.Join(v.Keys, ",")
+		result["PROTO_SERVICES_KERNEL_NETWORK_STATS_KEYS_RESPONSE_KEYS"] = strings.Join(v.Keys, ",")
 	}
 	return result
 }
@@ -30898,7 +30898,7 @@ func NetworkStatsKeysResponseToEnvVar(v *NetworkStatsKeysResponse) map[string]st
 // NetworkStatsKeysResponseFromEnvVar creates NetworkStatsKeysResponse from environment variable key-value pairs.
 func NetworkStatsKeysResponseFromEnvVar(env map[string]string) (*NetworkStatsKeysResponse, error) {
 	result := &NetworkStatsKeysResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_NETWORK_STATS_KEYS_RESPONSE_KEYS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_NETWORK_STATS_KEYS_RESPONSE_KEYS"]; ok && val != "" {
 		result.Keys = strings.Split(val, ",")
 	}
 	return result, nil
@@ -30910,14 +30910,14 @@ func NetworkStatsSizeResponseToEnvVar(v *NetworkStatsSizeResponse) map[string]st
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_NETWORK_STATS_SIZE_RESPONSE_SIZE"] = strconv.FormatInt(int64(v.Size), 10)
+	result["PROTO_SERVICES_KERNEL_NETWORK_STATS_SIZE_RESPONSE_SIZE"] = strconv.FormatInt(int64(v.Size), 10)
 	return result
 }
 
 // NetworkStatsSizeResponseFromEnvVar creates NetworkStatsSizeResponse from environment variable key-value pairs.
 func NetworkStatsSizeResponseFromEnvVar(env map[string]string) (*NetworkStatsSizeResponse, error) {
 	result := &NetworkStatsSizeResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_NETWORK_STATS_SIZE_RESPONSE_SIZE"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_NETWORK_STATS_SIZE_RESPONSE_SIZE"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -30958,14 +30958,14 @@ func NetworkStatsQueryResponseToEnvVar(v *NetworkStatsQueryResponse) map[string]
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_NETWORK_STATS_QUERY_RESPONSE_TOTAL_COUNT"] = strconv.FormatInt(int64(v.TotalCount), 10)
+	result["PROTO_SERVICES_KERNEL_NETWORK_STATS_QUERY_RESPONSE_TOTAL_COUNT"] = strconv.FormatInt(int64(v.TotalCount), 10)
 	return result
 }
 
 // NetworkStatsQueryResponseFromEnvVar creates NetworkStatsQueryResponse from environment variable key-value pairs.
 func NetworkStatsQueryResponseFromEnvVar(env map[string]string) (*NetworkStatsQueryResponse, error) {
 	result := &NetworkStatsQueryResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_NETWORK_STATS_QUERY_RESPONSE_TOTAL_COUNT"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_NETWORK_STATS_QUERY_RESPONSE_TOTAL_COUNT"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -30981,14 +30981,14 @@ func ThreadInfoGetRequestToEnvVar(v *ThreadInfoGetRequest) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_THREAD_INFO_GET_REQUEST_KEY"] = v.Key
+	result["PROTO_SERVICES_KERNEL_THREAD_INFO_GET_REQUEST_KEY"] = v.Key
 	return result
 }
 
 // ThreadInfoGetRequestFromEnvVar creates ThreadInfoGetRequest from environment variable key-value pairs.
 func ThreadInfoGetRequestFromEnvVar(env map[string]string) (*ThreadInfoGetRequest, error) {
 	result := &ThreadInfoGetRequest{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_THREAD_INFO_GET_REQUEST_KEY"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_THREAD_INFO_GET_REQUEST_KEY"]; ok && val != "" {
 		result.Key = val
 	}
 	return result, nil
@@ -31000,28 +31000,28 @@ func ThreadInfoPutRequestToEnvVar(v *ThreadInfoPutRequest) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_THREAD_INFO_PUT_REQUEST_KEY"] = v.Key
+	result["PROTO_SERVICES_KERNEL_THREAD_INFO_PUT_REQUEST_KEY"] = v.Key
 	if v.Value != nil {
-		for k, val := range presley.AdminThreadInfoToEnvVar(v.Value) {
+		for k, val := range sentinel.AdminThreadInfoToEnvVar(v.Value) {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_ELVIS_THREAD_INFO_PUT_REQUEST_LOCK_COUNTER"] = strconv.FormatInt(v.LockCounter, 10)
+	result["PROTO_SERVICES_KERNEL_THREAD_INFO_PUT_REQUEST_LOCK_COUNTER"] = strconv.FormatInt(v.LockCounter, 10)
 	return result
 }
 
 // ThreadInfoPutRequestFromEnvVar creates ThreadInfoPutRequest from environment variable key-value pairs.
 func ThreadInfoPutRequestFromEnvVar(env map[string]string) (*ThreadInfoPutRequest, error) {
 	result := &ThreadInfoPutRequest{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_THREAD_INFO_PUT_REQUEST_KEY"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_THREAD_INFO_PUT_REQUEST_KEY"]; ok && val != "" {
 		result.Key = val
 	}
-	if sub, err := presley.AdminThreadInfoFromEnvVar(env); err != nil {
+	if sub, err := sentinel.AdminThreadInfoFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
 		result.Value = sub
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_THREAD_INFO_PUT_REQUEST_LOCK_COUNTER"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_THREAD_INFO_PUT_REQUEST_LOCK_COUNTER"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
@@ -31098,23 +31098,23 @@ func ThreadInfoValueResponseToEnvVar(v *ThreadInfoValueResponse) map[string]stri
 	}
 	result := make(map[string]string)
 	if v.Value != nil {
-		for k, val := range presley.AdminThreadInfoToEnvVar(v.Value) {
+		for k, val := range sentinel.AdminThreadInfoToEnvVar(v.Value) {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_ELVIS_THREAD_INFO_VALUE_RESPONSE_FOUND"] = strconv.FormatBool(v.Found)
+	result["PROTO_SERVICES_KERNEL_THREAD_INFO_VALUE_RESPONSE_FOUND"] = strconv.FormatBool(v.Found)
 	return result
 }
 
 // ThreadInfoValueResponseFromEnvVar creates ThreadInfoValueResponse from environment variable key-value pairs.
 func ThreadInfoValueResponseFromEnvVar(env map[string]string) (*ThreadInfoValueResponse, error) {
 	result := &ThreadInfoValueResponse{}
-	if sub, err := presley.AdminThreadInfoFromEnvVar(env); err != nil {
+	if sub, err := sentinel.AdminThreadInfoFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
 		result.Value = sub
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_THREAD_INFO_VALUE_RESPONSE_FOUND"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_THREAD_INFO_VALUE_RESPONSE_FOUND"]; ok && val != "" {
 		parsed, err := strconv.ParseBool(val)
 		if err != nil {
 			return nil, err
@@ -31146,7 +31146,7 @@ func ThreadInfoKeysResponseToEnvVar(v *ThreadInfoKeysResponse) map[string]string
 	}
 	result := make(map[string]string)
 	if len(v.Keys) > 0 {
-		result["PROTO_SERVICES_ELVIS_THREAD_INFO_KEYS_RESPONSE_KEYS"] = strings.Join(v.Keys, ",")
+		result["PROTO_SERVICES_KERNEL_THREAD_INFO_KEYS_RESPONSE_KEYS"] = strings.Join(v.Keys, ",")
 	}
 	return result
 }
@@ -31154,7 +31154,7 @@ func ThreadInfoKeysResponseToEnvVar(v *ThreadInfoKeysResponse) map[string]string
 // ThreadInfoKeysResponseFromEnvVar creates ThreadInfoKeysResponse from environment variable key-value pairs.
 func ThreadInfoKeysResponseFromEnvVar(env map[string]string) (*ThreadInfoKeysResponse, error) {
 	result := &ThreadInfoKeysResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_THREAD_INFO_KEYS_RESPONSE_KEYS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_THREAD_INFO_KEYS_RESPONSE_KEYS"]; ok && val != "" {
 		result.Keys = strings.Split(val, ",")
 	}
 	return result, nil
@@ -31166,14 +31166,14 @@ func ThreadInfoSizeResponseToEnvVar(v *ThreadInfoSizeResponse) map[string]string
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_THREAD_INFO_SIZE_RESPONSE_SIZE"] = strconv.FormatInt(int64(v.Size), 10)
+	result["PROTO_SERVICES_KERNEL_THREAD_INFO_SIZE_RESPONSE_SIZE"] = strconv.FormatInt(int64(v.Size), 10)
 	return result
 }
 
 // ThreadInfoSizeResponseFromEnvVar creates ThreadInfoSizeResponse from environment variable key-value pairs.
 func ThreadInfoSizeResponseFromEnvVar(env map[string]string) (*ThreadInfoSizeResponse, error) {
 	result := &ThreadInfoSizeResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_THREAD_INFO_SIZE_RESPONSE_SIZE"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_THREAD_INFO_SIZE_RESPONSE_SIZE"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -31214,14 +31214,14 @@ func ThreadInfoQueryResponseToEnvVar(v *ThreadInfoQueryResponse) map[string]stri
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_THREAD_INFO_QUERY_RESPONSE_TOTAL_COUNT"] = strconv.FormatInt(int64(v.TotalCount), 10)
+	result["PROTO_SERVICES_KERNEL_THREAD_INFO_QUERY_RESPONSE_TOTAL_COUNT"] = strconv.FormatInt(int64(v.TotalCount), 10)
 	return result
 }
 
 // ThreadInfoQueryResponseFromEnvVar creates ThreadInfoQueryResponse from environment variable key-value pairs.
 func ThreadInfoQueryResponseFromEnvVar(env map[string]string) (*ThreadInfoQueryResponse, error) {
 	result := &ThreadInfoQueryResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_THREAD_INFO_QUERY_RESPONSE_TOTAL_COUNT"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_THREAD_INFO_QUERY_RESPONSE_TOTAL_COUNT"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -31237,14 +31237,14 @@ func TokenCacheStatsGetRequestToEnvVar(v *TokenCacheStatsGetRequest) map[string]
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_TOKEN_CACHE_STATS_GET_REQUEST_KEY"] = v.Key
+	result["PROTO_SERVICES_KERNEL_TOKEN_CACHE_STATS_GET_REQUEST_KEY"] = v.Key
 	return result
 }
 
 // TokenCacheStatsGetRequestFromEnvVar creates TokenCacheStatsGetRequest from environment variable key-value pairs.
 func TokenCacheStatsGetRequestFromEnvVar(env map[string]string) (*TokenCacheStatsGetRequest, error) {
 	result := &TokenCacheStatsGetRequest{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_TOKEN_CACHE_STATS_GET_REQUEST_KEY"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_TOKEN_CACHE_STATS_GET_REQUEST_KEY"]; ok && val != "" {
 		result.Key = val
 	}
 	return result, nil
@@ -31256,28 +31256,28 @@ func TokenCacheStatsPutRequestToEnvVar(v *TokenCacheStatsPutRequest) map[string]
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_TOKEN_CACHE_STATS_PUT_REQUEST_KEY"] = v.Key
+	result["PROTO_SERVICES_KERNEL_TOKEN_CACHE_STATS_PUT_REQUEST_KEY"] = v.Key
 	if v.Value != nil {
-		for k, val := range presley.AdminTokenCacheStatsToEnvVar(v.Value) {
+		for k, val := range sentinel.AdminTokenCacheStatsToEnvVar(v.Value) {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_ELVIS_TOKEN_CACHE_STATS_PUT_REQUEST_LOCK_COUNTER"] = strconv.FormatInt(v.LockCounter, 10)
+	result["PROTO_SERVICES_KERNEL_TOKEN_CACHE_STATS_PUT_REQUEST_LOCK_COUNTER"] = strconv.FormatInt(v.LockCounter, 10)
 	return result
 }
 
 // TokenCacheStatsPutRequestFromEnvVar creates TokenCacheStatsPutRequest from environment variable key-value pairs.
 func TokenCacheStatsPutRequestFromEnvVar(env map[string]string) (*TokenCacheStatsPutRequest, error) {
 	result := &TokenCacheStatsPutRequest{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_TOKEN_CACHE_STATS_PUT_REQUEST_KEY"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_TOKEN_CACHE_STATS_PUT_REQUEST_KEY"]; ok && val != "" {
 		result.Key = val
 	}
-	if sub, err := presley.AdminTokenCacheStatsFromEnvVar(env); err != nil {
+	if sub, err := sentinel.AdminTokenCacheStatsFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
 		result.Value = sub
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_TOKEN_CACHE_STATS_PUT_REQUEST_LOCK_COUNTER"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_TOKEN_CACHE_STATS_PUT_REQUEST_LOCK_COUNTER"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
@@ -31354,23 +31354,23 @@ func TokenCacheStatsValueResponseToEnvVar(v *TokenCacheStatsValueResponse) map[s
 	}
 	result := make(map[string]string)
 	if v.Value != nil {
-		for k, val := range presley.AdminTokenCacheStatsToEnvVar(v.Value) {
+		for k, val := range sentinel.AdminTokenCacheStatsToEnvVar(v.Value) {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_ELVIS_TOKEN_CACHE_STATS_VALUE_RESPONSE_FOUND"] = strconv.FormatBool(v.Found)
+	result["PROTO_SERVICES_KERNEL_TOKEN_CACHE_STATS_VALUE_RESPONSE_FOUND"] = strconv.FormatBool(v.Found)
 	return result
 }
 
 // TokenCacheStatsValueResponseFromEnvVar creates TokenCacheStatsValueResponse from environment variable key-value pairs.
 func TokenCacheStatsValueResponseFromEnvVar(env map[string]string) (*TokenCacheStatsValueResponse, error) {
 	result := &TokenCacheStatsValueResponse{}
-	if sub, err := presley.AdminTokenCacheStatsFromEnvVar(env); err != nil {
+	if sub, err := sentinel.AdminTokenCacheStatsFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
 		result.Value = sub
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_TOKEN_CACHE_STATS_VALUE_RESPONSE_FOUND"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_TOKEN_CACHE_STATS_VALUE_RESPONSE_FOUND"]; ok && val != "" {
 		parsed, err := strconv.ParseBool(val)
 		if err != nil {
 			return nil, err
@@ -31402,7 +31402,7 @@ func TokenCacheStatsKeysResponseToEnvVar(v *TokenCacheStatsKeysResponse) map[str
 	}
 	result := make(map[string]string)
 	if len(v.Keys) > 0 {
-		result["PROTO_SERVICES_ELVIS_TOKEN_CACHE_STATS_KEYS_RESPONSE_KEYS"] = strings.Join(v.Keys, ",")
+		result["PROTO_SERVICES_KERNEL_TOKEN_CACHE_STATS_KEYS_RESPONSE_KEYS"] = strings.Join(v.Keys, ",")
 	}
 	return result
 }
@@ -31410,7 +31410,7 @@ func TokenCacheStatsKeysResponseToEnvVar(v *TokenCacheStatsKeysResponse) map[str
 // TokenCacheStatsKeysResponseFromEnvVar creates TokenCacheStatsKeysResponse from environment variable key-value pairs.
 func TokenCacheStatsKeysResponseFromEnvVar(env map[string]string) (*TokenCacheStatsKeysResponse, error) {
 	result := &TokenCacheStatsKeysResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_TOKEN_CACHE_STATS_KEYS_RESPONSE_KEYS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_TOKEN_CACHE_STATS_KEYS_RESPONSE_KEYS"]; ok && val != "" {
 		result.Keys = strings.Split(val, ",")
 	}
 	return result, nil
@@ -31422,14 +31422,14 @@ func TokenCacheStatsSizeResponseToEnvVar(v *TokenCacheStatsSizeResponse) map[str
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_TOKEN_CACHE_STATS_SIZE_RESPONSE_SIZE"] = strconv.FormatInt(int64(v.Size), 10)
+	result["PROTO_SERVICES_KERNEL_TOKEN_CACHE_STATS_SIZE_RESPONSE_SIZE"] = strconv.FormatInt(int64(v.Size), 10)
 	return result
 }
 
 // TokenCacheStatsSizeResponseFromEnvVar creates TokenCacheStatsSizeResponse from environment variable key-value pairs.
 func TokenCacheStatsSizeResponseFromEnvVar(env map[string]string) (*TokenCacheStatsSizeResponse, error) {
 	result := &TokenCacheStatsSizeResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_TOKEN_CACHE_STATS_SIZE_RESPONSE_SIZE"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_TOKEN_CACHE_STATS_SIZE_RESPONSE_SIZE"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -31470,14 +31470,14 @@ func TokenCacheStatsQueryResponseToEnvVar(v *TokenCacheStatsQueryResponse) map[s
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_TOKEN_CACHE_STATS_QUERY_RESPONSE_TOTAL_COUNT"] = strconv.FormatInt(int64(v.TotalCount), 10)
+	result["PROTO_SERVICES_KERNEL_TOKEN_CACHE_STATS_QUERY_RESPONSE_TOTAL_COUNT"] = strconv.FormatInt(int64(v.TotalCount), 10)
 	return result
 }
 
 // TokenCacheStatsQueryResponseFromEnvVar creates TokenCacheStatsQueryResponse from environment variable key-value pairs.
 func TokenCacheStatsQueryResponseFromEnvVar(env map[string]string) (*TokenCacheStatsQueryResponse, error) {
 	result := &TokenCacheStatsQueryResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_TOKEN_CACHE_STATS_QUERY_RESPONSE_TOTAL_COUNT"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_TOKEN_CACHE_STATS_QUERY_RESPONSE_TOTAL_COUNT"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -31493,14 +31493,14 @@ func MapStatsGetRequestToEnvVar(v *MapStatsGetRequest) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_MAP_STATS_GET_REQUEST_KEY"] = v.Key
+	result["PROTO_SERVICES_KERNEL_MAP_STATS_GET_REQUEST_KEY"] = v.Key
 	return result
 }
 
 // MapStatsGetRequestFromEnvVar creates MapStatsGetRequest from environment variable key-value pairs.
 func MapStatsGetRequestFromEnvVar(env map[string]string) (*MapStatsGetRequest, error) {
 	result := &MapStatsGetRequest{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_MAP_STATS_GET_REQUEST_KEY"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_MAP_STATS_GET_REQUEST_KEY"]; ok && val != "" {
 		result.Key = val
 	}
 	return result, nil
@@ -31512,28 +31512,28 @@ func MapStatsPutRequestToEnvVar(v *MapStatsPutRequest) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_MAP_STATS_PUT_REQUEST_KEY"] = v.Key
+	result["PROTO_SERVICES_KERNEL_MAP_STATS_PUT_REQUEST_KEY"] = v.Key
 	if v.Value != nil {
-		for k, val := range presley.AdminMapStatsToEnvVar(v.Value) {
+		for k, val := range sentinel.AdminMapStatsToEnvVar(v.Value) {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_ELVIS_MAP_STATS_PUT_REQUEST_LOCK_COUNTER"] = strconv.FormatInt(v.LockCounter, 10)
+	result["PROTO_SERVICES_KERNEL_MAP_STATS_PUT_REQUEST_LOCK_COUNTER"] = strconv.FormatInt(v.LockCounter, 10)
 	return result
 }
 
 // MapStatsPutRequestFromEnvVar creates MapStatsPutRequest from environment variable key-value pairs.
 func MapStatsPutRequestFromEnvVar(env map[string]string) (*MapStatsPutRequest, error) {
 	result := &MapStatsPutRequest{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_MAP_STATS_PUT_REQUEST_KEY"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_MAP_STATS_PUT_REQUEST_KEY"]; ok && val != "" {
 		result.Key = val
 	}
-	if sub, err := presley.AdminMapStatsFromEnvVar(env); err != nil {
+	if sub, err := sentinel.AdminMapStatsFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
 		result.Value = sub
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_MAP_STATS_PUT_REQUEST_LOCK_COUNTER"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_MAP_STATS_PUT_REQUEST_LOCK_COUNTER"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
@@ -31610,23 +31610,23 @@ func MapStatsValueResponseToEnvVar(v *MapStatsValueResponse) map[string]string {
 	}
 	result := make(map[string]string)
 	if v.Value != nil {
-		for k, val := range presley.AdminMapStatsToEnvVar(v.Value) {
+		for k, val := range sentinel.AdminMapStatsToEnvVar(v.Value) {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_ELVIS_MAP_STATS_VALUE_RESPONSE_FOUND"] = strconv.FormatBool(v.Found)
+	result["PROTO_SERVICES_KERNEL_MAP_STATS_VALUE_RESPONSE_FOUND"] = strconv.FormatBool(v.Found)
 	return result
 }
 
 // MapStatsValueResponseFromEnvVar creates MapStatsValueResponse from environment variable key-value pairs.
 func MapStatsValueResponseFromEnvVar(env map[string]string) (*MapStatsValueResponse, error) {
 	result := &MapStatsValueResponse{}
-	if sub, err := presley.AdminMapStatsFromEnvVar(env); err != nil {
+	if sub, err := sentinel.AdminMapStatsFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
 		result.Value = sub
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_MAP_STATS_VALUE_RESPONSE_FOUND"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_MAP_STATS_VALUE_RESPONSE_FOUND"]; ok && val != "" {
 		parsed, err := strconv.ParseBool(val)
 		if err != nil {
 			return nil, err
@@ -31658,7 +31658,7 @@ func MapStatsKeysResponseToEnvVar(v *MapStatsKeysResponse) map[string]string {
 	}
 	result := make(map[string]string)
 	if len(v.Keys) > 0 {
-		result["PROTO_SERVICES_ELVIS_MAP_STATS_KEYS_RESPONSE_KEYS"] = strings.Join(v.Keys, ",")
+		result["PROTO_SERVICES_KERNEL_MAP_STATS_KEYS_RESPONSE_KEYS"] = strings.Join(v.Keys, ",")
 	}
 	return result
 }
@@ -31666,7 +31666,7 @@ func MapStatsKeysResponseToEnvVar(v *MapStatsKeysResponse) map[string]string {
 // MapStatsKeysResponseFromEnvVar creates MapStatsKeysResponse from environment variable key-value pairs.
 func MapStatsKeysResponseFromEnvVar(env map[string]string) (*MapStatsKeysResponse, error) {
 	result := &MapStatsKeysResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_MAP_STATS_KEYS_RESPONSE_KEYS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_MAP_STATS_KEYS_RESPONSE_KEYS"]; ok && val != "" {
 		result.Keys = strings.Split(val, ",")
 	}
 	return result, nil
@@ -31678,14 +31678,14 @@ func MapStatsSizeResponseToEnvVar(v *MapStatsSizeResponse) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_MAP_STATS_SIZE_RESPONSE_SIZE"] = strconv.FormatInt(int64(v.Size), 10)
+	result["PROTO_SERVICES_KERNEL_MAP_STATS_SIZE_RESPONSE_SIZE"] = strconv.FormatInt(int64(v.Size), 10)
 	return result
 }
 
 // MapStatsSizeResponseFromEnvVar creates MapStatsSizeResponse from environment variable key-value pairs.
 func MapStatsSizeResponseFromEnvVar(env map[string]string) (*MapStatsSizeResponse, error) {
 	result := &MapStatsSizeResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_MAP_STATS_SIZE_RESPONSE_SIZE"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_MAP_STATS_SIZE_RESPONSE_SIZE"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -31726,14 +31726,14 @@ func MapStatsQueryResponseToEnvVar(v *MapStatsQueryResponse) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_MAP_STATS_QUERY_RESPONSE_TOTAL_COUNT"] = strconv.FormatInt(int64(v.TotalCount), 10)
+	result["PROTO_SERVICES_KERNEL_MAP_STATS_QUERY_RESPONSE_TOTAL_COUNT"] = strconv.FormatInt(int64(v.TotalCount), 10)
 	return result
 }
 
 // MapStatsQueryResponseFromEnvVar creates MapStatsQueryResponse from environment variable key-value pairs.
 func MapStatsQueryResponseFromEnvVar(env map[string]string) (*MapStatsQueryResponse, error) {
 	result := &MapStatsQueryResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_MAP_STATS_QUERY_RESPONSE_TOTAL_COUNT"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_MAP_STATS_QUERY_RESPONSE_TOTAL_COUNT"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -31749,14 +31749,14 @@ func GraphRegistryGetRequestToEnvVar(v *GraphRegistryGetRequest) map[string]stri
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_GRAPH_REGISTRY_GET_REQUEST_KEY"] = v.Key
+	result["PROTO_SERVICES_KERNEL_GRAPH_REGISTRY_GET_REQUEST_KEY"] = v.Key
 	return result
 }
 
 // GraphRegistryGetRequestFromEnvVar creates GraphRegistryGetRequest from environment variable key-value pairs.
 func GraphRegistryGetRequestFromEnvVar(env map[string]string) (*GraphRegistryGetRequest, error) {
 	result := &GraphRegistryGetRequest{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_GRAPH_REGISTRY_GET_REQUEST_KEY"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_GRAPH_REGISTRY_GET_REQUEST_KEY"]; ok && val != "" {
 		result.Key = val
 	}
 	return result, nil
@@ -31768,28 +31768,28 @@ func GraphRegistryPutRequestToEnvVar(v *GraphRegistryPutRequest) map[string]stri
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_GRAPH_REGISTRY_PUT_REQUEST_KEY"] = v.Key
+	result["PROTO_SERVICES_KERNEL_GRAPH_REGISTRY_PUT_REQUEST_KEY"] = v.Key
 	if v.Value != nil {
-		for k, val := range presley.AdminGraphInfoToEnvVar(v.Value) {
+		for k, val := range sentinel.AdminGraphInfoToEnvVar(v.Value) {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_ELVIS_GRAPH_REGISTRY_PUT_REQUEST_LOCK_COUNTER"] = strconv.FormatInt(v.LockCounter, 10)
+	result["PROTO_SERVICES_KERNEL_GRAPH_REGISTRY_PUT_REQUEST_LOCK_COUNTER"] = strconv.FormatInt(v.LockCounter, 10)
 	return result
 }
 
 // GraphRegistryPutRequestFromEnvVar creates GraphRegistryPutRequest from environment variable key-value pairs.
 func GraphRegistryPutRequestFromEnvVar(env map[string]string) (*GraphRegistryPutRequest, error) {
 	result := &GraphRegistryPutRequest{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_GRAPH_REGISTRY_PUT_REQUEST_KEY"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_GRAPH_REGISTRY_PUT_REQUEST_KEY"]; ok && val != "" {
 		result.Key = val
 	}
-	if sub, err := presley.AdminGraphInfoFromEnvVar(env); err != nil {
+	if sub, err := sentinel.AdminGraphInfoFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
 		result.Value = sub
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_GRAPH_REGISTRY_PUT_REQUEST_LOCK_COUNTER"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_GRAPH_REGISTRY_PUT_REQUEST_LOCK_COUNTER"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
@@ -31866,23 +31866,23 @@ func GraphRegistryValueResponseToEnvVar(v *GraphRegistryValueResponse) map[strin
 	}
 	result := make(map[string]string)
 	if v.Value != nil {
-		for k, val := range presley.AdminGraphInfoToEnvVar(v.Value) {
+		for k, val := range sentinel.AdminGraphInfoToEnvVar(v.Value) {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_ELVIS_GRAPH_REGISTRY_VALUE_RESPONSE_FOUND"] = strconv.FormatBool(v.Found)
+	result["PROTO_SERVICES_KERNEL_GRAPH_REGISTRY_VALUE_RESPONSE_FOUND"] = strconv.FormatBool(v.Found)
 	return result
 }
 
 // GraphRegistryValueResponseFromEnvVar creates GraphRegistryValueResponse from environment variable key-value pairs.
 func GraphRegistryValueResponseFromEnvVar(env map[string]string) (*GraphRegistryValueResponse, error) {
 	result := &GraphRegistryValueResponse{}
-	if sub, err := presley.AdminGraphInfoFromEnvVar(env); err != nil {
+	if sub, err := sentinel.AdminGraphInfoFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
 		result.Value = sub
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_GRAPH_REGISTRY_VALUE_RESPONSE_FOUND"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_GRAPH_REGISTRY_VALUE_RESPONSE_FOUND"]; ok && val != "" {
 		parsed, err := strconv.ParseBool(val)
 		if err != nil {
 			return nil, err
@@ -31914,7 +31914,7 @@ func GraphRegistryKeysResponseToEnvVar(v *GraphRegistryKeysResponse) map[string]
 	}
 	result := make(map[string]string)
 	if len(v.Keys) > 0 {
-		result["PROTO_SERVICES_ELVIS_GRAPH_REGISTRY_KEYS_RESPONSE_KEYS"] = strings.Join(v.Keys, ",")
+		result["PROTO_SERVICES_KERNEL_GRAPH_REGISTRY_KEYS_RESPONSE_KEYS"] = strings.Join(v.Keys, ",")
 	}
 	return result
 }
@@ -31922,7 +31922,7 @@ func GraphRegistryKeysResponseToEnvVar(v *GraphRegistryKeysResponse) map[string]
 // GraphRegistryKeysResponseFromEnvVar creates GraphRegistryKeysResponse from environment variable key-value pairs.
 func GraphRegistryKeysResponseFromEnvVar(env map[string]string) (*GraphRegistryKeysResponse, error) {
 	result := &GraphRegistryKeysResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_GRAPH_REGISTRY_KEYS_RESPONSE_KEYS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_GRAPH_REGISTRY_KEYS_RESPONSE_KEYS"]; ok && val != "" {
 		result.Keys = strings.Split(val, ",")
 	}
 	return result, nil
@@ -31934,14 +31934,14 @@ func GraphRegistrySizeResponseToEnvVar(v *GraphRegistrySizeResponse) map[string]
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_GRAPH_REGISTRY_SIZE_RESPONSE_SIZE"] = strconv.FormatInt(int64(v.Size), 10)
+	result["PROTO_SERVICES_KERNEL_GRAPH_REGISTRY_SIZE_RESPONSE_SIZE"] = strconv.FormatInt(int64(v.Size), 10)
 	return result
 }
 
 // GraphRegistrySizeResponseFromEnvVar creates GraphRegistrySizeResponse from environment variable key-value pairs.
 func GraphRegistrySizeResponseFromEnvVar(env map[string]string) (*GraphRegistrySizeResponse, error) {
 	result := &GraphRegistrySizeResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_GRAPH_REGISTRY_SIZE_RESPONSE_SIZE"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_GRAPH_REGISTRY_SIZE_RESPONSE_SIZE"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -31982,14 +31982,14 @@ func GraphRegistryQueryResponseToEnvVar(v *GraphRegistryQueryResponse) map[strin
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_GRAPH_REGISTRY_QUERY_RESPONSE_TOTAL_COUNT"] = strconv.FormatInt(int64(v.TotalCount), 10)
+	result["PROTO_SERVICES_KERNEL_GRAPH_REGISTRY_QUERY_RESPONSE_TOTAL_COUNT"] = strconv.FormatInt(int64(v.TotalCount), 10)
 	return result
 }
 
 // GraphRegistryQueryResponseFromEnvVar creates GraphRegistryQueryResponse from environment variable key-value pairs.
 func GraphRegistryQueryResponseFromEnvVar(env map[string]string) (*GraphRegistryQueryResponse, error) {
 	result := &GraphRegistryQueryResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_GRAPH_REGISTRY_QUERY_RESPONSE_TOTAL_COUNT"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_GRAPH_REGISTRY_QUERY_RESPONSE_TOTAL_COUNT"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -32005,14 +32005,14 @@ func ServiceConnectionsGetRequestToEnvVar(v *ServiceConnectionsGetRequest) map[s
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_SERVICE_CONNECTIONS_GET_REQUEST_KEY"] = v.Key
+	result["PROTO_SERVICES_KERNEL_SERVICE_CONNECTIONS_GET_REQUEST_KEY"] = v.Key
 	return result
 }
 
 // ServiceConnectionsGetRequestFromEnvVar creates ServiceConnectionsGetRequest from environment variable key-value pairs.
 func ServiceConnectionsGetRequestFromEnvVar(env map[string]string) (*ServiceConnectionsGetRequest, error) {
 	result := &ServiceConnectionsGetRequest{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_SERVICE_CONNECTIONS_GET_REQUEST_KEY"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_SERVICE_CONNECTIONS_GET_REQUEST_KEY"]; ok && val != "" {
 		result.Key = val
 	}
 	return result, nil
@@ -32024,28 +32024,28 @@ func ServiceConnectionsPutRequestToEnvVar(v *ServiceConnectionsPutRequest) map[s
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_SERVICE_CONNECTIONS_PUT_REQUEST_KEY"] = v.Key
+	result["PROTO_SERVICES_KERNEL_SERVICE_CONNECTIONS_PUT_REQUEST_KEY"] = v.Key
 	if v.Value != nil {
-		for k, val := range presley.AdminServiceConnectionToEnvVar(v.Value) {
+		for k, val := range sentinel.AdminServiceConnectionToEnvVar(v.Value) {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_ELVIS_SERVICE_CONNECTIONS_PUT_REQUEST_LOCK_COUNTER"] = strconv.FormatInt(v.LockCounter, 10)
+	result["PROTO_SERVICES_KERNEL_SERVICE_CONNECTIONS_PUT_REQUEST_LOCK_COUNTER"] = strconv.FormatInt(v.LockCounter, 10)
 	return result
 }
 
 // ServiceConnectionsPutRequestFromEnvVar creates ServiceConnectionsPutRequest from environment variable key-value pairs.
 func ServiceConnectionsPutRequestFromEnvVar(env map[string]string) (*ServiceConnectionsPutRequest, error) {
 	result := &ServiceConnectionsPutRequest{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_SERVICE_CONNECTIONS_PUT_REQUEST_KEY"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_SERVICE_CONNECTIONS_PUT_REQUEST_KEY"]; ok && val != "" {
 		result.Key = val
 	}
-	if sub, err := presley.AdminServiceConnectionFromEnvVar(env); err != nil {
+	if sub, err := sentinel.AdminServiceConnectionFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
 		result.Value = sub
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_SERVICE_CONNECTIONS_PUT_REQUEST_LOCK_COUNTER"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_SERVICE_CONNECTIONS_PUT_REQUEST_LOCK_COUNTER"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
@@ -32122,23 +32122,23 @@ func ServiceConnectionsValueResponseToEnvVar(v *ServiceConnectionsValueResponse)
 	}
 	result := make(map[string]string)
 	if v.Value != nil {
-		for k, val := range presley.AdminServiceConnectionToEnvVar(v.Value) {
+		for k, val := range sentinel.AdminServiceConnectionToEnvVar(v.Value) {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_ELVIS_SERVICE_CONNECTIONS_VALUE_RESPONSE_FOUND"] = strconv.FormatBool(v.Found)
+	result["PROTO_SERVICES_KERNEL_SERVICE_CONNECTIONS_VALUE_RESPONSE_FOUND"] = strconv.FormatBool(v.Found)
 	return result
 }
 
 // ServiceConnectionsValueResponseFromEnvVar creates ServiceConnectionsValueResponse from environment variable key-value pairs.
 func ServiceConnectionsValueResponseFromEnvVar(env map[string]string) (*ServiceConnectionsValueResponse, error) {
 	result := &ServiceConnectionsValueResponse{}
-	if sub, err := presley.AdminServiceConnectionFromEnvVar(env); err != nil {
+	if sub, err := sentinel.AdminServiceConnectionFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
 		result.Value = sub
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_SERVICE_CONNECTIONS_VALUE_RESPONSE_FOUND"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_SERVICE_CONNECTIONS_VALUE_RESPONSE_FOUND"]; ok && val != "" {
 		parsed, err := strconv.ParseBool(val)
 		if err != nil {
 			return nil, err
@@ -32170,7 +32170,7 @@ func ServiceConnectionsKeysResponseToEnvVar(v *ServiceConnectionsKeysResponse) m
 	}
 	result := make(map[string]string)
 	if len(v.Keys) > 0 {
-		result["PROTO_SERVICES_ELVIS_SERVICE_CONNECTIONS_KEYS_RESPONSE_KEYS"] = strings.Join(v.Keys, ",")
+		result["PROTO_SERVICES_KERNEL_SERVICE_CONNECTIONS_KEYS_RESPONSE_KEYS"] = strings.Join(v.Keys, ",")
 	}
 	return result
 }
@@ -32178,7 +32178,7 @@ func ServiceConnectionsKeysResponseToEnvVar(v *ServiceConnectionsKeysResponse) m
 // ServiceConnectionsKeysResponseFromEnvVar creates ServiceConnectionsKeysResponse from environment variable key-value pairs.
 func ServiceConnectionsKeysResponseFromEnvVar(env map[string]string) (*ServiceConnectionsKeysResponse, error) {
 	result := &ServiceConnectionsKeysResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_SERVICE_CONNECTIONS_KEYS_RESPONSE_KEYS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_SERVICE_CONNECTIONS_KEYS_RESPONSE_KEYS"]; ok && val != "" {
 		result.Keys = strings.Split(val, ",")
 	}
 	return result, nil
@@ -32190,14 +32190,14 @@ func ServiceConnectionsSizeResponseToEnvVar(v *ServiceConnectionsSizeResponse) m
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_SERVICE_CONNECTIONS_SIZE_RESPONSE_SIZE"] = strconv.FormatInt(int64(v.Size), 10)
+	result["PROTO_SERVICES_KERNEL_SERVICE_CONNECTIONS_SIZE_RESPONSE_SIZE"] = strconv.FormatInt(int64(v.Size), 10)
 	return result
 }
 
 // ServiceConnectionsSizeResponseFromEnvVar creates ServiceConnectionsSizeResponse from environment variable key-value pairs.
 func ServiceConnectionsSizeResponseFromEnvVar(env map[string]string) (*ServiceConnectionsSizeResponse, error) {
 	result := &ServiceConnectionsSizeResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_SERVICE_CONNECTIONS_SIZE_RESPONSE_SIZE"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_SERVICE_CONNECTIONS_SIZE_RESPONSE_SIZE"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -32238,14 +32238,14 @@ func ServiceConnectionsQueryResponseToEnvVar(v *ServiceConnectionsQueryResponse)
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_SERVICE_CONNECTIONS_QUERY_RESPONSE_TOTAL_COUNT"] = strconv.FormatInt(int64(v.TotalCount), 10)
+	result["PROTO_SERVICES_KERNEL_SERVICE_CONNECTIONS_QUERY_RESPONSE_TOTAL_COUNT"] = strconv.FormatInt(int64(v.TotalCount), 10)
 	return result
 }
 
 // ServiceConnectionsQueryResponseFromEnvVar creates ServiceConnectionsQueryResponse from environment variable key-value pairs.
 func ServiceConnectionsQueryResponseFromEnvVar(env map[string]string) (*ServiceConnectionsQueryResponse, error) {
 	result := &ServiceConnectionsQueryResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_SERVICE_CONNECTIONS_QUERY_RESPONSE_TOTAL_COUNT"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_SERVICE_CONNECTIONS_QUERY_RESPONSE_TOTAL_COUNT"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -32261,14 +32261,14 @@ func QueueStatsGetRequestToEnvVar(v *QueueStatsGetRequest) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_QUEUE_STATS_GET_REQUEST_KEY"] = v.Key
+	result["PROTO_SERVICES_KERNEL_QUEUE_STATS_GET_REQUEST_KEY"] = v.Key
 	return result
 }
 
 // QueueStatsGetRequestFromEnvVar creates QueueStatsGetRequest from environment variable key-value pairs.
 func QueueStatsGetRequestFromEnvVar(env map[string]string) (*QueueStatsGetRequest, error) {
 	result := &QueueStatsGetRequest{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_QUEUE_STATS_GET_REQUEST_KEY"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_QUEUE_STATS_GET_REQUEST_KEY"]; ok && val != "" {
 		result.Key = val
 	}
 	return result, nil
@@ -32280,28 +32280,28 @@ func QueueStatsPutRequestToEnvVar(v *QueueStatsPutRequest) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_QUEUE_STATS_PUT_REQUEST_KEY"] = v.Key
+	result["PROTO_SERVICES_KERNEL_QUEUE_STATS_PUT_REQUEST_KEY"] = v.Key
 	if v.Value != nil {
-		for k, val := range presley.AdminQueueStatsToEnvVar(v.Value) {
+		for k, val := range sentinel.AdminQueueStatsToEnvVar(v.Value) {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_ELVIS_QUEUE_STATS_PUT_REQUEST_LOCK_COUNTER"] = strconv.FormatInt(v.LockCounter, 10)
+	result["PROTO_SERVICES_KERNEL_QUEUE_STATS_PUT_REQUEST_LOCK_COUNTER"] = strconv.FormatInt(v.LockCounter, 10)
 	return result
 }
 
 // QueueStatsPutRequestFromEnvVar creates QueueStatsPutRequest from environment variable key-value pairs.
 func QueueStatsPutRequestFromEnvVar(env map[string]string) (*QueueStatsPutRequest, error) {
 	result := &QueueStatsPutRequest{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_QUEUE_STATS_PUT_REQUEST_KEY"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_QUEUE_STATS_PUT_REQUEST_KEY"]; ok && val != "" {
 		result.Key = val
 	}
-	if sub, err := presley.AdminQueueStatsFromEnvVar(env); err != nil {
+	if sub, err := sentinel.AdminQueueStatsFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
 		result.Value = sub
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_QUEUE_STATS_PUT_REQUEST_LOCK_COUNTER"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_QUEUE_STATS_PUT_REQUEST_LOCK_COUNTER"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
@@ -32378,23 +32378,23 @@ func QueueStatsValueResponseToEnvVar(v *QueueStatsValueResponse) map[string]stri
 	}
 	result := make(map[string]string)
 	if v.Value != nil {
-		for k, val := range presley.AdminQueueStatsToEnvVar(v.Value) {
+		for k, val := range sentinel.AdminQueueStatsToEnvVar(v.Value) {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_ELVIS_QUEUE_STATS_VALUE_RESPONSE_FOUND"] = strconv.FormatBool(v.Found)
+	result["PROTO_SERVICES_KERNEL_QUEUE_STATS_VALUE_RESPONSE_FOUND"] = strconv.FormatBool(v.Found)
 	return result
 }
 
 // QueueStatsValueResponseFromEnvVar creates QueueStatsValueResponse from environment variable key-value pairs.
 func QueueStatsValueResponseFromEnvVar(env map[string]string) (*QueueStatsValueResponse, error) {
 	result := &QueueStatsValueResponse{}
-	if sub, err := presley.AdminQueueStatsFromEnvVar(env); err != nil {
+	if sub, err := sentinel.AdminQueueStatsFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
 		result.Value = sub
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_QUEUE_STATS_VALUE_RESPONSE_FOUND"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_QUEUE_STATS_VALUE_RESPONSE_FOUND"]; ok && val != "" {
 		parsed, err := strconv.ParseBool(val)
 		if err != nil {
 			return nil, err
@@ -32426,7 +32426,7 @@ func QueueStatsKeysResponseToEnvVar(v *QueueStatsKeysResponse) map[string]string
 	}
 	result := make(map[string]string)
 	if len(v.Keys) > 0 {
-		result["PROTO_SERVICES_ELVIS_QUEUE_STATS_KEYS_RESPONSE_KEYS"] = strings.Join(v.Keys, ",")
+		result["PROTO_SERVICES_KERNEL_QUEUE_STATS_KEYS_RESPONSE_KEYS"] = strings.Join(v.Keys, ",")
 	}
 	return result
 }
@@ -32434,7 +32434,7 @@ func QueueStatsKeysResponseToEnvVar(v *QueueStatsKeysResponse) map[string]string
 // QueueStatsKeysResponseFromEnvVar creates QueueStatsKeysResponse from environment variable key-value pairs.
 func QueueStatsKeysResponseFromEnvVar(env map[string]string) (*QueueStatsKeysResponse, error) {
 	result := &QueueStatsKeysResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_QUEUE_STATS_KEYS_RESPONSE_KEYS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_QUEUE_STATS_KEYS_RESPONSE_KEYS"]; ok && val != "" {
 		result.Keys = strings.Split(val, ",")
 	}
 	return result, nil
@@ -32446,14 +32446,14 @@ func QueueStatsSizeResponseToEnvVar(v *QueueStatsSizeResponse) map[string]string
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_QUEUE_STATS_SIZE_RESPONSE_SIZE"] = strconv.FormatInt(int64(v.Size), 10)
+	result["PROTO_SERVICES_KERNEL_QUEUE_STATS_SIZE_RESPONSE_SIZE"] = strconv.FormatInt(int64(v.Size), 10)
 	return result
 }
 
 // QueueStatsSizeResponseFromEnvVar creates QueueStatsSizeResponse from environment variable key-value pairs.
 func QueueStatsSizeResponseFromEnvVar(env map[string]string) (*QueueStatsSizeResponse, error) {
 	result := &QueueStatsSizeResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_QUEUE_STATS_SIZE_RESPONSE_SIZE"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_QUEUE_STATS_SIZE_RESPONSE_SIZE"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -32494,14 +32494,14 @@ func QueueStatsQueryResponseToEnvVar(v *QueueStatsQueryResponse) map[string]stri
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_QUEUE_STATS_QUERY_RESPONSE_TOTAL_COUNT"] = strconv.FormatInt(int64(v.TotalCount), 10)
+	result["PROTO_SERVICES_KERNEL_QUEUE_STATS_QUERY_RESPONSE_TOTAL_COUNT"] = strconv.FormatInt(int64(v.TotalCount), 10)
 	return result
 }
 
 // QueueStatsQueryResponseFromEnvVar creates QueueStatsQueryResponse from environment variable key-value pairs.
 func QueueStatsQueryResponseFromEnvVar(env map[string]string) (*QueueStatsQueryResponse, error) {
 	result := &QueueStatsQueryResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_QUEUE_STATS_QUERY_RESPONSE_TOTAL_COUNT"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_QUEUE_STATS_QUERY_RESPONSE_TOTAL_COUNT"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -32517,14 +32517,14 @@ func TopicStatsGetRequestToEnvVar(v *TopicStatsGetRequest) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_TOPIC_STATS_GET_REQUEST_KEY"] = v.Key
+	result["PROTO_SERVICES_KERNEL_TOPIC_STATS_GET_REQUEST_KEY"] = v.Key
 	return result
 }
 
 // TopicStatsGetRequestFromEnvVar creates TopicStatsGetRequest from environment variable key-value pairs.
 func TopicStatsGetRequestFromEnvVar(env map[string]string) (*TopicStatsGetRequest, error) {
 	result := &TopicStatsGetRequest{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_TOPIC_STATS_GET_REQUEST_KEY"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_TOPIC_STATS_GET_REQUEST_KEY"]; ok && val != "" {
 		result.Key = val
 	}
 	return result, nil
@@ -32536,28 +32536,28 @@ func TopicStatsPutRequestToEnvVar(v *TopicStatsPutRequest) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_TOPIC_STATS_PUT_REQUEST_KEY"] = v.Key
+	result["PROTO_SERVICES_KERNEL_TOPIC_STATS_PUT_REQUEST_KEY"] = v.Key
 	if v.Value != nil {
-		for k, val := range presley.AdminTopicStatsToEnvVar(v.Value) {
+		for k, val := range sentinel.AdminTopicStatsToEnvVar(v.Value) {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_ELVIS_TOPIC_STATS_PUT_REQUEST_LOCK_COUNTER"] = strconv.FormatInt(v.LockCounter, 10)
+	result["PROTO_SERVICES_KERNEL_TOPIC_STATS_PUT_REQUEST_LOCK_COUNTER"] = strconv.FormatInt(v.LockCounter, 10)
 	return result
 }
 
 // TopicStatsPutRequestFromEnvVar creates TopicStatsPutRequest from environment variable key-value pairs.
 func TopicStatsPutRequestFromEnvVar(env map[string]string) (*TopicStatsPutRequest, error) {
 	result := &TopicStatsPutRequest{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_TOPIC_STATS_PUT_REQUEST_KEY"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_TOPIC_STATS_PUT_REQUEST_KEY"]; ok && val != "" {
 		result.Key = val
 	}
-	if sub, err := presley.AdminTopicStatsFromEnvVar(env); err != nil {
+	if sub, err := sentinel.AdminTopicStatsFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
 		result.Value = sub
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_TOPIC_STATS_PUT_REQUEST_LOCK_COUNTER"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_TOPIC_STATS_PUT_REQUEST_LOCK_COUNTER"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
@@ -32634,23 +32634,23 @@ func TopicStatsValueResponseToEnvVar(v *TopicStatsValueResponse) map[string]stri
 	}
 	result := make(map[string]string)
 	if v.Value != nil {
-		for k, val := range presley.AdminTopicStatsToEnvVar(v.Value) {
+		for k, val := range sentinel.AdminTopicStatsToEnvVar(v.Value) {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_ELVIS_TOPIC_STATS_VALUE_RESPONSE_FOUND"] = strconv.FormatBool(v.Found)
+	result["PROTO_SERVICES_KERNEL_TOPIC_STATS_VALUE_RESPONSE_FOUND"] = strconv.FormatBool(v.Found)
 	return result
 }
 
 // TopicStatsValueResponseFromEnvVar creates TopicStatsValueResponse from environment variable key-value pairs.
 func TopicStatsValueResponseFromEnvVar(env map[string]string) (*TopicStatsValueResponse, error) {
 	result := &TopicStatsValueResponse{}
-	if sub, err := presley.AdminTopicStatsFromEnvVar(env); err != nil {
+	if sub, err := sentinel.AdminTopicStatsFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
 		result.Value = sub
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_TOPIC_STATS_VALUE_RESPONSE_FOUND"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_TOPIC_STATS_VALUE_RESPONSE_FOUND"]; ok && val != "" {
 		parsed, err := strconv.ParseBool(val)
 		if err != nil {
 			return nil, err
@@ -32682,7 +32682,7 @@ func TopicStatsKeysResponseToEnvVar(v *TopicStatsKeysResponse) map[string]string
 	}
 	result := make(map[string]string)
 	if len(v.Keys) > 0 {
-		result["PROTO_SERVICES_ELVIS_TOPIC_STATS_KEYS_RESPONSE_KEYS"] = strings.Join(v.Keys, ",")
+		result["PROTO_SERVICES_KERNEL_TOPIC_STATS_KEYS_RESPONSE_KEYS"] = strings.Join(v.Keys, ",")
 	}
 	return result
 }
@@ -32690,7 +32690,7 @@ func TopicStatsKeysResponseToEnvVar(v *TopicStatsKeysResponse) map[string]string
 // TopicStatsKeysResponseFromEnvVar creates TopicStatsKeysResponse from environment variable key-value pairs.
 func TopicStatsKeysResponseFromEnvVar(env map[string]string) (*TopicStatsKeysResponse, error) {
 	result := &TopicStatsKeysResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_TOPIC_STATS_KEYS_RESPONSE_KEYS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_TOPIC_STATS_KEYS_RESPONSE_KEYS"]; ok && val != "" {
 		result.Keys = strings.Split(val, ",")
 	}
 	return result, nil
@@ -32702,14 +32702,14 @@ func TopicStatsSizeResponseToEnvVar(v *TopicStatsSizeResponse) map[string]string
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_TOPIC_STATS_SIZE_RESPONSE_SIZE"] = strconv.FormatInt(int64(v.Size), 10)
+	result["PROTO_SERVICES_KERNEL_TOPIC_STATS_SIZE_RESPONSE_SIZE"] = strconv.FormatInt(int64(v.Size), 10)
 	return result
 }
 
 // TopicStatsSizeResponseFromEnvVar creates TopicStatsSizeResponse from environment variable key-value pairs.
 func TopicStatsSizeResponseFromEnvVar(env map[string]string) (*TopicStatsSizeResponse, error) {
 	result := &TopicStatsSizeResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_TOPIC_STATS_SIZE_RESPONSE_SIZE"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_TOPIC_STATS_SIZE_RESPONSE_SIZE"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -32750,14 +32750,14 @@ func TopicStatsQueryResponseToEnvVar(v *TopicStatsQueryResponse) map[string]stri
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_TOPIC_STATS_QUERY_RESPONSE_TOTAL_COUNT"] = strconv.FormatInt(int64(v.TotalCount), 10)
+	result["PROTO_SERVICES_KERNEL_TOPIC_STATS_QUERY_RESPONSE_TOTAL_COUNT"] = strconv.FormatInt(int64(v.TotalCount), 10)
 	return result
 }
 
 // TopicStatsQueryResponseFromEnvVar creates TopicStatsQueryResponse from environment variable key-value pairs.
 func TopicStatsQueryResponseFromEnvVar(env map[string]string) (*TopicStatsQueryResponse, error) {
 	result := &TopicStatsQueryResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_TOPIC_STATS_QUERY_RESPONSE_TOTAL_COUNT"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_TOPIC_STATS_QUERY_RESPONSE_TOTAL_COUNT"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -32773,14 +32773,14 @@ func WatchHealthGetRequestToEnvVar(v *WatchHealthGetRequest) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_WATCH_HEALTH_GET_REQUEST_KEY"] = v.Key
+	result["PROTO_SERVICES_KERNEL_WATCH_HEALTH_GET_REQUEST_KEY"] = v.Key
 	return result
 }
 
 // WatchHealthGetRequestFromEnvVar creates WatchHealthGetRequest from environment variable key-value pairs.
 func WatchHealthGetRequestFromEnvVar(env map[string]string) (*WatchHealthGetRequest, error) {
 	result := &WatchHealthGetRequest{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_WATCH_HEALTH_GET_REQUEST_KEY"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_WATCH_HEALTH_GET_REQUEST_KEY"]; ok && val != "" {
 		result.Key = val
 	}
 	return result, nil
@@ -32792,28 +32792,28 @@ func WatchHealthPutRequestToEnvVar(v *WatchHealthPutRequest) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_WATCH_HEALTH_PUT_REQUEST_KEY"] = v.Key
+	result["PROTO_SERVICES_KERNEL_WATCH_HEALTH_PUT_REQUEST_KEY"] = v.Key
 	if v.Value != nil {
-		for k, val := range presley.AdminWatchHealthToEnvVar(v.Value) {
+		for k, val := range sentinel.AdminWatchHealthToEnvVar(v.Value) {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_ELVIS_WATCH_HEALTH_PUT_REQUEST_LOCK_COUNTER"] = strconv.FormatInt(v.LockCounter, 10)
+	result["PROTO_SERVICES_KERNEL_WATCH_HEALTH_PUT_REQUEST_LOCK_COUNTER"] = strconv.FormatInt(v.LockCounter, 10)
 	return result
 }
 
 // WatchHealthPutRequestFromEnvVar creates WatchHealthPutRequest from environment variable key-value pairs.
 func WatchHealthPutRequestFromEnvVar(env map[string]string) (*WatchHealthPutRequest, error) {
 	result := &WatchHealthPutRequest{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_WATCH_HEALTH_PUT_REQUEST_KEY"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_WATCH_HEALTH_PUT_REQUEST_KEY"]; ok && val != "" {
 		result.Key = val
 	}
-	if sub, err := presley.AdminWatchHealthFromEnvVar(env); err != nil {
+	if sub, err := sentinel.AdminWatchHealthFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
 		result.Value = sub
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_WATCH_HEALTH_PUT_REQUEST_LOCK_COUNTER"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_WATCH_HEALTH_PUT_REQUEST_LOCK_COUNTER"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
@@ -32890,23 +32890,23 @@ func WatchHealthValueResponseToEnvVar(v *WatchHealthValueResponse) map[string]st
 	}
 	result := make(map[string]string)
 	if v.Value != nil {
-		for k, val := range presley.AdminWatchHealthToEnvVar(v.Value) {
+		for k, val := range sentinel.AdminWatchHealthToEnvVar(v.Value) {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_ELVIS_WATCH_HEALTH_VALUE_RESPONSE_FOUND"] = strconv.FormatBool(v.Found)
+	result["PROTO_SERVICES_KERNEL_WATCH_HEALTH_VALUE_RESPONSE_FOUND"] = strconv.FormatBool(v.Found)
 	return result
 }
 
 // WatchHealthValueResponseFromEnvVar creates WatchHealthValueResponse from environment variable key-value pairs.
 func WatchHealthValueResponseFromEnvVar(env map[string]string) (*WatchHealthValueResponse, error) {
 	result := &WatchHealthValueResponse{}
-	if sub, err := presley.AdminWatchHealthFromEnvVar(env); err != nil {
+	if sub, err := sentinel.AdminWatchHealthFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
 		result.Value = sub
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_WATCH_HEALTH_VALUE_RESPONSE_FOUND"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_WATCH_HEALTH_VALUE_RESPONSE_FOUND"]; ok && val != "" {
 		parsed, err := strconv.ParseBool(val)
 		if err != nil {
 			return nil, err
@@ -32938,7 +32938,7 @@ func WatchHealthKeysResponseToEnvVar(v *WatchHealthKeysResponse) map[string]stri
 	}
 	result := make(map[string]string)
 	if len(v.Keys) > 0 {
-		result["PROTO_SERVICES_ELVIS_WATCH_HEALTH_KEYS_RESPONSE_KEYS"] = strings.Join(v.Keys, ",")
+		result["PROTO_SERVICES_KERNEL_WATCH_HEALTH_KEYS_RESPONSE_KEYS"] = strings.Join(v.Keys, ",")
 	}
 	return result
 }
@@ -32946,7 +32946,7 @@ func WatchHealthKeysResponseToEnvVar(v *WatchHealthKeysResponse) map[string]stri
 // WatchHealthKeysResponseFromEnvVar creates WatchHealthKeysResponse from environment variable key-value pairs.
 func WatchHealthKeysResponseFromEnvVar(env map[string]string) (*WatchHealthKeysResponse, error) {
 	result := &WatchHealthKeysResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_WATCH_HEALTH_KEYS_RESPONSE_KEYS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_WATCH_HEALTH_KEYS_RESPONSE_KEYS"]; ok && val != "" {
 		result.Keys = strings.Split(val, ",")
 	}
 	return result, nil
@@ -32958,14 +32958,14 @@ func WatchHealthSizeResponseToEnvVar(v *WatchHealthSizeResponse) map[string]stri
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_WATCH_HEALTH_SIZE_RESPONSE_SIZE"] = strconv.FormatInt(int64(v.Size), 10)
+	result["PROTO_SERVICES_KERNEL_WATCH_HEALTH_SIZE_RESPONSE_SIZE"] = strconv.FormatInt(int64(v.Size), 10)
 	return result
 }
 
 // WatchHealthSizeResponseFromEnvVar creates WatchHealthSizeResponse from environment variable key-value pairs.
 func WatchHealthSizeResponseFromEnvVar(env map[string]string) (*WatchHealthSizeResponse, error) {
 	result := &WatchHealthSizeResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_WATCH_HEALTH_SIZE_RESPONSE_SIZE"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_WATCH_HEALTH_SIZE_RESPONSE_SIZE"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -33006,14 +33006,14 @@ func WatchHealthQueryResponseToEnvVar(v *WatchHealthQueryResponse) map[string]st
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_WATCH_HEALTH_QUERY_RESPONSE_TOTAL_COUNT"] = strconv.FormatInt(int64(v.TotalCount), 10)
+	result["PROTO_SERVICES_KERNEL_WATCH_HEALTH_QUERY_RESPONSE_TOTAL_COUNT"] = strconv.FormatInt(int64(v.TotalCount), 10)
 	return result
 }
 
 // WatchHealthQueryResponseFromEnvVar creates WatchHealthQueryResponse from environment variable key-value pairs.
 func WatchHealthQueryResponseFromEnvVar(env map[string]string) (*WatchHealthQueryResponse, error) {
 	result := &WatchHealthQueryResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_WATCH_HEALTH_QUERY_RESPONSE_TOTAL_COUNT"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_WATCH_HEALTH_QUERY_RESPONSE_TOTAL_COUNT"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -33029,14 +33029,14 @@ func MutationRatesGetRequestToEnvVar(v *MutationRatesGetRequest) map[string]stri
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_MUTATION_RATES_GET_REQUEST_KEY"] = v.Key
+	result["PROTO_SERVICES_KERNEL_MUTATION_RATES_GET_REQUEST_KEY"] = v.Key
 	return result
 }
 
 // MutationRatesGetRequestFromEnvVar creates MutationRatesGetRequest from environment variable key-value pairs.
 func MutationRatesGetRequestFromEnvVar(env map[string]string) (*MutationRatesGetRequest, error) {
 	result := &MutationRatesGetRequest{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_MUTATION_RATES_GET_REQUEST_KEY"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_MUTATION_RATES_GET_REQUEST_KEY"]; ok && val != "" {
 		result.Key = val
 	}
 	return result, nil
@@ -33048,28 +33048,28 @@ func MutationRatesPutRequestToEnvVar(v *MutationRatesPutRequest) map[string]stri
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_MUTATION_RATES_PUT_REQUEST_KEY"] = v.Key
+	result["PROTO_SERVICES_KERNEL_MUTATION_RATES_PUT_REQUEST_KEY"] = v.Key
 	if v.Value != nil {
-		for k, val := range presley.AdminMutationRateToEnvVar(v.Value) {
+		for k, val := range sentinel.AdminMutationRateToEnvVar(v.Value) {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_ELVIS_MUTATION_RATES_PUT_REQUEST_LOCK_COUNTER"] = strconv.FormatInt(v.LockCounter, 10)
+	result["PROTO_SERVICES_KERNEL_MUTATION_RATES_PUT_REQUEST_LOCK_COUNTER"] = strconv.FormatInt(v.LockCounter, 10)
 	return result
 }
 
 // MutationRatesPutRequestFromEnvVar creates MutationRatesPutRequest from environment variable key-value pairs.
 func MutationRatesPutRequestFromEnvVar(env map[string]string) (*MutationRatesPutRequest, error) {
 	result := &MutationRatesPutRequest{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_MUTATION_RATES_PUT_REQUEST_KEY"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_MUTATION_RATES_PUT_REQUEST_KEY"]; ok && val != "" {
 		result.Key = val
 	}
-	if sub, err := presley.AdminMutationRateFromEnvVar(env); err != nil {
+	if sub, err := sentinel.AdminMutationRateFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
 		result.Value = sub
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_MUTATION_RATES_PUT_REQUEST_LOCK_COUNTER"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_MUTATION_RATES_PUT_REQUEST_LOCK_COUNTER"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return nil, err
@@ -33146,23 +33146,23 @@ func MutationRatesValueResponseToEnvVar(v *MutationRatesValueResponse) map[strin
 	}
 	result := make(map[string]string)
 	if v.Value != nil {
-		for k, val := range presley.AdminMutationRateToEnvVar(v.Value) {
+		for k, val := range sentinel.AdminMutationRateToEnvVar(v.Value) {
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_ELVIS_MUTATION_RATES_VALUE_RESPONSE_FOUND"] = strconv.FormatBool(v.Found)
+	result["PROTO_SERVICES_KERNEL_MUTATION_RATES_VALUE_RESPONSE_FOUND"] = strconv.FormatBool(v.Found)
 	return result
 }
 
 // MutationRatesValueResponseFromEnvVar creates MutationRatesValueResponse from environment variable key-value pairs.
 func MutationRatesValueResponseFromEnvVar(env map[string]string) (*MutationRatesValueResponse, error) {
 	result := &MutationRatesValueResponse{}
-	if sub, err := presley.AdminMutationRateFromEnvVar(env); err != nil {
+	if sub, err := sentinel.AdminMutationRateFromEnvVar(env); err != nil {
 		return nil, err
 	} else if sub != nil {
 		result.Value = sub
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_MUTATION_RATES_VALUE_RESPONSE_FOUND"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_MUTATION_RATES_VALUE_RESPONSE_FOUND"]; ok && val != "" {
 		parsed, err := strconv.ParseBool(val)
 		if err != nil {
 			return nil, err
@@ -33194,7 +33194,7 @@ func MutationRatesKeysResponseToEnvVar(v *MutationRatesKeysResponse) map[string]
 	}
 	result := make(map[string]string)
 	if len(v.Keys) > 0 {
-		result["PROTO_SERVICES_ELVIS_MUTATION_RATES_KEYS_RESPONSE_KEYS"] = strings.Join(v.Keys, ",")
+		result["PROTO_SERVICES_KERNEL_MUTATION_RATES_KEYS_RESPONSE_KEYS"] = strings.Join(v.Keys, ",")
 	}
 	return result
 }
@@ -33202,7 +33202,7 @@ func MutationRatesKeysResponseToEnvVar(v *MutationRatesKeysResponse) map[string]
 // MutationRatesKeysResponseFromEnvVar creates MutationRatesKeysResponse from environment variable key-value pairs.
 func MutationRatesKeysResponseFromEnvVar(env map[string]string) (*MutationRatesKeysResponse, error) {
 	result := &MutationRatesKeysResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_MUTATION_RATES_KEYS_RESPONSE_KEYS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_MUTATION_RATES_KEYS_RESPONSE_KEYS"]; ok && val != "" {
 		result.Keys = strings.Split(val, ",")
 	}
 	return result, nil
@@ -33214,14 +33214,14 @@ func MutationRatesSizeResponseToEnvVar(v *MutationRatesSizeResponse) map[string]
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_MUTATION_RATES_SIZE_RESPONSE_SIZE"] = strconv.FormatInt(int64(v.Size), 10)
+	result["PROTO_SERVICES_KERNEL_MUTATION_RATES_SIZE_RESPONSE_SIZE"] = strconv.FormatInt(int64(v.Size), 10)
 	return result
 }
 
 // MutationRatesSizeResponseFromEnvVar creates MutationRatesSizeResponse from environment variable key-value pairs.
 func MutationRatesSizeResponseFromEnvVar(env map[string]string) (*MutationRatesSizeResponse, error) {
 	result := &MutationRatesSizeResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_MUTATION_RATES_SIZE_RESPONSE_SIZE"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_MUTATION_RATES_SIZE_RESPONSE_SIZE"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -33262,14 +33262,14 @@ func MutationRatesQueryResponseToEnvVar(v *MutationRatesQueryResponse) map[strin
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_MUTATION_RATES_QUERY_RESPONSE_TOTAL_COUNT"] = strconv.FormatInt(int64(v.TotalCount), 10)
+	result["PROTO_SERVICES_KERNEL_MUTATION_RATES_QUERY_RESPONSE_TOTAL_COUNT"] = strconv.FormatInt(int64(v.TotalCount), 10)
 	return result
 }
 
 // MutationRatesQueryResponseFromEnvVar creates MutationRatesQueryResponse from environment variable key-value pairs.
 func MutationRatesQueryResponseFromEnvVar(env map[string]string) (*MutationRatesQueryResponse, error) {
 	result := &MutationRatesQueryResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_MUTATION_RATES_QUERY_RESPONSE_TOTAL_COUNT"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_MUTATION_RATES_QUERY_RESPONSE_TOTAL_COUNT"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -33285,14 +33285,14 @@ func InstancesGetRequestToEnvVar(v *InstancesGetRequest) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_INSTANCES_GET_REQUEST_KEY"] = v.Key
+	result["PROTO_SERVICES_KERNEL_INSTANCES_GET_REQUEST_KEY"] = v.Key
 	return result
 }
 
 // InstancesGetRequestFromEnvVar creates InstancesGetRequest from environment variable key-value pairs.
 func InstancesGetRequestFromEnvVar(env map[string]string) (*InstancesGetRequest, error) {
 	result := &InstancesGetRequest{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_INSTANCES_GET_REQUEST_KEY"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_INSTANCES_GET_REQUEST_KEY"]; ok && val != "" {
 		result.Key = val
 	}
 	return result, nil
@@ -33354,7 +33354,7 @@ func InstancesValueResponseToEnvVar(v *InstancesValueResponse) map[string]string
 			result[k] = val
 		}
 	}
-	result["PROTO_SERVICES_ELVIS_INSTANCES_VALUE_RESPONSE_FOUND"] = strconv.FormatBool(v.Found)
+	result["PROTO_SERVICES_KERNEL_INSTANCES_VALUE_RESPONSE_FOUND"] = strconv.FormatBool(v.Found)
 	return result
 }
 
@@ -33366,7 +33366,7 @@ func InstancesValueResponseFromEnvVar(env map[string]string) (*InstancesValueRes
 	} else if sub != nil {
 		result.Value = sub
 	}
-	if val, ok := env["PROTO_SERVICES_ELVIS_INSTANCES_VALUE_RESPONSE_FOUND"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_INSTANCES_VALUE_RESPONSE_FOUND"]; ok && val != "" {
 		parsed, err := strconv.ParseBool(val)
 		if err != nil {
 			return nil, err
@@ -33398,7 +33398,7 @@ func InstancesKeysResponseToEnvVar(v *InstancesKeysResponse) map[string]string {
 	}
 	result := make(map[string]string)
 	if len(v.Keys) > 0 {
-		result["PROTO_SERVICES_ELVIS_INSTANCES_KEYS_RESPONSE_KEYS"] = strings.Join(v.Keys, ",")
+		result["PROTO_SERVICES_KERNEL_INSTANCES_KEYS_RESPONSE_KEYS"] = strings.Join(v.Keys, ",")
 	}
 	return result
 }
@@ -33406,7 +33406,7 @@ func InstancesKeysResponseToEnvVar(v *InstancesKeysResponse) map[string]string {
 // InstancesKeysResponseFromEnvVar creates InstancesKeysResponse from environment variable key-value pairs.
 func InstancesKeysResponseFromEnvVar(env map[string]string) (*InstancesKeysResponse, error) {
 	result := &InstancesKeysResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_INSTANCES_KEYS_RESPONSE_KEYS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_INSTANCES_KEYS_RESPONSE_KEYS"]; ok && val != "" {
 		result.Keys = strings.Split(val, ",")
 	}
 	return result, nil
@@ -33418,14 +33418,14 @@ func InstancesSizeResponseToEnvVar(v *InstancesSizeResponse) map[string]string {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_INSTANCES_SIZE_RESPONSE_SIZE"] = strconv.FormatInt(int64(v.Size), 10)
+	result["PROTO_SERVICES_KERNEL_INSTANCES_SIZE_RESPONSE_SIZE"] = strconv.FormatInt(int64(v.Size), 10)
 	return result
 }
 
 // InstancesSizeResponseFromEnvVar creates InstancesSizeResponse from environment variable key-value pairs.
 func InstancesSizeResponseFromEnvVar(env map[string]string) (*InstancesSizeResponse, error) {
 	result := &InstancesSizeResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_INSTANCES_SIZE_RESPONSE_SIZE"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_INSTANCES_SIZE_RESPONSE_SIZE"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -33466,14 +33466,14 @@ func InstancesQueryResponseToEnvVar(v *InstancesQueryResponse) map[string]string
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_ELVIS_INSTANCES_QUERY_RESPONSE_TOTAL_COUNT"] = strconv.FormatInt(int64(v.TotalCount), 10)
+	result["PROTO_SERVICES_KERNEL_INSTANCES_QUERY_RESPONSE_TOTAL_COUNT"] = strconv.FormatInt(int64(v.TotalCount), 10)
 	return result
 }
 
 // InstancesQueryResponseFromEnvVar creates InstancesQueryResponse from environment variable key-value pairs.
 func InstancesQueryResponseFromEnvVar(env map[string]string) (*InstancesQueryResponse, error) {
 	result := &InstancesQueryResponse{}
-	if val, ok := env["PROTO_SERVICES_ELVIS_INSTANCES_QUERY_RESPONSE_TOTAL_COUNT"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_KERNEL_INSTANCES_QUERY_RESPONSE_TOTAL_COUNT"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
 			return nil, err
@@ -36177,7 +36177,7 @@ func ValidateMapEmpty(m *MapEmpty) error {
 // ============================================================
 const (
 	DefaultPartitionCount                    int64   = 271
-	DefaultPersistenceDir                    string  = "data/elvis"
+	DefaultPersistenceDir                    string  = "data/kernel"
 	DefaultRaftPort                          int64   = 5002
 	DefaultConnectTimeoutSeconds             int64   = 5
 	DefaultHeartbeatIntervalSeconds          int64   = 5
@@ -36188,7 +36188,7 @@ const (
 	DefaultMissingCpMemberAutoRemovalSeconds int64   = 14400
 	DefaultPollingRate                       float64 = 2.0
 	DefaultUnaryRate                         float64 = 10.0
-	DefaultAudience                          string  = "elvis"
+	DefaultAudience                          string  = "kernel"
 	DefaultTokenTtlSeconds                   int64   = 3600
 	DefaultRefreshAudience                   string  = "refresh"
 	DefaultKeyRotationIntervalSeconds        int64   = 86400

@@ -19,12 +19,11 @@ import (
 	opa "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/opa"
 	serviceconfig "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/serviceconfig"
 	x509 "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/x509"
-	elvis "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/elvis"
 	gateway "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/gateway"
 	identity "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/identity"
+	kernel "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/kernel"
 	letsencrypt "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/letsencrypt"
 	policy "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/policy"
-	presley "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/presley"
 	sentinel "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/sentinel"
 	snoopy "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/snoopy"
 	woodstock "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/woodstock"
@@ -143,32 +142,32 @@ type KitchenSink struct {
 	TimestampMs int64                  `protobuf:"varint,5,opt,name=timestamp_ms,json=timestampMs,proto3" json:"timestamp_ms,omitempty"`
 	// Types that are valid to be assigned to Payload:
 	//
-	//	*KitchenSink_ElvisConfig
 	//	*KitchenSink_GatewayConfig
 	//	*KitchenSink_HealthreportServiceInstanceHealth
 	//	*KitchenSink_IdentityConfig
 	//	*KitchenSink_IdentityEntitlementConfig
 	//	*KitchenSink_IdentityExternalJwk
 	//	*KitchenSink_JwkJwk
+	//	*KitchenSink_KernelConfig
 	//	*KitchenSink_LetsencryptConfig
 	//	*KitchenSink_LetsencryptLetsEncryptCertData
 	//	*KitchenSink_OpaOpaPolicy
 	//	*KitchenSink_PolicyConfig
-	//	*KitchenSink_PresleyAdminClusterHealth
-	//	*KitchenSink_PresleyAdminClusterInfo
-	//	*KitchenSink_PresleyAdminGraphInfo
-	//	*KitchenSink_PresleyAdminGrpcStats
-	//	*KitchenSink_PresleyAdminMapStats
-	//	*KitchenSink_PresleyAdminMutationRate
-	//	*KitchenSink_PresleyAdminNetworkStats
-	//	*KitchenSink_PresleyAdminNodeMetrics
-	//	*KitchenSink_PresleyAdminPersistenceStatus
-	//	*KitchenSink_PresleyAdminQueueStats
-	//	*KitchenSink_PresleyAdminServiceConnection
-	//	*KitchenSink_PresleyAdminThreadInfo
-	//	*KitchenSink_PresleyAdminTokenCacheStats
-	//	*KitchenSink_PresleyAdminTopicStats
-	//	*KitchenSink_PresleyAdminWatchHealth
+	//	*KitchenSink_SentinelAdminClusterHealth
+	//	*KitchenSink_SentinelAdminClusterInfo
+	//	*KitchenSink_SentinelAdminGraphInfo
+	//	*KitchenSink_SentinelAdminGrpcStats
+	//	*KitchenSink_SentinelAdminMapStats
+	//	*KitchenSink_SentinelAdminMutationRate
+	//	*KitchenSink_SentinelAdminNetworkStats
+	//	*KitchenSink_SentinelAdminNodeMetrics
+	//	*KitchenSink_SentinelAdminPersistenceStatus
+	//	*KitchenSink_SentinelAdminQueueStats
+	//	*KitchenSink_SentinelAdminServiceConnection
+	//	*KitchenSink_SentinelAdminThreadInfo
+	//	*KitchenSink_SentinelAdminTokenCacheStats
+	//	*KitchenSink_SentinelAdminTopicStats
+	//	*KitchenSink_SentinelAdminWatchHealth
 	//	*KitchenSink_SentinelConfig
 	//	*KitchenSink_ServiceconfigConfig
 	//	*KitchenSink_SnoopyEventData
@@ -255,15 +254,6 @@ func (x *KitchenSink) GetPayload() isKitchenSink_Payload {
 	return nil
 }
 
-func (x *KitchenSink) GetElvisConfig() *elvis.Config {
-	if x != nil {
-		if x, ok := x.Payload.(*KitchenSink_ElvisConfig); ok {
-			return x.ElvisConfig
-		}
-	}
-	return nil
-}
-
 func (x *KitchenSink) GetGatewayConfig() *gateway.Config {
 	if x != nil {
 		if x, ok := x.Payload.(*KitchenSink_GatewayConfig); ok {
@@ -318,6 +308,15 @@ func (x *KitchenSink) GetJwkJwk() *jwk.Jwk {
 	return nil
 }
 
+func (x *KitchenSink) GetKernelConfig() *kernel.Config {
+	if x != nil {
+		if x, ok := x.Payload.(*KitchenSink_KernelConfig); ok {
+			return x.KernelConfig
+		}
+	}
+	return nil
+}
+
 func (x *KitchenSink) GetLetsencryptConfig() *letsencrypt.Config {
 	if x != nil {
 		if x, ok := x.Payload.(*KitchenSink_LetsencryptConfig); ok {
@@ -354,136 +353,136 @@ func (x *KitchenSink) GetPolicyConfig() *policy.Config {
 	return nil
 }
 
-func (x *KitchenSink) GetPresleyAdminClusterHealth() *presley.AdminClusterHealth {
+func (x *KitchenSink) GetSentinelAdminClusterHealth() *sentinel.AdminClusterHealth {
 	if x != nil {
-		if x, ok := x.Payload.(*KitchenSink_PresleyAdminClusterHealth); ok {
-			return x.PresleyAdminClusterHealth
+		if x, ok := x.Payload.(*KitchenSink_SentinelAdminClusterHealth); ok {
+			return x.SentinelAdminClusterHealth
 		}
 	}
 	return nil
 }
 
-func (x *KitchenSink) GetPresleyAdminClusterInfo() *presley.AdminClusterInfo {
+func (x *KitchenSink) GetSentinelAdminClusterInfo() *sentinel.AdminClusterInfo {
 	if x != nil {
-		if x, ok := x.Payload.(*KitchenSink_PresleyAdminClusterInfo); ok {
-			return x.PresleyAdminClusterInfo
+		if x, ok := x.Payload.(*KitchenSink_SentinelAdminClusterInfo); ok {
+			return x.SentinelAdminClusterInfo
 		}
 	}
 	return nil
 }
 
-func (x *KitchenSink) GetPresleyAdminGraphInfo() *presley.AdminGraphInfo {
+func (x *KitchenSink) GetSentinelAdminGraphInfo() *sentinel.AdminGraphInfo {
 	if x != nil {
-		if x, ok := x.Payload.(*KitchenSink_PresleyAdminGraphInfo); ok {
-			return x.PresleyAdminGraphInfo
+		if x, ok := x.Payload.(*KitchenSink_SentinelAdminGraphInfo); ok {
+			return x.SentinelAdminGraphInfo
 		}
 	}
 	return nil
 }
 
-func (x *KitchenSink) GetPresleyAdminGrpcStats() *presley.AdminGrpcStats {
+func (x *KitchenSink) GetSentinelAdminGrpcStats() *sentinel.AdminGrpcStats {
 	if x != nil {
-		if x, ok := x.Payload.(*KitchenSink_PresleyAdminGrpcStats); ok {
-			return x.PresleyAdminGrpcStats
+		if x, ok := x.Payload.(*KitchenSink_SentinelAdminGrpcStats); ok {
+			return x.SentinelAdminGrpcStats
 		}
 	}
 	return nil
 }
 
-func (x *KitchenSink) GetPresleyAdminMapStats() *presley.AdminMapStats {
+func (x *KitchenSink) GetSentinelAdminMapStats() *sentinel.AdminMapStats {
 	if x != nil {
-		if x, ok := x.Payload.(*KitchenSink_PresleyAdminMapStats); ok {
-			return x.PresleyAdminMapStats
+		if x, ok := x.Payload.(*KitchenSink_SentinelAdminMapStats); ok {
+			return x.SentinelAdminMapStats
 		}
 	}
 	return nil
 }
 
-func (x *KitchenSink) GetPresleyAdminMutationRate() *presley.AdminMutationRate {
+func (x *KitchenSink) GetSentinelAdminMutationRate() *sentinel.AdminMutationRate {
 	if x != nil {
-		if x, ok := x.Payload.(*KitchenSink_PresleyAdminMutationRate); ok {
-			return x.PresleyAdminMutationRate
+		if x, ok := x.Payload.(*KitchenSink_SentinelAdminMutationRate); ok {
+			return x.SentinelAdminMutationRate
 		}
 	}
 	return nil
 }
 
-func (x *KitchenSink) GetPresleyAdminNetworkStats() *presley.AdminNetworkStats {
+func (x *KitchenSink) GetSentinelAdminNetworkStats() *sentinel.AdminNetworkStats {
 	if x != nil {
-		if x, ok := x.Payload.(*KitchenSink_PresleyAdminNetworkStats); ok {
-			return x.PresleyAdminNetworkStats
+		if x, ok := x.Payload.(*KitchenSink_SentinelAdminNetworkStats); ok {
+			return x.SentinelAdminNetworkStats
 		}
 	}
 	return nil
 }
 
-func (x *KitchenSink) GetPresleyAdminNodeMetrics() *presley.AdminNodeMetrics {
+func (x *KitchenSink) GetSentinelAdminNodeMetrics() *sentinel.AdminNodeMetrics {
 	if x != nil {
-		if x, ok := x.Payload.(*KitchenSink_PresleyAdminNodeMetrics); ok {
-			return x.PresleyAdminNodeMetrics
+		if x, ok := x.Payload.(*KitchenSink_SentinelAdminNodeMetrics); ok {
+			return x.SentinelAdminNodeMetrics
 		}
 	}
 	return nil
 }
 
-func (x *KitchenSink) GetPresleyAdminPersistenceStatus() *presley.AdminPersistenceStatus {
+func (x *KitchenSink) GetSentinelAdminPersistenceStatus() *sentinel.AdminPersistenceStatus {
 	if x != nil {
-		if x, ok := x.Payload.(*KitchenSink_PresleyAdminPersistenceStatus); ok {
-			return x.PresleyAdminPersistenceStatus
+		if x, ok := x.Payload.(*KitchenSink_SentinelAdminPersistenceStatus); ok {
+			return x.SentinelAdminPersistenceStatus
 		}
 	}
 	return nil
 }
 
-func (x *KitchenSink) GetPresleyAdminQueueStats() *presley.AdminQueueStats {
+func (x *KitchenSink) GetSentinelAdminQueueStats() *sentinel.AdminQueueStats {
 	if x != nil {
-		if x, ok := x.Payload.(*KitchenSink_PresleyAdminQueueStats); ok {
-			return x.PresleyAdminQueueStats
+		if x, ok := x.Payload.(*KitchenSink_SentinelAdminQueueStats); ok {
+			return x.SentinelAdminQueueStats
 		}
 	}
 	return nil
 }
 
-func (x *KitchenSink) GetPresleyAdminServiceConnection() *presley.AdminServiceConnection {
+func (x *KitchenSink) GetSentinelAdminServiceConnection() *sentinel.AdminServiceConnection {
 	if x != nil {
-		if x, ok := x.Payload.(*KitchenSink_PresleyAdminServiceConnection); ok {
-			return x.PresleyAdminServiceConnection
+		if x, ok := x.Payload.(*KitchenSink_SentinelAdminServiceConnection); ok {
+			return x.SentinelAdminServiceConnection
 		}
 	}
 	return nil
 }
 
-func (x *KitchenSink) GetPresleyAdminThreadInfo() *presley.AdminThreadInfo {
+func (x *KitchenSink) GetSentinelAdminThreadInfo() *sentinel.AdminThreadInfo {
 	if x != nil {
-		if x, ok := x.Payload.(*KitchenSink_PresleyAdminThreadInfo); ok {
-			return x.PresleyAdminThreadInfo
+		if x, ok := x.Payload.(*KitchenSink_SentinelAdminThreadInfo); ok {
+			return x.SentinelAdminThreadInfo
 		}
 	}
 	return nil
 }
 
-func (x *KitchenSink) GetPresleyAdminTokenCacheStats() *presley.AdminTokenCacheStats {
+func (x *KitchenSink) GetSentinelAdminTokenCacheStats() *sentinel.AdminTokenCacheStats {
 	if x != nil {
-		if x, ok := x.Payload.(*KitchenSink_PresleyAdminTokenCacheStats); ok {
-			return x.PresleyAdminTokenCacheStats
+		if x, ok := x.Payload.(*KitchenSink_SentinelAdminTokenCacheStats); ok {
+			return x.SentinelAdminTokenCacheStats
 		}
 	}
 	return nil
 }
 
-func (x *KitchenSink) GetPresleyAdminTopicStats() *presley.AdminTopicStats {
+func (x *KitchenSink) GetSentinelAdminTopicStats() *sentinel.AdminTopicStats {
 	if x != nil {
-		if x, ok := x.Payload.(*KitchenSink_PresleyAdminTopicStats); ok {
-			return x.PresleyAdminTopicStats
+		if x, ok := x.Payload.(*KitchenSink_SentinelAdminTopicStats); ok {
+			return x.SentinelAdminTopicStats
 		}
 	}
 	return nil
 }
 
-func (x *KitchenSink) GetPresleyAdminWatchHealth() *presley.AdminWatchHealth {
+func (x *KitchenSink) GetSentinelAdminWatchHealth() *sentinel.AdminWatchHealth {
 	if x != nil {
-		if x, ok := x.Payload.(*KitchenSink_PresleyAdminWatchHealth); ok {
-			return x.PresleyAdminWatchHealth
+		if x, ok := x.Payload.(*KitchenSink_SentinelAdminWatchHealth); ok {
+			return x.SentinelAdminWatchHealth
 		}
 	}
 	return nil
@@ -574,32 +573,32 @@ type isKitchenSink_Payload interface {
 	isKitchenSink_Payload()
 }
 
-type KitchenSink_ElvisConfig struct {
-	ElvisConfig *elvis.Config `protobuf:"bytes,100,opt,name=elvis_config,json=elvisConfig,proto3,oneof"`
-}
-
 type KitchenSink_GatewayConfig struct {
-	GatewayConfig *gateway.Config `protobuf:"bytes,101,opt,name=gateway_config,json=gatewayConfig,proto3,oneof"`
+	GatewayConfig *gateway.Config `protobuf:"bytes,100,opt,name=gateway_config,json=gatewayConfig,proto3,oneof"`
 }
 
 type KitchenSink_HealthreportServiceInstanceHealth struct {
-	HealthreportServiceInstanceHealth *healthreport.ServiceInstanceHealth `protobuf:"bytes,102,opt,name=healthreport_service_instance_health,json=healthreportServiceInstanceHealth,proto3,oneof"`
+	HealthreportServiceInstanceHealth *healthreport.ServiceInstanceHealth `protobuf:"bytes,101,opt,name=healthreport_service_instance_health,json=healthreportServiceInstanceHealth,proto3,oneof"`
 }
 
 type KitchenSink_IdentityConfig struct {
-	IdentityConfig *identity.Config `protobuf:"bytes,103,opt,name=identity_config,json=identityConfig,proto3,oneof"`
+	IdentityConfig *identity.Config `protobuf:"bytes,102,opt,name=identity_config,json=identityConfig,proto3,oneof"`
 }
 
 type KitchenSink_IdentityEntitlementConfig struct {
-	IdentityEntitlementConfig *identity.EntitlementConfig `protobuf:"bytes,104,opt,name=identity_entitlement_config,json=identityEntitlementConfig,proto3,oneof"`
+	IdentityEntitlementConfig *identity.EntitlementConfig `protobuf:"bytes,103,opt,name=identity_entitlement_config,json=identityEntitlementConfig,proto3,oneof"`
 }
 
 type KitchenSink_IdentityExternalJwk struct {
-	IdentityExternalJwk *identity.ExternalJwk `protobuf:"bytes,105,opt,name=identity_external_jwk,json=identityExternalJwk,proto3,oneof"`
+	IdentityExternalJwk *identity.ExternalJwk `protobuf:"bytes,104,opt,name=identity_external_jwk,json=identityExternalJwk,proto3,oneof"`
 }
 
 type KitchenSink_JwkJwk struct {
-	JwkJwk *jwk.Jwk `protobuf:"bytes,106,opt,name=jwk_jwk,json=jwkJwk,proto3,oneof"`
+	JwkJwk *jwk.Jwk `protobuf:"bytes,105,opt,name=jwk_jwk,json=jwkJwk,proto3,oneof"`
+}
+
+type KitchenSink_KernelConfig struct {
+	KernelConfig *kernel.Config `protobuf:"bytes,106,opt,name=kernel_config,json=kernelConfig,proto3,oneof"`
 }
 
 type KitchenSink_LetsencryptConfig struct {
@@ -618,64 +617,64 @@ type KitchenSink_PolicyConfig struct {
 	PolicyConfig *policy.Config `protobuf:"bytes,110,opt,name=policy_config,json=policyConfig,proto3,oneof"`
 }
 
-type KitchenSink_PresleyAdminClusterHealth struct {
-	PresleyAdminClusterHealth *presley.AdminClusterHealth `protobuf:"bytes,111,opt,name=presley_admin_cluster_health,json=presleyAdminClusterHealth,proto3,oneof"`
+type KitchenSink_SentinelAdminClusterHealth struct {
+	SentinelAdminClusterHealth *sentinel.AdminClusterHealth `protobuf:"bytes,111,opt,name=sentinel_admin_cluster_health,json=sentinelAdminClusterHealth,proto3,oneof"`
 }
 
-type KitchenSink_PresleyAdminClusterInfo struct {
-	PresleyAdminClusterInfo *presley.AdminClusterInfo `protobuf:"bytes,112,opt,name=presley_admin_cluster_info,json=presleyAdminClusterInfo,proto3,oneof"`
+type KitchenSink_SentinelAdminClusterInfo struct {
+	SentinelAdminClusterInfo *sentinel.AdminClusterInfo `protobuf:"bytes,112,opt,name=sentinel_admin_cluster_info,json=sentinelAdminClusterInfo,proto3,oneof"`
 }
 
-type KitchenSink_PresleyAdminGraphInfo struct {
-	PresleyAdminGraphInfo *presley.AdminGraphInfo `protobuf:"bytes,113,opt,name=presley_admin_graph_info,json=presleyAdminGraphInfo,proto3,oneof"`
+type KitchenSink_SentinelAdminGraphInfo struct {
+	SentinelAdminGraphInfo *sentinel.AdminGraphInfo `protobuf:"bytes,113,opt,name=sentinel_admin_graph_info,json=sentinelAdminGraphInfo,proto3,oneof"`
 }
 
-type KitchenSink_PresleyAdminGrpcStats struct {
-	PresleyAdminGrpcStats *presley.AdminGrpcStats `protobuf:"bytes,114,opt,name=presley_admin_grpc_stats,json=presleyAdminGrpcStats,proto3,oneof"`
+type KitchenSink_SentinelAdminGrpcStats struct {
+	SentinelAdminGrpcStats *sentinel.AdminGrpcStats `protobuf:"bytes,114,opt,name=sentinel_admin_grpc_stats,json=sentinelAdminGrpcStats,proto3,oneof"`
 }
 
-type KitchenSink_PresleyAdminMapStats struct {
-	PresleyAdminMapStats *presley.AdminMapStats `protobuf:"bytes,115,opt,name=presley_admin_map_stats,json=presleyAdminMapStats,proto3,oneof"`
+type KitchenSink_SentinelAdminMapStats struct {
+	SentinelAdminMapStats *sentinel.AdminMapStats `protobuf:"bytes,115,opt,name=sentinel_admin_map_stats,json=sentinelAdminMapStats,proto3,oneof"`
 }
 
-type KitchenSink_PresleyAdminMutationRate struct {
-	PresleyAdminMutationRate *presley.AdminMutationRate `protobuf:"bytes,116,opt,name=presley_admin_mutation_rate,json=presleyAdminMutationRate,proto3,oneof"`
+type KitchenSink_SentinelAdminMutationRate struct {
+	SentinelAdminMutationRate *sentinel.AdminMutationRate `protobuf:"bytes,116,opt,name=sentinel_admin_mutation_rate,json=sentinelAdminMutationRate,proto3,oneof"`
 }
 
-type KitchenSink_PresleyAdminNetworkStats struct {
-	PresleyAdminNetworkStats *presley.AdminNetworkStats `protobuf:"bytes,117,opt,name=presley_admin_network_stats,json=presleyAdminNetworkStats,proto3,oneof"`
+type KitchenSink_SentinelAdminNetworkStats struct {
+	SentinelAdminNetworkStats *sentinel.AdminNetworkStats `protobuf:"bytes,117,opt,name=sentinel_admin_network_stats,json=sentinelAdminNetworkStats,proto3,oneof"`
 }
 
-type KitchenSink_PresleyAdminNodeMetrics struct {
-	PresleyAdminNodeMetrics *presley.AdminNodeMetrics `protobuf:"bytes,118,opt,name=presley_admin_node_metrics,json=presleyAdminNodeMetrics,proto3,oneof"`
+type KitchenSink_SentinelAdminNodeMetrics struct {
+	SentinelAdminNodeMetrics *sentinel.AdminNodeMetrics `protobuf:"bytes,118,opt,name=sentinel_admin_node_metrics,json=sentinelAdminNodeMetrics,proto3,oneof"`
 }
 
-type KitchenSink_PresleyAdminPersistenceStatus struct {
-	PresleyAdminPersistenceStatus *presley.AdminPersistenceStatus `protobuf:"bytes,119,opt,name=presley_admin_persistence_status,json=presleyAdminPersistenceStatus,proto3,oneof"`
+type KitchenSink_SentinelAdminPersistenceStatus struct {
+	SentinelAdminPersistenceStatus *sentinel.AdminPersistenceStatus `protobuf:"bytes,119,opt,name=sentinel_admin_persistence_status,json=sentinelAdminPersistenceStatus,proto3,oneof"`
 }
 
-type KitchenSink_PresleyAdminQueueStats struct {
-	PresleyAdminQueueStats *presley.AdminQueueStats `protobuf:"bytes,120,opt,name=presley_admin_queue_stats,json=presleyAdminQueueStats,proto3,oneof"`
+type KitchenSink_SentinelAdminQueueStats struct {
+	SentinelAdminQueueStats *sentinel.AdminQueueStats `protobuf:"bytes,120,opt,name=sentinel_admin_queue_stats,json=sentinelAdminQueueStats,proto3,oneof"`
 }
 
-type KitchenSink_PresleyAdminServiceConnection struct {
-	PresleyAdminServiceConnection *presley.AdminServiceConnection `protobuf:"bytes,121,opt,name=presley_admin_service_connection,json=presleyAdminServiceConnection,proto3,oneof"`
+type KitchenSink_SentinelAdminServiceConnection struct {
+	SentinelAdminServiceConnection *sentinel.AdminServiceConnection `protobuf:"bytes,121,opt,name=sentinel_admin_service_connection,json=sentinelAdminServiceConnection,proto3,oneof"`
 }
 
-type KitchenSink_PresleyAdminThreadInfo struct {
-	PresleyAdminThreadInfo *presley.AdminThreadInfo `protobuf:"bytes,122,opt,name=presley_admin_thread_info,json=presleyAdminThreadInfo,proto3,oneof"`
+type KitchenSink_SentinelAdminThreadInfo struct {
+	SentinelAdminThreadInfo *sentinel.AdminThreadInfo `protobuf:"bytes,122,opt,name=sentinel_admin_thread_info,json=sentinelAdminThreadInfo,proto3,oneof"`
 }
 
-type KitchenSink_PresleyAdminTokenCacheStats struct {
-	PresleyAdminTokenCacheStats *presley.AdminTokenCacheStats `protobuf:"bytes,123,opt,name=presley_admin_token_cache_stats,json=presleyAdminTokenCacheStats,proto3,oneof"`
+type KitchenSink_SentinelAdminTokenCacheStats struct {
+	SentinelAdminTokenCacheStats *sentinel.AdminTokenCacheStats `protobuf:"bytes,123,opt,name=sentinel_admin_token_cache_stats,json=sentinelAdminTokenCacheStats,proto3,oneof"`
 }
 
-type KitchenSink_PresleyAdminTopicStats struct {
-	PresleyAdminTopicStats *presley.AdminTopicStats `protobuf:"bytes,124,opt,name=presley_admin_topic_stats,json=presleyAdminTopicStats,proto3,oneof"`
+type KitchenSink_SentinelAdminTopicStats struct {
+	SentinelAdminTopicStats *sentinel.AdminTopicStats `protobuf:"bytes,124,opt,name=sentinel_admin_topic_stats,json=sentinelAdminTopicStats,proto3,oneof"`
 }
 
-type KitchenSink_PresleyAdminWatchHealth struct {
-	PresleyAdminWatchHealth *presley.AdminWatchHealth `protobuf:"bytes,125,opt,name=presley_admin_watch_health,json=presleyAdminWatchHealth,proto3,oneof"`
+type KitchenSink_SentinelAdminWatchHealth struct {
+	SentinelAdminWatchHealth *sentinel.AdminWatchHealth `protobuf:"bytes,125,opt,name=sentinel_admin_watch_health,json=sentinelAdminWatchHealth,proto3,oneof"`
 }
 
 type KitchenSink_SentinelConfig struct {
@@ -714,8 +713,6 @@ type KitchenSink_X509X509Cert struct {
 	X509X509Cert *x509.X509Cert `protobuf:"bytes,134,opt,name=x509_x509_cert,json=x509X509Cert,proto3,oneof"`
 }
 
-func (*KitchenSink_ElvisConfig) isKitchenSink_Payload() {}
-
 func (*KitchenSink_GatewayConfig) isKitchenSink_Payload() {}
 
 func (*KitchenSink_HealthreportServiceInstanceHealth) isKitchenSink_Payload() {}
@@ -728,6 +725,8 @@ func (*KitchenSink_IdentityExternalJwk) isKitchenSink_Payload() {}
 
 func (*KitchenSink_JwkJwk) isKitchenSink_Payload() {}
 
+func (*KitchenSink_KernelConfig) isKitchenSink_Payload() {}
+
 func (*KitchenSink_LetsencryptConfig) isKitchenSink_Payload() {}
 
 func (*KitchenSink_LetsencryptLetsEncryptCertData) isKitchenSink_Payload() {}
@@ -736,35 +735,35 @@ func (*KitchenSink_OpaOpaPolicy) isKitchenSink_Payload() {}
 
 func (*KitchenSink_PolicyConfig) isKitchenSink_Payload() {}
 
-func (*KitchenSink_PresleyAdminClusterHealth) isKitchenSink_Payload() {}
+func (*KitchenSink_SentinelAdminClusterHealth) isKitchenSink_Payload() {}
 
-func (*KitchenSink_PresleyAdminClusterInfo) isKitchenSink_Payload() {}
+func (*KitchenSink_SentinelAdminClusterInfo) isKitchenSink_Payload() {}
 
-func (*KitchenSink_PresleyAdminGraphInfo) isKitchenSink_Payload() {}
+func (*KitchenSink_SentinelAdminGraphInfo) isKitchenSink_Payload() {}
 
-func (*KitchenSink_PresleyAdminGrpcStats) isKitchenSink_Payload() {}
+func (*KitchenSink_SentinelAdminGrpcStats) isKitchenSink_Payload() {}
 
-func (*KitchenSink_PresleyAdminMapStats) isKitchenSink_Payload() {}
+func (*KitchenSink_SentinelAdminMapStats) isKitchenSink_Payload() {}
 
-func (*KitchenSink_PresleyAdminMutationRate) isKitchenSink_Payload() {}
+func (*KitchenSink_SentinelAdminMutationRate) isKitchenSink_Payload() {}
 
-func (*KitchenSink_PresleyAdminNetworkStats) isKitchenSink_Payload() {}
+func (*KitchenSink_SentinelAdminNetworkStats) isKitchenSink_Payload() {}
 
-func (*KitchenSink_PresleyAdminNodeMetrics) isKitchenSink_Payload() {}
+func (*KitchenSink_SentinelAdminNodeMetrics) isKitchenSink_Payload() {}
 
-func (*KitchenSink_PresleyAdminPersistenceStatus) isKitchenSink_Payload() {}
+func (*KitchenSink_SentinelAdminPersistenceStatus) isKitchenSink_Payload() {}
 
-func (*KitchenSink_PresleyAdminQueueStats) isKitchenSink_Payload() {}
+func (*KitchenSink_SentinelAdminQueueStats) isKitchenSink_Payload() {}
 
-func (*KitchenSink_PresleyAdminServiceConnection) isKitchenSink_Payload() {}
+func (*KitchenSink_SentinelAdminServiceConnection) isKitchenSink_Payload() {}
 
-func (*KitchenSink_PresleyAdminThreadInfo) isKitchenSink_Payload() {}
+func (*KitchenSink_SentinelAdminThreadInfo) isKitchenSink_Payload() {}
 
-func (*KitchenSink_PresleyAdminTokenCacheStats) isKitchenSink_Payload() {}
+func (*KitchenSink_SentinelAdminTokenCacheStats) isKitchenSink_Payload() {}
 
-func (*KitchenSink_PresleyAdminTopicStats) isKitchenSink_Payload() {}
+func (*KitchenSink_SentinelAdminTopicStats) isKitchenSink_Payload() {}
 
-func (*KitchenSink_PresleyAdminWatchHealth) isKitchenSink_Payload() {}
+func (*KitchenSink_SentinelAdminWatchHealth) isKitchenSink_Payload() {}
 
 func (*KitchenSink_SentinelConfig) isKitchenSink_Payload() {}
 
@@ -856,39 +855,39 @@ var File_services_kitchen_sink_proto protoreflect.FileDescriptor
 
 const file_services_kitchen_sink_proto_rawDesc = "" +
 	"\n" +
-	"\x1bservices/kitchen_sink.proto\x12\fkitchen_sink\x1a\x17libs/healthreport.proto\x1a\x0elibs/jwk.proto\x1a\x0elibs/opa.proto\x1a\x18libs/serviceconfig.proto\x1a\x0flibs/x509.proto\x1a\x14services/elvis.proto\x1a\x16services/gateway.proto\x1a\x17services/identity.proto\x1a\x1aservices/letsencrypt.proto\x1a\x15services/policy.proto\x1a\x16services/presley.proto\x1a\x17services/sentinel.proto\x1a\x15services/snoopy.proto\x1a\x18services/woodstock.proto\"\xc8\x17\n" +
+	"\x1bservices/kitchen_sink.proto\x12\fkitchen_sink\x1a\x17libs/healthreport.proto\x1a\x0elibs/jwk.proto\x1a\x0elibs/opa.proto\x1a\x18libs/serviceconfig.proto\x1a\x0flibs/x509.proto\x1a\x16services/gateway.proto\x1a\x17services/identity.proto\x1a\x15services/kernel.proto\x1a\x1aservices/letsencrypt.proto\x1a\x15services/policy.proto\x1a\x17services/sentinel.proto\x1a\x15services/snoopy.proto\x1a\x18services/woodstock.proto\"\xf8\x17\n" +
 	"\vKitchenSink\x12\x19\n" +
 	"\bmap_name\x18\x01 \x01(\tR\amapName\x12\x10\n" +
 	"\x03key\x18\x02 \x01(\tR\x03key\x12$\n" +
 	"\x02op\x18\x03 \x01(\x0e2\x14.kitchen_sink.OpTypeR\x02op\x12?\n" +
 	"\vconsistency\x18\x04 \x01(\x0e2\x1d.kitchen_sink.ConsistencyTypeR\vconsistency\x12!\n" +
-	"\ftimestamp_ms\x18\x05 \x01(\x03R\vtimestampMs\x122\n" +
-	"\felvis_config\x18d \x01(\v2\r.elvis.ConfigH\x00R\velvisConfig\x128\n" +
-	"\x0egateway_config\x18e \x01(\v2\x0f.gateway.ConfigH\x00R\rgatewayConfig\x12v\n" +
-	"$healthreport_service_instance_health\x18f \x01(\v2#.healthreport.ServiceInstanceHealthH\x00R!healthreportServiceInstanceHealth\x12;\n" +
-	"\x0fidentity_config\x18g \x01(\v2\x10.identity.ConfigH\x00R\x0eidentityConfig\x12]\n" +
-	"\x1bidentity_entitlement_config\x18h \x01(\v2\x1b.identity.EntitlementConfigH\x00R\x19identityEntitlementConfig\x12K\n" +
-	"\x15identity_external_jwk\x18i \x01(\v2\x15.identity.ExternalJwkH\x00R\x13identityExternalJwk\x12#\n" +
-	"\ajwk_jwk\x18j \x01(\v2\b.jwk.JwkH\x00R\x06jwkJwk\x12D\n" +
+	"\ftimestamp_ms\x18\x05 \x01(\x03R\vtimestampMs\x128\n" +
+	"\x0egateway_config\x18d \x01(\v2\x0f.gateway.ConfigH\x00R\rgatewayConfig\x12v\n" +
+	"$healthreport_service_instance_health\x18e \x01(\v2#.healthreport.ServiceInstanceHealthH\x00R!healthreportServiceInstanceHealth\x12;\n" +
+	"\x0fidentity_config\x18f \x01(\v2\x10.identity.ConfigH\x00R\x0eidentityConfig\x12]\n" +
+	"\x1bidentity_entitlement_config\x18g \x01(\v2\x1b.identity.EntitlementConfigH\x00R\x19identityEntitlementConfig\x12K\n" +
+	"\x15identity_external_jwk\x18h \x01(\v2\x15.identity.ExternalJwkH\x00R\x13identityExternalJwk\x12#\n" +
+	"\ajwk_jwk\x18i \x01(\v2\b.jwk.JwkH\x00R\x06jwkJwk\x125\n" +
+	"\rkernel_config\x18j \x01(\v2\x0e.kernel.ConfigH\x00R\fkernelConfig\x12D\n" +
 	"\x12letsencrypt_config\x18k \x01(\v2\x13.letsencrypt.ConfigH\x00R\x11letsencryptConfig\x12n\n" +
 	"\"letsencrypt_lets_encrypt_cert_data\x18l \x01(\v2 .letsencrypt.LetsEncryptCertDataH\x00R\x1eletsencryptLetsEncryptCertData\x126\n" +
 	"\x0eopa_opa_policy\x18m \x01(\v2\x0e.opa.OpaPolicyH\x00R\fopaOpaPolicy\x125\n" +
-	"\rpolicy_config\x18n \x01(\v2\x0e.policy.ConfigH\x00R\fpolicyConfig\x12^\n" +
-	"\x1cpresley_admin_cluster_health\x18o \x01(\v2\x1b.presley.AdminClusterHealthH\x00R\x19presleyAdminClusterHealth\x12X\n" +
-	"\x1apresley_admin_cluster_info\x18p \x01(\v2\x19.presley.AdminClusterInfoH\x00R\x17presleyAdminClusterInfo\x12R\n" +
-	"\x18presley_admin_graph_info\x18q \x01(\v2\x17.presley.AdminGraphInfoH\x00R\x15presleyAdminGraphInfo\x12R\n" +
-	"\x18presley_admin_grpc_stats\x18r \x01(\v2\x17.presley.AdminGrpcStatsH\x00R\x15presleyAdminGrpcStats\x12O\n" +
-	"\x17presley_admin_map_stats\x18s \x01(\v2\x16.presley.AdminMapStatsH\x00R\x14presleyAdminMapStats\x12[\n" +
-	"\x1bpresley_admin_mutation_rate\x18t \x01(\v2\x1a.presley.AdminMutationRateH\x00R\x18presleyAdminMutationRate\x12[\n" +
-	"\x1bpresley_admin_network_stats\x18u \x01(\v2\x1a.presley.AdminNetworkStatsH\x00R\x18presleyAdminNetworkStats\x12X\n" +
-	"\x1apresley_admin_node_metrics\x18v \x01(\v2\x19.presley.AdminNodeMetricsH\x00R\x17presleyAdminNodeMetrics\x12j\n" +
-	" presley_admin_persistence_status\x18w \x01(\v2\x1f.presley.AdminPersistenceStatusH\x00R\x1dpresleyAdminPersistenceStatus\x12U\n" +
-	"\x19presley_admin_queue_stats\x18x \x01(\v2\x18.presley.AdminQueueStatsH\x00R\x16presleyAdminQueueStats\x12j\n" +
-	" presley_admin_service_connection\x18y \x01(\v2\x1f.presley.AdminServiceConnectionH\x00R\x1dpresleyAdminServiceConnection\x12U\n" +
-	"\x19presley_admin_thread_info\x18z \x01(\v2\x18.presley.AdminThreadInfoH\x00R\x16presleyAdminThreadInfo\x12e\n" +
-	"\x1fpresley_admin_token_cache_stats\x18{ \x01(\v2\x1d.presley.AdminTokenCacheStatsH\x00R\x1bpresleyAdminTokenCacheStats\x12U\n" +
-	"\x19presley_admin_topic_stats\x18| \x01(\v2\x18.presley.AdminTopicStatsH\x00R\x16presleyAdminTopicStats\x12X\n" +
-	"\x1apresley_admin_watch_health\x18} \x01(\v2\x19.presley.AdminWatchHealthH\x00R\x17presleyAdminWatchHealth\x12;\n" +
+	"\rpolicy_config\x18n \x01(\v2\x0e.policy.ConfigH\x00R\fpolicyConfig\x12a\n" +
+	"\x1dsentinel_admin_cluster_health\x18o \x01(\v2\x1c.sentinel.AdminClusterHealthH\x00R\x1asentinelAdminClusterHealth\x12[\n" +
+	"\x1bsentinel_admin_cluster_info\x18p \x01(\v2\x1a.sentinel.AdminClusterInfoH\x00R\x18sentinelAdminClusterInfo\x12U\n" +
+	"\x19sentinel_admin_graph_info\x18q \x01(\v2\x18.sentinel.AdminGraphInfoH\x00R\x16sentinelAdminGraphInfo\x12U\n" +
+	"\x19sentinel_admin_grpc_stats\x18r \x01(\v2\x18.sentinel.AdminGrpcStatsH\x00R\x16sentinelAdminGrpcStats\x12R\n" +
+	"\x18sentinel_admin_map_stats\x18s \x01(\v2\x17.sentinel.AdminMapStatsH\x00R\x15sentinelAdminMapStats\x12^\n" +
+	"\x1csentinel_admin_mutation_rate\x18t \x01(\v2\x1b.sentinel.AdminMutationRateH\x00R\x19sentinelAdminMutationRate\x12^\n" +
+	"\x1csentinel_admin_network_stats\x18u \x01(\v2\x1b.sentinel.AdminNetworkStatsH\x00R\x19sentinelAdminNetworkStats\x12[\n" +
+	"\x1bsentinel_admin_node_metrics\x18v \x01(\v2\x1a.sentinel.AdminNodeMetricsH\x00R\x18sentinelAdminNodeMetrics\x12m\n" +
+	"!sentinel_admin_persistence_status\x18w \x01(\v2 .sentinel.AdminPersistenceStatusH\x00R\x1esentinelAdminPersistenceStatus\x12X\n" +
+	"\x1asentinel_admin_queue_stats\x18x \x01(\v2\x19.sentinel.AdminQueueStatsH\x00R\x17sentinelAdminQueueStats\x12m\n" +
+	"!sentinel_admin_service_connection\x18y \x01(\v2 .sentinel.AdminServiceConnectionH\x00R\x1esentinelAdminServiceConnection\x12X\n" +
+	"\x1asentinel_admin_thread_info\x18z \x01(\v2\x19.sentinel.AdminThreadInfoH\x00R\x17sentinelAdminThreadInfo\x12h\n" +
+	" sentinel_admin_token_cache_stats\x18{ \x01(\v2\x1e.sentinel.AdminTokenCacheStatsH\x00R\x1csentinelAdminTokenCacheStats\x12X\n" +
+	"\x1asentinel_admin_topic_stats\x18| \x01(\v2\x19.sentinel.AdminTopicStatsH\x00R\x17sentinelAdminTopicStats\x12[\n" +
+	"\x1bsentinel_admin_watch_health\x18} \x01(\v2\x1a.sentinel.AdminWatchHealthH\x00R\x18sentinelAdminWatchHealth\x12;\n" +
 	"\x0fsentinel_config\x18~ \x01(\v2\x10.sentinel.ConfigH\x00R\x0esentinelConfig\x12J\n" +
 	"\x14serviceconfig_config\x18\x7f \x01(\v2\x15.serviceconfig.ConfigH\x00R\x13serviceconfigConfig\x12@\n" +
 	"\x11snoopy_event_data\x18\x80\x01 \x01(\v2\x11.snoopy.EventDataH\x00R\x0fsnoopyEventData\x12L\n" +
@@ -927,36 +926,36 @@ func file_services_kitchen_sink_proto_rawDescGZIP() []byte {
 var file_services_kitchen_sink_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
 var file_services_kitchen_sink_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_services_kitchen_sink_proto_goTypes = []any{
-	(OpType)(0),                                // 0: kitchen_sink.OpType
-	(ConsistencyType)(0),                       // 1: kitchen_sink.ConsistencyType
-	(*KitchenSink)(nil),                        // 2: kitchen_sink.KitchenSink
-	(*DbDump)(nil),                             // 3: kitchen_sink.DbDump
-	(*elvis.Config)(nil),                       // 4: elvis.Config
-	(*gateway.Config)(nil),                     // 5: gateway.Config
-	(*healthreport.ServiceInstanceHealth)(nil), // 6: healthreport.ServiceInstanceHealth
-	(*identity.Config)(nil),                    // 7: identity.Config
-	(*identity.EntitlementConfig)(nil),         // 8: identity.EntitlementConfig
-	(*identity.ExternalJwk)(nil),               // 9: identity.ExternalJwk
-	(*jwk.Jwk)(nil),                            // 10: jwk.Jwk
+	(OpType)(0),            // 0: kitchen_sink.OpType
+	(ConsistencyType)(0),   // 1: kitchen_sink.ConsistencyType
+	(*KitchenSink)(nil),    // 2: kitchen_sink.KitchenSink
+	(*DbDump)(nil),         // 3: kitchen_sink.DbDump
+	(*gateway.Config)(nil), // 4: gateway.Config
+	(*healthreport.ServiceInstanceHealth)(nil), // 5: healthreport.ServiceInstanceHealth
+	(*identity.Config)(nil),                    // 6: identity.Config
+	(*identity.EntitlementConfig)(nil),         // 7: identity.EntitlementConfig
+	(*identity.ExternalJwk)(nil),               // 8: identity.ExternalJwk
+	(*jwk.Jwk)(nil),                            // 9: jwk.Jwk
+	(*kernel.Config)(nil),                      // 10: kernel.Config
 	(*letsencrypt.Config)(nil),                 // 11: letsencrypt.Config
 	(*letsencrypt.LetsEncryptCertData)(nil),    // 12: letsencrypt.LetsEncryptCertData
 	(*opa.OpaPolicy)(nil),                      // 13: opa.OpaPolicy
 	(*policy.Config)(nil),                      // 14: policy.Config
-	(*presley.AdminClusterHealth)(nil),         // 15: presley.AdminClusterHealth
-	(*presley.AdminClusterInfo)(nil),           // 16: presley.AdminClusterInfo
-	(*presley.AdminGraphInfo)(nil),             // 17: presley.AdminGraphInfo
-	(*presley.AdminGrpcStats)(nil),             // 18: presley.AdminGrpcStats
-	(*presley.AdminMapStats)(nil),              // 19: presley.AdminMapStats
-	(*presley.AdminMutationRate)(nil),          // 20: presley.AdminMutationRate
-	(*presley.AdminNetworkStats)(nil),          // 21: presley.AdminNetworkStats
-	(*presley.AdminNodeMetrics)(nil),           // 22: presley.AdminNodeMetrics
-	(*presley.AdminPersistenceStatus)(nil),     // 23: presley.AdminPersistenceStatus
-	(*presley.AdminQueueStats)(nil),            // 24: presley.AdminQueueStats
-	(*presley.AdminServiceConnection)(nil),     // 25: presley.AdminServiceConnection
-	(*presley.AdminThreadInfo)(nil),            // 26: presley.AdminThreadInfo
-	(*presley.AdminTokenCacheStats)(nil),       // 27: presley.AdminTokenCacheStats
-	(*presley.AdminTopicStats)(nil),            // 28: presley.AdminTopicStats
-	(*presley.AdminWatchHealth)(nil),           // 29: presley.AdminWatchHealth
+	(*sentinel.AdminClusterHealth)(nil),        // 15: sentinel.AdminClusterHealth
+	(*sentinel.AdminClusterInfo)(nil),          // 16: sentinel.AdminClusterInfo
+	(*sentinel.AdminGraphInfo)(nil),            // 17: sentinel.AdminGraphInfo
+	(*sentinel.AdminGrpcStats)(nil),            // 18: sentinel.AdminGrpcStats
+	(*sentinel.AdminMapStats)(nil),             // 19: sentinel.AdminMapStats
+	(*sentinel.AdminMutationRate)(nil),         // 20: sentinel.AdminMutationRate
+	(*sentinel.AdminNetworkStats)(nil),         // 21: sentinel.AdminNetworkStats
+	(*sentinel.AdminNodeMetrics)(nil),          // 22: sentinel.AdminNodeMetrics
+	(*sentinel.AdminPersistenceStatus)(nil),    // 23: sentinel.AdminPersistenceStatus
+	(*sentinel.AdminQueueStats)(nil),           // 24: sentinel.AdminQueueStats
+	(*sentinel.AdminServiceConnection)(nil),    // 25: sentinel.AdminServiceConnection
+	(*sentinel.AdminThreadInfo)(nil),           // 26: sentinel.AdminThreadInfo
+	(*sentinel.AdminTokenCacheStats)(nil),      // 27: sentinel.AdminTokenCacheStats
+	(*sentinel.AdminTopicStats)(nil),           // 28: sentinel.AdminTopicStats
+	(*sentinel.AdminWatchHealth)(nil),          // 29: sentinel.AdminWatchHealth
 	(*sentinel.Config)(nil),                    // 30: sentinel.Config
 	(*serviceconfig.Config)(nil),               // 31: serviceconfig.Config
 	(*snoopy.EventData)(nil),                   // 32: snoopy.EventData
@@ -970,32 +969,32 @@ var file_services_kitchen_sink_proto_goTypes = []any{
 var file_services_kitchen_sink_proto_depIdxs = []int32{
 	0,  // 0: kitchen_sink.KitchenSink.op:type_name -> kitchen_sink.OpType
 	1,  // 1: kitchen_sink.KitchenSink.consistency:type_name -> kitchen_sink.ConsistencyType
-	4,  // 2: kitchen_sink.KitchenSink.elvis_config:type_name -> elvis.Config
-	5,  // 3: kitchen_sink.KitchenSink.gateway_config:type_name -> gateway.Config
-	6,  // 4: kitchen_sink.KitchenSink.healthreport_service_instance_health:type_name -> healthreport.ServiceInstanceHealth
-	7,  // 5: kitchen_sink.KitchenSink.identity_config:type_name -> identity.Config
-	8,  // 6: kitchen_sink.KitchenSink.identity_entitlement_config:type_name -> identity.EntitlementConfig
-	9,  // 7: kitchen_sink.KitchenSink.identity_external_jwk:type_name -> identity.ExternalJwk
-	10, // 8: kitchen_sink.KitchenSink.jwk_jwk:type_name -> jwk.Jwk
+	4,  // 2: kitchen_sink.KitchenSink.gateway_config:type_name -> gateway.Config
+	5,  // 3: kitchen_sink.KitchenSink.healthreport_service_instance_health:type_name -> healthreport.ServiceInstanceHealth
+	6,  // 4: kitchen_sink.KitchenSink.identity_config:type_name -> identity.Config
+	7,  // 5: kitchen_sink.KitchenSink.identity_entitlement_config:type_name -> identity.EntitlementConfig
+	8,  // 6: kitchen_sink.KitchenSink.identity_external_jwk:type_name -> identity.ExternalJwk
+	9,  // 7: kitchen_sink.KitchenSink.jwk_jwk:type_name -> jwk.Jwk
+	10, // 8: kitchen_sink.KitchenSink.kernel_config:type_name -> kernel.Config
 	11, // 9: kitchen_sink.KitchenSink.letsencrypt_config:type_name -> letsencrypt.Config
 	12, // 10: kitchen_sink.KitchenSink.letsencrypt_lets_encrypt_cert_data:type_name -> letsencrypt.LetsEncryptCertData
 	13, // 11: kitchen_sink.KitchenSink.opa_opa_policy:type_name -> opa.OpaPolicy
 	14, // 12: kitchen_sink.KitchenSink.policy_config:type_name -> policy.Config
-	15, // 13: kitchen_sink.KitchenSink.presley_admin_cluster_health:type_name -> presley.AdminClusterHealth
-	16, // 14: kitchen_sink.KitchenSink.presley_admin_cluster_info:type_name -> presley.AdminClusterInfo
-	17, // 15: kitchen_sink.KitchenSink.presley_admin_graph_info:type_name -> presley.AdminGraphInfo
-	18, // 16: kitchen_sink.KitchenSink.presley_admin_grpc_stats:type_name -> presley.AdminGrpcStats
-	19, // 17: kitchen_sink.KitchenSink.presley_admin_map_stats:type_name -> presley.AdminMapStats
-	20, // 18: kitchen_sink.KitchenSink.presley_admin_mutation_rate:type_name -> presley.AdminMutationRate
-	21, // 19: kitchen_sink.KitchenSink.presley_admin_network_stats:type_name -> presley.AdminNetworkStats
-	22, // 20: kitchen_sink.KitchenSink.presley_admin_node_metrics:type_name -> presley.AdminNodeMetrics
-	23, // 21: kitchen_sink.KitchenSink.presley_admin_persistence_status:type_name -> presley.AdminPersistenceStatus
-	24, // 22: kitchen_sink.KitchenSink.presley_admin_queue_stats:type_name -> presley.AdminQueueStats
-	25, // 23: kitchen_sink.KitchenSink.presley_admin_service_connection:type_name -> presley.AdminServiceConnection
-	26, // 24: kitchen_sink.KitchenSink.presley_admin_thread_info:type_name -> presley.AdminThreadInfo
-	27, // 25: kitchen_sink.KitchenSink.presley_admin_token_cache_stats:type_name -> presley.AdminTokenCacheStats
-	28, // 26: kitchen_sink.KitchenSink.presley_admin_topic_stats:type_name -> presley.AdminTopicStats
-	29, // 27: kitchen_sink.KitchenSink.presley_admin_watch_health:type_name -> presley.AdminWatchHealth
+	15, // 13: kitchen_sink.KitchenSink.sentinel_admin_cluster_health:type_name -> sentinel.AdminClusterHealth
+	16, // 14: kitchen_sink.KitchenSink.sentinel_admin_cluster_info:type_name -> sentinel.AdminClusterInfo
+	17, // 15: kitchen_sink.KitchenSink.sentinel_admin_graph_info:type_name -> sentinel.AdminGraphInfo
+	18, // 16: kitchen_sink.KitchenSink.sentinel_admin_grpc_stats:type_name -> sentinel.AdminGrpcStats
+	19, // 17: kitchen_sink.KitchenSink.sentinel_admin_map_stats:type_name -> sentinel.AdminMapStats
+	20, // 18: kitchen_sink.KitchenSink.sentinel_admin_mutation_rate:type_name -> sentinel.AdminMutationRate
+	21, // 19: kitchen_sink.KitchenSink.sentinel_admin_network_stats:type_name -> sentinel.AdminNetworkStats
+	22, // 20: kitchen_sink.KitchenSink.sentinel_admin_node_metrics:type_name -> sentinel.AdminNodeMetrics
+	23, // 21: kitchen_sink.KitchenSink.sentinel_admin_persistence_status:type_name -> sentinel.AdminPersistenceStatus
+	24, // 22: kitchen_sink.KitchenSink.sentinel_admin_queue_stats:type_name -> sentinel.AdminQueueStats
+	25, // 23: kitchen_sink.KitchenSink.sentinel_admin_service_connection:type_name -> sentinel.AdminServiceConnection
+	26, // 24: kitchen_sink.KitchenSink.sentinel_admin_thread_info:type_name -> sentinel.AdminThreadInfo
+	27, // 25: kitchen_sink.KitchenSink.sentinel_admin_token_cache_stats:type_name -> sentinel.AdminTokenCacheStats
+	28, // 26: kitchen_sink.KitchenSink.sentinel_admin_topic_stats:type_name -> sentinel.AdminTopicStats
+	29, // 27: kitchen_sink.KitchenSink.sentinel_admin_watch_health:type_name -> sentinel.AdminWatchHealth
 	30, // 28: kitchen_sink.KitchenSink.sentinel_config:type_name -> sentinel.Config
 	31, // 29: kitchen_sink.KitchenSink.serviceconfig_config:type_name -> serviceconfig.Config
 	32, // 30: kitchen_sink.KitchenSink.snoopy_event_data:type_name -> snoopy.EventData
@@ -1019,32 +1018,32 @@ func file_services_kitchen_sink_proto_init() {
 		return
 	}
 	file_services_kitchen_sink_proto_msgTypes[0].OneofWrappers = []any{
-		(*KitchenSink_ElvisConfig)(nil),
 		(*KitchenSink_GatewayConfig)(nil),
 		(*KitchenSink_HealthreportServiceInstanceHealth)(nil),
 		(*KitchenSink_IdentityConfig)(nil),
 		(*KitchenSink_IdentityEntitlementConfig)(nil),
 		(*KitchenSink_IdentityExternalJwk)(nil),
 		(*KitchenSink_JwkJwk)(nil),
+		(*KitchenSink_KernelConfig)(nil),
 		(*KitchenSink_LetsencryptConfig)(nil),
 		(*KitchenSink_LetsencryptLetsEncryptCertData)(nil),
 		(*KitchenSink_OpaOpaPolicy)(nil),
 		(*KitchenSink_PolicyConfig)(nil),
-		(*KitchenSink_PresleyAdminClusterHealth)(nil),
-		(*KitchenSink_PresleyAdminClusterInfo)(nil),
-		(*KitchenSink_PresleyAdminGraphInfo)(nil),
-		(*KitchenSink_PresleyAdminGrpcStats)(nil),
-		(*KitchenSink_PresleyAdminMapStats)(nil),
-		(*KitchenSink_PresleyAdminMutationRate)(nil),
-		(*KitchenSink_PresleyAdminNetworkStats)(nil),
-		(*KitchenSink_PresleyAdminNodeMetrics)(nil),
-		(*KitchenSink_PresleyAdminPersistenceStatus)(nil),
-		(*KitchenSink_PresleyAdminQueueStats)(nil),
-		(*KitchenSink_PresleyAdminServiceConnection)(nil),
-		(*KitchenSink_PresleyAdminThreadInfo)(nil),
-		(*KitchenSink_PresleyAdminTokenCacheStats)(nil),
-		(*KitchenSink_PresleyAdminTopicStats)(nil),
-		(*KitchenSink_PresleyAdminWatchHealth)(nil),
+		(*KitchenSink_SentinelAdminClusterHealth)(nil),
+		(*KitchenSink_SentinelAdminClusterInfo)(nil),
+		(*KitchenSink_SentinelAdminGraphInfo)(nil),
+		(*KitchenSink_SentinelAdminGrpcStats)(nil),
+		(*KitchenSink_SentinelAdminMapStats)(nil),
+		(*KitchenSink_SentinelAdminMutationRate)(nil),
+		(*KitchenSink_SentinelAdminNetworkStats)(nil),
+		(*KitchenSink_SentinelAdminNodeMetrics)(nil),
+		(*KitchenSink_SentinelAdminPersistenceStatus)(nil),
+		(*KitchenSink_SentinelAdminQueueStats)(nil),
+		(*KitchenSink_SentinelAdminServiceConnection)(nil),
+		(*KitchenSink_SentinelAdminThreadInfo)(nil),
+		(*KitchenSink_SentinelAdminTokenCacheStats)(nil),
+		(*KitchenSink_SentinelAdminTopicStats)(nil),
+		(*KitchenSink_SentinelAdminWatchHealth)(nil),
 		(*KitchenSink_SentinelConfig)(nil),
 		(*KitchenSink_ServiceconfigConfig)(nil),
 		(*KitchenSink_SnoopyEventData)(nil),

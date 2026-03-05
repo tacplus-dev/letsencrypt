@@ -19,7 +19,7 @@ import (
 )
 
 // CertManager handles Let's Encrypt certificate provisioning and renewal,
-// storing the resulting X509CertPair in elvis for gateway to consume.
+// storing the resulting X509CertPair in kernel for gateway to consume.
 type CertManager struct {
 	cfg     *letsencrypt_pb.Config
 	backend *backends.Backends
@@ -35,9 +35,9 @@ func NewCertManager(cfg *letsencrypt_pb.Config, bc *backends.Backends) (*CertMan
 }
 
 // Run starts the ACME HTTP challenge server, provisions/renews the certificate,
-// and writes the result to elvis. Blocks until ctx is cancelled.
+// and writes the result to kernel. Blocks until ctx is cancelled.
 func (cm *CertManager) Run(ctx context.Context) error {
-	// Restore CertMagic state from elvis if available.
+	// Restore CertMagic state from kernel if available.
 	if err := cm.restoreState(ctx); err != nil {
 		zap.L().Warn("Failed to restore CertMagic state, starting fresh", zap.Error(err))
 	}
@@ -90,7 +90,7 @@ func (cm *CertManager) Run(ctx context.Context) error {
 	}
 
 	// Renewal loop — CertMagic handles renewal internally via ManageSync,
-	// but we need to periodically re-extract and push to elvis.
+	// but we need to periodically re-extract and push to kernel.
 	interval := time.Duration(cm.cfg.RenewalCheckIntervalSeconds) * time.Second
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
@@ -110,7 +110,7 @@ func (cm *CertManager) Run(ctx context.Context) error {
 }
 
 // extractAndStore extracts the current certificate from CertMagic and writes
-// the X509CertPair + CertMagic state to elvis.
+// the X509CertPair + CertMagic state to kernel.
 func (cm *CertManager) extractAndStore(ctx context.Context, magic *certmagic.Config) error {
 	// Get the certificate from CertMagic.
 	cert, err := magic.CacheManagedCertificate(ctx, cm.cfg.Fqdn)
@@ -131,7 +131,7 @@ func (cm *CertManager) extractAndStore(ctx context.Context, magic *certmagic.Con
 	// Build CertMagic state snapshot.
 	certmagicState := cm.storage.ToProto()
 
-	// Write to elvis.
+	// Write to kernel.
 	certData := &letsencrypt_pb.LetsEncryptCertData{
 		TlsCert:         certPair,
 		CertmagicState:  certmagicState,
@@ -140,17 +140,17 @@ func (cm *CertManager) extractAndStore(ctx context.Context, magic *certmagic.Con
 	}
 
 	if _, err := cm.backend.Services().LetsEncryptState().CertData().Set(ctx, certData); err != nil {
-		return fmt.Errorf("writing to elvis: %w", err)
+		return fmt.Errorf("writing to kernel: %w", err)
 	}
 
-	zap.L().Info("Certificate stored in elvis",
+	zap.L().Info("Certificate stored in kernel",
 		zap.String("fqdn", cm.cfg.Fqdn),
 		zap.Time("expires", cert.Leaf.NotAfter))
 
 	return nil
 }
 
-// restoreState loads CertMagic state from elvis and restores it into the
+// restoreState loads CertMagic state from kernel and restores it into the
 // in-memory storage, so CertMagic doesn't re-provision on restart.
 func (cm *CertManager) restoreState(ctx context.Context) error {
 	data, err := cm.backend.Services().LetsEncryptState().CertData().Fetch(ctx)
@@ -162,7 +162,7 @@ func (cm *CertManager) restoreState(ctx context.Context) error {
 	}
 
 	cm.storage.FromProto(data.CertmagicState)
-	zap.L().Info("Restored CertMagic state from elvis",
+	zap.L().Info("Restored CertMagic state from kernel",
 		zap.String("fqdn", data.Fqdn),
 		zap.Time("last_renewed", time.Unix(data.LastRenewed, 0)))
 	return nil

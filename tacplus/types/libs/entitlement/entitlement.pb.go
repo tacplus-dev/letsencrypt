@@ -29,71 +29,13 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// SubjectType defines the types of principals that can authenticate.
-// The string value used in the token "sub" claim is "<type>:<principal>",
-// e.g. "service:elvis", "api:admin".
-type SubjectType int32
-
-const (
-	SubjectType_SUBJECT_TYPE_UNSPECIFIED SubjectType = 0
-	SubjectType_SUBJECT_TYPE_SERVICE     SubjectType = 1
-	SubjectType_SUBJECT_TYPE_API         SubjectType = 2
-	SubjectType_SUBJECT_TYPE_WORKLOAD    SubjectType = 3
-	SubjectType_SUBJECT_TYPE_AGENT       SubjectType = 4
-)
-
-// Enum value maps for SubjectType.
-var (
-	SubjectType_name = map[int32]string{
-		0: "SUBJECT_TYPE_UNSPECIFIED",
-		1: "SUBJECT_TYPE_SERVICE",
-		2: "SUBJECT_TYPE_API",
-		3: "SUBJECT_TYPE_WORKLOAD",
-		4: "SUBJECT_TYPE_AGENT",
-	}
-	SubjectType_value = map[string]int32{
-		"SUBJECT_TYPE_UNSPECIFIED": 0,
-		"SUBJECT_TYPE_SERVICE":     1,
-		"SUBJECT_TYPE_API":         2,
-		"SUBJECT_TYPE_WORKLOAD":    3,
-		"SUBJECT_TYPE_AGENT":       4,
-	}
-)
-
-func (x SubjectType) Enum() *SubjectType {
-	p := new(SubjectType)
-	*p = x
-	return p
-}
-
-func (x SubjectType) String() string {
-	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
-}
-
-func (SubjectType) Descriptor() protoreflect.EnumDescriptor {
-	return file_libs_entitlement_proto_enumTypes[0].Descriptor()
-}
-
-func (SubjectType) Type() protoreflect.EnumType {
-	return &file_libs_entitlement_proto_enumTypes[0]
-}
-
-func (x SubjectType) Number() protoreflect.EnumNumber {
-	return protoreflect.EnumNumber(x)
-}
-
-// Deprecated: Use SubjectType.Descriptor instead.
-func (SubjectType) EnumDescriptor() ([]byte, []int) {
-	return file_libs_entitlement_proto_rawDescGZIP(), []int{0}
-}
-
 // ServiceEntitlement defines what a caller is allowed to do on a target service.
 // The service_name becomes the "aud" claim in access tokens.
 // Every permitted RPC must be listed — there is no wildcard/default-allow.
 type ServiceEntitlement struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// service_name is the target service (matches spec.service_frontend value,
-	// e.g. "fleetwood", "ironmaiden", "springsteen").
+	// e.g. "fleetwood", "ironmaiden", "gateway").
 	ServiceName string `protobuf:"bytes,1,opt,name=service_name,json=serviceName,proto3" json:"service_name,omitempty"`
 	// allowed_rpcs lists the RPC methods permitted on the target service.
 	// Format: "MethodName" (unqualified). Must not be empty.
@@ -149,7 +91,8 @@ func (x *ServiceEntitlement) GetAllowedRpcs() []string {
 // ServiceEntitlements is a named collection of entitlements, typically one per
 // microservice or logical role (e.g. "fleetwood-admin", "full-admin").
 // Defined as JSON files in proto/security/ and loaded into service configs
-// at config build time.
+// at config build time. Used by the U2S path (ironmaiden's service_entitlements
+// config for expandWildcard).
 type ServiceEntitlements struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// id identifies this entitlement set (e.g. "fleetwood-admin", "snoopy-reader").
@@ -205,24 +148,19 @@ func (x *ServiceEntitlements) GetEntitlements() []*ServiceEntitlement {
 	return nil
 }
 
-// ServiceEntitlementMapping maps a principal to a ServiceEntitlements by reference.
-// Used by TokenExchanger (static config in elvis.Config) and
-// IronMaiden (OPA-resolved, in ironmaiden.Config).
+// ServiceEntitlementMapping maps a credential to a service identity.
+// Used by TokenExchanger (static config) to resolve
+// which service a CredPair or cloud credential represents.
+// Entitlements for S2S are derived from proto definitions — no entitlements_id needed.
 type ServiceEntitlementMapping struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// string_id identifies the authentication credential. Convention:
-	//   - CredPair: "local:<name>" (e.g. "local:fleetwood")
-	//   - AWS STS: the IAM role ARN
-	StringId string `protobuf:"bytes,1,opt,name=string_id,json=stringId,proto3" json:"string_id,omitempty"`
-	// entitlements_id references a ServiceEntitlements.id
-	EntitlementsId string `protobuf:"bytes,2,opt,name=entitlements_id,json=entitlementsId,proto3" json:"entitlements_id,omitempty"`
-	// subject_type classifies this principal's identity (service, api, workload, agent).
-	SubjectType SubjectType `protobuf:"varint,3,opt,name=subject_type,json=subjectType,proto3,enum=entitlement.SubjectType" json:"subject_type,omitempty"`
-	// principal is the logical service identity. Used to build the token's "sub"
-	// claim as "<subject_type>:<principal>" (e.g. "service:fleetwood").
-	// Decoupled from string_id so that different authentication methods (CredPair,
-	// AWS STS) can map to the same service identity.
-	Principal     string `protobuf:"bytes,4,opt,name=principal,proto3" json:"principal,omitempty"`
+	// credential_id is the unique identifier for the authentication credential.
+	// For CredPairs this is the public_key.kid. For cloud credentials, the
+	// cloud credential ID (e.g. IAM role ARN).
+	CredentialId string `protobuf:"bytes,1,opt,name=credential_id,json=credentialId,proto3" json:"credential_id,omitempty"`
+	// service is the logical service identity this credential maps to.
+	// Becomes the "sub" claim in S2S tokens (e.g. "fleetwood", "ironmaiden").
+	Service       string `protobuf:"bytes,2,opt,name=service,proto3" json:"service,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -257,30 +195,16 @@ func (*ServiceEntitlementMapping) Descriptor() ([]byte, []int) {
 	return file_libs_entitlement_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *ServiceEntitlementMapping) GetStringId() string {
+func (x *ServiceEntitlementMapping) GetCredentialId() string {
 	if x != nil {
-		return x.StringId
+		return x.CredentialId
 	}
 	return ""
 }
 
-func (x *ServiceEntitlementMapping) GetEntitlementsId() string {
+func (x *ServiceEntitlementMapping) GetService() string {
 	if x != nil {
-		return x.EntitlementsId
-	}
-	return ""
-}
-
-func (x *ServiceEntitlementMapping) GetSubjectType() SubjectType {
-	if x != nil {
-		return x.SubjectType
-	}
-	return SubjectType_SUBJECT_TYPE_UNSPECIFIED
-}
-
-func (x *ServiceEntitlementMapping) GetPrincipal() string {
-	if x != nil {
-		return x.Principal
+		return x.Service
 	}
 	return ""
 }
@@ -295,18 +219,10 @@ const file_libs_entitlement_proto_rawDesc = "" +
 	"\fallowed_rpcs\x18\x02 \x03(\tB\x04\x88\xa6\x1d\x01R\vallowedRpcs\"v\n" +
 	"\x13ServiceEntitlements\x12\x14\n" +
 	"\x02id\x18\x01 \x01(\tB\x04\x88\xa6\x1d\x01R\x02id\x12I\n" +
-	"\fentitlements\x18\x02 \x03(\v2\x1f.entitlement.ServiceEntitlementB\x04\x88\xa6\x1d\x01R\fentitlements\"\xd4\x01\n" +
-	"\x19ServiceEntitlementMapping\x12!\n" +
-	"\tstring_id\x18\x01 \x01(\tB\x04\x88\xa6\x1d\x01R\bstringId\x12-\n" +
-	"\x0fentitlements_id\x18\x02 \x01(\tB\x04\x88\xa6\x1d\x01R\x0eentitlementsId\x12A\n" +
-	"\fsubject_type\x18\x03 \x01(\x0e2\x18.entitlement.SubjectTypeB\x04\x98\xa7\x1d\x01R\vsubjectType\x12\"\n" +
-	"\tprincipal\x18\x04 \x01(\tB\x04\x88\xa6\x1d\x01R\tprincipal*\xbd\x01\n" +
-	"\vSubjectType\x12\x1c\n" +
-	"\x18SUBJECT_TYPE_UNSPECIFIED\x10\x00\x12%\n" +
-	"\x14SUBJECT_TYPE_SERVICE\x10\x01\x1a\v\xaa\xb5\x18\aservice\x12\x1d\n" +
-	"\x10SUBJECT_TYPE_API\x10\x02\x1a\a\xaa\xb5\x18\x03api\x12'\n" +
-	"\x15SUBJECT_TYPE_WORKLOAD\x10\x03\x1a\f\xaa\xb5\x18\bworkload\x12!\n" +
-	"\x12SUBJECT_TYPE_AGENT\x10\x04\x1a\t\xaa\xb5\x18\x05agentB\\ZZgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/entitlementb\x06proto3"
+	"\fentitlements\x18\x02 \x03(\v2\x1f.entitlement.ServiceEntitlementB\x04\x88\xa6\x1d\x01R\fentitlements\"f\n" +
+	"\x19ServiceEntitlementMapping\x12)\n" +
+	"\rcredential_id\x18\x01 \x01(\tB\x04\x88\xa6\x1d\x01R\fcredentialId\x12\x1e\n" +
+	"\aservice\x18\x02 \x01(\tB\x04\x88\xa6\x1d\x01R\aserviceB\\ZZgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/entitlementb\x06proto3"
 
 var (
 	file_libs_entitlement_proto_rawDescOnce sync.Once
@@ -320,22 +236,19 @@ func file_libs_entitlement_proto_rawDescGZIP() []byte {
 	return file_libs_entitlement_proto_rawDescData
 }
 
-var file_libs_entitlement_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_libs_entitlement_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_libs_entitlement_proto_goTypes = []any{
-	(SubjectType)(0),                  // 0: entitlement.SubjectType
-	(*ServiceEntitlement)(nil),        // 1: entitlement.ServiceEntitlement
-	(*ServiceEntitlements)(nil),       // 2: entitlement.ServiceEntitlements
-	(*ServiceEntitlementMapping)(nil), // 3: entitlement.ServiceEntitlementMapping
+	(*ServiceEntitlement)(nil),        // 0: entitlement.ServiceEntitlement
+	(*ServiceEntitlements)(nil),       // 1: entitlement.ServiceEntitlements
+	(*ServiceEntitlementMapping)(nil), // 2: entitlement.ServiceEntitlementMapping
 }
 var file_libs_entitlement_proto_depIdxs = []int32{
-	1, // 0: entitlement.ServiceEntitlements.entitlements:type_name -> entitlement.ServiceEntitlement
-	0, // 1: entitlement.ServiceEntitlementMapping.subject_type:type_name -> entitlement.SubjectType
-	2, // [2:2] is the sub-list for method output_type
-	2, // [2:2] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	0, // 0: entitlement.ServiceEntitlements.entitlements:type_name -> entitlement.ServiceEntitlement
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_libs_entitlement_proto_init() }
@@ -348,14 +261,13 @@ func file_libs_entitlement_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_libs_entitlement_proto_rawDesc), len(file_libs_entitlement_proto_rawDesc)),
-			NumEnums:      1,
+			NumEnums:      0,
 			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
 		GoTypes:           file_libs_entitlement_proto_goTypes,
 		DependencyIndexes: file_libs_entitlement_proto_depIdxs,
-		EnumInfos:         file_libs_entitlement_proto_enumTypes,
 		MessageInfos:      file_libs_entitlement_proto_msgTypes,
 	}.Build()
 	File_libs_entitlement_proto = out.File

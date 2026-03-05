@@ -89,7 +89,7 @@ func LoadBootstrapConfig() (*serviceconfig_pb.BootstrapConfig, error) {
 // LoadLocalConfig loads serviceconfig.Config fields from the same config file
 // used by LoadBootstrapConfig (via -c/--config flag or BOOTSTRAP_CONFIG env var).
 // This allows per-service config files to specify runtime settings like
-// listen_address that override the runtime config delivered by elvis.
+// listen_address that override the runtime config delivered by the backend.
 // Returns nil, nil if no config file is found or if parsing fails (non-fatal).
 func LoadLocalConfig() (*serviceconfig_pb.Config, error) {
 	path := ""

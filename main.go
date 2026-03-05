@@ -61,7 +61,7 @@ func run() error {
 		return fmt.Errorf("parsing letsencrypt config %s: %w", configPath, err)
 	}
 
-	// 4. Connect to elvis via ServiceManager.
+	// 4. Connect to kernel via ServiceManager.
 	sc, err := servicemanager.NewServiceManager(ctx, bsCfg)
 	if err != nil {
 		return fmt.Errorf("servicemanager: %w", err)

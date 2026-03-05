@@ -333,7 +333,7 @@ func (x *PolicyConfigState) GetConfig() *policy.Config {
 }
 
 // ServiceConfigState delivers runtime configuration (OPA policy) to all services.
-// Elvis writes the OPA policy; frontends subscribe via OnChange.
+// The backend writes the OPA policy; frontends subscribe via OnChange.
 type ServiceConfigState struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Config        *serviceconfig.Config  `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`

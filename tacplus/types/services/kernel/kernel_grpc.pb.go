@@ -9,15 +9,15 @@
 // If changes are needed, update the tacplus compiler at:
 // gitlab.com/secondstarcavalier/controlplane/services/tacplus
 //
-// Source: services/elvis.proto
+// Source: services/kernel.proto
 
-package elvis
+package kernel
 
 import (
 	context "context"
 	healthreport "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/healthreport"
 	token "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/token"
-	presley "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/presley"
+	sentinel "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/sentinel"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -30,7 +30,7 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	TokenExchangerService_ExchangeToken_FullMethodName = "/elvis.TokenExchangerService/ExchangeToken"
+	TokenExchangerService_ExchangeToken_FullMethodName = "/kernel.TokenExchangerService/ExchangeToken"
 )
 
 // TokenExchangerServiceClient is the client API for TokenExchangerService service.
@@ -39,7 +39,7 @@ const (
 //
 // TokenExchangerService is the built-in backend RPC service for token exchange.
 // Accepts a CredPair-signed token or refresh token and returns tokens for
-// backend (elvis) communication. Hand-written implementation; tacplus
+// backend (kernel) communication. Hand-written implementation; tacplus
 // generates client wrappers and server wiring.
 type TokenExchangerServiceClient interface {
 	// ExchangeToken validates the input token, evaluates OPA policy,
@@ -71,7 +71,7 @@ func (c *tokenExchangerServiceClient) ExchangeToken(ctx context.Context, in *Tok
 //
 // TokenExchangerService is the built-in backend RPC service for token exchange.
 // Accepts a CredPair-signed token or refresh token and returns tokens for
-// backend (elvis) communication. Hand-written implementation; tacplus
+// backend (kernel) communication. Hand-written implementation; tacplus
 // generates client wrappers and server wiring.
 type TokenExchangerServiceServer interface {
 	// ExchangeToken validates the input token, evaluates OPA policy,
@@ -133,7 +133,7 @@ func _TokenExchangerService_ExchangeToken_Handler(srv interface{}, ctx context.C
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var TokenExchangerService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "elvis.TokenExchangerService",
+	ServiceName: "kernel.TokenExchangerService",
 	HandlerType: (*TokenExchangerServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -142,24 +142,24 @@ var TokenExchangerService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "services/elvis.proto",
+	Metadata: "services/kernel.proto",
 }
 
 const (
-	TokenExchangerStateBackendService_GetVerifyingKeys_FullMethodName         = "/elvis.TokenExchangerStateBackendService/GetVerifyingKeys"
-	TokenExchangerStateBackendService_PutVerifyingKeys_FullMethodName         = "/elvis.TokenExchangerStateBackendService/PutVerifyingKeys"
-	TokenExchangerStateBackendService_SetVerifyingKeys_FullMethodName         = "/elvis.TokenExchangerStateBackendService/SetVerifyingKeys"
-	TokenExchangerStateBackendService_RemoveVerifyingKeys_FullMethodName      = "/elvis.TokenExchangerStateBackendService/RemoveVerifyingKeys"
-	TokenExchangerStateBackendService_DeleteVerifyingKeys_FullMethodName      = "/elvis.TokenExchangerStateBackendService/DeleteVerifyingKeys"
-	TokenExchangerStateBackendService_ContainsKeyVerifyingKeys_FullMethodName = "/elvis.TokenExchangerStateBackendService/ContainsKeyVerifyingKeys"
-	TokenExchangerStateBackendService_GetAllVerifyingKeys_FullMethodName      = "/elvis.TokenExchangerStateBackendService/GetAllVerifyingKeys"
-	TokenExchangerStateBackendService_KeySetVerifyingKeys_FullMethodName      = "/elvis.TokenExchangerStateBackendService/KeySetVerifyingKeys"
-	TokenExchangerStateBackendService_SizeVerifyingKeys_FullMethodName        = "/elvis.TokenExchangerStateBackendService/SizeVerifyingKeys"
-	TokenExchangerStateBackendService_ClearVerifyingKeys_FullMethodName       = "/elvis.TokenExchangerStateBackendService/ClearVerifyingKeys"
-	TokenExchangerStateBackendService_PutIfAbsentVerifyingKeys_FullMethodName = "/elvis.TokenExchangerStateBackendService/PutIfAbsentVerifyingKeys"
-	TokenExchangerStateBackendService_WatchVerifyingKeys_FullMethodName       = "/elvis.TokenExchangerStateBackendService/WatchVerifyingKeys"
-	TokenExchangerStateBackendService_QueryVerifyingKeys_FullMethodName       = "/elvis.TokenExchangerStateBackendService/QueryVerifyingKeys"
-	TokenExchangerStateBackendService_WatchQueryVerifyingKeys_FullMethodName  = "/elvis.TokenExchangerStateBackendService/WatchQueryVerifyingKeys"
+	TokenExchangerStateBackendService_GetVerifyingKeys_FullMethodName         = "/kernel.TokenExchangerStateBackendService/GetVerifyingKeys"
+	TokenExchangerStateBackendService_PutVerifyingKeys_FullMethodName         = "/kernel.TokenExchangerStateBackendService/PutVerifyingKeys"
+	TokenExchangerStateBackendService_SetVerifyingKeys_FullMethodName         = "/kernel.TokenExchangerStateBackendService/SetVerifyingKeys"
+	TokenExchangerStateBackendService_RemoveVerifyingKeys_FullMethodName      = "/kernel.TokenExchangerStateBackendService/RemoveVerifyingKeys"
+	TokenExchangerStateBackendService_DeleteVerifyingKeys_FullMethodName      = "/kernel.TokenExchangerStateBackendService/DeleteVerifyingKeys"
+	TokenExchangerStateBackendService_ContainsKeyVerifyingKeys_FullMethodName = "/kernel.TokenExchangerStateBackendService/ContainsKeyVerifyingKeys"
+	TokenExchangerStateBackendService_GetAllVerifyingKeys_FullMethodName      = "/kernel.TokenExchangerStateBackendService/GetAllVerifyingKeys"
+	TokenExchangerStateBackendService_KeySetVerifyingKeys_FullMethodName      = "/kernel.TokenExchangerStateBackendService/KeySetVerifyingKeys"
+	TokenExchangerStateBackendService_SizeVerifyingKeys_FullMethodName        = "/kernel.TokenExchangerStateBackendService/SizeVerifyingKeys"
+	TokenExchangerStateBackendService_ClearVerifyingKeys_FullMethodName       = "/kernel.TokenExchangerStateBackendService/ClearVerifyingKeys"
+	TokenExchangerStateBackendService_PutIfAbsentVerifyingKeys_FullMethodName = "/kernel.TokenExchangerStateBackendService/PutIfAbsentVerifyingKeys"
+	TokenExchangerStateBackendService_WatchVerifyingKeys_FullMethodName       = "/kernel.TokenExchangerStateBackendService/WatchVerifyingKeys"
+	TokenExchangerStateBackendService_QueryVerifyingKeys_FullMethodName       = "/kernel.TokenExchangerStateBackendService/QueryVerifyingKeys"
+	TokenExchangerStateBackendService_WatchQueryVerifyingKeys_FullMethodName  = "/kernel.TokenExchangerStateBackendService/WatchQueryVerifyingKeys"
 )
 
 // TokenExchangerStateBackendServiceClient is the client API for TokenExchangerStateBackendService service.
@@ -684,7 +684,7 @@ type TokenExchangerStateBackendService_WatchQueryVerifyingKeysServer = grpc.Serv
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var TokenExchangerStateBackendService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "elvis.TokenExchangerStateBackendService",
+	ServiceName: "kernel.TokenExchangerStateBackendService",
 	HandlerType: (*TokenExchangerStateBackendServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -748,24 +748,24 @@ var TokenExchangerStateBackendService_ServiceDesc = grpc.ServiceDesc{
 			ServerStreams: true,
 		},
 	},
-	Metadata: "services/elvis.proto",
+	Metadata: "services/kernel.proto",
 }
 
 const (
-	TrustedCaStateBackendService_GetTrustedCas_FullMethodName         = "/elvis.TrustedCaStateBackendService/GetTrustedCas"
-	TrustedCaStateBackendService_PutTrustedCas_FullMethodName         = "/elvis.TrustedCaStateBackendService/PutTrustedCas"
-	TrustedCaStateBackendService_SetTrustedCas_FullMethodName         = "/elvis.TrustedCaStateBackendService/SetTrustedCas"
-	TrustedCaStateBackendService_RemoveTrustedCas_FullMethodName      = "/elvis.TrustedCaStateBackendService/RemoveTrustedCas"
-	TrustedCaStateBackendService_DeleteTrustedCas_FullMethodName      = "/elvis.TrustedCaStateBackendService/DeleteTrustedCas"
-	TrustedCaStateBackendService_ContainsKeyTrustedCas_FullMethodName = "/elvis.TrustedCaStateBackendService/ContainsKeyTrustedCas"
-	TrustedCaStateBackendService_GetAllTrustedCas_FullMethodName      = "/elvis.TrustedCaStateBackendService/GetAllTrustedCas"
-	TrustedCaStateBackendService_KeySetTrustedCas_FullMethodName      = "/elvis.TrustedCaStateBackendService/KeySetTrustedCas"
-	TrustedCaStateBackendService_SizeTrustedCas_FullMethodName        = "/elvis.TrustedCaStateBackendService/SizeTrustedCas"
-	TrustedCaStateBackendService_ClearTrustedCas_FullMethodName       = "/elvis.TrustedCaStateBackendService/ClearTrustedCas"
-	TrustedCaStateBackendService_PutIfAbsentTrustedCas_FullMethodName = "/elvis.TrustedCaStateBackendService/PutIfAbsentTrustedCas"
-	TrustedCaStateBackendService_WatchTrustedCas_FullMethodName       = "/elvis.TrustedCaStateBackendService/WatchTrustedCas"
-	TrustedCaStateBackendService_QueryTrustedCas_FullMethodName       = "/elvis.TrustedCaStateBackendService/QueryTrustedCas"
-	TrustedCaStateBackendService_WatchQueryTrustedCas_FullMethodName  = "/elvis.TrustedCaStateBackendService/WatchQueryTrustedCas"
+	TrustedCaStateBackendService_GetTrustedCas_FullMethodName         = "/kernel.TrustedCaStateBackendService/GetTrustedCas"
+	TrustedCaStateBackendService_PutTrustedCas_FullMethodName         = "/kernel.TrustedCaStateBackendService/PutTrustedCas"
+	TrustedCaStateBackendService_SetTrustedCas_FullMethodName         = "/kernel.TrustedCaStateBackendService/SetTrustedCas"
+	TrustedCaStateBackendService_RemoveTrustedCas_FullMethodName      = "/kernel.TrustedCaStateBackendService/RemoveTrustedCas"
+	TrustedCaStateBackendService_DeleteTrustedCas_FullMethodName      = "/kernel.TrustedCaStateBackendService/DeleteTrustedCas"
+	TrustedCaStateBackendService_ContainsKeyTrustedCas_FullMethodName = "/kernel.TrustedCaStateBackendService/ContainsKeyTrustedCas"
+	TrustedCaStateBackendService_GetAllTrustedCas_FullMethodName      = "/kernel.TrustedCaStateBackendService/GetAllTrustedCas"
+	TrustedCaStateBackendService_KeySetTrustedCas_FullMethodName      = "/kernel.TrustedCaStateBackendService/KeySetTrustedCas"
+	TrustedCaStateBackendService_SizeTrustedCas_FullMethodName        = "/kernel.TrustedCaStateBackendService/SizeTrustedCas"
+	TrustedCaStateBackendService_ClearTrustedCas_FullMethodName       = "/kernel.TrustedCaStateBackendService/ClearTrustedCas"
+	TrustedCaStateBackendService_PutIfAbsentTrustedCas_FullMethodName = "/kernel.TrustedCaStateBackendService/PutIfAbsentTrustedCas"
+	TrustedCaStateBackendService_WatchTrustedCas_FullMethodName       = "/kernel.TrustedCaStateBackendService/WatchTrustedCas"
+	TrustedCaStateBackendService_QueryTrustedCas_FullMethodName       = "/kernel.TrustedCaStateBackendService/QueryTrustedCas"
+	TrustedCaStateBackendService_WatchQueryTrustedCas_FullMethodName  = "/kernel.TrustedCaStateBackendService/WatchQueryTrustedCas"
 )
 
 // TrustedCaStateBackendServiceClient is the client API for TrustedCaStateBackendService service.
@@ -1290,7 +1290,7 @@ type TrustedCaStateBackendService_WatchQueryTrustedCasServer = grpc.ServerStream
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var TrustedCaStateBackendService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "elvis.TrustedCaStateBackendService",
+	ServiceName: "kernel.TrustedCaStateBackendService",
 	HandlerType: (*TrustedCaStateBackendServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -1354,203 +1354,203 @@ var TrustedCaStateBackendService_ServiceDesc = grpc.ServiceDesc{
 			ServerStreams: true,
 		},
 	},
-	Metadata: "services/elvis.proto",
+	Metadata: "services/kernel.proto",
 }
 
 const (
-	ClusterStateBackendService_GetClusterInfo_FullMethodName                = "/elvis.ClusterStateBackendService/GetClusterInfo"
-	ClusterStateBackendService_SetClusterInfo_FullMethodName                = "/elvis.ClusterStateBackendService/SetClusterInfo"
-	ClusterStateBackendService_WatchClusterInfo_FullMethodName              = "/elvis.ClusterStateBackendService/WatchClusterInfo"
-	ClusterStateBackendService_GetClusterHealth_FullMethodName              = "/elvis.ClusterStateBackendService/GetClusterHealth"
-	ClusterStateBackendService_SetClusterHealth_FullMethodName              = "/elvis.ClusterStateBackendService/SetClusterHealth"
-	ClusterStateBackendService_WatchClusterHealth_FullMethodName            = "/elvis.ClusterStateBackendService/WatchClusterHealth"
-	ClusterStateBackendService_GetFrontendConfig_FullMethodName             = "/elvis.ClusterStateBackendService/GetFrontendConfig"
-	ClusterStateBackendService_SetFrontendConfig_FullMethodName             = "/elvis.ClusterStateBackendService/SetFrontendConfig"
-	ClusterStateBackendService_WatchFrontendConfig_FullMethodName           = "/elvis.ClusterStateBackendService/WatchFrontendConfig"
-	ClusterStateBackendService_GetNodeMetrics_FullMethodName                = "/elvis.ClusterStateBackendService/GetNodeMetrics"
-	ClusterStateBackendService_PutNodeMetrics_FullMethodName                = "/elvis.ClusterStateBackendService/PutNodeMetrics"
-	ClusterStateBackendService_SetNodeMetrics_FullMethodName                = "/elvis.ClusterStateBackendService/SetNodeMetrics"
-	ClusterStateBackendService_RemoveNodeMetrics_FullMethodName             = "/elvis.ClusterStateBackendService/RemoveNodeMetrics"
-	ClusterStateBackendService_DeleteNodeMetrics_FullMethodName             = "/elvis.ClusterStateBackendService/DeleteNodeMetrics"
-	ClusterStateBackendService_ContainsKeyNodeMetrics_FullMethodName        = "/elvis.ClusterStateBackendService/ContainsKeyNodeMetrics"
-	ClusterStateBackendService_GetAllNodeMetrics_FullMethodName             = "/elvis.ClusterStateBackendService/GetAllNodeMetrics"
-	ClusterStateBackendService_KeySetNodeMetrics_FullMethodName             = "/elvis.ClusterStateBackendService/KeySetNodeMetrics"
-	ClusterStateBackendService_SizeNodeMetrics_FullMethodName               = "/elvis.ClusterStateBackendService/SizeNodeMetrics"
-	ClusterStateBackendService_ClearNodeMetrics_FullMethodName              = "/elvis.ClusterStateBackendService/ClearNodeMetrics"
-	ClusterStateBackendService_PutIfAbsentNodeMetrics_FullMethodName        = "/elvis.ClusterStateBackendService/PutIfAbsentNodeMetrics"
-	ClusterStateBackendService_WatchNodeMetrics_FullMethodName              = "/elvis.ClusterStateBackendService/WatchNodeMetrics"
-	ClusterStateBackendService_QueryNodeMetrics_FullMethodName              = "/elvis.ClusterStateBackendService/QueryNodeMetrics"
-	ClusterStateBackendService_WatchQueryNodeMetrics_FullMethodName         = "/elvis.ClusterStateBackendService/WatchQueryNodeMetrics"
-	ClusterStateBackendService_GetGrpcStats_FullMethodName                  = "/elvis.ClusterStateBackendService/GetGrpcStats"
-	ClusterStateBackendService_PutGrpcStats_FullMethodName                  = "/elvis.ClusterStateBackendService/PutGrpcStats"
-	ClusterStateBackendService_SetGrpcStats_FullMethodName                  = "/elvis.ClusterStateBackendService/SetGrpcStats"
-	ClusterStateBackendService_RemoveGrpcStats_FullMethodName               = "/elvis.ClusterStateBackendService/RemoveGrpcStats"
-	ClusterStateBackendService_DeleteGrpcStats_FullMethodName               = "/elvis.ClusterStateBackendService/DeleteGrpcStats"
-	ClusterStateBackendService_ContainsKeyGrpcStats_FullMethodName          = "/elvis.ClusterStateBackendService/ContainsKeyGrpcStats"
-	ClusterStateBackendService_GetAllGrpcStats_FullMethodName               = "/elvis.ClusterStateBackendService/GetAllGrpcStats"
-	ClusterStateBackendService_KeySetGrpcStats_FullMethodName               = "/elvis.ClusterStateBackendService/KeySetGrpcStats"
-	ClusterStateBackendService_SizeGrpcStats_FullMethodName                 = "/elvis.ClusterStateBackendService/SizeGrpcStats"
-	ClusterStateBackendService_ClearGrpcStats_FullMethodName                = "/elvis.ClusterStateBackendService/ClearGrpcStats"
-	ClusterStateBackendService_PutIfAbsentGrpcStats_FullMethodName          = "/elvis.ClusterStateBackendService/PutIfAbsentGrpcStats"
-	ClusterStateBackendService_WatchGrpcStats_FullMethodName                = "/elvis.ClusterStateBackendService/WatchGrpcStats"
-	ClusterStateBackendService_QueryGrpcStats_FullMethodName                = "/elvis.ClusterStateBackendService/QueryGrpcStats"
-	ClusterStateBackendService_WatchQueryGrpcStats_FullMethodName           = "/elvis.ClusterStateBackendService/WatchQueryGrpcStats"
-	ClusterStateBackendService_GetPersistenceStatus_FullMethodName          = "/elvis.ClusterStateBackendService/GetPersistenceStatus"
-	ClusterStateBackendService_PutPersistenceStatus_FullMethodName          = "/elvis.ClusterStateBackendService/PutPersistenceStatus"
-	ClusterStateBackendService_SetPersistenceStatus_FullMethodName          = "/elvis.ClusterStateBackendService/SetPersistenceStatus"
-	ClusterStateBackendService_RemovePersistenceStatus_FullMethodName       = "/elvis.ClusterStateBackendService/RemovePersistenceStatus"
-	ClusterStateBackendService_DeletePersistenceStatus_FullMethodName       = "/elvis.ClusterStateBackendService/DeletePersistenceStatus"
-	ClusterStateBackendService_ContainsKeyPersistenceStatus_FullMethodName  = "/elvis.ClusterStateBackendService/ContainsKeyPersistenceStatus"
-	ClusterStateBackendService_GetAllPersistenceStatus_FullMethodName       = "/elvis.ClusterStateBackendService/GetAllPersistenceStatus"
-	ClusterStateBackendService_KeySetPersistenceStatus_FullMethodName       = "/elvis.ClusterStateBackendService/KeySetPersistenceStatus"
-	ClusterStateBackendService_SizePersistenceStatus_FullMethodName         = "/elvis.ClusterStateBackendService/SizePersistenceStatus"
-	ClusterStateBackendService_ClearPersistenceStatus_FullMethodName        = "/elvis.ClusterStateBackendService/ClearPersistenceStatus"
-	ClusterStateBackendService_PutIfAbsentPersistenceStatus_FullMethodName  = "/elvis.ClusterStateBackendService/PutIfAbsentPersistenceStatus"
-	ClusterStateBackendService_WatchPersistenceStatus_FullMethodName        = "/elvis.ClusterStateBackendService/WatchPersistenceStatus"
-	ClusterStateBackendService_QueryPersistenceStatus_FullMethodName        = "/elvis.ClusterStateBackendService/QueryPersistenceStatus"
-	ClusterStateBackendService_WatchQueryPersistenceStatus_FullMethodName   = "/elvis.ClusterStateBackendService/WatchQueryPersistenceStatus"
-	ClusterStateBackendService_GetNetworkStats_FullMethodName               = "/elvis.ClusterStateBackendService/GetNetworkStats"
-	ClusterStateBackendService_PutNetworkStats_FullMethodName               = "/elvis.ClusterStateBackendService/PutNetworkStats"
-	ClusterStateBackendService_SetNetworkStats_FullMethodName               = "/elvis.ClusterStateBackendService/SetNetworkStats"
-	ClusterStateBackendService_RemoveNetworkStats_FullMethodName            = "/elvis.ClusterStateBackendService/RemoveNetworkStats"
-	ClusterStateBackendService_DeleteNetworkStats_FullMethodName            = "/elvis.ClusterStateBackendService/DeleteNetworkStats"
-	ClusterStateBackendService_ContainsKeyNetworkStats_FullMethodName       = "/elvis.ClusterStateBackendService/ContainsKeyNetworkStats"
-	ClusterStateBackendService_GetAllNetworkStats_FullMethodName            = "/elvis.ClusterStateBackendService/GetAllNetworkStats"
-	ClusterStateBackendService_KeySetNetworkStats_FullMethodName            = "/elvis.ClusterStateBackendService/KeySetNetworkStats"
-	ClusterStateBackendService_SizeNetworkStats_FullMethodName              = "/elvis.ClusterStateBackendService/SizeNetworkStats"
-	ClusterStateBackendService_ClearNetworkStats_FullMethodName             = "/elvis.ClusterStateBackendService/ClearNetworkStats"
-	ClusterStateBackendService_PutIfAbsentNetworkStats_FullMethodName       = "/elvis.ClusterStateBackendService/PutIfAbsentNetworkStats"
-	ClusterStateBackendService_WatchNetworkStats_FullMethodName             = "/elvis.ClusterStateBackendService/WatchNetworkStats"
-	ClusterStateBackendService_QueryNetworkStats_FullMethodName             = "/elvis.ClusterStateBackendService/QueryNetworkStats"
-	ClusterStateBackendService_WatchQueryNetworkStats_FullMethodName        = "/elvis.ClusterStateBackendService/WatchQueryNetworkStats"
-	ClusterStateBackendService_GetThreadInfo_FullMethodName                 = "/elvis.ClusterStateBackendService/GetThreadInfo"
-	ClusterStateBackendService_PutThreadInfo_FullMethodName                 = "/elvis.ClusterStateBackendService/PutThreadInfo"
-	ClusterStateBackendService_SetThreadInfo_FullMethodName                 = "/elvis.ClusterStateBackendService/SetThreadInfo"
-	ClusterStateBackendService_RemoveThreadInfo_FullMethodName              = "/elvis.ClusterStateBackendService/RemoveThreadInfo"
-	ClusterStateBackendService_DeleteThreadInfo_FullMethodName              = "/elvis.ClusterStateBackendService/DeleteThreadInfo"
-	ClusterStateBackendService_ContainsKeyThreadInfo_FullMethodName         = "/elvis.ClusterStateBackendService/ContainsKeyThreadInfo"
-	ClusterStateBackendService_GetAllThreadInfo_FullMethodName              = "/elvis.ClusterStateBackendService/GetAllThreadInfo"
-	ClusterStateBackendService_KeySetThreadInfo_FullMethodName              = "/elvis.ClusterStateBackendService/KeySetThreadInfo"
-	ClusterStateBackendService_SizeThreadInfo_FullMethodName                = "/elvis.ClusterStateBackendService/SizeThreadInfo"
-	ClusterStateBackendService_ClearThreadInfo_FullMethodName               = "/elvis.ClusterStateBackendService/ClearThreadInfo"
-	ClusterStateBackendService_PutIfAbsentThreadInfo_FullMethodName         = "/elvis.ClusterStateBackendService/PutIfAbsentThreadInfo"
-	ClusterStateBackendService_WatchThreadInfo_FullMethodName               = "/elvis.ClusterStateBackendService/WatchThreadInfo"
-	ClusterStateBackendService_QueryThreadInfo_FullMethodName               = "/elvis.ClusterStateBackendService/QueryThreadInfo"
-	ClusterStateBackendService_WatchQueryThreadInfo_FullMethodName          = "/elvis.ClusterStateBackendService/WatchQueryThreadInfo"
-	ClusterStateBackendService_GetTokenCacheStats_FullMethodName            = "/elvis.ClusterStateBackendService/GetTokenCacheStats"
-	ClusterStateBackendService_PutTokenCacheStats_FullMethodName            = "/elvis.ClusterStateBackendService/PutTokenCacheStats"
-	ClusterStateBackendService_SetTokenCacheStats_FullMethodName            = "/elvis.ClusterStateBackendService/SetTokenCacheStats"
-	ClusterStateBackendService_RemoveTokenCacheStats_FullMethodName         = "/elvis.ClusterStateBackendService/RemoveTokenCacheStats"
-	ClusterStateBackendService_DeleteTokenCacheStats_FullMethodName         = "/elvis.ClusterStateBackendService/DeleteTokenCacheStats"
-	ClusterStateBackendService_ContainsKeyTokenCacheStats_FullMethodName    = "/elvis.ClusterStateBackendService/ContainsKeyTokenCacheStats"
-	ClusterStateBackendService_GetAllTokenCacheStats_FullMethodName         = "/elvis.ClusterStateBackendService/GetAllTokenCacheStats"
-	ClusterStateBackendService_KeySetTokenCacheStats_FullMethodName         = "/elvis.ClusterStateBackendService/KeySetTokenCacheStats"
-	ClusterStateBackendService_SizeTokenCacheStats_FullMethodName           = "/elvis.ClusterStateBackendService/SizeTokenCacheStats"
-	ClusterStateBackendService_ClearTokenCacheStats_FullMethodName          = "/elvis.ClusterStateBackendService/ClearTokenCacheStats"
-	ClusterStateBackendService_PutIfAbsentTokenCacheStats_FullMethodName    = "/elvis.ClusterStateBackendService/PutIfAbsentTokenCacheStats"
-	ClusterStateBackendService_WatchTokenCacheStats_FullMethodName          = "/elvis.ClusterStateBackendService/WatchTokenCacheStats"
-	ClusterStateBackendService_QueryTokenCacheStats_FullMethodName          = "/elvis.ClusterStateBackendService/QueryTokenCacheStats"
-	ClusterStateBackendService_WatchQueryTokenCacheStats_FullMethodName     = "/elvis.ClusterStateBackendService/WatchQueryTokenCacheStats"
-	ClusterStateBackendService_GetMapStats_FullMethodName                   = "/elvis.ClusterStateBackendService/GetMapStats"
-	ClusterStateBackendService_PutMapStats_FullMethodName                   = "/elvis.ClusterStateBackendService/PutMapStats"
-	ClusterStateBackendService_SetMapStats_FullMethodName                   = "/elvis.ClusterStateBackendService/SetMapStats"
-	ClusterStateBackendService_RemoveMapStats_FullMethodName                = "/elvis.ClusterStateBackendService/RemoveMapStats"
-	ClusterStateBackendService_DeleteMapStats_FullMethodName                = "/elvis.ClusterStateBackendService/DeleteMapStats"
-	ClusterStateBackendService_ContainsKeyMapStats_FullMethodName           = "/elvis.ClusterStateBackendService/ContainsKeyMapStats"
-	ClusterStateBackendService_GetAllMapStats_FullMethodName                = "/elvis.ClusterStateBackendService/GetAllMapStats"
-	ClusterStateBackendService_KeySetMapStats_FullMethodName                = "/elvis.ClusterStateBackendService/KeySetMapStats"
-	ClusterStateBackendService_SizeMapStats_FullMethodName                  = "/elvis.ClusterStateBackendService/SizeMapStats"
-	ClusterStateBackendService_ClearMapStats_FullMethodName                 = "/elvis.ClusterStateBackendService/ClearMapStats"
-	ClusterStateBackendService_PutIfAbsentMapStats_FullMethodName           = "/elvis.ClusterStateBackendService/PutIfAbsentMapStats"
-	ClusterStateBackendService_WatchMapStats_FullMethodName                 = "/elvis.ClusterStateBackendService/WatchMapStats"
-	ClusterStateBackendService_QueryMapStats_FullMethodName                 = "/elvis.ClusterStateBackendService/QueryMapStats"
-	ClusterStateBackendService_WatchQueryMapStats_FullMethodName            = "/elvis.ClusterStateBackendService/WatchQueryMapStats"
-	ClusterStateBackendService_GetGraphRegistry_FullMethodName              = "/elvis.ClusterStateBackendService/GetGraphRegistry"
-	ClusterStateBackendService_PutGraphRegistry_FullMethodName              = "/elvis.ClusterStateBackendService/PutGraphRegistry"
-	ClusterStateBackendService_SetGraphRegistry_FullMethodName              = "/elvis.ClusterStateBackendService/SetGraphRegistry"
-	ClusterStateBackendService_RemoveGraphRegistry_FullMethodName           = "/elvis.ClusterStateBackendService/RemoveGraphRegistry"
-	ClusterStateBackendService_DeleteGraphRegistry_FullMethodName           = "/elvis.ClusterStateBackendService/DeleteGraphRegistry"
-	ClusterStateBackendService_ContainsKeyGraphRegistry_FullMethodName      = "/elvis.ClusterStateBackendService/ContainsKeyGraphRegistry"
-	ClusterStateBackendService_GetAllGraphRegistry_FullMethodName           = "/elvis.ClusterStateBackendService/GetAllGraphRegistry"
-	ClusterStateBackendService_KeySetGraphRegistry_FullMethodName           = "/elvis.ClusterStateBackendService/KeySetGraphRegistry"
-	ClusterStateBackendService_SizeGraphRegistry_FullMethodName             = "/elvis.ClusterStateBackendService/SizeGraphRegistry"
-	ClusterStateBackendService_ClearGraphRegistry_FullMethodName            = "/elvis.ClusterStateBackendService/ClearGraphRegistry"
-	ClusterStateBackendService_PutIfAbsentGraphRegistry_FullMethodName      = "/elvis.ClusterStateBackendService/PutIfAbsentGraphRegistry"
-	ClusterStateBackendService_WatchGraphRegistry_FullMethodName            = "/elvis.ClusterStateBackendService/WatchGraphRegistry"
-	ClusterStateBackendService_QueryGraphRegistry_FullMethodName            = "/elvis.ClusterStateBackendService/QueryGraphRegistry"
-	ClusterStateBackendService_WatchQueryGraphRegistry_FullMethodName       = "/elvis.ClusterStateBackendService/WatchQueryGraphRegistry"
-	ClusterStateBackendService_GetServiceConnections_FullMethodName         = "/elvis.ClusterStateBackendService/GetServiceConnections"
-	ClusterStateBackendService_PutServiceConnections_FullMethodName         = "/elvis.ClusterStateBackendService/PutServiceConnections"
-	ClusterStateBackendService_SetServiceConnections_FullMethodName         = "/elvis.ClusterStateBackendService/SetServiceConnections"
-	ClusterStateBackendService_RemoveServiceConnections_FullMethodName      = "/elvis.ClusterStateBackendService/RemoveServiceConnections"
-	ClusterStateBackendService_DeleteServiceConnections_FullMethodName      = "/elvis.ClusterStateBackendService/DeleteServiceConnections"
-	ClusterStateBackendService_ContainsKeyServiceConnections_FullMethodName = "/elvis.ClusterStateBackendService/ContainsKeyServiceConnections"
-	ClusterStateBackendService_GetAllServiceConnections_FullMethodName      = "/elvis.ClusterStateBackendService/GetAllServiceConnections"
-	ClusterStateBackendService_KeySetServiceConnections_FullMethodName      = "/elvis.ClusterStateBackendService/KeySetServiceConnections"
-	ClusterStateBackendService_SizeServiceConnections_FullMethodName        = "/elvis.ClusterStateBackendService/SizeServiceConnections"
-	ClusterStateBackendService_ClearServiceConnections_FullMethodName       = "/elvis.ClusterStateBackendService/ClearServiceConnections"
-	ClusterStateBackendService_PutIfAbsentServiceConnections_FullMethodName = "/elvis.ClusterStateBackendService/PutIfAbsentServiceConnections"
-	ClusterStateBackendService_WatchServiceConnections_FullMethodName       = "/elvis.ClusterStateBackendService/WatchServiceConnections"
-	ClusterStateBackendService_QueryServiceConnections_FullMethodName       = "/elvis.ClusterStateBackendService/QueryServiceConnections"
-	ClusterStateBackendService_WatchQueryServiceConnections_FullMethodName  = "/elvis.ClusterStateBackendService/WatchQueryServiceConnections"
-	ClusterStateBackendService_GetQueueStats_FullMethodName                 = "/elvis.ClusterStateBackendService/GetQueueStats"
-	ClusterStateBackendService_PutQueueStats_FullMethodName                 = "/elvis.ClusterStateBackendService/PutQueueStats"
-	ClusterStateBackendService_SetQueueStats_FullMethodName                 = "/elvis.ClusterStateBackendService/SetQueueStats"
-	ClusterStateBackendService_RemoveQueueStats_FullMethodName              = "/elvis.ClusterStateBackendService/RemoveQueueStats"
-	ClusterStateBackendService_DeleteQueueStats_FullMethodName              = "/elvis.ClusterStateBackendService/DeleteQueueStats"
-	ClusterStateBackendService_ContainsKeyQueueStats_FullMethodName         = "/elvis.ClusterStateBackendService/ContainsKeyQueueStats"
-	ClusterStateBackendService_GetAllQueueStats_FullMethodName              = "/elvis.ClusterStateBackendService/GetAllQueueStats"
-	ClusterStateBackendService_KeySetQueueStats_FullMethodName              = "/elvis.ClusterStateBackendService/KeySetQueueStats"
-	ClusterStateBackendService_SizeQueueStats_FullMethodName                = "/elvis.ClusterStateBackendService/SizeQueueStats"
-	ClusterStateBackendService_ClearQueueStats_FullMethodName               = "/elvis.ClusterStateBackendService/ClearQueueStats"
-	ClusterStateBackendService_PutIfAbsentQueueStats_FullMethodName         = "/elvis.ClusterStateBackendService/PutIfAbsentQueueStats"
-	ClusterStateBackendService_WatchQueueStats_FullMethodName               = "/elvis.ClusterStateBackendService/WatchQueueStats"
-	ClusterStateBackendService_QueryQueueStats_FullMethodName               = "/elvis.ClusterStateBackendService/QueryQueueStats"
-	ClusterStateBackendService_WatchQueryQueueStats_FullMethodName          = "/elvis.ClusterStateBackendService/WatchQueryQueueStats"
-	ClusterStateBackendService_GetTopicStats_FullMethodName                 = "/elvis.ClusterStateBackendService/GetTopicStats"
-	ClusterStateBackendService_PutTopicStats_FullMethodName                 = "/elvis.ClusterStateBackendService/PutTopicStats"
-	ClusterStateBackendService_SetTopicStats_FullMethodName                 = "/elvis.ClusterStateBackendService/SetTopicStats"
-	ClusterStateBackendService_RemoveTopicStats_FullMethodName              = "/elvis.ClusterStateBackendService/RemoveTopicStats"
-	ClusterStateBackendService_DeleteTopicStats_FullMethodName              = "/elvis.ClusterStateBackendService/DeleteTopicStats"
-	ClusterStateBackendService_ContainsKeyTopicStats_FullMethodName         = "/elvis.ClusterStateBackendService/ContainsKeyTopicStats"
-	ClusterStateBackendService_GetAllTopicStats_FullMethodName              = "/elvis.ClusterStateBackendService/GetAllTopicStats"
-	ClusterStateBackendService_KeySetTopicStats_FullMethodName              = "/elvis.ClusterStateBackendService/KeySetTopicStats"
-	ClusterStateBackendService_SizeTopicStats_FullMethodName                = "/elvis.ClusterStateBackendService/SizeTopicStats"
-	ClusterStateBackendService_ClearTopicStats_FullMethodName               = "/elvis.ClusterStateBackendService/ClearTopicStats"
-	ClusterStateBackendService_PutIfAbsentTopicStats_FullMethodName         = "/elvis.ClusterStateBackendService/PutIfAbsentTopicStats"
-	ClusterStateBackendService_WatchTopicStats_FullMethodName               = "/elvis.ClusterStateBackendService/WatchTopicStats"
-	ClusterStateBackendService_QueryTopicStats_FullMethodName               = "/elvis.ClusterStateBackendService/QueryTopicStats"
-	ClusterStateBackendService_WatchQueryTopicStats_FullMethodName          = "/elvis.ClusterStateBackendService/WatchQueryTopicStats"
-	ClusterStateBackendService_GetWatchHealth_FullMethodName                = "/elvis.ClusterStateBackendService/GetWatchHealth"
-	ClusterStateBackendService_PutWatchHealth_FullMethodName                = "/elvis.ClusterStateBackendService/PutWatchHealth"
-	ClusterStateBackendService_SetWatchHealth_FullMethodName                = "/elvis.ClusterStateBackendService/SetWatchHealth"
-	ClusterStateBackendService_RemoveWatchHealth_FullMethodName             = "/elvis.ClusterStateBackendService/RemoveWatchHealth"
-	ClusterStateBackendService_DeleteWatchHealth_FullMethodName             = "/elvis.ClusterStateBackendService/DeleteWatchHealth"
-	ClusterStateBackendService_ContainsKeyWatchHealth_FullMethodName        = "/elvis.ClusterStateBackendService/ContainsKeyWatchHealth"
-	ClusterStateBackendService_GetAllWatchHealth_FullMethodName             = "/elvis.ClusterStateBackendService/GetAllWatchHealth"
-	ClusterStateBackendService_KeySetWatchHealth_FullMethodName             = "/elvis.ClusterStateBackendService/KeySetWatchHealth"
-	ClusterStateBackendService_SizeWatchHealth_FullMethodName               = "/elvis.ClusterStateBackendService/SizeWatchHealth"
-	ClusterStateBackendService_ClearWatchHealth_FullMethodName              = "/elvis.ClusterStateBackendService/ClearWatchHealth"
-	ClusterStateBackendService_PutIfAbsentWatchHealth_FullMethodName        = "/elvis.ClusterStateBackendService/PutIfAbsentWatchHealth"
-	ClusterStateBackendService_WatchWatchHealth_FullMethodName              = "/elvis.ClusterStateBackendService/WatchWatchHealth"
-	ClusterStateBackendService_QueryWatchHealth_FullMethodName              = "/elvis.ClusterStateBackendService/QueryWatchHealth"
-	ClusterStateBackendService_WatchQueryWatchHealth_FullMethodName         = "/elvis.ClusterStateBackendService/WatchQueryWatchHealth"
-	ClusterStateBackendService_GetMutationRates_FullMethodName              = "/elvis.ClusterStateBackendService/GetMutationRates"
-	ClusterStateBackendService_PutMutationRates_FullMethodName              = "/elvis.ClusterStateBackendService/PutMutationRates"
-	ClusterStateBackendService_SetMutationRates_FullMethodName              = "/elvis.ClusterStateBackendService/SetMutationRates"
-	ClusterStateBackendService_RemoveMutationRates_FullMethodName           = "/elvis.ClusterStateBackendService/RemoveMutationRates"
-	ClusterStateBackendService_DeleteMutationRates_FullMethodName           = "/elvis.ClusterStateBackendService/DeleteMutationRates"
-	ClusterStateBackendService_ContainsKeyMutationRates_FullMethodName      = "/elvis.ClusterStateBackendService/ContainsKeyMutationRates"
-	ClusterStateBackendService_GetAllMutationRates_FullMethodName           = "/elvis.ClusterStateBackendService/GetAllMutationRates"
-	ClusterStateBackendService_KeySetMutationRates_FullMethodName           = "/elvis.ClusterStateBackendService/KeySetMutationRates"
-	ClusterStateBackendService_SizeMutationRates_FullMethodName             = "/elvis.ClusterStateBackendService/SizeMutationRates"
-	ClusterStateBackendService_ClearMutationRates_FullMethodName            = "/elvis.ClusterStateBackendService/ClearMutationRates"
-	ClusterStateBackendService_PutIfAbsentMutationRates_FullMethodName      = "/elvis.ClusterStateBackendService/PutIfAbsentMutationRates"
-	ClusterStateBackendService_WatchMutationRates_FullMethodName            = "/elvis.ClusterStateBackendService/WatchMutationRates"
-	ClusterStateBackendService_QueryMutationRates_FullMethodName            = "/elvis.ClusterStateBackendService/QueryMutationRates"
-	ClusterStateBackendService_WatchQueryMutationRates_FullMethodName       = "/elvis.ClusterStateBackendService/WatchQueryMutationRates"
-	ClusterStateBackendService_SetLogLevel_FullMethodName                   = "/elvis.ClusterStateBackendService/SetLogLevel"
-	ClusterStateBackendService_ReloadConfig_FullMethodName                  = "/elvis.ClusterStateBackendService/ReloadConfig"
+	ClusterStateBackendService_GetClusterInfo_FullMethodName                = "/kernel.ClusterStateBackendService/GetClusterInfo"
+	ClusterStateBackendService_SetClusterInfo_FullMethodName                = "/kernel.ClusterStateBackendService/SetClusterInfo"
+	ClusterStateBackendService_WatchClusterInfo_FullMethodName              = "/kernel.ClusterStateBackendService/WatchClusterInfo"
+	ClusterStateBackendService_GetClusterHealth_FullMethodName              = "/kernel.ClusterStateBackendService/GetClusterHealth"
+	ClusterStateBackendService_SetClusterHealth_FullMethodName              = "/kernel.ClusterStateBackendService/SetClusterHealth"
+	ClusterStateBackendService_WatchClusterHealth_FullMethodName            = "/kernel.ClusterStateBackendService/WatchClusterHealth"
+	ClusterStateBackendService_GetFrontendConfig_FullMethodName             = "/kernel.ClusterStateBackendService/GetFrontendConfig"
+	ClusterStateBackendService_SetFrontendConfig_FullMethodName             = "/kernel.ClusterStateBackendService/SetFrontendConfig"
+	ClusterStateBackendService_WatchFrontendConfig_FullMethodName           = "/kernel.ClusterStateBackendService/WatchFrontendConfig"
+	ClusterStateBackendService_GetNodeMetrics_FullMethodName                = "/kernel.ClusterStateBackendService/GetNodeMetrics"
+	ClusterStateBackendService_PutNodeMetrics_FullMethodName                = "/kernel.ClusterStateBackendService/PutNodeMetrics"
+	ClusterStateBackendService_SetNodeMetrics_FullMethodName                = "/kernel.ClusterStateBackendService/SetNodeMetrics"
+	ClusterStateBackendService_RemoveNodeMetrics_FullMethodName             = "/kernel.ClusterStateBackendService/RemoveNodeMetrics"
+	ClusterStateBackendService_DeleteNodeMetrics_FullMethodName             = "/kernel.ClusterStateBackendService/DeleteNodeMetrics"
+	ClusterStateBackendService_ContainsKeyNodeMetrics_FullMethodName        = "/kernel.ClusterStateBackendService/ContainsKeyNodeMetrics"
+	ClusterStateBackendService_GetAllNodeMetrics_FullMethodName             = "/kernel.ClusterStateBackendService/GetAllNodeMetrics"
+	ClusterStateBackendService_KeySetNodeMetrics_FullMethodName             = "/kernel.ClusterStateBackendService/KeySetNodeMetrics"
+	ClusterStateBackendService_SizeNodeMetrics_FullMethodName               = "/kernel.ClusterStateBackendService/SizeNodeMetrics"
+	ClusterStateBackendService_ClearNodeMetrics_FullMethodName              = "/kernel.ClusterStateBackendService/ClearNodeMetrics"
+	ClusterStateBackendService_PutIfAbsentNodeMetrics_FullMethodName        = "/kernel.ClusterStateBackendService/PutIfAbsentNodeMetrics"
+	ClusterStateBackendService_WatchNodeMetrics_FullMethodName              = "/kernel.ClusterStateBackendService/WatchNodeMetrics"
+	ClusterStateBackendService_QueryNodeMetrics_FullMethodName              = "/kernel.ClusterStateBackendService/QueryNodeMetrics"
+	ClusterStateBackendService_WatchQueryNodeMetrics_FullMethodName         = "/kernel.ClusterStateBackendService/WatchQueryNodeMetrics"
+	ClusterStateBackendService_GetGrpcStats_FullMethodName                  = "/kernel.ClusterStateBackendService/GetGrpcStats"
+	ClusterStateBackendService_PutGrpcStats_FullMethodName                  = "/kernel.ClusterStateBackendService/PutGrpcStats"
+	ClusterStateBackendService_SetGrpcStats_FullMethodName                  = "/kernel.ClusterStateBackendService/SetGrpcStats"
+	ClusterStateBackendService_RemoveGrpcStats_FullMethodName               = "/kernel.ClusterStateBackendService/RemoveGrpcStats"
+	ClusterStateBackendService_DeleteGrpcStats_FullMethodName               = "/kernel.ClusterStateBackendService/DeleteGrpcStats"
+	ClusterStateBackendService_ContainsKeyGrpcStats_FullMethodName          = "/kernel.ClusterStateBackendService/ContainsKeyGrpcStats"
+	ClusterStateBackendService_GetAllGrpcStats_FullMethodName               = "/kernel.ClusterStateBackendService/GetAllGrpcStats"
+	ClusterStateBackendService_KeySetGrpcStats_FullMethodName               = "/kernel.ClusterStateBackendService/KeySetGrpcStats"
+	ClusterStateBackendService_SizeGrpcStats_FullMethodName                 = "/kernel.ClusterStateBackendService/SizeGrpcStats"
+	ClusterStateBackendService_ClearGrpcStats_FullMethodName                = "/kernel.ClusterStateBackendService/ClearGrpcStats"
+	ClusterStateBackendService_PutIfAbsentGrpcStats_FullMethodName          = "/kernel.ClusterStateBackendService/PutIfAbsentGrpcStats"
+	ClusterStateBackendService_WatchGrpcStats_FullMethodName                = "/kernel.ClusterStateBackendService/WatchGrpcStats"
+	ClusterStateBackendService_QueryGrpcStats_FullMethodName                = "/kernel.ClusterStateBackendService/QueryGrpcStats"
+	ClusterStateBackendService_WatchQueryGrpcStats_FullMethodName           = "/kernel.ClusterStateBackendService/WatchQueryGrpcStats"
+	ClusterStateBackendService_GetPersistenceStatus_FullMethodName          = "/kernel.ClusterStateBackendService/GetPersistenceStatus"
+	ClusterStateBackendService_PutPersistenceStatus_FullMethodName          = "/kernel.ClusterStateBackendService/PutPersistenceStatus"
+	ClusterStateBackendService_SetPersistenceStatus_FullMethodName          = "/kernel.ClusterStateBackendService/SetPersistenceStatus"
+	ClusterStateBackendService_RemovePersistenceStatus_FullMethodName       = "/kernel.ClusterStateBackendService/RemovePersistenceStatus"
+	ClusterStateBackendService_DeletePersistenceStatus_FullMethodName       = "/kernel.ClusterStateBackendService/DeletePersistenceStatus"
+	ClusterStateBackendService_ContainsKeyPersistenceStatus_FullMethodName  = "/kernel.ClusterStateBackendService/ContainsKeyPersistenceStatus"
+	ClusterStateBackendService_GetAllPersistenceStatus_FullMethodName       = "/kernel.ClusterStateBackendService/GetAllPersistenceStatus"
+	ClusterStateBackendService_KeySetPersistenceStatus_FullMethodName       = "/kernel.ClusterStateBackendService/KeySetPersistenceStatus"
+	ClusterStateBackendService_SizePersistenceStatus_FullMethodName         = "/kernel.ClusterStateBackendService/SizePersistenceStatus"
+	ClusterStateBackendService_ClearPersistenceStatus_FullMethodName        = "/kernel.ClusterStateBackendService/ClearPersistenceStatus"
+	ClusterStateBackendService_PutIfAbsentPersistenceStatus_FullMethodName  = "/kernel.ClusterStateBackendService/PutIfAbsentPersistenceStatus"
+	ClusterStateBackendService_WatchPersistenceStatus_FullMethodName        = "/kernel.ClusterStateBackendService/WatchPersistenceStatus"
+	ClusterStateBackendService_QueryPersistenceStatus_FullMethodName        = "/kernel.ClusterStateBackendService/QueryPersistenceStatus"
+	ClusterStateBackendService_WatchQueryPersistenceStatus_FullMethodName   = "/kernel.ClusterStateBackendService/WatchQueryPersistenceStatus"
+	ClusterStateBackendService_GetNetworkStats_FullMethodName               = "/kernel.ClusterStateBackendService/GetNetworkStats"
+	ClusterStateBackendService_PutNetworkStats_FullMethodName               = "/kernel.ClusterStateBackendService/PutNetworkStats"
+	ClusterStateBackendService_SetNetworkStats_FullMethodName               = "/kernel.ClusterStateBackendService/SetNetworkStats"
+	ClusterStateBackendService_RemoveNetworkStats_FullMethodName            = "/kernel.ClusterStateBackendService/RemoveNetworkStats"
+	ClusterStateBackendService_DeleteNetworkStats_FullMethodName            = "/kernel.ClusterStateBackendService/DeleteNetworkStats"
+	ClusterStateBackendService_ContainsKeyNetworkStats_FullMethodName       = "/kernel.ClusterStateBackendService/ContainsKeyNetworkStats"
+	ClusterStateBackendService_GetAllNetworkStats_FullMethodName            = "/kernel.ClusterStateBackendService/GetAllNetworkStats"
+	ClusterStateBackendService_KeySetNetworkStats_FullMethodName            = "/kernel.ClusterStateBackendService/KeySetNetworkStats"
+	ClusterStateBackendService_SizeNetworkStats_FullMethodName              = "/kernel.ClusterStateBackendService/SizeNetworkStats"
+	ClusterStateBackendService_ClearNetworkStats_FullMethodName             = "/kernel.ClusterStateBackendService/ClearNetworkStats"
+	ClusterStateBackendService_PutIfAbsentNetworkStats_FullMethodName       = "/kernel.ClusterStateBackendService/PutIfAbsentNetworkStats"
+	ClusterStateBackendService_WatchNetworkStats_FullMethodName             = "/kernel.ClusterStateBackendService/WatchNetworkStats"
+	ClusterStateBackendService_QueryNetworkStats_FullMethodName             = "/kernel.ClusterStateBackendService/QueryNetworkStats"
+	ClusterStateBackendService_WatchQueryNetworkStats_FullMethodName        = "/kernel.ClusterStateBackendService/WatchQueryNetworkStats"
+	ClusterStateBackendService_GetThreadInfo_FullMethodName                 = "/kernel.ClusterStateBackendService/GetThreadInfo"
+	ClusterStateBackendService_PutThreadInfo_FullMethodName                 = "/kernel.ClusterStateBackendService/PutThreadInfo"
+	ClusterStateBackendService_SetThreadInfo_FullMethodName                 = "/kernel.ClusterStateBackendService/SetThreadInfo"
+	ClusterStateBackendService_RemoveThreadInfo_FullMethodName              = "/kernel.ClusterStateBackendService/RemoveThreadInfo"
+	ClusterStateBackendService_DeleteThreadInfo_FullMethodName              = "/kernel.ClusterStateBackendService/DeleteThreadInfo"
+	ClusterStateBackendService_ContainsKeyThreadInfo_FullMethodName         = "/kernel.ClusterStateBackendService/ContainsKeyThreadInfo"
+	ClusterStateBackendService_GetAllThreadInfo_FullMethodName              = "/kernel.ClusterStateBackendService/GetAllThreadInfo"
+	ClusterStateBackendService_KeySetThreadInfo_FullMethodName              = "/kernel.ClusterStateBackendService/KeySetThreadInfo"
+	ClusterStateBackendService_SizeThreadInfo_FullMethodName                = "/kernel.ClusterStateBackendService/SizeThreadInfo"
+	ClusterStateBackendService_ClearThreadInfo_FullMethodName               = "/kernel.ClusterStateBackendService/ClearThreadInfo"
+	ClusterStateBackendService_PutIfAbsentThreadInfo_FullMethodName         = "/kernel.ClusterStateBackendService/PutIfAbsentThreadInfo"
+	ClusterStateBackendService_WatchThreadInfo_FullMethodName               = "/kernel.ClusterStateBackendService/WatchThreadInfo"
+	ClusterStateBackendService_QueryThreadInfo_FullMethodName               = "/kernel.ClusterStateBackendService/QueryThreadInfo"
+	ClusterStateBackendService_WatchQueryThreadInfo_FullMethodName          = "/kernel.ClusterStateBackendService/WatchQueryThreadInfo"
+	ClusterStateBackendService_GetTokenCacheStats_FullMethodName            = "/kernel.ClusterStateBackendService/GetTokenCacheStats"
+	ClusterStateBackendService_PutTokenCacheStats_FullMethodName            = "/kernel.ClusterStateBackendService/PutTokenCacheStats"
+	ClusterStateBackendService_SetTokenCacheStats_FullMethodName            = "/kernel.ClusterStateBackendService/SetTokenCacheStats"
+	ClusterStateBackendService_RemoveTokenCacheStats_FullMethodName         = "/kernel.ClusterStateBackendService/RemoveTokenCacheStats"
+	ClusterStateBackendService_DeleteTokenCacheStats_FullMethodName         = "/kernel.ClusterStateBackendService/DeleteTokenCacheStats"
+	ClusterStateBackendService_ContainsKeyTokenCacheStats_FullMethodName    = "/kernel.ClusterStateBackendService/ContainsKeyTokenCacheStats"
+	ClusterStateBackendService_GetAllTokenCacheStats_FullMethodName         = "/kernel.ClusterStateBackendService/GetAllTokenCacheStats"
+	ClusterStateBackendService_KeySetTokenCacheStats_FullMethodName         = "/kernel.ClusterStateBackendService/KeySetTokenCacheStats"
+	ClusterStateBackendService_SizeTokenCacheStats_FullMethodName           = "/kernel.ClusterStateBackendService/SizeTokenCacheStats"
+	ClusterStateBackendService_ClearTokenCacheStats_FullMethodName          = "/kernel.ClusterStateBackendService/ClearTokenCacheStats"
+	ClusterStateBackendService_PutIfAbsentTokenCacheStats_FullMethodName    = "/kernel.ClusterStateBackendService/PutIfAbsentTokenCacheStats"
+	ClusterStateBackendService_WatchTokenCacheStats_FullMethodName          = "/kernel.ClusterStateBackendService/WatchTokenCacheStats"
+	ClusterStateBackendService_QueryTokenCacheStats_FullMethodName          = "/kernel.ClusterStateBackendService/QueryTokenCacheStats"
+	ClusterStateBackendService_WatchQueryTokenCacheStats_FullMethodName     = "/kernel.ClusterStateBackendService/WatchQueryTokenCacheStats"
+	ClusterStateBackendService_GetMapStats_FullMethodName                   = "/kernel.ClusterStateBackendService/GetMapStats"
+	ClusterStateBackendService_PutMapStats_FullMethodName                   = "/kernel.ClusterStateBackendService/PutMapStats"
+	ClusterStateBackendService_SetMapStats_FullMethodName                   = "/kernel.ClusterStateBackendService/SetMapStats"
+	ClusterStateBackendService_RemoveMapStats_FullMethodName                = "/kernel.ClusterStateBackendService/RemoveMapStats"
+	ClusterStateBackendService_DeleteMapStats_FullMethodName                = "/kernel.ClusterStateBackendService/DeleteMapStats"
+	ClusterStateBackendService_ContainsKeyMapStats_FullMethodName           = "/kernel.ClusterStateBackendService/ContainsKeyMapStats"
+	ClusterStateBackendService_GetAllMapStats_FullMethodName                = "/kernel.ClusterStateBackendService/GetAllMapStats"
+	ClusterStateBackendService_KeySetMapStats_FullMethodName                = "/kernel.ClusterStateBackendService/KeySetMapStats"
+	ClusterStateBackendService_SizeMapStats_FullMethodName                  = "/kernel.ClusterStateBackendService/SizeMapStats"
+	ClusterStateBackendService_ClearMapStats_FullMethodName                 = "/kernel.ClusterStateBackendService/ClearMapStats"
+	ClusterStateBackendService_PutIfAbsentMapStats_FullMethodName           = "/kernel.ClusterStateBackendService/PutIfAbsentMapStats"
+	ClusterStateBackendService_WatchMapStats_FullMethodName                 = "/kernel.ClusterStateBackendService/WatchMapStats"
+	ClusterStateBackendService_QueryMapStats_FullMethodName                 = "/kernel.ClusterStateBackendService/QueryMapStats"
+	ClusterStateBackendService_WatchQueryMapStats_FullMethodName            = "/kernel.ClusterStateBackendService/WatchQueryMapStats"
+	ClusterStateBackendService_GetGraphRegistry_FullMethodName              = "/kernel.ClusterStateBackendService/GetGraphRegistry"
+	ClusterStateBackendService_PutGraphRegistry_FullMethodName              = "/kernel.ClusterStateBackendService/PutGraphRegistry"
+	ClusterStateBackendService_SetGraphRegistry_FullMethodName              = "/kernel.ClusterStateBackendService/SetGraphRegistry"
+	ClusterStateBackendService_RemoveGraphRegistry_FullMethodName           = "/kernel.ClusterStateBackendService/RemoveGraphRegistry"
+	ClusterStateBackendService_DeleteGraphRegistry_FullMethodName           = "/kernel.ClusterStateBackendService/DeleteGraphRegistry"
+	ClusterStateBackendService_ContainsKeyGraphRegistry_FullMethodName      = "/kernel.ClusterStateBackendService/ContainsKeyGraphRegistry"
+	ClusterStateBackendService_GetAllGraphRegistry_FullMethodName           = "/kernel.ClusterStateBackendService/GetAllGraphRegistry"
+	ClusterStateBackendService_KeySetGraphRegistry_FullMethodName           = "/kernel.ClusterStateBackendService/KeySetGraphRegistry"
+	ClusterStateBackendService_SizeGraphRegistry_FullMethodName             = "/kernel.ClusterStateBackendService/SizeGraphRegistry"
+	ClusterStateBackendService_ClearGraphRegistry_FullMethodName            = "/kernel.ClusterStateBackendService/ClearGraphRegistry"
+	ClusterStateBackendService_PutIfAbsentGraphRegistry_FullMethodName      = "/kernel.ClusterStateBackendService/PutIfAbsentGraphRegistry"
+	ClusterStateBackendService_WatchGraphRegistry_FullMethodName            = "/kernel.ClusterStateBackendService/WatchGraphRegistry"
+	ClusterStateBackendService_QueryGraphRegistry_FullMethodName            = "/kernel.ClusterStateBackendService/QueryGraphRegistry"
+	ClusterStateBackendService_WatchQueryGraphRegistry_FullMethodName       = "/kernel.ClusterStateBackendService/WatchQueryGraphRegistry"
+	ClusterStateBackendService_GetServiceConnections_FullMethodName         = "/kernel.ClusterStateBackendService/GetServiceConnections"
+	ClusterStateBackendService_PutServiceConnections_FullMethodName         = "/kernel.ClusterStateBackendService/PutServiceConnections"
+	ClusterStateBackendService_SetServiceConnections_FullMethodName         = "/kernel.ClusterStateBackendService/SetServiceConnections"
+	ClusterStateBackendService_RemoveServiceConnections_FullMethodName      = "/kernel.ClusterStateBackendService/RemoveServiceConnections"
+	ClusterStateBackendService_DeleteServiceConnections_FullMethodName      = "/kernel.ClusterStateBackendService/DeleteServiceConnections"
+	ClusterStateBackendService_ContainsKeyServiceConnections_FullMethodName = "/kernel.ClusterStateBackendService/ContainsKeyServiceConnections"
+	ClusterStateBackendService_GetAllServiceConnections_FullMethodName      = "/kernel.ClusterStateBackendService/GetAllServiceConnections"
+	ClusterStateBackendService_KeySetServiceConnections_FullMethodName      = "/kernel.ClusterStateBackendService/KeySetServiceConnections"
+	ClusterStateBackendService_SizeServiceConnections_FullMethodName        = "/kernel.ClusterStateBackendService/SizeServiceConnections"
+	ClusterStateBackendService_ClearServiceConnections_FullMethodName       = "/kernel.ClusterStateBackendService/ClearServiceConnections"
+	ClusterStateBackendService_PutIfAbsentServiceConnections_FullMethodName = "/kernel.ClusterStateBackendService/PutIfAbsentServiceConnections"
+	ClusterStateBackendService_WatchServiceConnections_FullMethodName       = "/kernel.ClusterStateBackendService/WatchServiceConnections"
+	ClusterStateBackendService_QueryServiceConnections_FullMethodName       = "/kernel.ClusterStateBackendService/QueryServiceConnections"
+	ClusterStateBackendService_WatchQueryServiceConnections_FullMethodName  = "/kernel.ClusterStateBackendService/WatchQueryServiceConnections"
+	ClusterStateBackendService_GetQueueStats_FullMethodName                 = "/kernel.ClusterStateBackendService/GetQueueStats"
+	ClusterStateBackendService_PutQueueStats_FullMethodName                 = "/kernel.ClusterStateBackendService/PutQueueStats"
+	ClusterStateBackendService_SetQueueStats_FullMethodName                 = "/kernel.ClusterStateBackendService/SetQueueStats"
+	ClusterStateBackendService_RemoveQueueStats_FullMethodName              = "/kernel.ClusterStateBackendService/RemoveQueueStats"
+	ClusterStateBackendService_DeleteQueueStats_FullMethodName              = "/kernel.ClusterStateBackendService/DeleteQueueStats"
+	ClusterStateBackendService_ContainsKeyQueueStats_FullMethodName         = "/kernel.ClusterStateBackendService/ContainsKeyQueueStats"
+	ClusterStateBackendService_GetAllQueueStats_FullMethodName              = "/kernel.ClusterStateBackendService/GetAllQueueStats"
+	ClusterStateBackendService_KeySetQueueStats_FullMethodName              = "/kernel.ClusterStateBackendService/KeySetQueueStats"
+	ClusterStateBackendService_SizeQueueStats_FullMethodName                = "/kernel.ClusterStateBackendService/SizeQueueStats"
+	ClusterStateBackendService_ClearQueueStats_FullMethodName               = "/kernel.ClusterStateBackendService/ClearQueueStats"
+	ClusterStateBackendService_PutIfAbsentQueueStats_FullMethodName         = "/kernel.ClusterStateBackendService/PutIfAbsentQueueStats"
+	ClusterStateBackendService_WatchQueueStats_FullMethodName               = "/kernel.ClusterStateBackendService/WatchQueueStats"
+	ClusterStateBackendService_QueryQueueStats_FullMethodName               = "/kernel.ClusterStateBackendService/QueryQueueStats"
+	ClusterStateBackendService_WatchQueryQueueStats_FullMethodName          = "/kernel.ClusterStateBackendService/WatchQueryQueueStats"
+	ClusterStateBackendService_GetTopicStats_FullMethodName                 = "/kernel.ClusterStateBackendService/GetTopicStats"
+	ClusterStateBackendService_PutTopicStats_FullMethodName                 = "/kernel.ClusterStateBackendService/PutTopicStats"
+	ClusterStateBackendService_SetTopicStats_FullMethodName                 = "/kernel.ClusterStateBackendService/SetTopicStats"
+	ClusterStateBackendService_RemoveTopicStats_FullMethodName              = "/kernel.ClusterStateBackendService/RemoveTopicStats"
+	ClusterStateBackendService_DeleteTopicStats_FullMethodName              = "/kernel.ClusterStateBackendService/DeleteTopicStats"
+	ClusterStateBackendService_ContainsKeyTopicStats_FullMethodName         = "/kernel.ClusterStateBackendService/ContainsKeyTopicStats"
+	ClusterStateBackendService_GetAllTopicStats_FullMethodName              = "/kernel.ClusterStateBackendService/GetAllTopicStats"
+	ClusterStateBackendService_KeySetTopicStats_FullMethodName              = "/kernel.ClusterStateBackendService/KeySetTopicStats"
+	ClusterStateBackendService_SizeTopicStats_FullMethodName                = "/kernel.ClusterStateBackendService/SizeTopicStats"
+	ClusterStateBackendService_ClearTopicStats_FullMethodName               = "/kernel.ClusterStateBackendService/ClearTopicStats"
+	ClusterStateBackendService_PutIfAbsentTopicStats_FullMethodName         = "/kernel.ClusterStateBackendService/PutIfAbsentTopicStats"
+	ClusterStateBackendService_WatchTopicStats_FullMethodName               = "/kernel.ClusterStateBackendService/WatchTopicStats"
+	ClusterStateBackendService_QueryTopicStats_FullMethodName               = "/kernel.ClusterStateBackendService/QueryTopicStats"
+	ClusterStateBackendService_WatchQueryTopicStats_FullMethodName          = "/kernel.ClusterStateBackendService/WatchQueryTopicStats"
+	ClusterStateBackendService_GetWatchHealth_FullMethodName                = "/kernel.ClusterStateBackendService/GetWatchHealth"
+	ClusterStateBackendService_PutWatchHealth_FullMethodName                = "/kernel.ClusterStateBackendService/PutWatchHealth"
+	ClusterStateBackendService_SetWatchHealth_FullMethodName                = "/kernel.ClusterStateBackendService/SetWatchHealth"
+	ClusterStateBackendService_RemoveWatchHealth_FullMethodName             = "/kernel.ClusterStateBackendService/RemoveWatchHealth"
+	ClusterStateBackendService_DeleteWatchHealth_FullMethodName             = "/kernel.ClusterStateBackendService/DeleteWatchHealth"
+	ClusterStateBackendService_ContainsKeyWatchHealth_FullMethodName        = "/kernel.ClusterStateBackendService/ContainsKeyWatchHealth"
+	ClusterStateBackendService_GetAllWatchHealth_FullMethodName             = "/kernel.ClusterStateBackendService/GetAllWatchHealth"
+	ClusterStateBackendService_KeySetWatchHealth_FullMethodName             = "/kernel.ClusterStateBackendService/KeySetWatchHealth"
+	ClusterStateBackendService_SizeWatchHealth_FullMethodName               = "/kernel.ClusterStateBackendService/SizeWatchHealth"
+	ClusterStateBackendService_ClearWatchHealth_FullMethodName              = "/kernel.ClusterStateBackendService/ClearWatchHealth"
+	ClusterStateBackendService_PutIfAbsentWatchHealth_FullMethodName        = "/kernel.ClusterStateBackendService/PutIfAbsentWatchHealth"
+	ClusterStateBackendService_WatchWatchHealth_FullMethodName              = "/kernel.ClusterStateBackendService/WatchWatchHealth"
+	ClusterStateBackendService_QueryWatchHealth_FullMethodName              = "/kernel.ClusterStateBackendService/QueryWatchHealth"
+	ClusterStateBackendService_WatchQueryWatchHealth_FullMethodName         = "/kernel.ClusterStateBackendService/WatchQueryWatchHealth"
+	ClusterStateBackendService_GetMutationRates_FullMethodName              = "/kernel.ClusterStateBackendService/GetMutationRates"
+	ClusterStateBackendService_PutMutationRates_FullMethodName              = "/kernel.ClusterStateBackendService/PutMutationRates"
+	ClusterStateBackendService_SetMutationRates_FullMethodName              = "/kernel.ClusterStateBackendService/SetMutationRates"
+	ClusterStateBackendService_RemoveMutationRates_FullMethodName           = "/kernel.ClusterStateBackendService/RemoveMutationRates"
+	ClusterStateBackendService_DeleteMutationRates_FullMethodName           = "/kernel.ClusterStateBackendService/DeleteMutationRates"
+	ClusterStateBackendService_ContainsKeyMutationRates_FullMethodName      = "/kernel.ClusterStateBackendService/ContainsKeyMutationRates"
+	ClusterStateBackendService_GetAllMutationRates_FullMethodName           = "/kernel.ClusterStateBackendService/GetAllMutationRates"
+	ClusterStateBackendService_KeySetMutationRates_FullMethodName           = "/kernel.ClusterStateBackendService/KeySetMutationRates"
+	ClusterStateBackendService_SizeMutationRates_FullMethodName             = "/kernel.ClusterStateBackendService/SizeMutationRates"
+	ClusterStateBackendService_ClearMutationRates_FullMethodName            = "/kernel.ClusterStateBackendService/ClearMutationRates"
+	ClusterStateBackendService_PutIfAbsentMutationRates_FullMethodName      = "/kernel.ClusterStateBackendService/PutIfAbsentMutationRates"
+	ClusterStateBackendService_WatchMutationRates_FullMethodName            = "/kernel.ClusterStateBackendService/WatchMutationRates"
+	ClusterStateBackendService_QueryMutationRates_FullMethodName            = "/kernel.ClusterStateBackendService/QueryMutationRates"
+	ClusterStateBackendService_WatchQueryMutationRates_FullMethodName       = "/kernel.ClusterStateBackendService/WatchQueryMutationRates"
+	ClusterStateBackendService_SetLogLevel_FullMethodName                   = "/kernel.ClusterStateBackendService/SetLogLevel"
+	ClusterStateBackendService_ReloadConfig_FullMethodName                  = "/kernel.ClusterStateBackendService/ReloadConfig"
 )
 
 // ClusterStateBackendServiceClient is the client API for ClusterStateBackendService service.
@@ -1558,13 +1558,13 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ClusterStateBackendServiceClient interface {
 	// Singleton: ClusterInfo
-	GetClusterInfo(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*presley.AdminClusterInfo, error)
-	SetClusterInfo(ctx context.Context, in *presley.AdminClusterInfo, opts ...grpc.CallOption) (*presley.AdminClusterInfo, error)
-	WatchClusterInfo(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[presley.AdminClusterInfo], error)
+	GetClusterInfo(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*sentinel.AdminClusterInfo, error)
+	SetClusterInfo(ctx context.Context, in *sentinel.AdminClusterInfo, opts ...grpc.CallOption) (*sentinel.AdminClusterInfo, error)
+	WatchClusterInfo(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[sentinel.AdminClusterInfo], error)
 	// Singleton: ClusterHealth
-	GetClusterHealth(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*presley.AdminClusterHealth, error)
-	SetClusterHealth(ctx context.Context, in *presley.AdminClusterHealth, opts ...grpc.CallOption) (*presley.AdminClusterHealth, error)
-	WatchClusterHealth(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[presley.AdminClusterHealth], error)
+	GetClusterHealth(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*sentinel.AdminClusterHealth, error)
+	SetClusterHealth(ctx context.Context, in *sentinel.AdminClusterHealth, opts ...grpc.CallOption) (*sentinel.AdminClusterHealth, error)
+	WatchClusterHealth(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[sentinel.AdminClusterHealth], error)
 	// Singleton: FrontendConfig
 	GetFrontendConfig(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*Config, error)
 	SetFrontendConfig(ctx context.Context, in *Config, opts ...grpc.CallOption) (*Config, error)
@@ -1778,9 +1778,9 @@ func NewClusterStateBackendServiceClient(cc grpc.ClientConnInterface) ClusterSta
 	return &clusterStateBackendServiceClient{cc}
 }
 
-func (c *clusterStateBackendServiceClient) GetClusterInfo(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*presley.AdminClusterInfo, error) {
+func (c *clusterStateBackendServiceClient) GetClusterInfo(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*sentinel.AdminClusterInfo, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(presley.AdminClusterInfo)
+	out := new(sentinel.AdminClusterInfo)
 	err := c.cc.Invoke(ctx, ClusterStateBackendService_GetClusterInfo_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -1788,9 +1788,9 @@ func (c *clusterStateBackendServiceClient) GetClusterInfo(ctx context.Context, i
 	return out, nil
 }
 
-func (c *clusterStateBackendServiceClient) SetClusterInfo(ctx context.Context, in *presley.AdminClusterInfo, opts ...grpc.CallOption) (*presley.AdminClusterInfo, error) {
+func (c *clusterStateBackendServiceClient) SetClusterInfo(ctx context.Context, in *sentinel.AdminClusterInfo, opts ...grpc.CallOption) (*sentinel.AdminClusterInfo, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(presley.AdminClusterInfo)
+	out := new(sentinel.AdminClusterInfo)
 	err := c.cc.Invoke(ctx, ClusterStateBackendService_SetClusterInfo_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -1798,13 +1798,13 @@ func (c *clusterStateBackendServiceClient) SetClusterInfo(ctx context.Context, i
 	return out, nil
 }
 
-func (c *clusterStateBackendServiceClient) WatchClusterInfo(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[presley.AdminClusterInfo], error) {
+func (c *clusterStateBackendServiceClient) WatchClusterInfo(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[sentinel.AdminClusterInfo], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	stream, err := c.cc.NewStream(ctx, &ClusterStateBackendService_ServiceDesc.Streams[0], ClusterStateBackendService_WatchClusterInfo_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &grpc.GenericClientStream[emptypb.Empty, presley.AdminClusterInfo]{ClientStream: stream}
+	x := &grpc.GenericClientStream[emptypb.Empty, sentinel.AdminClusterInfo]{ClientStream: stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -1815,11 +1815,11 @@ func (c *clusterStateBackendServiceClient) WatchClusterInfo(ctx context.Context,
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type ClusterStateBackendService_WatchClusterInfoClient = grpc.ServerStreamingClient[presley.AdminClusterInfo]
+type ClusterStateBackendService_WatchClusterInfoClient = grpc.ServerStreamingClient[sentinel.AdminClusterInfo]
 
-func (c *clusterStateBackendServiceClient) GetClusterHealth(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*presley.AdminClusterHealth, error) {
+func (c *clusterStateBackendServiceClient) GetClusterHealth(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*sentinel.AdminClusterHealth, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(presley.AdminClusterHealth)
+	out := new(sentinel.AdminClusterHealth)
 	err := c.cc.Invoke(ctx, ClusterStateBackendService_GetClusterHealth_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -1827,9 +1827,9 @@ func (c *clusterStateBackendServiceClient) GetClusterHealth(ctx context.Context,
 	return out, nil
 }
 
-func (c *clusterStateBackendServiceClient) SetClusterHealth(ctx context.Context, in *presley.AdminClusterHealth, opts ...grpc.CallOption) (*presley.AdminClusterHealth, error) {
+func (c *clusterStateBackendServiceClient) SetClusterHealth(ctx context.Context, in *sentinel.AdminClusterHealth, opts ...grpc.CallOption) (*sentinel.AdminClusterHealth, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(presley.AdminClusterHealth)
+	out := new(sentinel.AdminClusterHealth)
 	err := c.cc.Invoke(ctx, ClusterStateBackendService_SetClusterHealth_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -1837,13 +1837,13 @@ func (c *clusterStateBackendServiceClient) SetClusterHealth(ctx context.Context,
 	return out, nil
 }
 
-func (c *clusterStateBackendServiceClient) WatchClusterHealth(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[presley.AdminClusterHealth], error) {
+func (c *clusterStateBackendServiceClient) WatchClusterHealth(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[sentinel.AdminClusterHealth], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	stream, err := c.cc.NewStream(ctx, &ClusterStateBackendService_ServiceDesc.Streams[1], ClusterStateBackendService_WatchClusterHealth_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &grpc.GenericClientStream[emptypb.Empty, presley.AdminClusterHealth]{ClientStream: stream}
+	x := &grpc.GenericClientStream[emptypb.Empty, sentinel.AdminClusterHealth]{ClientStream: stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -1854,7 +1854,7 @@ func (c *clusterStateBackendServiceClient) WatchClusterHealth(ctx context.Contex
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type ClusterStateBackendService_WatchClusterHealthClient = grpc.ServerStreamingClient[presley.AdminClusterHealth]
+type ClusterStateBackendService_WatchClusterHealthClient = grpc.ServerStreamingClient[sentinel.AdminClusterHealth]
 
 func (c *clusterStateBackendServiceClient) GetFrontendConfig(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*Config, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
@@ -3974,13 +3974,13 @@ func (c *clusterStateBackendServiceClient) ReloadConfig(ctx context.Context, in 
 // for forward compatibility.
 type ClusterStateBackendServiceServer interface {
 	// Singleton: ClusterInfo
-	GetClusterInfo(context.Context, *emptypb.Empty) (*presley.AdminClusterInfo, error)
-	SetClusterInfo(context.Context, *presley.AdminClusterInfo) (*presley.AdminClusterInfo, error)
-	WatchClusterInfo(*emptypb.Empty, grpc.ServerStreamingServer[presley.AdminClusterInfo]) error
+	GetClusterInfo(context.Context, *emptypb.Empty) (*sentinel.AdminClusterInfo, error)
+	SetClusterInfo(context.Context, *sentinel.AdminClusterInfo) (*sentinel.AdminClusterInfo, error)
+	WatchClusterInfo(*emptypb.Empty, grpc.ServerStreamingServer[sentinel.AdminClusterInfo]) error
 	// Singleton: ClusterHealth
-	GetClusterHealth(context.Context, *emptypb.Empty) (*presley.AdminClusterHealth, error)
-	SetClusterHealth(context.Context, *presley.AdminClusterHealth) (*presley.AdminClusterHealth, error)
-	WatchClusterHealth(*emptypb.Empty, grpc.ServerStreamingServer[presley.AdminClusterHealth]) error
+	GetClusterHealth(context.Context, *emptypb.Empty) (*sentinel.AdminClusterHealth, error)
+	SetClusterHealth(context.Context, *sentinel.AdminClusterHealth) (*sentinel.AdminClusterHealth, error)
+	WatchClusterHealth(*emptypb.Empty, grpc.ServerStreamingServer[sentinel.AdminClusterHealth]) error
 	// Singleton: FrontendConfig
 	GetFrontendConfig(context.Context, *emptypb.Empty) (*Config, error)
 	SetFrontendConfig(context.Context, *Config) (*Config, error)
@@ -4194,22 +4194,22 @@ type ClusterStateBackendServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedClusterStateBackendServiceServer struct{}
 
-func (UnimplementedClusterStateBackendServiceServer) GetClusterInfo(context.Context, *emptypb.Empty) (*presley.AdminClusterInfo, error) {
+func (UnimplementedClusterStateBackendServiceServer) GetClusterInfo(context.Context, *emptypb.Empty) (*sentinel.AdminClusterInfo, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetClusterInfo not implemented")
 }
-func (UnimplementedClusterStateBackendServiceServer) SetClusterInfo(context.Context, *presley.AdminClusterInfo) (*presley.AdminClusterInfo, error) {
+func (UnimplementedClusterStateBackendServiceServer) SetClusterInfo(context.Context, *sentinel.AdminClusterInfo) (*sentinel.AdminClusterInfo, error) {
 	return nil, status.Error(codes.Unimplemented, "method SetClusterInfo not implemented")
 }
-func (UnimplementedClusterStateBackendServiceServer) WatchClusterInfo(*emptypb.Empty, grpc.ServerStreamingServer[presley.AdminClusterInfo]) error {
+func (UnimplementedClusterStateBackendServiceServer) WatchClusterInfo(*emptypb.Empty, grpc.ServerStreamingServer[sentinel.AdminClusterInfo]) error {
 	return status.Error(codes.Unimplemented, "method WatchClusterInfo not implemented")
 }
-func (UnimplementedClusterStateBackendServiceServer) GetClusterHealth(context.Context, *emptypb.Empty) (*presley.AdminClusterHealth, error) {
+func (UnimplementedClusterStateBackendServiceServer) GetClusterHealth(context.Context, *emptypb.Empty) (*sentinel.AdminClusterHealth, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetClusterHealth not implemented")
 }
-func (UnimplementedClusterStateBackendServiceServer) SetClusterHealth(context.Context, *presley.AdminClusterHealth) (*presley.AdminClusterHealth, error) {
+func (UnimplementedClusterStateBackendServiceServer) SetClusterHealth(context.Context, *sentinel.AdminClusterHealth) (*sentinel.AdminClusterHealth, error) {
 	return nil, status.Error(codes.Unimplemented, "method SetClusterHealth not implemented")
 }
-func (UnimplementedClusterStateBackendServiceServer) WatchClusterHealth(*emptypb.Empty, grpc.ServerStreamingServer[presley.AdminClusterHealth]) error {
+func (UnimplementedClusterStateBackendServiceServer) WatchClusterHealth(*emptypb.Empty, grpc.ServerStreamingServer[sentinel.AdminClusterHealth]) error {
 	return status.Error(codes.Unimplemented, "method WatchClusterHealth not implemented")
 }
 func (UnimplementedClusterStateBackendServiceServer) GetFrontendConfig(context.Context, *emptypb.Empty) (*Config, error) {
@@ -4814,7 +4814,7 @@ func _ClusterStateBackendService_GetClusterInfo_Handler(srv interface{}, ctx con
 }
 
 func _ClusterStateBackendService_SetClusterInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(presley.AdminClusterInfo)
+	in := new(sentinel.AdminClusterInfo)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -4826,7 +4826,7 @@ func _ClusterStateBackendService_SetClusterInfo_Handler(srv interface{}, ctx con
 		FullMethod: ClusterStateBackendService_SetClusterInfo_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ClusterStateBackendServiceServer).SetClusterInfo(ctx, req.(*presley.AdminClusterInfo))
+		return srv.(ClusterStateBackendServiceServer).SetClusterInfo(ctx, req.(*sentinel.AdminClusterInfo))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -4836,11 +4836,11 @@ func _ClusterStateBackendService_WatchClusterInfo_Handler(srv interface{}, strea
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(ClusterStateBackendServiceServer).WatchClusterInfo(m, &grpc.GenericServerStream[emptypb.Empty, presley.AdminClusterInfo]{ServerStream: stream})
+	return srv.(ClusterStateBackendServiceServer).WatchClusterInfo(m, &grpc.GenericServerStream[emptypb.Empty, sentinel.AdminClusterInfo]{ServerStream: stream})
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type ClusterStateBackendService_WatchClusterInfoServer = grpc.ServerStreamingServer[presley.AdminClusterInfo]
+type ClusterStateBackendService_WatchClusterInfoServer = grpc.ServerStreamingServer[sentinel.AdminClusterInfo]
 
 func _ClusterStateBackendService_GetClusterHealth_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
@@ -4861,7 +4861,7 @@ func _ClusterStateBackendService_GetClusterHealth_Handler(srv interface{}, ctx c
 }
 
 func _ClusterStateBackendService_SetClusterHealth_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(presley.AdminClusterHealth)
+	in := new(sentinel.AdminClusterHealth)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -4873,7 +4873,7 @@ func _ClusterStateBackendService_SetClusterHealth_Handler(srv interface{}, ctx c
 		FullMethod: ClusterStateBackendService_SetClusterHealth_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ClusterStateBackendServiceServer).SetClusterHealth(ctx, req.(*presley.AdminClusterHealth))
+		return srv.(ClusterStateBackendServiceServer).SetClusterHealth(ctx, req.(*sentinel.AdminClusterHealth))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -4883,11 +4883,11 @@ func _ClusterStateBackendService_WatchClusterHealth_Handler(srv interface{}, str
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(ClusterStateBackendServiceServer).WatchClusterHealth(m, &grpc.GenericServerStream[emptypb.Empty, presley.AdminClusterHealth]{ServerStream: stream})
+	return srv.(ClusterStateBackendServiceServer).WatchClusterHealth(m, &grpc.GenericServerStream[emptypb.Empty, sentinel.AdminClusterHealth]{ServerStream: stream})
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type ClusterStateBackendService_WatchClusterHealthServer = grpc.ServerStreamingServer[presley.AdminClusterHealth]
+type ClusterStateBackendService_WatchClusterHealthServer = grpc.ServerStreamingServer[sentinel.AdminClusterHealth]
 
 func _ClusterStateBackendService_GetFrontendConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
@@ -8070,7 +8070,7 @@ func _ClusterStateBackendService_ReloadConfig_Handler(srv interface{}, ctx conte
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var ClusterStateBackendService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "elvis.ClusterStateBackendService",
+	ServiceName: "kernel.ClusterStateBackendService",
 	HandlerType: (*ClusterStateBackendServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -8877,19 +8877,19 @@ var ClusterStateBackendService_ServiceDesc = grpc.ServiceDesc{
 			ServerStreams: true,
 		},
 	},
-	Metadata: "services/elvis.proto",
+	Metadata: "services/kernel.proto",
 }
 
 const (
-	ServiceHealthStateBackendService_SetInstances_FullMethodName         = "/elvis.ServiceHealthStateBackendService/SetInstances"
-	ServiceHealthStateBackendService_GetInstances_FullMethodName         = "/elvis.ServiceHealthStateBackendService/GetInstances"
-	ServiceHealthStateBackendService_GetAllInstances_FullMethodName      = "/elvis.ServiceHealthStateBackendService/GetAllInstances"
-	ServiceHealthStateBackendService_ContainsKeyInstances_FullMethodName = "/elvis.ServiceHealthStateBackendService/ContainsKeyInstances"
-	ServiceHealthStateBackendService_KeySetInstances_FullMethodName      = "/elvis.ServiceHealthStateBackendService/KeySetInstances"
-	ServiceHealthStateBackendService_SizeInstances_FullMethodName        = "/elvis.ServiceHealthStateBackendService/SizeInstances"
-	ServiceHealthStateBackendService_WatchInstances_FullMethodName       = "/elvis.ServiceHealthStateBackendService/WatchInstances"
-	ServiceHealthStateBackendService_QueryInstances_FullMethodName       = "/elvis.ServiceHealthStateBackendService/QueryInstances"
-	ServiceHealthStateBackendService_WatchQueryInstances_FullMethodName  = "/elvis.ServiceHealthStateBackendService/WatchQueryInstances"
+	ServiceHealthStateBackendService_SetInstances_FullMethodName         = "/kernel.ServiceHealthStateBackendService/SetInstances"
+	ServiceHealthStateBackendService_GetInstances_FullMethodName         = "/kernel.ServiceHealthStateBackendService/GetInstances"
+	ServiceHealthStateBackendService_GetAllInstances_FullMethodName      = "/kernel.ServiceHealthStateBackendService/GetAllInstances"
+	ServiceHealthStateBackendService_ContainsKeyInstances_FullMethodName = "/kernel.ServiceHealthStateBackendService/ContainsKeyInstances"
+	ServiceHealthStateBackendService_KeySetInstances_FullMethodName      = "/kernel.ServiceHealthStateBackendService/KeySetInstances"
+	ServiceHealthStateBackendService_SizeInstances_FullMethodName        = "/kernel.ServiceHealthStateBackendService/SizeInstances"
+	ServiceHealthStateBackendService_WatchInstances_FullMethodName       = "/kernel.ServiceHealthStateBackendService/WatchInstances"
+	ServiceHealthStateBackendService_QueryInstances_FullMethodName       = "/kernel.ServiceHealthStateBackendService/QueryInstances"
+	ServiceHealthStateBackendService_WatchQueryInstances_FullMethodName  = "/kernel.ServiceHealthStateBackendService/WatchQueryInstances"
 )
 
 // ServiceHealthStateBackendServiceClient is the client API for ServiceHealthStateBackendService service.
@@ -9249,7 +9249,7 @@ type ServiceHealthStateBackendService_WatchQueryInstancesServer = grpc.ServerStr
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var ServiceHealthStateBackendService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "elvis.ServiceHealthStateBackendService",
+	ServiceName: "kernel.ServiceHealthStateBackendService",
 	HandlerType: (*ServiceHealthStateBackendServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -9293,5 +9293,5 @@ var ServiceHealthStateBackendService_ServiceDesc = grpc.ServiceDesc{
 			ServerStreams: true,
 		},
 	},
-	Metadata: "services/elvis.proto",
+	Metadata: "services/kernel.proto",
 }

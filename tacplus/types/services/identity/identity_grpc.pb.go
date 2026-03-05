@@ -53,7 +53,7 @@ type IdentityServiceClient interface {
 	// to the callback_relay topic for the originating instance to handle.
 	Callback(ctx context.Context, in *CallbackRequest, opts ...grpc.CallOption) (*CallbackResponse, error)
 	// RefreshToken exchanges a valid refresh token for a new short-lived access token.
-	// The refresh token is validated against Identity's verifying_keys in elvis.
+	// The refresh token is validated against Identity's verifying_keys in kernel.
 	RefreshToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*RefreshTokenResponse, error)
 	// ExchangeToken exchanges a generic access token for a service-specific
 	// access token with entitlements. The entitlements are determined by evaluating
@@ -148,7 +148,7 @@ type IdentityServiceServer interface {
 	// to the callback_relay topic for the originating instance to handle.
 	Callback(context.Context, *CallbackRequest) (*CallbackResponse, error)
 	// RefreshToken exchanges a valid refresh token for a new short-lived access token.
-	// The refresh token is validated against Identity's verifying_keys in elvis.
+	// The refresh token is validated against Identity's verifying_keys in kernel.
 	RefreshToken(context.Context, *RefreshTokenRequest) (*RefreshTokenResponse, error)
 	// ExchangeToken exchanges a generic access token for a service-specific
 	// access token with entitlements. The entitlements are determined by evaluating

@@ -684,7 +684,6 @@ func OpenIdConfigurationToTOML(v *OpenIdConfiguration) ([]byte, error) {
 // MARKER: JSON helper struct generated from serial.go
 type credpairJSON struct {
 	PublicKey json.RawMessage `json:"public_key,omitempty"`
-	Principal string          `json:"principal,omitempty"`
 }
 
 // CredPairToJSON converts CredPair to JSON bytes.
@@ -702,7 +701,6 @@ func CredPairToJSON(v *CredPair) ([]byte, error) {
 			data, _ := JwkToJSON(v.PublicKey)
 			return data
 		}(),
-		Principal: v.Principal,
 	}
 	return json.Marshal(helper)
 }
@@ -774,7 +772,6 @@ func CredPairFromJSON(data []byte) (*CredPair, error) {
 			result.PublicKey = parsed
 		}
 	}
-	result.Principal = raw.Principal
 	return result, nil
 }
 
@@ -1148,7 +1145,6 @@ func CredPairToEnvVar(v *CredPair) map[string]string {
 			result[k] = val
 		}
 	}
-	result["PROTO_LIBS_JWK_CRED_PAIR_PRINCIPAL"] = v.Principal
 	return result
 }
 
@@ -1159,9 +1155,6 @@ func CredPairFromEnvVar(env map[string]string) (*CredPair, error) {
 		return nil, err
 	} else if sub != nil {
 		result.PublicKey = sub
-	}
-	if val, ok := env["PROTO_LIBS_JWK_CRED_PAIR_PRINCIPAL"]; ok && val != "" {
-		result.Principal = val
 	}
 	return result, nil
 }
@@ -1176,24 +1169,24 @@ func ValidateJwk(m *Jwk) error {
 		return nil
 	}
 
-	// Validate Alg (assert_required)
-	if m.Alg == "" {
-		return protoerrors.NewErrMissingInvalidData(nil, "field Alg is required")
-	}
-
 	// Validate Alg (assert_min_length: 1)
 	if len(m.Alg) < 1 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Alg must be at least 1 characters, got: %d", len(m.Alg))
 	}
 
-	// Validate Kid (assert_min_length: 1)
-	if len(m.Kid) < 1 {
-		return protoerrors.NewErrMissingInvalidData(nil, "field Kid must be at least 1 characters, got: %d", len(m.Kid))
+	// Validate Alg (assert_required)
+	if m.Alg == "" {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Alg is required")
 	}
 
 	// Validate Kid (assert_required)
 	if m.Kid == "" {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Kid is required")
+	}
+
+	// Validate Kid (assert_min_length: 1)
+	if len(m.Kid) < 1 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Kid must be at least 1 characters, got: %d", len(m.Kid))
 	}
 
 	// Validate E (assert_base64)
@@ -1328,16 +1321,16 @@ func ValidateOpenIdConfiguration(m *OpenIdConfiguration) error {
 		}
 	}
 
-	// Validate JwksUri (assert_required)
-	if m.JwksUri == "" {
-		return protoerrors.NewErrMissingInvalidData(nil, "field JwksUri is required")
-	}
-
 	// Validate JwksUri (assert_url: URL_SCHEME_HTTPS)
 	if m.JwksUri != "" {
 		if err := utils.ValidateAssertURL_URL_SCHEME_HTTPS(m.JwksUri); err != nil {
 			return protoerrors.NewErrMissingInvalidData(err, "field JwksUri URL validation failed")
 		}
+	}
+
+	// Validate JwksUri (assert_required)
+	if m.JwksUri == "" {
+		return protoerrors.NewErrMissingInvalidData(nil, "field JwksUri is required")
 	}
 
 	// Validate IntrospectionEndpoint (assert_url: URL_SCHEME_HTTPS)
@@ -1501,16 +1494,6 @@ func ValidateCredPair(m *CredPair) error {
 		return protoerrors.NewErrMissingInvalidData(nil, "field PublicKey is required")
 	}
 
-	// Validate Principal (assert_required)
-	if m.Principal == "" {
-		return protoerrors.NewErrMissingInvalidData(nil, "field Principal is required")
-	}
-
-	// Validate Principal (default max size: 32768 bytes)
-	if len(m.Principal) > 32768 {
-		return protoerrors.NewErrMissingInvalidData(nil, "field Principal exceeds max size of 32768 bytes, got: %d", len(m.Principal))
-	}
-
 	return nil
 }
 
@@ -1550,7 +1533,6 @@ const (
 	MaxSizeOpenidconfigurationMsgraphHost                 int = 32768
 	MaxSizeOpenidconfigurationRbacUrl                     int = 32768
 	MaxSizeOpenidconfigurationMfaChallengeEndpoint        int = 32768
-	MaxSizeCredpairPrincipal                              int = 32768
 )
 
 // ============================================================
@@ -1746,8 +1728,5 @@ func MergeCredPair(dst, src *CredPair) {
 		dst.PublicKey = src.PublicKey
 	} else if src.PublicKey != nil {
 		MergeJwk(dst.PublicKey, src.PublicKey)
-	}
-	if dst.Principal == "" {
-		dst.Principal = src.Principal
 	}
 }

@@ -670,11 +670,6 @@ func ValidateKey(m *Key) error {
 		}
 	}
 
-	// Validate Created (assert_required: must be > 0)
-	if m.Created <= 0 {
-		return protoerrors.NewErrMissingInvalidData(nil, "field Created is required and must be greater than zero")
-	}
-
 	// Validate Created (assert_ge: 1735689600)
 	if m.Created < 1735689600 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Created must be >= 1735689600, got: %v", m.Created)
@@ -683,6 +678,11 @@ func ValidateKey(m *Key) error {
 	if m.Created > 8045740800 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Created must be <= 8045740800, got: %v", m.Created)
 	}
+	// Validate Created (assert_required: must be > 0)
+	if m.Created <= 0 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Created is required and must be greater than zero")
+	}
+
 	// Validate Id (default max size: 32768 bytes)
 	if len(m.Id) > 32768 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Id exceeds max size of 32768 bytes, got: %d", len(m.Id))

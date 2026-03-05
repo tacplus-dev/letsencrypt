@@ -23,8 +23,8 @@ option go_package = "gitlab.com/secondstarcavalier/controlplane/services/letsenc
 // ============================================================================
 
 // OrchestratorState is the orchestrator's backend state root.
-// It has CALL access to elvis.ClusterState.reload_config so it can
-// trigger a config reload on the elvis cluster.
+// It has CALL access to kernel.ClusterState.reload_config so it can
+// trigger a config reload on the kernel cluster.
 message OrchestratorState {
 }
 // ============================================================================

@@ -29,7 +29,7 @@
 //      If the callback lands on a different instance, that instance publishes
 //      the callback data to the callback_relay topic. The originating instance
 //      receives it via subscription, exchanges the authorization code for an
-//      ID token, validates it against the IDP's JWKS (cached in elvis),
+//      ID token, validates it against the IDP's JWKS (cached in kernel),
 //      and mints a refresh token signed by Identity's own keys.
 //
 //   4. Identity uses the refresh token to mint a short-lived access token,
@@ -41,8 +41,8 @@
 //      refresh token to get a new access token without re-authenticating.
 //
 // Key storage: each Identity instance generates its own key pair locally,
-// keeps the private key in memory, and publishes the public JWK to elvis.
-// Cached external IDP JWKS also live in elvis. Other services subscribe
+// keeps the private key in memory, and publishes the public JWK to kernel.
+// Cached external IDP JWKS also live in kernel. Other services subscribe
 // to Identity's verifying_keys via Watch (RO) and receive new keys
 // immediately — no polling or pre-generation window needed.
 
@@ -75,7 +75,7 @@ message Config {
 
   // key_lifetime_seconds controls how long each instance's signing key is used.
   // On rotation the instance generates a new key pair, publishes the new JWK
-  // to elvis (consumers receive it immediately via Watch), and starts
+  // to kernel (consumers receive it immediately via Watch), and starts
   // signing with the new key. The old JWK remains in verifying_keys until
   // all tokens signed by it have expired (access_token_lifetime_seconds).
   // Minimum: 3600 (1 hour). Default: 86400 (24 hours).
@@ -170,7 +170,7 @@ message ProviderConfig {
 }
 
 // ============================================================================
-// Backend State (stored in elvis)
+// Backend State (stored in kernel)
 // ============================================================================
 
 // EntitlementConfig wraps the entitlement mappings and service entitlement
@@ -259,7 +259,7 @@ service IdentityService {
   }
 
   // RefreshToken exchanges a valid refresh token for a new short-lived access token.
-  // The refresh token is validated against Identity's verifying_keys in elvis.
+  // The refresh token is validated against Identity's verifying_keys in kernel.
   rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse) {
     option (google.api.http) = { post: "/api/identity/v1/refresh" body: "*" };
   }

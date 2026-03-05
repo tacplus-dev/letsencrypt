@@ -45,7 +45,11 @@ type OpaPolicy struct {
 	// source is the raw .rego policy source code. A builder can compile this
 	// into the bundle field (base64-encoded tar.gz). It may be a directory or
 	// a file
-	Source        string `protobuf:"bytes,5,opt,name=source,proto3" json:"source,omitempty"`
+	Source string `protobuf:"bytes,5,opt,name=source,proto3" json:"source,omitempty"`
+	// issuer is the required token issuer URL. Verified in code BEFORE OPA
+	// evaluation — tokens from unexpected issuers are rejected before the
+	// policy runs.
+	Issuer        string `protobuf:"bytes,6,opt,name=issuer,proto3" json:"issuer,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -115,18 +119,26 @@ func (x *OpaPolicy) GetSource() string {
 	return ""
 }
 
+func (x *OpaPolicy) GetIssuer() string {
+	if x != nil {
+		return x.Issuer
+	}
+	return ""
+}
+
 var File_libs_opa_proto protoreflect.FileDescriptor
 
 const file_libs_opa_proto_rawDesc = "" +
 	"\n" +
-	"\x0elibs/opa.proto\x12\x03opa\x1a\x0flibs/spec.proto\"\xb8\x01\n" +
+	"\x0elibs/opa.proto\x12\x03opa\x1a\x0flibs/spec.proto\"\xda\x01\n" +
 	"\tOpaPolicy\x12%\n" +
 	"\ventry_point\x18\x01 \x01(\tB\x04\x88\xa7\x1d\x01R\n" +
 	"entryPoint\x12 \n" +
 	"\x06bundle\x18\x02 \x01(\tB\b\x80\xa7\x1d\x01ا\x1d\x01R\x06bundle\x12*\n" +
 	"\acreated\x18\x03 \x01(\x03B\x10\xb0\xa7\x1d\x80\x8bһ\x06\xc0\xa7\x1d\x80\x86\xc1\xfc\x1dR\acreated\x12\x1e\n" +
 	"\aversion\x18\x04 \x01(\tB\x04\xe0\xa7\x1d\x01R\aversion\x12\x16\n" +
-	"\x06source\x18\x05 \x01(\tR\x06sourceBTZRgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/opab\x06proto3"
+	"\x06source\x18\x05 \x01(\tR\x06source\x12 \n" +
+	"\x06issuer\x18\x06 \x01(\tB\b\x88\xa6\x1d\x01\xa8\xa6\x1d\x02R\x06issuerBTZRgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/opab\x06proto3"
 
 var (
 	file_libs_opa_proto_rawDescOnce sync.Once

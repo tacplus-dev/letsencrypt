@@ -15,7 +15,6 @@ package sentinel
 
 import (
 	_ "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/spec"
-	presley "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/presley"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -31,6 +30,68 @@ const (
 	// Verify that runtime/protoimpl is sufficiently up-to-date.
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
+
+// AdminGraphType classifies a graph boundary.
+type AdminGraphType int32
+
+const (
+	AdminGraphType_ADMIN_GRAPH_TYPE_SINGLETON      AdminGraphType = 0
+	AdminGraphType_ADMIN_GRAPH_TYPE_COLLECTION     AdminGraphType = 1
+	AdminGraphType_ADMIN_GRAPH_TYPE_QUEUE          AdminGraphType = 2
+	AdminGraphType_ADMIN_GRAPH_TYPE_PRIORITY_QUEUE AdminGraphType = 3
+	AdminGraphType_ADMIN_GRAPH_TYPE_TOPIC          AdminGraphType = 4
+	AdminGraphType_ADMIN_GRAPH_TYPE_VIEW           AdminGraphType = 5
+	AdminGraphType_ADMIN_GRAPH_TYPE_COMMAND        AdminGraphType = 6
+)
+
+// Enum value maps for AdminGraphType.
+var (
+	AdminGraphType_name = map[int32]string{
+		0: "ADMIN_GRAPH_TYPE_SINGLETON",
+		1: "ADMIN_GRAPH_TYPE_COLLECTION",
+		2: "ADMIN_GRAPH_TYPE_QUEUE",
+		3: "ADMIN_GRAPH_TYPE_PRIORITY_QUEUE",
+		4: "ADMIN_GRAPH_TYPE_TOPIC",
+		5: "ADMIN_GRAPH_TYPE_VIEW",
+		6: "ADMIN_GRAPH_TYPE_COMMAND",
+	}
+	AdminGraphType_value = map[string]int32{
+		"ADMIN_GRAPH_TYPE_SINGLETON":      0,
+		"ADMIN_GRAPH_TYPE_COLLECTION":     1,
+		"ADMIN_GRAPH_TYPE_QUEUE":          2,
+		"ADMIN_GRAPH_TYPE_PRIORITY_QUEUE": 3,
+		"ADMIN_GRAPH_TYPE_TOPIC":          4,
+		"ADMIN_GRAPH_TYPE_VIEW":           5,
+		"ADMIN_GRAPH_TYPE_COMMAND":        6,
+	}
+)
+
+func (x AdminGraphType) Enum() *AdminGraphType {
+	p := new(AdminGraphType)
+	*p = x
+	return p
+}
+
+func (x AdminGraphType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (AdminGraphType) Descriptor() protoreflect.EnumDescriptor {
+	return file_services_sentinel_proto_enumTypes[0].Descriptor()
+}
+
+func (AdminGraphType) Type() protoreflect.EnumType {
+	return &file_services_sentinel_proto_enumTypes[0]
+}
+
+func (x AdminGraphType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use AdminGraphType.Descriptor instead.
+func (AdminGraphType) EnumDescriptor() ([]byte, []int) {
+	return file_services_sentinel_proto_rawDescGZIP(), []int{0}
+}
 
 type Config struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -153,8 +214,8 @@ func (x *WatchDashboardRequest) GetIntervalSeconds() int32 {
 
 // Wrapper responses for per-node collections
 type NodeMetricsResponse struct {
-	state         protoimpl.MessageState      `protogen:"open.v1"`
-	Items         []*presley.AdminNodeMetrics `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Items         []*AdminNodeMetrics    `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -189,7 +250,7 @@ func (*NodeMetricsResponse) Descriptor() ([]byte, []int) {
 	return file_services_sentinel_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *NodeMetricsResponse) GetItems() []*presley.AdminNodeMetrics {
+func (x *NodeMetricsResponse) GetItems() []*AdminNodeMetrics {
 	if x != nil {
 		return x.Items
 	}
@@ -197,8 +258,8 @@ func (x *NodeMetricsResponse) GetItems() []*presley.AdminNodeMetrics {
 }
 
 type GrpcStatsResponse struct {
-	state         protoimpl.MessageState    `protogen:"open.v1"`
-	Items         []*presley.AdminGrpcStats `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Items         []*AdminGrpcStats      `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -233,7 +294,7 @@ func (*GrpcStatsResponse) Descriptor() ([]byte, []int) {
 	return file_services_sentinel_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *GrpcStatsResponse) GetItems() []*presley.AdminGrpcStats {
+func (x *GrpcStatsResponse) GetItems() []*AdminGrpcStats {
 	if x != nil {
 		return x.Items
 	}
@@ -241,8 +302,8 @@ func (x *GrpcStatsResponse) GetItems() []*presley.AdminGrpcStats {
 }
 
 type PersistenceStatusResponse struct {
-	state         protoimpl.MessageState            `protogen:"open.v1"`
-	Items         []*presley.AdminPersistenceStatus `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	state         protoimpl.MessageState    `protogen:"open.v1"`
+	Items         []*AdminPersistenceStatus `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -277,7 +338,7 @@ func (*PersistenceStatusResponse) Descriptor() ([]byte, []int) {
 	return file_services_sentinel_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *PersistenceStatusResponse) GetItems() []*presley.AdminPersistenceStatus {
+func (x *PersistenceStatusResponse) GetItems() []*AdminPersistenceStatus {
 	if x != nil {
 		return x.Items
 	}
@@ -285,8 +346,8 @@ func (x *PersistenceStatusResponse) GetItems() []*presley.AdminPersistenceStatus
 }
 
 type NetworkStatsResponse struct {
-	state         protoimpl.MessageState       `protogen:"open.v1"`
-	Items         []*presley.AdminNetworkStats `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Items         []*AdminNetworkStats   `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -321,7 +382,7 @@ func (*NetworkStatsResponse) Descriptor() ([]byte, []int) {
 	return file_services_sentinel_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *NetworkStatsResponse) GetItems() []*presley.AdminNetworkStats {
+func (x *NetworkStatsResponse) GetItems() []*AdminNetworkStats {
 	if x != nil {
 		return x.Items
 	}
@@ -329,8 +390,8 @@ func (x *NetworkStatsResponse) GetItems() []*presley.AdminNetworkStats {
 }
 
 type ThreadInfoResponse struct {
-	state         protoimpl.MessageState     `protogen:"open.v1"`
-	Items         []*presley.AdminThreadInfo `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Items         []*AdminThreadInfo     `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -365,7 +426,7 @@ func (*ThreadInfoResponse) Descriptor() ([]byte, []int) {
 	return file_services_sentinel_proto_rawDescGZIP(), []int{7}
 }
 
-func (x *ThreadInfoResponse) GetItems() []*presley.AdminThreadInfo {
+func (x *ThreadInfoResponse) GetItems() []*AdminThreadInfo {
 	if x != nil {
 		return x.Items
 	}
@@ -373,8 +434,8 @@ func (x *ThreadInfoResponse) GetItems() []*presley.AdminThreadInfo {
 }
 
 type TokenCacheStatsResponse struct {
-	state         protoimpl.MessageState          `protogen:"open.v1"`
-	Items         []*presley.AdminTokenCacheStats `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	state         protoimpl.MessageState  `protogen:"open.v1"`
+	Items         []*AdminTokenCacheStats `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -409,7 +470,7 @@ func (*TokenCacheStatsResponse) Descriptor() ([]byte, []int) {
 	return file_services_sentinel_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *TokenCacheStatsResponse) GetItems() []*presley.AdminTokenCacheStats {
+func (x *TokenCacheStatsResponse) GetItems() []*AdminTokenCacheStats {
 	if x != nil {
 		return x.Items
 	}
@@ -417,8 +478,8 @@ func (x *TokenCacheStatsResponse) GetItems() []*presley.AdminTokenCacheStats {
 }
 
 type MapStatsResponse struct {
-	state         protoimpl.MessageState   `protogen:"open.v1"`
-	Items         []*presley.AdminMapStats `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Items         []*AdminMapStats       `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -453,7 +514,7 @@ func (*MapStatsResponse) Descriptor() ([]byte, []int) {
 	return file_services_sentinel_proto_rawDescGZIP(), []int{9}
 }
 
-func (x *MapStatsResponse) GetItems() []*presley.AdminMapStats {
+func (x *MapStatsResponse) GetItems() []*AdminMapStats {
 	if x != nil {
 		return x.Items
 	}
@@ -461,16 +522,16 @@ func (x *MapStatsResponse) GetItems() []*presley.AdminMapStats {
 }
 
 type DashboardResponse struct {
-	state             protoimpl.MessageState            `protogen:"open.v1"`
-	ClusterInfo       *presley.AdminClusterInfo         `protobuf:"bytes,1,opt,name=cluster_info,json=clusterInfo,proto3" json:"cluster_info,omitempty"`
-	ClusterHealth     *presley.AdminClusterHealth       `protobuf:"bytes,2,opt,name=cluster_health,json=clusterHealth,proto3" json:"cluster_health,omitempty"`
-	NodeMetrics       []*presley.AdminNodeMetrics       `protobuf:"bytes,3,rep,name=node_metrics,json=nodeMetrics,proto3" json:"node_metrics,omitempty"`
-	GrpcStats         []*presley.AdminGrpcStats         `protobuf:"bytes,4,rep,name=grpc_stats,json=grpcStats,proto3" json:"grpc_stats,omitempty"`
-	PersistenceStatus []*presley.AdminPersistenceStatus `protobuf:"bytes,5,rep,name=persistence_status,json=persistenceStatus,proto3" json:"persistence_status,omitempty"`
-	NetworkStats      []*presley.AdminNetworkStats      `protobuf:"bytes,6,rep,name=network_stats,json=networkStats,proto3" json:"network_stats,omitempty"`
-	ThreadInfo        []*presley.AdminThreadInfo        `protobuf:"bytes,7,rep,name=thread_info,json=threadInfo,proto3" json:"thread_info,omitempty"`
-	TokenCacheStats   []*presley.AdminTokenCacheStats   `protobuf:"bytes,8,rep,name=token_cache_stats,json=tokenCacheStats,proto3" json:"token_cache_stats,omitempty"`
-	MapStats          []*presley.AdminMapStats          `protobuf:"bytes,9,rep,name=map_stats,json=mapStats,proto3" json:"map_stats,omitempty"`
+	state             protoimpl.MessageState    `protogen:"open.v1"`
+	ClusterInfo       *AdminClusterInfo         `protobuf:"bytes,1,opt,name=cluster_info,json=clusterInfo,proto3" json:"cluster_info,omitempty"`
+	ClusterHealth     *AdminClusterHealth       `protobuf:"bytes,2,opt,name=cluster_health,json=clusterHealth,proto3" json:"cluster_health,omitempty"`
+	NodeMetrics       []*AdminNodeMetrics       `protobuf:"bytes,3,rep,name=node_metrics,json=nodeMetrics,proto3" json:"node_metrics,omitempty"`
+	GrpcStats         []*AdminGrpcStats         `protobuf:"bytes,4,rep,name=grpc_stats,json=grpcStats,proto3" json:"grpc_stats,omitempty"`
+	PersistenceStatus []*AdminPersistenceStatus `protobuf:"bytes,5,rep,name=persistence_status,json=persistenceStatus,proto3" json:"persistence_status,omitempty"`
+	NetworkStats      []*AdminNetworkStats      `protobuf:"bytes,6,rep,name=network_stats,json=networkStats,proto3" json:"network_stats,omitempty"`
+	ThreadInfo        []*AdminThreadInfo        `protobuf:"bytes,7,rep,name=thread_info,json=threadInfo,proto3" json:"thread_info,omitempty"`
+	TokenCacheStats   []*AdminTokenCacheStats   `protobuf:"bytes,8,rep,name=token_cache_stats,json=tokenCacheStats,proto3" json:"token_cache_stats,omitempty"`
+	MapStats          []*AdminMapStats          `protobuf:"bytes,9,rep,name=map_stats,json=mapStats,proto3" json:"map_stats,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -505,67 +566,3055 @@ func (*DashboardResponse) Descriptor() ([]byte, []int) {
 	return file_services_sentinel_proto_rawDescGZIP(), []int{10}
 }
 
-func (x *DashboardResponse) GetClusterInfo() *presley.AdminClusterInfo {
+func (x *DashboardResponse) GetClusterInfo() *AdminClusterInfo {
 	if x != nil {
 		return x.ClusterInfo
 	}
 	return nil
 }
 
-func (x *DashboardResponse) GetClusterHealth() *presley.AdminClusterHealth {
+func (x *DashboardResponse) GetClusterHealth() *AdminClusterHealth {
 	if x != nil {
 		return x.ClusterHealth
 	}
 	return nil
 }
 
-func (x *DashboardResponse) GetNodeMetrics() []*presley.AdminNodeMetrics {
+func (x *DashboardResponse) GetNodeMetrics() []*AdminNodeMetrics {
 	if x != nil {
 		return x.NodeMetrics
 	}
 	return nil
 }
 
-func (x *DashboardResponse) GetGrpcStats() []*presley.AdminGrpcStats {
+func (x *DashboardResponse) GetGrpcStats() []*AdminGrpcStats {
 	if x != nil {
 		return x.GrpcStats
 	}
 	return nil
 }
 
-func (x *DashboardResponse) GetPersistenceStatus() []*presley.AdminPersistenceStatus {
+func (x *DashboardResponse) GetPersistenceStatus() []*AdminPersistenceStatus {
 	if x != nil {
 		return x.PersistenceStatus
 	}
 	return nil
 }
 
-func (x *DashboardResponse) GetNetworkStats() []*presley.AdminNetworkStats {
+func (x *DashboardResponse) GetNetworkStats() []*AdminNetworkStats {
 	if x != nil {
 		return x.NetworkStats
 	}
 	return nil
 }
 
-func (x *DashboardResponse) GetThreadInfo() []*presley.AdminThreadInfo {
+func (x *DashboardResponse) GetThreadInfo() []*AdminThreadInfo {
 	if x != nil {
 		return x.ThreadInfo
 	}
 	return nil
 }
 
-func (x *DashboardResponse) GetTokenCacheStats() []*presley.AdminTokenCacheStats {
+func (x *DashboardResponse) GetTokenCacheStats() []*AdminTokenCacheStats {
 	if x != nil {
 		return x.TokenCacheStats
 	}
 	return nil
 }
 
-func (x *DashboardResponse) GetMapStats() []*presley.AdminMapStats {
+func (x *DashboardResponse) GetMapStats() []*AdminMapStats {
 	if x != nil {
 		return x.MapStats
 	}
 	return nil
+}
+
+// AdminClusterInfo captures cluster membership, state, and version.
+// Published as a singleton in ClusterState.cluster_info.
+type AdminClusterInfo struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	ClusterName    string                 `protobuf:"bytes,1,opt,name=cluster_name,json=clusterName,proto3" json:"cluster_name,omitempty"`
+	State          string                 `protobuf:"bytes,2,opt,name=state,proto3" json:"state,omitempty"`
+	Members        []*AdminMember         `protobuf:"bytes,3,rep,name=members,proto3" json:"members,omitempty"`
+	LocalMember    string                 `protobuf:"bytes,4,opt,name=local_member,json=localMember,proto3" json:"local_member,omitempty"`
+	PartitionCount int32                  `protobuf:"varint,5,opt,name=partition_count,json=partitionCount,proto3" json:"partition_count,omitempty"`
+	ClusterSize    int32                  `protobuf:"varint,6,opt,name=cluster_size,json=clusterSize,proto3" json:"cluster_size,omitempty"`
+	Version        string                 `protobuf:"bytes,7,opt,name=version,proto3" json:"version,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *AdminClusterInfo) Reset() {
+	*x = AdminClusterInfo{}
+	mi := &file_services_sentinel_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminClusterInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminClusterInfo) ProtoMessage() {}
+
+func (x *AdminClusterInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_services_sentinel_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminClusterInfo.ProtoReflect.Descriptor instead.
+func (*AdminClusterInfo) Descriptor() ([]byte, []int) {
+	return file_services_sentinel_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *AdminClusterInfo) GetClusterName() string {
+	if x != nil {
+		return x.ClusterName
+	}
+	return ""
+}
+
+func (x *AdminClusterInfo) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *AdminClusterInfo) GetMembers() []*AdminMember {
+	if x != nil {
+		return x.Members
+	}
+	return nil
+}
+
+func (x *AdminClusterInfo) GetLocalMember() string {
+	if x != nil {
+		return x.LocalMember
+	}
+	return ""
+}
+
+func (x *AdminClusterInfo) GetPartitionCount() int32 {
+	if x != nil {
+		return x.PartitionCount
+	}
+	return 0
+}
+
+func (x *AdminClusterInfo) GetClusterSize() int32 {
+	if x != nil {
+		return x.ClusterSize
+	}
+	return 0
+}
+
+func (x *AdminClusterInfo) GetVersion() string {
+	if x != nil {
+		return x.Version
+	}
+	return ""
+}
+
+// AdminMember describes a single cluster member node.
+type AdminMember struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Uuid          string                 `protobuf:"bytes,1,opt,name=uuid,proto3" json:"uuid,omitempty"`
+	Address       string                 `protobuf:"bytes,2,opt,name=address,proto3" json:"address,omitempty"`
+	Lite          bool                   `protobuf:"varint,3,opt,name=lite,proto3" json:"lite,omitempty"`
+	IsLocal       bool                   `protobuf:"varint,4,opt,name=is_local,json=isLocal,proto3" json:"is_local,omitempty"`
+	Attributes    map[string]string      `protobuf:"bytes,5,rep,name=attributes,proto3" json:"attributes,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminMember) Reset() {
+	*x = AdminMember{}
+	mi := &file_services_sentinel_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminMember) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminMember) ProtoMessage() {}
+
+func (x *AdminMember) ProtoReflect() protoreflect.Message {
+	mi := &file_services_sentinel_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminMember.ProtoReflect.Descriptor instead.
+func (*AdminMember) Descriptor() ([]byte, []int) {
+	return file_services_sentinel_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *AdminMember) GetUuid() string {
+	if x != nil {
+		return x.Uuid
+	}
+	return ""
+}
+
+func (x *AdminMember) GetAddress() string {
+	if x != nil {
+		return x.Address
+	}
+	return ""
+}
+
+func (x *AdminMember) GetLite() bool {
+	if x != nil {
+		return x.Lite
+	}
+	return false
+}
+
+func (x *AdminMember) GetIsLocal() bool {
+	if x != nil {
+		return x.IsLocal
+	}
+	return false
+}
+
+func (x *AdminMember) GetAttributes() map[string]string {
+	if x != nil {
+		return x.Attributes
+	}
+	return nil
+}
+
+// AdminClusterHealth captures partition safety, quorum, and migration state.
+// Published as a singleton in ClusterState.cluster_health.
+type AdminClusterHealth struct {
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	ClusterSafe        bool                   `protobuf:"varint,1,opt,name=cluster_safe,json=clusterSafe,proto3" json:"cluster_safe,omitempty"`
+	LocalMemberSafe    bool                   `protobuf:"varint,2,opt,name=local_member_safe,json=localMemberSafe,proto3" json:"local_member_safe,omitempty"`
+	ClusterState       string                 `protobuf:"bytes,3,opt,name=cluster_state,json=clusterState,proto3" json:"cluster_state,omitempty"`
+	Running            bool                   `protobuf:"varint,4,opt,name=running,proto3" json:"running,omitempty"`
+	ClusterSize        int32                  `protobuf:"varint,5,opt,name=cluster_size,json=clusterSize,proto3" json:"cluster_size,omitempty"`
+	HasQuorum          bool                   `protobuf:"varint,6,opt,name=has_quorum,json=hasQuorum,proto3" json:"has_quorum,omitempty"`
+	MigrationQueueSize int32                  `protobuf:"varint,7,opt,name=migration_queue_size,json=migrationQueueSize,proto3" json:"migration_queue_size,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *AdminClusterHealth) Reset() {
+	*x = AdminClusterHealth{}
+	mi := &file_services_sentinel_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminClusterHealth) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminClusterHealth) ProtoMessage() {}
+
+func (x *AdminClusterHealth) ProtoReflect() protoreflect.Message {
+	mi := &file_services_sentinel_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminClusterHealth.ProtoReflect.Descriptor instead.
+func (*AdminClusterHealth) Descriptor() ([]byte, []int) {
+	return file_services_sentinel_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *AdminClusterHealth) GetClusterSafe() bool {
+	if x != nil {
+		return x.ClusterSafe
+	}
+	return false
+}
+
+func (x *AdminClusterHealth) GetLocalMemberSafe() bool {
+	if x != nil {
+		return x.LocalMemberSafe
+	}
+	return false
+}
+
+func (x *AdminClusterHealth) GetClusterState() string {
+	if x != nil {
+		return x.ClusterState
+	}
+	return ""
+}
+
+func (x *AdminClusterHealth) GetRunning() bool {
+	if x != nil {
+		return x.Running
+	}
+	return false
+}
+
+func (x *AdminClusterHealth) GetClusterSize() int32 {
+	if x != nil {
+		return x.ClusterSize
+	}
+	return 0
+}
+
+func (x *AdminClusterHealth) GetHasQuorum() bool {
+	if x != nil {
+		return x.HasQuorum
+	}
+	return false
+}
+
+func (x *AdminClusterHealth) GetMigrationQueueSize() int32 {
+	if x != nil {
+		return x.MigrationQueueSize
+	}
+	return 0
+}
+
+// AdminNodeMetrics captures memory, CPU, and disk usage for a single node.
+// Published per-node in ClusterState.node_metrics, keyed by node_id.
+type AdminNodeMetrics struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	NodeId        string                 `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
+	Memory        *AdminMemoryMetrics    `protobuf:"bytes,2,opt,name=memory,proto3" json:"memory,omitempty"`
+	Cpu           *AdminCpuMetrics       `protobuf:"bytes,3,opt,name=cpu,proto3" json:"cpu,omitempty"`
+	Disk          *AdminDiskMetrics      `protobuf:"bytes,4,opt,name=disk,proto3" json:"disk,omitempty"`
+	TimestampMs   int64                  `protobuf:"varint,5,opt,name=timestamp_ms,json=timestampMs,proto3" json:"timestamp_ms,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminNodeMetrics) Reset() {
+	*x = AdminNodeMetrics{}
+	mi := &file_services_sentinel_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminNodeMetrics) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminNodeMetrics) ProtoMessage() {}
+
+func (x *AdminNodeMetrics) ProtoReflect() protoreflect.Message {
+	mi := &file_services_sentinel_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminNodeMetrics.ProtoReflect.Descriptor instead.
+func (*AdminNodeMetrics) Descriptor() ([]byte, []int) {
+	return file_services_sentinel_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *AdminNodeMetrics) GetNodeId() string {
+	if x != nil {
+		return x.NodeId
+	}
+	return ""
+}
+
+func (x *AdminNodeMetrics) GetMemory() *AdminMemoryMetrics {
+	if x != nil {
+		return x.Memory
+	}
+	return nil
+}
+
+func (x *AdminNodeMetrics) GetCpu() *AdminCpuMetrics {
+	if x != nil {
+		return x.Cpu
+	}
+	return nil
+}
+
+func (x *AdminNodeMetrics) GetDisk() *AdminDiskMetrics {
+	if x != nil {
+		return x.Disk
+	}
+	return nil
+}
+
+func (x *AdminNodeMetrics) GetTimestampMs() int64 {
+	if x != nil {
+		return x.TimestampMs
+	}
+	return 0
+}
+
+// AdminMemoryMetrics captures JVM heap and garbage collection statistics.
+type AdminMemoryMetrics struct {
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	HeapUsedBytes      int64                  `protobuf:"varint,1,opt,name=heap_used_bytes,json=heapUsedBytes,proto3" json:"heap_used_bytes,omitempty"`
+	HeapMaxBytes       int64                  `protobuf:"varint,2,opt,name=heap_max_bytes,json=heapMaxBytes,proto3" json:"heap_max_bytes,omitempty"`
+	HeapCommittedBytes int64                  `protobuf:"varint,3,opt,name=heap_committed_bytes,json=heapCommittedBytes,proto3" json:"heap_committed_bytes,omitempty"`
+	NonHeapUsedBytes   int64                  `protobuf:"varint,4,opt,name=non_heap_used_bytes,json=nonHeapUsedBytes,proto3" json:"non_heap_used_bytes,omitempty"`
+	GcCount            int64                  `protobuf:"varint,5,opt,name=gc_count,json=gcCount,proto3" json:"gc_count,omitempty"`
+	GcTimeMs           int64                  `protobuf:"varint,6,opt,name=gc_time_ms,json=gcTimeMs,proto3" json:"gc_time_ms,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *AdminMemoryMetrics) Reset() {
+	*x = AdminMemoryMetrics{}
+	mi := &file_services_sentinel_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminMemoryMetrics) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminMemoryMetrics) ProtoMessage() {}
+
+func (x *AdminMemoryMetrics) ProtoReflect() protoreflect.Message {
+	mi := &file_services_sentinel_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminMemoryMetrics.ProtoReflect.Descriptor instead.
+func (*AdminMemoryMetrics) Descriptor() ([]byte, []int) {
+	return file_services_sentinel_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *AdminMemoryMetrics) GetHeapUsedBytes() int64 {
+	if x != nil {
+		return x.HeapUsedBytes
+	}
+	return 0
+}
+
+func (x *AdminMemoryMetrics) GetHeapMaxBytes() int64 {
+	if x != nil {
+		return x.HeapMaxBytes
+	}
+	return 0
+}
+
+func (x *AdminMemoryMetrics) GetHeapCommittedBytes() int64 {
+	if x != nil {
+		return x.HeapCommittedBytes
+	}
+	return 0
+}
+
+func (x *AdminMemoryMetrics) GetNonHeapUsedBytes() int64 {
+	if x != nil {
+		return x.NonHeapUsedBytes
+	}
+	return 0
+}
+
+func (x *AdminMemoryMetrics) GetGcCount() int64 {
+	if x != nil {
+		return x.GcCount
+	}
+	return 0
+}
+
+func (x *AdminMemoryMetrics) GetGcTimeMs() int64 {
+	if x != nil {
+		return x.GcTimeMs
+	}
+	return 0
+}
+
+// AdminCpuMetrics captures CPU load and uptime for a node.
+type AdminCpuMetrics struct {
+	state               protoimpl.MessageState `protogen:"open.v1"`
+	AvailableProcessors int32                  `protobuf:"varint,1,opt,name=available_processors,json=availableProcessors,proto3" json:"available_processors,omitempty"`
+	ProcessCpuLoad      float64                `protobuf:"fixed64,2,opt,name=process_cpu_load,json=processCpuLoad,proto3" json:"process_cpu_load,omitempty"`
+	SystemCpuLoad       float64                `protobuf:"fixed64,3,opt,name=system_cpu_load,json=systemCpuLoad,proto3" json:"system_cpu_load,omitempty"`
+	SystemLoadAverage   float64                `protobuf:"fixed64,4,opt,name=system_load_average,json=systemLoadAverage,proto3" json:"system_load_average,omitempty"`
+	UptimeMs            int64                  `protobuf:"varint,5,opt,name=uptime_ms,json=uptimeMs,proto3" json:"uptime_ms,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *AdminCpuMetrics) Reset() {
+	*x = AdminCpuMetrics{}
+	mi := &file_services_sentinel_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminCpuMetrics) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminCpuMetrics) ProtoMessage() {}
+
+func (x *AdminCpuMetrics) ProtoReflect() protoreflect.Message {
+	mi := &file_services_sentinel_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminCpuMetrics.ProtoReflect.Descriptor instead.
+func (*AdminCpuMetrics) Descriptor() ([]byte, []int) {
+	return file_services_sentinel_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *AdminCpuMetrics) GetAvailableProcessors() int32 {
+	if x != nil {
+		return x.AvailableProcessors
+	}
+	return 0
+}
+
+func (x *AdminCpuMetrics) GetProcessCpuLoad() float64 {
+	if x != nil {
+		return x.ProcessCpuLoad
+	}
+	return 0
+}
+
+func (x *AdminCpuMetrics) GetSystemCpuLoad() float64 {
+	if x != nil {
+		return x.SystemCpuLoad
+	}
+	return 0
+}
+
+func (x *AdminCpuMetrics) GetSystemLoadAverage() float64 {
+	if x != nil {
+		return x.SystemLoadAverage
+	}
+	return 0
+}
+
+func (x *AdminCpuMetrics) GetUptimeMs() int64 {
+	if x != nil {
+		return x.UptimeMs
+	}
+	return 0
+}
+
+// AdminDiskMetrics captures disk usage for the persistence directory.
+type AdminDiskMetrics struct {
+	state                protoimpl.MessageState `protogen:"open.v1"`
+	PersistenceDir       string                 `protobuf:"bytes,1,opt,name=persistence_dir,json=persistenceDir,proto3" json:"persistence_dir,omitempty"`
+	TotalBytes           int64                  `protobuf:"varint,2,opt,name=total_bytes,json=totalBytes,proto3" json:"total_bytes,omitempty"`
+	UsableBytes          int64                  `protobuf:"varint,3,opt,name=usable_bytes,json=usableBytes,proto3" json:"usable_bytes,omitempty"`
+	UsedBytes            int64                  `protobuf:"varint,4,opt,name=used_bytes,json=usedBytes,proto3" json:"used_bytes,omitempty"`
+	PersistenceSizeBytes int64                  `protobuf:"varint,5,opt,name=persistence_size_bytes,json=persistenceSizeBytes,proto3" json:"persistence_size_bytes,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
+}
+
+func (x *AdminDiskMetrics) Reset() {
+	*x = AdminDiskMetrics{}
+	mi := &file_services_sentinel_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminDiskMetrics) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminDiskMetrics) ProtoMessage() {}
+
+func (x *AdminDiskMetrics) ProtoReflect() protoreflect.Message {
+	mi := &file_services_sentinel_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminDiskMetrics.ProtoReflect.Descriptor instead.
+func (*AdminDiskMetrics) Descriptor() ([]byte, []int) {
+	return file_services_sentinel_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *AdminDiskMetrics) GetPersistenceDir() string {
+	if x != nil {
+		return x.PersistenceDir
+	}
+	return ""
+}
+
+func (x *AdminDiskMetrics) GetTotalBytes() int64 {
+	if x != nil {
+		return x.TotalBytes
+	}
+	return 0
+}
+
+func (x *AdminDiskMetrics) GetUsableBytes() int64 {
+	if x != nil {
+		return x.UsableBytes
+	}
+	return 0
+}
+
+func (x *AdminDiskMetrics) GetUsedBytes() int64 {
+	if x != nil {
+		return x.UsedBytes
+	}
+	return 0
+}
+
+func (x *AdminDiskMetrics) GetPersistenceSizeBytes() int64 {
+	if x != nil {
+		return x.PersistenceSizeBytes
+	}
+	return 0
+}
+
+// AdminGraphInfo describes a single graph boundary in the system.
+// Published once at boot from the generated Registry metadata.
+// Keyed by qualified_name (e.g. "services/kernel/ClusterState.NodeMetrics").
+type AdminGraphInfo struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Fully qualified name: "services/kernel/ClusterState.NodeMetrics"
+	QualifiedName string `protobuf:"bytes,1,opt,name=qualified_name,json=qualifiedName,proto3" json:"qualified_name,omitempty"`
+	// State root name: "ClusterState"
+	StateRoot string `protobuf:"bytes,2,opt,name=state_root,json=stateRoot,proto3" json:"state_root,omitempty"`
+	// Boundary name: "NodeMetrics"
+	Boundary string `protobuf:"bytes,3,opt,name=boundary,proto3" json:"boundary,omitempty"`
+	// Graph type (singleton, collection, queue, topic, etc.)
+	GraphType AdminGraphType `protobuf:"varint,4,opt,name=graph_type,json=graphType,proto3,enum=sentinel.AdminGraphType" json:"graph_type,omitempty"`
+	// Consistency model: "atomic" or "convergent"
+	Consistency string `protobuf:"bytes,5,opt,name=consistency,proto3" json:"consistency,omitempty"`
+	// Whether persistence is enabled for this boundary
+	Persistence bool `protobuf:"varint,6,opt,name=persistence,proto3" json:"persistence,omitempty"`
+	// Proto value type: "sentinel.AdminNodeMetrics"
+	ValueType     string `protobuf:"bytes,7,opt,name=value_type,json=valueType,proto3" json:"value_type,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminGraphInfo) Reset() {
+	*x = AdminGraphInfo{}
+	mi := &file_services_sentinel_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminGraphInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminGraphInfo) ProtoMessage() {}
+
+func (x *AdminGraphInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_services_sentinel_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminGraphInfo.ProtoReflect.Descriptor instead.
+func (*AdminGraphInfo) Descriptor() ([]byte, []int) {
+	return file_services_sentinel_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *AdminGraphInfo) GetQualifiedName() string {
+	if x != nil {
+		return x.QualifiedName
+	}
+	return ""
+}
+
+func (x *AdminGraphInfo) GetStateRoot() string {
+	if x != nil {
+		return x.StateRoot
+	}
+	return ""
+}
+
+func (x *AdminGraphInfo) GetBoundary() string {
+	if x != nil {
+		return x.Boundary
+	}
+	return ""
+}
+
+func (x *AdminGraphInfo) GetGraphType() AdminGraphType {
+	if x != nil {
+		return x.GraphType
+	}
+	return AdminGraphType_ADMIN_GRAPH_TYPE_SINGLETON
+}
+
+func (x *AdminGraphInfo) GetConsistency() string {
+	if x != nil {
+		return x.Consistency
+	}
+	return ""
+}
+
+func (x *AdminGraphInfo) GetPersistence() bool {
+	if x != nil {
+		return x.Persistence
+	}
+	return false
+}
+
+func (x *AdminGraphInfo) GetValueType() string {
+	if x != nil {
+		return x.ValueType
+	}
+	return ""
+}
+
+// AdminServiceConnection tracks a connected microservice's aggregate activity
+// on a single kernel node. Published periodically by the security interceptor.
+// Keyed by composite id "service_id@node_id".
+type AdminServiceConnection struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Composite key: "service:sentinel@node-uuid"
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// Service identity from token sub claim: "service:sentinel"
+	ServiceId string `protobuf:"bytes,2,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
+	// Node this connection is on
+	NodeId string `protobuf:"bytes,3,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
+	// Active gRPC connections from this service to this node
+	ActiveConnections int32 `protobuf:"varint,4,opt,name=active_connections,json=activeConnections,proto3" json:"active_connections,omitempty"`
+	// Total gRPC connections ever established (including closed)
+	TotalConnections int64 `protobuf:"varint,5,opt,name=total_connections,json=totalConnections,proto3" json:"total_connections,omitempty"`
+	// Total RPCs (unary + streaming setup) from this service
+	TotalRpcs int64 `protobuf:"varint,6,opt,name=total_rpcs,json=totalRpcs,proto3" json:"total_rpcs,omitempty"`
+	// Active RPCs right now
+	ActiveRpcs int32 `protobuf:"varint,7,opt,name=active_rpcs,json=activeRpcs,proto3" json:"active_rpcs,omitempty"`
+	// Total unary read RPCs (Get, GetAll, ContainsKey, KeySet, Size)
+	TotalUnaryReads int64 `protobuf:"varint,8,opt,name=total_unary_reads,json=totalUnaryReads,proto3" json:"total_unary_reads,omitempty"`
+	// Total unary write RPCs (Set, Delete, Put, PutIfAbsent, Clear, Execute)
+	TotalUnaryWrites int64 `protobuf:"varint,9,opt,name=total_unary_writes,json=totalUnaryWrites,proto3" json:"total_unary_writes,omitempty"`
+	// Active watch/subscribe streams right now
+	ActiveStreams int32 `protobuf:"varint,10,opt,name=active_streams,json=activeStreams,proto3" json:"active_streams,omitempty"`
+	// Total watch/subscribe streams ever opened (including closed)
+	TotalStreamsOpened int64 `protobuf:"varint,11,opt,name=total_streams_opened,json=totalStreamsOpened,proto3" json:"total_streams_opened,omitempty"`
+	// Total unary RPCs to methods that have a Watch alternative.
+	// A high count here indicates the service is polling instead of watching.
+	PollCount int64 `protobuf:"varint,12,opt,name=poll_count,json=pollCount,proto3" json:"poll_count,omitempty"`
+	// Polling rate: polls per second over the last publish interval.
+	PollRate float64 `protobuf:"fixed64,13,opt,name=poll_rate,json=pollRate,proto3" json:"poll_rate,omitempty"`
+	// Per-method poll counts for methods that have Watch alternatives.
+	// e.g. "GetAllNodeMetrics" -> 150, "GetClusterInfo" -> 300
+	PerMethodPollCounts map[string]int64 `protobuf:"bytes,14,rep,name=per_method_poll_counts,json=perMethodPollCounts,proto3" json:"per_method_poll_counts,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`
+	// Per-method RPC counts (all methods, including watches).
+	// e.g. "GetAllNodeMetrics" -> 150, "WatchNodeMetrics" -> 1
+	PerMethodCounts map[string]int64 `protobuf:"bytes,15,rep,name=per_method_counts,json=perMethodCounts,proto3" json:"per_method_counts,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`
+	// Graphs accessed by this service (qualified boundary names).
+	AccessedGraphs []string `protobuf:"bytes,16,rep,name=accessed_graphs,json=accessedGraphs,proto3" json:"accessed_graphs,omitempty"`
+	// Per-graph RPC counts.
+	// e.g. "ClusterState.NodeMetrics" -> 150
+	PerGraphCounts map[string]int64 `protobuf:"bytes,17,rep,name=per_graph_counts,json=perGraphCounts,proto3" json:"per_graph_counts,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`
+	// Breakdown by individual peer (connection source address).
+	// Each entry represents one gRPC transport connection.
+	Peers []*AdminPeerActivity `protobuf:"bytes,18,rep,name=peers,proto3" json:"peers,omitempty"`
+	// First connection from this service (epoch ms)
+	ConnectedAtMs int64 `protobuf:"varint,19,opt,name=connected_at_ms,json=connectedAtMs,proto3" json:"connected_at_ms,omitempty"`
+	// Last activity from this service (epoch ms)
+	LastActivityMs int64 `protobuf:"varint,20,opt,name=last_activity_ms,json=lastActivityMs,proto3" json:"last_activity_ms,omitempty"`
+	// Publish timestamp (epoch ms)
+	TimestampMs int64 `protobuf:"varint,21,opt,name=timestamp_ms,json=timestampMs,proto3" json:"timestamp_ms,omitempty"`
+	// Total RPCs rejected by rate limiter for this service
+	RateLimitedCount int64 `protobuf:"varint,22,opt,name=rate_limited_count,json=rateLimitedCount,proto3" json:"rate_limited_count,omitempty"`
+	// Per-method rate-limited counts
+	PerMethodRateLimited map[string]int64 `protobuf:"bytes,23,rep,name=per_method_rate_limited,json=perMethodRateLimited,proto3" json:"per_method_rate_limited,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`
+	// Total RPCs that returned an error (any gRPC status != OK)
+	TotalErrors int64 `protobuf:"varint,24,opt,name=total_errors,json=totalErrors,proto3" json:"total_errors,omitempty"`
+	// Per-error-code counts: "PERMISSION_DENIED" -> 12, "NOT_FOUND" -> 3
+	PerErrorCodeCounts map[string]int64 `protobuf:"bytes,25,rep,name=per_error_code_counts,json=perErrorCodeCounts,proto3" json:"per_error_code_counts,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`
+	// Per-method error counts: "GetAllNodeMetrics" -> 5
+	PerMethodErrorCounts map[string]int64 `protobuf:"bytes,26,rep,name=per_method_error_counts,json=perMethodErrorCounts,proto3" json:"per_method_error_counts,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`
+	// Aggregate latency percentiles across all RPCs from this service (microseconds)
+	Latency *AdminLatencyStats `protobuf:"bytes,27,opt,name=latency,proto3" json:"latency,omitempty"`
+	// Per-method latency: method name -> latency stats
+	PerMethodLatency []*AdminMethodLatency `protobuf:"bytes,28,rep,name=per_method_latency,json=perMethodLatency,proto3" json:"per_method_latency,omitempty"`
+	// Total bytes received from this service (request payloads)
+	BytesReceived int64 `protobuf:"varint,29,opt,name=bytes_received,json=bytesReceived,proto3" json:"bytes_received,omitempty"`
+	// Total bytes sent to this service (response payloads + stream messages)
+	BytesSent int64 `protobuf:"varint,30,opt,name=bytes_sent,json=bytesSent,proto3" json:"bytes_sent,omitempty"`
+	// Per-method payload stats: method name -> sizes
+	PerMethodPayload []*AdminMethodPayload `protobuf:"bytes,31,rep,name=per_method_payload,json=perMethodPayload,proto3" json:"per_method_payload,omitempty"`
+	// Total mutations (writes) per graph from this service
+	// e.g. "ClusterState.NodeMetrics" -> 500
+	PerGraphMutationCounts map[string]int64 `protobuf:"bytes,32,rep,name=per_graph_mutation_counts,json=perGraphMutationCounts,proto3" json:"per_graph_mutation_counts,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *AdminServiceConnection) Reset() {
+	*x = AdminServiceConnection{}
+	mi := &file_services_sentinel_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminServiceConnection) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminServiceConnection) ProtoMessage() {}
+
+func (x *AdminServiceConnection) ProtoReflect() protoreflect.Message {
+	mi := &file_services_sentinel_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminServiceConnection.ProtoReflect.Descriptor instead.
+func (*AdminServiceConnection) Descriptor() ([]byte, []int) {
+	return file_services_sentinel_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *AdminServiceConnection) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *AdminServiceConnection) GetServiceId() string {
+	if x != nil {
+		return x.ServiceId
+	}
+	return ""
+}
+
+func (x *AdminServiceConnection) GetNodeId() string {
+	if x != nil {
+		return x.NodeId
+	}
+	return ""
+}
+
+func (x *AdminServiceConnection) GetActiveConnections() int32 {
+	if x != nil {
+		return x.ActiveConnections
+	}
+	return 0
+}
+
+func (x *AdminServiceConnection) GetTotalConnections() int64 {
+	if x != nil {
+		return x.TotalConnections
+	}
+	return 0
+}
+
+func (x *AdminServiceConnection) GetTotalRpcs() int64 {
+	if x != nil {
+		return x.TotalRpcs
+	}
+	return 0
+}
+
+func (x *AdminServiceConnection) GetActiveRpcs() int32 {
+	if x != nil {
+		return x.ActiveRpcs
+	}
+	return 0
+}
+
+func (x *AdminServiceConnection) GetTotalUnaryReads() int64 {
+	if x != nil {
+		return x.TotalUnaryReads
+	}
+	return 0
+}
+
+func (x *AdminServiceConnection) GetTotalUnaryWrites() int64 {
+	if x != nil {
+		return x.TotalUnaryWrites
+	}
+	return 0
+}
+
+func (x *AdminServiceConnection) GetActiveStreams() int32 {
+	if x != nil {
+		return x.ActiveStreams
+	}
+	return 0
+}
+
+func (x *AdminServiceConnection) GetTotalStreamsOpened() int64 {
+	if x != nil {
+		return x.TotalStreamsOpened
+	}
+	return 0
+}
+
+func (x *AdminServiceConnection) GetPollCount() int64 {
+	if x != nil {
+		return x.PollCount
+	}
+	return 0
+}
+
+func (x *AdminServiceConnection) GetPollRate() float64 {
+	if x != nil {
+		return x.PollRate
+	}
+	return 0
+}
+
+func (x *AdminServiceConnection) GetPerMethodPollCounts() map[string]int64 {
+	if x != nil {
+		return x.PerMethodPollCounts
+	}
+	return nil
+}
+
+func (x *AdminServiceConnection) GetPerMethodCounts() map[string]int64 {
+	if x != nil {
+		return x.PerMethodCounts
+	}
+	return nil
+}
+
+func (x *AdminServiceConnection) GetAccessedGraphs() []string {
+	if x != nil {
+		return x.AccessedGraphs
+	}
+	return nil
+}
+
+func (x *AdminServiceConnection) GetPerGraphCounts() map[string]int64 {
+	if x != nil {
+		return x.PerGraphCounts
+	}
+	return nil
+}
+
+func (x *AdminServiceConnection) GetPeers() []*AdminPeerActivity {
+	if x != nil {
+		return x.Peers
+	}
+	return nil
+}
+
+func (x *AdminServiceConnection) GetConnectedAtMs() int64 {
+	if x != nil {
+		return x.ConnectedAtMs
+	}
+	return 0
+}
+
+func (x *AdminServiceConnection) GetLastActivityMs() int64 {
+	if x != nil {
+		return x.LastActivityMs
+	}
+	return 0
+}
+
+func (x *AdminServiceConnection) GetTimestampMs() int64 {
+	if x != nil {
+		return x.TimestampMs
+	}
+	return 0
+}
+
+func (x *AdminServiceConnection) GetRateLimitedCount() int64 {
+	if x != nil {
+		return x.RateLimitedCount
+	}
+	return 0
+}
+
+func (x *AdminServiceConnection) GetPerMethodRateLimited() map[string]int64 {
+	if x != nil {
+		return x.PerMethodRateLimited
+	}
+	return nil
+}
+
+func (x *AdminServiceConnection) GetTotalErrors() int64 {
+	if x != nil {
+		return x.TotalErrors
+	}
+	return 0
+}
+
+func (x *AdminServiceConnection) GetPerErrorCodeCounts() map[string]int64 {
+	if x != nil {
+		return x.PerErrorCodeCounts
+	}
+	return nil
+}
+
+func (x *AdminServiceConnection) GetPerMethodErrorCounts() map[string]int64 {
+	if x != nil {
+		return x.PerMethodErrorCounts
+	}
+	return nil
+}
+
+func (x *AdminServiceConnection) GetLatency() *AdminLatencyStats {
+	if x != nil {
+		return x.Latency
+	}
+	return nil
+}
+
+func (x *AdminServiceConnection) GetPerMethodLatency() []*AdminMethodLatency {
+	if x != nil {
+		return x.PerMethodLatency
+	}
+	return nil
+}
+
+func (x *AdminServiceConnection) GetBytesReceived() int64 {
+	if x != nil {
+		return x.BytesReceived
+	}
+	return 0
+}
+
+func (x *AdminServiceConnection) GetBytesSent() int64 {
+	if x != nil {
+		return x.BytesSent
+	}
+	return 0
+}
+
+func (x *AdminServiceConnection) GetPerMethodPayload() []*AdminMethodPayload {
+	if x != nil {
+		return x.PerMethodPayload
+	}
+	return nil
+}
+
+func (x *AdminServiceConnection) GetPerGraphMutationCounts() map[string]int64 {
+	if x != nil {
+		return x.PerGraphMutationCounts
+	}
+	return nil
+}
+
+// AdminPeerActivity tracks activity from a single gRPC transport connection
+// (one peer address within a service). Multiple peers exist when a service
+// has multiple instances or opens multiple connections.
+type AdminPeerActivity struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Peer address: "10.0.1.5:52340"
+	PeerAddress string `protobuf:"bytes,1,opt,name=peer_address,json=peerAddress,proto3" json:"peer_address,omitempty"`
+	// Active RPCs on this connection right now
+	ActiveRpcs int32 `protobuf:"varint,2,opt,name=active_rpcs,json=activeRpcs,proto3" json:"active_rpcs,omitempty"`
+	// Total RPCs on this connection
+	TotalRpcs int64 `protobuf:"varint,3,opt,name=total_rpcs,json=totalRpcs,proto3" json:"total_rpcs,omitempty"`
+	// Active streams on this connection
+	ActiveStreams int32 `protobuf:"varint,4,opt,name=active_streams,json=activeStreams,proto3" json:"active_streams,omitempty"`
+	// Total streams ever opened on this connection
+	TotalStreamsOpened int64 `protobuf:"varint,5,opt,name=total_streams_opened,json=totalStreamsOpened,proto3" json:"total_streams_opened,omitempty"`
+	// Polls on this connection (unary RPCs with Watch alternatives)
+	PollCount int64 `protobuf:"varint,6,opt,name=poll_count,json=pollCount,proto3" json:"poll_count,omitempty"`
+	// Polling rate for this peer (polls/sec over last interval)
+	PollRate float64 `protobuf:"fixed64,7,opt,name=poll_rate,json=pollRate,proto3" json:"poll_rate,omitempty"`
+	// Per-method counts for this peer
+	PerMethodCounts map[string]int64 `protobuf:"bytes,8,rep,name=per_method_counts,json=perMethodCounts,proto3" json:"per_method_counts,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`
+	// First seen timestamp (epoch ms)
+	ConnectedAtMs int64 `protobuf:"varint,9,opt,name=connected_at_ms,json=connectedAtMs,proto3" json:"connected_at_ms,omitempty"`
+	// Last activity timestamp (epoch ms)
+	LastActivityMs int64 `protobuf:"varint,10,opt,name=last_activity_ms,json=lastActivityMs,proto3" json:"last_activity_ms,omitempty"`
+	// Errors on this connection
+	TotalErrors int64 `protobuf:"varint,11,opt,name=total_errors,json=totalErrors,proto3" json:"total_errors,omitempty"`
+	// Per-error-code counts for this peer
+	PerErrorCodeCounts map[string]int64 `protobuf:"bytes,12,rep,name=per_error_code_counts,json=perErrorCodeCounts,proto3" json:"per_error_code_counts,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`
+	// Bytes received from this peer (request payloads)
+	BytesReceived int64 `protobuf:"varint,13,opt,name=bytes_received,json=bytesReceived,proto3" json:"bytes_received,omitempty"`
+	// Bytes sent to this peer (response payloads + stream messages)
+	BytesSent     int64 `protobuf:"varint,14,opt,name=bytes_sent,json=bytesSent,proto3" json:"bytes_sent,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminPeerActivity) Reset() {
+	*x = AdminPeerActivity{}
+	mi := &file_services_sentinel_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminPeerActivity) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminPeerActivity) ProtoMessage() {}
+
+func (x *AdminPeerActivity) ProtoReflect() protoreflect.Message {
+	mi := &file_services_sentinel_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminPeerActivity.ProtoReflect.Descriptor instead.
+func (*AdminPeerActivity) Descriptor() ([]byte, []int) {
+	return file_services_sentinel_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *AdminPeerActivity) GetPeerAddress() string {
+	if x != nil {
+		return x.PeerAddress
+	}
+	return ""
+}
+
+func (x *AdminPeerActivity) GetActiveRpcs() int32 {
+	if x != nil {
+		return x.ActiveRpcs
+	}
+	return 0
+}
+
+func (x *AdminPeerActivity) GetTotalRpcs() int64 {
+	if x != nil {
+		return x.TotalRpcs
+	}
+	return 0
+}
+
+func (x *AdminPeerActivity) GetActiveStreams() int32 {
+	if x != nil {
+		return x.ActiveStreams
+	}
+	return 0
+}
+
+func (x *AdminPeerActivity) GetTotalStreamsOpened() int64 {
+	if x != nil {
+		return x.TotalStreamsOpened
+	}
+	return 0
+}
+
+func (x *AdminPeerActivity) GetPollCount() int64 {
+	if x != nil {
+		return x.PollCount
+	}
+	return 0
+}
+
+func (x *AdminPeerActivity) GetPollRate() float64 {
+	if x != nil {
+		return x.PollRate
+	}
+	return 0
+}
+
+func (x *AdminPeerActivity) GetPerMethodCounts() map[string]int64 {
+	if x != nil {
+		return x.PerMethodCounts
+	}
+	return nil
+}
+
+func (x *AdminPeerActivity) GetConnectedAtMs() int64 {
+	if x != nil {
+		return x.ConnectedAtMs
+	}
+	return 0
+}
+
+func (x *AdminPeerActivity) GetLastActivityMs() int64 {
+	if x != nil {
+		return x.LastActivityMs
+	}
+	return 0
+}
+
+func (x *AdminPeerActivity) GetTotalErrors() int64 {
+	if x != nil {
+		return x.TotalErrors
+	}
+	return 0
+}
+
+func (x *AdminPeerActivity) GetPerErrorCodeCounts() map[string]int64 {
+	if x != nil {
+		return x.PerErrorCodeCounts
+	}
+	return nil
+}
+
+func (x *AdminPeerActivity) GetBytesReceived() int64 {
+	if x != nil {
+		return x.BytesReceived
+	}
+	return 0
+}
+
+func (x *AdminPeerActivity) GetBytesSent() int64 {
+	if x != nil {
+		return x.BytesSent
+	}
+	return 0
+}
+
+// AdminMapStats captures per-map statistics (size, entry counts, operation counts).
+// Published per-map in ClusterState.map_stats, keyed by map_name.
+type AdminMapStats struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	MapName          string                 `protobuf:"bytes,1,opt,name=map_name,json=mapName,proto3" json:"map_name,omitempty"`
+	Size             int32                  `protobuf:"varint,2,opt,name=size,proto3" json:"size,omitempty"`
+	OwnedEntryCount  int64                  `protobuf:"varint,3,opt,name=owned_entry_count,json=ownedEntryCount,proto3" json:"owned_entry_count,omitempty"`
+	BackupEntryCount int64                  `protobuf:"varint,4,opt,name=backup_entry_count,json=backupEntryCount,proto3" json:"backup_entry_count,omitempty"`
+	HeapCostBytes    int64                  `protobuf:"varint,5,opt,name=heap_cost_bytes,json=heapCostBytes,proto3" json:"heap_cost_bytes,omitempty"`
+	LastUpdateTimeMs int64                  `protobuf:"varint,6,opt,name=last_update_time_ms,json=lastUpdateTimeMs,proto3" json:"last_update_time_ms,omitempty"`
+	PutCount         int64                  `protobuf:"varint,7,opt,name=put_count,json=putCount,proto3" json:"put_count,omitempty"`
+	GetCount         int64                  `protobuf:"varint,8,opt,name=get_count,json=getCount,proto3" json:"get_count,omitempty"`
+	HitCount         int64                  `protobuf:"varint,9,opt,name=hit_count,json=hitCount,proto3" json:"hit_count,omitempty"`
+	TimestampMs      int64                  `protobuf:"varint,10,opt,name=timestamp_ms,json=timestampMs,proto3" json:"timestamp_ms,omitempty"`
+	// Memory breakdown
+	OwnedEntryMemoryCost  int64 `protobuf:"varint,11,opt,name=owned_entry_memory_cost,json=ownedEntryMemoryCost,proto3" json:"owned_entry_memory_cost,omitempty"`
+	BackupEntryMemoryCost int64 `protobuf:"varint,12,opt,name=backup_entry_memory_cost,json=backupEntryMemoryCost,proto3" json:"backup_entry_memory_cost,omitempty"`
+	// Additional entry counts
+	DirtyEntryCount  int64 `protobuf:"varint,13,opt,name=dirty_entry_count,json=dirtyEntryCount,proto3" json:"dirty_entry_count,omitempty"`
+	LockedEntryCount int64 `protobuf:"varint,14,opt,name=locked_entry_count,json=lockedEntryCount,proto3" json:"locked_entry_count,omitempty"`
+	// Additional operation counts
+	RemoveCount     int64 `protobuf:"varint,15,opt,name=remove_count,json=removeCount,proto3" json:"remove_count,omitempty"`
+	SetCount        int64 `protobuf:"varint,16,opt,name=set_count,json=setCount,proto3" json:"set_count,omitempty"`
+	EvictionCount   int64 `protobuf:"varint,17,opt,name=eviction_count,json=evictionCount,proto3" json:"eviction_count,omitempty"`
+	ExpirationCount int64 `protobuf:"varint,18,opt,name=expiration_count,json=expirationCount,proto3" json:"expiration_count,omitempty"`
+	// Timestamps
+	LastAccessTimeMs int64 `protobuf:"varint,19,opt,name=last_access_time_ms,json=lastAccessTimeMs,proto3" json:"last_access_time_ms,omitempty"`
+	CreationTimeMs   int64 `protobuf:"varint,20,opt,name=creation_time_ms,json=creationTimeMs,proto3" json:"creation_time_ms,omitempty"`
+	// Backup config
+	BackupCount int32 `protobuf:"varint,21,opt,name=backup_count,json=backupCount,proto3" json:"backup_count,omitempty"`
+	// Value type (proto message name, e.g. "sentinel.AdminNodeMetrics")
+	ValueType string `protobuf:"bytes,22,opt,name=value_type,json=valueType,proto3" json:"value_type,omitempty"`
+	// Graph type classification for this map
+	GraphType AdminGraphType `protobuf:"varint,23,opt,name=graph_type,json=graphType,proto3,enum=sentinel.AdminGraphType" json:"graph_type,omitempty"`
+	// Fully qualified name: "services/kernel/ClusterState.NodeMetrics"
+	QualifiedName string `protobuf:"bytes,24,opt,name=qualified_name,json=qualifiedName,proto3" json:"qualified_name,omitempty"`
+	// State root that owns this map: "ClusterState"
+	StateRoot string `protobuf:"bytes,25,opt,name=state_root,json=stateRoot,proto3" json:"state_root,omitempty"`
+	// Consistency model: "atomic" or "convergent"
+	Consistency string `protobuf:"bytes,26,opt,name=consistency,proto3" json:"consistency,omitempty"`
+	// Whether persistence is enabled for this boundary
+	Persistence   bool `protobuf:"varint,27,opt,name=persistence,proto3" json:"persistence,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminMapStats) Reset() {
+	*x = AdminMapStats{}
+	mi := &file_services_sentinel_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminMapStats) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminMapStats) ProtoMessage() {}
+
+func (x *AdminMapStats) ProtoReflect() protoreflect.Message {
+	mi := &file_services_sentinel_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminMapStats.ProtoReflect.Descriptor instead.
+func (*AdminMapStats) Descriptor() ([]byte, []int) {
+	return file_services_sentinel_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *AdminMapStats) GetMapName() string {
+	if x != nil {
+		return x.MapName
+	}
+	return ""
+}
+
+func (x *AdminMapStats) GetSize() int32 {
+	if x != nil {
+		return x.Size
+	}
+	return 0
+}
+
+func (x *AdminMapStats) GetOwnedEntryCount() int64 {
+	if x != nil {
+		return x.OwnedEntryCount
+	}
+	return 0
+}
+
+func (x *AdminMapStats) GetBackupEntryCount() int64 {
+	if x != nil {
+		return x.BackupEntryCount
+	}
+	return 0
+}
+
+func (x *AdminMapStats) GetHeapCostBytes() int64 {
+	if x != nil {
+		return x.HeapCostBytes
+	}
+	return 0
+}
+
+func (x *AdminMapStats) GetLastUpdateTimeMs() int64 {
+	if x != nil {
+		return x.LastUpdateTimeMs
+	}
+	return 0
+}
+
+func (x *AdminMapStats) GetPutCount() int64 {
+	if x != nil {
+		return x.PutCount
+	}
+	return 0
+}
+
+func (x *AdminMapStats) GetGetCount() int64 {
+	if x != nil {
+		return x.GetCount
+	}
+	return 0
+}
+
+func (x *AdminMapStats) GetHitCount() int64 {
+	if x != nil {
+		return x.HitCount
+	}
+	return 0
+}
+
+func (x *AdminMapStats) GetTimestampMs() int64 {
+	if x != nil {
+		return x.TimestampMs
+	}
+	return 0
+}
+
+func (x *AdminMapStats) GetOwnedEntryMemoryCost() int64 {
+	if x != nil {
+		return x.OwnedEntryMemoryCost
+	}
+	return 0
+}
+
+func (x *AdminMapStats) GetBackupEntryMemoryCost() int64 {
+	if x != nil {
+		return x.BackupEntryMemoryCost
+	}
+	return 0
+}
+
+func (x *AdminMapStats) GetDirtyEntryCount() int64 {
+	if x != nil {
+		return x.DirtyEntryCount
+	}
+	return 0
+}
+
+func (x *AdminMapStats) GetLockedEntryCount() int64 {
+	if x != nil {
+		return x.LockedEntryCount
+	}
+	return 0
+}
+
+func (x *AdminMapStats) GetRemoveCount() int64 {
+	if x != nil {
+		return x.RemoveCount
+	}
+	return 0
+}
+
+func (x *AdminMapStats) GetSetCount() int64 {
+	if x != nil {
+		return x.SetCount
+	}
+	return 0
+}
+
+func (x *AdminMapStats) GetEvictionCount() int64 {
+	if x != nil {
+		return x.EvictionCount
+	}
+	return 0
+}
+
+func (x *AdminMapStats) GetExpirationCount() int64 {
+	if x != nil {
+		return x.ExpirationCount
+	}
+	return 0
+}
+
+func (x *AdminMapStats) GetLastAccessTimeMs() int64 {
+	if x != nil {
+		return x.LastAccessTimeMs
+	}
+	return 0
+}
+
+func (x *AdminMapStats) GetCreationTimeMs() int64 {
+	if x != nil {
+		return x.CreationTimeMs
+	}
+	return 0
+}
+
+func (x *AdminMapStats) GetBackupCount() int32 {
+	if x != nil {
+		return x.BackupCount
+	}
+	return 0
+}
+
+func (x *AdminMapStats) GetValueType() string {
+	if x != nil {
+		return x.ValueType
+	}
+	return ""
+}
+
+func (x *AdminMapStats) GetGraphType() AdminGraphType {
+	if x != nil {
+		return x.GraphType
+	}
+	return AdminGraphType_ADMIN_GRAPH_TYPE_SINGLETON
+}
+
+func (x *AdminMapStats) GetQualifiedName() string {
+	if x != nil {
+		return x.QualifiedName
+	}
+	return ""
+}
+
+func (x *AdminMapStats) GetStateRoot() string {
+	if x != nil {
+		return x.StateRoot
+	}
+	return ""
+}
+
+func (x *AdminMapStats) GetConsistency() string {
+	if x != nil {
+		return x.Consistency
+	}
+	return ""
+}
+
+func (x *AdminMapStats) GetPersistence() bool {
+	if x != nil {
+		return x.Persistence
+	}
+	return false
+}
+
+// AdminGrpcStats captures gRPC connection and RPC statistics for a single node.
+// Published per-node in ClusterState.grpc_stats, keyed by node_id.
+type AdminGrpcStats struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	NodeId            string                 `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
+	ActiveConnections int32                  `protobuf:"varint,2,opt,name=active_connections,json=activeConnections,proto3" json:"active_connections,omitempty"`
+	TotalRpcs         int64                  `protobuf:"varint,3,opt,name=total_rpcs,json=totalRpcs,proto3" json:"total_rpcs,omitempty"`
+	ActiveRpcs        int32                  `protobuf:"varint,4,opt,name=active_rpcs,json=activeRpcs,proto3" json:"active_rpcs,omitempty"`
+	PerMethodCounts   map[string]int64       `protobuf:"bytes,5,rep,name=per_method_counts,json=perMethodCounts,proto3" json:"per_method_counts,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`
+	RateLimitedCount  int64                  `protobuf:"varint,6,opt,name=rate_limited_count,json=rateLimitedCount,proto3" json:"rate_limited_count,omitempty"`
+	ActiveStreams     int32                  `protobuf:"varint,7,opt,name=active_streams,json=activeStreams,proto3" json:"active_streams,omitempty"`
+	TimestampMs       int64                  `protobuf:"varint,8,opt,name=timestamp_ms,json=timestampMs,proto3" json:"timestamp_ms,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *AdminGrpcStats) Reset() {
+	*x = AdminGrpcStats{}
+	mi := &file_services_sentinel_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminGrpcStats) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminGrpcStats) ProtoMessage() {}
+
+func (x *AdminGrpcStats) ProtoReflect() protoreflect.Message {
+	mi := &file_services_sentinel_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminGrpcStats.ProtoReflect.Descriptor instead.
+func (*AdminGrpcStats) Descriptor() ([]byte, []int) {
+	return file_services_sentinel_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *AdminGrpcStats) GetNodeId() string {
+	if x != nil {
+		return x.NodeId
+	}
+	return ""
+}
+
+func (x *AdminGrpcStats) GetActiveConnections() int32 {
+	if x != nil {
+		return x.ActiveConnections
+	}
+	return 0
+}
+
+func (x *AdminGrpcStats) GetTotalRpcs() int64 {
+	if x != nil {
+		return x.TotalRpcs
+	}
+	return 0
+}
+
+func (x *AdminGrpcStats) GetActiveRpcs() int32 {
+	if x != nil {
+		return x.ActiveRpcs
+	}
+	return 0
+}
+
+func (x *AdminGrpcStats) GetPerMethodCounts() map[string]int64 {
+	if x != nil {
+		return x.PerMethodCounts
+	}
+	return nil
+}
+
+func (x *AdminGrpcStats) GetRateLimitedCount() int64 {
+	if x != nil {
+		return x.RateLimitedCount
+	}
+	return 0
+}
+
+func (x *AdminGrpcStats) GetActiveStreams() int32 {
+	if x != nil {
+		return x.ActiveStreams
+	}
+	return 0
+}
+
+func (x *AdminGrpcStats) GetTimestampMs() int64 {
+	if x != nil {
+		return x.TimestampMs
+	}
+	return 0
+}
+
+// AdminPersistenceStatus captures redo log and dump state for a single node.
+// Published per-node in ClusterState.persistence_status, keyed by node_id.
+type AdminPersistenceStatus struct {
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	NodeId             string                 `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
+	Enabled            bool                   `protobuf:"varint,2,opt,name=enabled,proto3" json:"enabled,omitempty"`
+	PersistenceDir     string                 `protobuf:"bytes,3,opt,name=persistence_dir,json=persistenceDir,proto3" json:"persistence_dir,omitempty"`
+	RedoLogEntryCount  int64                  `protobuf:"varint,4,opt,name=redo_log_entry_count,json=redoLogEntryCount,proto3" json:"redo_log_entry_count,omitempty"`
+	RedoLogSizeBytes   int64                  `protobuf:"varint,5,opt,name=redo_log_size_bytes,json=redoLogSizeBytes,proto3" json:"redo_log_size_bytes,omitempty"`
+	LastDumpTimeMs     int64                  `protobuf:"varint,6,opt,name=last_dump_time_ms,json=lastDumpTimeMs,proto3" json:"last_dump_time_ms,omitempty"`
+	LastDumpEntryCount int64                  `protobuf:"varint,7,opt,name=last_dump_entry_count,json=lastDumpEntryCount,proto3" json:"last_dump_entry_count,omitempty"`
+	DumpCount          int64                  `protobuf:"varint,8,opt,name=dump_count,json=dumpCount,proto3" json:"dump_count,omitempty"`
+	TimestampMs        int64                  `protobuf:"varint,9,opt,name=timestamp_ms,json=timestampMs,proto3" json:"timestamp_ms,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *AdminPersistenceStatus) Reset() {
+	*x = AdminPersistenceStatus{}
+	mi := &file_services_sentinel_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminPersistenceStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminPersistenceStatus) ProtoMessage() {}
+
+func (x *AdminPersistenceStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_services_sentinel_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminPersistenceStatus.ProtoReflect.Descriptor instead.
+func (*AdminPersistenceStatus) Descriptor() ([]byte, []int) {
+	return file_services_sentinel_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *AdminPersistenceStatus) GetNodeId() string {
+	if x != nil {
+		return x.NodeId
+	}
+	return ""
+}
+
+func (x *AdminPersistenceStatus) GetEnabled() bool {
+	if x != nil {
+		return x.Enabled
+	}
+	return false
+}
+
+func (x *AdminPersistenceStatus) GetPersistenceDir() string {
+	if x != nil {
+		return x.PersistenceDir
+	}
+	return ""
+}
+
+func (x *AdminPersistenceStatus) GetRedoLogEntryCount() int64 {
+	if x != nil {
+		return x.RedoLogEntryCount
+	}
+	return 0
+}
+
+func (x *AdminPersistenceStatus) GetRedoLogSizeBytes() int64 {
+	if x != nil {
+		return x.RedoLogSizeBytes
+	}
+	return 0
+}
+
+func (x *AdminPersistenceStatus) GetLastDumpTimeMs() int64 {
+	if x != nil {
+		return x.LastDumpTimeMs
+	}
+	return 0
+}
+
+func (x *AdminPersistenceStatus) GetLastDumpEntryCount() int64 {
+	if x != nil {
+		return x.LastDumpEntryCount
+	}
+	return 0
+}
+
+func (x *AdminPersistenceStatus) GetDumpCount() int64 {
+	if x != nil {
+		return x.DumpCount
+	}
+	return 0
+}
+
+func (x *AdminPersistenceStatus) GetTimestampMs() int64 {
+	if x != nil {
+		return x.TimestampMs
+	}
+	return 0
+}
+
+// AdminNetworkStats captures network connections and traffic for a single node.
+// Published per-node in ClusterState.network_stats, keyed by node_id.
+type AdminNetworkStats struct {
+	state                  protoimpl.MessageState   `protogen:"open.v1"`
+	NodeId                 string                   `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
+	GrpcListenAddress      string                   `protobuf:"bytes,2,opt,name=grpc_listen_address,json=grpcListenAddress,proto3" json:"grpc_listen_address,omitempty"`
+	HazelcastListenAddress string                   `protobuf:"bytes,3,opt,name=hazelcast_listen_address,json=hazelcastListenAddress,proto3" json:"hazelcast_listen_address,omitempty"`
+	ActiveGrpcConnections  int32                    `protobuf:"varint,4,opt,name=active_grpc_connections,json=activeGrpcConnections,proto3" json:"active_grpc_connections,omitempty"`
+	MemberConnections      []*AdminMemberConnection `protobuf:"bytes,5,rep,name=member_connections,json=memberConnections,proto3" json:"member_connections,omitempty"`
+	BytesSent              int64                    `protobuf:"varint,6,opt,name=bytes_sent,json=bytesSent,proto3" json:"bytes_sent,omitempty"`
+	BytesReceived          int64                    `protobuf:"varint,7,opt,name=bytes_received,json=bytesReceived,proto3" json:"bytes_received,omitempty"`
+	TimestampMs            int64                    `protobuf:"varint,8,opt,name=timestamp_ms,json=timestampMs,proto3" json:"timestamp_ms,omitempty"`
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *AdminNetworkStats) Reset() {
+	*x = AdminNetworkStats{}
+	mi := &file_services_sentinel_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminNetworkStats) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminNetworkStats) ProtoMessage() {}
+
+func (x *AdminNetworkStats) ProtoReflect() protoreflect.Message {
+	mi := &file_services_sentinel_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminNetworkStats.ProtoReflect.Descriptor instead.
+func (*AdminNetworkStats) Descriptor() ([]byte, []int) {
+	return file_services_sentinel_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *AdminNetworkStats) GetNodeId() string {
+	if x != nil {
+		return x.NodeId
+	}
+	return ""
+}
+
+func (x *AdminNetworkStats) GetGrpcListenAddress() string {
+	if x != nil {
+		return x.GrpcListenAddress
+	}
+	return ""
+}
+
+func (x *AdminNetworkStats) GetHazelcastListenAddress() string {
+	if x != nil {
+		return x.HazelcastListenAddress
+	}
+	return ""
+}
+
+func (x *AdminNetworkStats) GetActiveGrpcConnections() int32 {
+	if x != nil {
+		return x.ActiveGrpcConnections
+	}
+	return 0
+}
+
+func (x *AdminNetworkStats) GetMemberConnections() []*AdminMemberConnection {
+	if x != nil {
+		return x.MemberConnections
+	}
+	return nil
+}
+
+func (x *AdminNetworkStats) GetBytesSent() int64 {
+	if x != nil {
+		return x.BytesSent
+	}
+	return 0
+}
+
+func (x *AdminNetworkStats) GetBytesReceived() int64 {
+	if x != nil {
+		return x.BytesReceived
+	}
+	return 0
+}
+
+func (x *AdminNetworkStats) GetTimestampMs() int64 {
+	if x != nil {
+		return x.TimestampMs
+	}
+	return 0
+}
+
+// AdminMemberConnection describes the connection state to a single cluster peer.
+type AdminMemberConnection struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Address         string                 `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
+	Connected       bool                   `protobuf:"varint,2,opt,name=connected,proto3" json:"connected,omitempty"`
+	ConnectionCount int32                  `protobuf:"varint,3,opt,name=connection_count,json=connectionCount,proto3" json:"connection_count,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *AdminMemberConnection) Reset() {
+	*x = AdminMemberConnection{}
+	mi := &file_services_sentinel_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminMemberConnection) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminMemberConnection) ProtoMessage() {}
+
+func (x *AdminMemberConnection) ProtoReflect() protoreflect.Message {
+	mi := &file_services_sentinel_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminMemberConnection.ProtoReflect.Descriptor instead.
+func (*AdminMemberConnection) Descriptor() ([]byte, []int) {
+	return file_services_sentinel_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *AdminMemberConnection) GetAddress() string {
+	if x != nil {
+		return x.Address
+	}
+	return ""
+}
+
+func (x *AdminMemberConnection) GetConnected() bool {
+	if x != nil {
+		return x.Connected
+	}
+	return false
+}
+
+func (x *AdminMemberConnection) GetConnectionCount() int32 {
+	if x != nil {
+		return x.ConnectionCount
+	}
+	return 0
+}
+
+// AdminThreadInfo captures JVM thread counts and deadlock detection for a single node.
+// Published per-node in ClusterState.thread_info, keyed by node_id.
+type AdminThreadInfo struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	NodeId            string                 `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
+	ThreadCount       int32                  `protobuf:"varint,2,opt,name=thread_count,json=threadCount,proto3" json:"thread_count,omitempty"`
+	PeakThreadCount   int32                  `protobuf:"varint,3,opt,name=peak_thread_count,json=peakThreadCount,proto3" json:"peak_thread_count,omitempty"`
+	DaemonThreadCount int32                  `protobuf:"varint,4,opt,name=daemon_thread_count,json=daemonThreadCount,proto3" json:"daemon_thread_count,omitempty"`
+	DeadlockedThreads []string               `protobuf:"bytes,5,rep,name=deadlocked_threads,json=deadlockedThreads,proto3" json:"deadlocked_threads,omitempty"`
+	TimestampMs       int64                  `protobuf:"varint,6,opt,name=timestamp_ms,json=timestampMs,proto3" json:"timestamp_ms,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *AdminThreadInfo) Reset() {
+	*x = AdminThreadInfo{}
+	mi := &file_services_sentinel_proto_msgTypes[26]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminThreadInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminThreadInfo) ProtoMessage() {}
+
+func (x *AdminThreadInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_services_sentinel_proto_msgTypes[26]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminThreadInfo.ProtoReflect.Descriptor instead.
+func (*AdminThreadInfo) Descriptor() ([]byte, []int) {
+	return file_services_sentinel_proto_rawDescGZIP(), []int{26}
+}
+
+func (x *AdminThreadInfo) GetNodeId() string {
+	if x != nil {
+		return x.NodeId
+	}
+	return ""
+}
+
+func (x *AdminThreadInfo) GetThreadCount() int32 {
+	if x != nil {
+		return x.ThreadCount
+	}
+	return 0
+}
+
+func (x *AdminThreadInfo) GetPeakThreadCount() int32 {
+	if x != nil {
+		return x.PeakThreadCount
+	}
+	return 0
+}
+
+func (x *AdminThreadInfo) GetDaemonThreadCount() int32 {
+	if x != nil {
+		return x.DaemonThreadCount
+	}
+	return 0
+}
+
+func (x *AdminThreadInfo) GetDeadlockedThreads() []string {
+	if x != nil {
+		return x.DeadlockedThreads
+	}
+	return nil
+}
+
+func (x *AdminThreadInfo) GetTimestampMs() int64 {
+	if x != nil {
+		return x.TimestampMs
+	}
+	return 0
+}
+
+// AdminTokenCacheStats captures security token cache statistics for a single node.
+// Published per-node in ClusterState.token_cache_stats, keyed by node_id.
+type AdminTokenCacheStats struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	NodeId        string                 `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
+	CacheSize     int32                  `protobuf:"varint,2,opt,name=cache_size,json=cacheSize,proto3" json:"cache_size,omitempty"`
+	HitCount      int64                  `protobuf:"varint,3,opt,name=hit_count,json=hitCount,proto3" json:"hit_count,omitempty"`
+	MissCount     int64                  `protobuf:"varint,4,opt,name=miss_count,json=missCount,proto3" json:"miss_count,omitempty"`
+	EvictionCount int64                  `protobuf:"varint,5,opt,name=eviction_count,json=evictionCount,proto3" json:"eviction_count,omitempty"`
+	TimestampMs   int64                  `protobuf:"varint,6,opt,name=timestamp_ms,json=timestampMs,proto3" json:"timestamp_ms,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminTokenCacheStats) Reset() {
+	*x = AdminTokenCacheStats{}
+	mi := &file_services_sentinel_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminTokenCacheStats) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminTokenCacheStats) ProtoMessage() {}
+
+func (x *AdminTokenCacheStats) ProtoReflect() protoreflect.Message {
+	mi := &file_services_sentinel_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminTokenCacheStats.ProtoReflect.Descriptor instead.
+func (*AdminTokenCacheStats) Descriptor() ([]byte, []int) {
+	return file_services_sentinel_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *AdminTokenCacheStats) GetNodeId() string {
+	if x != nil {
+		return x.NodeId
+	}
+	return ""
+}
+
+func (x *AdminTokenCacheStats) GetCacheSize() int32 {
+	if x != nil {
+		return x.CacheSize
+	}
+	return 0
+}
+
+func (x *AdminTokenCacheStats) GetHitCount() int64 {
+	if x != nil {
+		return x.HitCount
+	}
+	return 0
+}
+
+func (x *AdminTokenCacheStats) GetMissCount() int64 {
+	if x != nil {
+		return x.MissCount
+	}
+	return 0
+}
+
+func (x *AdminTokenCacheStats) GetEvictionCount() int64 {
+	if x != nil {
+		return x.EvictionCount
+	}
+	return 0
+}
+
+func (x *AdminTokenCacheStats) GetTimestampMs() int64 {
+	if x != nil {
+		return x.TimestampMs
+	}
+	return 0
+}
+
+// AdminLatencyStats captures response time distribution (microseconds).
+// Computed over a sliding window or since last publish.
+type AdminLatencyStats struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	P50Us         int64                  `protobuf:"varint,1,opt,name=p50_us,json=p50Us,proto3" json:"p50_us,omitempty"` // median
+	P90Us         int64                  `protobuf:"varint,2,opt,name=p90_us,json=p90Us,proto3" json:"p90_us,omitempty"`
+	P95Us         int64                  `protobuf:"varint,3,opt,name=p95_us,json=p95Us,proto3" json:"p95_us,omitempty"`
+	P99Us         int64                  `protobuf:"varint,4,opt,name=p99_us,json=p99Us,proto3" json:"p99_us,omitempty"`
+	MaxUs         int64                  `protobuf:"varint,5,opt,name=max_us,json=maxUs,proto3" json:"max_us,omitempty"`
+	MinUs         int64                  `protobuf:"varint,6,opt,name=min_us,json=minUs,proto3" json:"min_us,omitempty"`
+	MeanUs        float64                `protobuf:"fixed64,7,opt,name=mean_us,json=meanUs,proto3" json:"mean_us,omitempty"`
+	SampleCount   int64                  `protobuf:"varint,8,opt,name=sample_count,json=sampleCount,proto3" json:"sample_count,omitempty"` // number of RPCs in this window
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminLatencyStats) Reset() {
+	*x = AdminLatencyStats{}
+	mi := &file_services_sentinel_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminLatencyStats) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminLatencyStats) ProtoMessage() {}
+
+func (x *AdminLatencyStats) ProtoReflect() protoreflect.Message {
+	mi := &file_services_sentinel_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminLatencyStats.ProtoReflect.Descriptor instead.
+func (*AdminLatencyStats) Descriptor() ([]byte, []int) {
+	return file_services_sentinel_proto_rawDescGZIP(), []int{28}
+}
+
+func (x *AdminLatencyStats) GetP50Us() int64 {
+	if x != nil {
+		return x.P50Us
+	}
+	return 0
+}
+
+func (x *AdminLatencyStats) GetP90Us() int64 {
+	if x != nil {
+		return x.P90Us
+	}
+	return 0
+}
+
+func (x *AdminLatencyStats) GetP95Us() int64 {
+	if x != nil {
+		return x.P95Us
+	}
+	return 0
+}
+
+func (x *AdminLatencyStats) GetP99Us() int64 {
+	if x != nil {
+		return x.P99Us
+	}
+	return 0
+}
+
+func (x *AdminLatencyStats) GetMaxUs() int64 {
+	if x != nil {
+		return x.MaxUs
+	}
+	return 0
+}
+
+func (x *AdminLatencyStats) GetMinUs() int64 {
+	if x != nil {
+		return x.MinUs
+	}
+	return 0
+}
+
+func (x *AdminLatencyStats) GetMeanUs() float64 {
+	if x != nil {
+		return x.MeanUs
+	}
+	return 0
+}
+
+func (x *AdminLatencyStats) GetSampleCount() int64 {
+	if x != nil {
+		return x.SampleCount
+	}
+	return 0
+}
+
+// AdminMethodLatency pairs a method name with its latency distribution.
+type AdminMethodLatency struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Method        string                 `protobuf:"bytes,1,opt,name=method,proto3" json:"method,omitempty"`
+	Latency       *AdminLatencyStats     `protobuf:"bytes,2,opt,name=latency,proto3" json:"latency,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminMethodLatency) Reset() {
+	*x = AdminMethodLatency{}
+	mi := &file_services_sentinel_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminMethodLatency) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminMethodLatency) ProtoMessage() {}
+
+func (x *AdminMethodLatency) ProtoReflect() protoreflect.Message {
+	mi := &file_services_sentinel_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminMethodLatency.ProtoReflect.Descriptor instead.
+func (*AdminMethodLatency) Descriptor() ([]byte, []int) {
+	return file_services_sentinel_proto_rawDescGZIP(), []int{29}
+}
+
+func (x *AdminMethodLatency) GetMethod() string {
+	if x != nil {
+		return x.Method
+	}
+	return ""
+}
+
+func (x *AdminMethodLatency) GetLatency() *AdminLatencyStats {
+	if x != nil {
+		return x.Latency
+	}
+	return nil
+}
+
+// AdminMethodPayload captures payload size statistics for a single method.
+type AdminMethodPayload struct {
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	Method             string                 `protobuf:"bytes,1,opt,name=method,proto3" json:"method,omitempty"`
+	TotalRequestBytes  int64                  `protobuf:"varint,2,opt,name=total_request_bytes,json=totalRequestBytes,proto3" json:"total_request_bytes,omitempty"`
+	TotalResponseBytes int64                  `protobuf:"varint,3,opt,name=total_response_bytes,json=totalResponseBytes,proto3" json:"total_response_bytes,omitempty"`
+	RequestCount       int64                  `protobuf:"varint,4,opt,name=request_count,json=requestCount,proto3" json:"request_count,omitempty"`
+	AvgRequestBytes    float64                `protobuf:"fixed64,5,opt,name=avg_request_bytes,json=avgRequestBytes,proto3" json:"avg_request_bytes,omitempty"`
+	AvgResponseBytes   float64                `protobuf:"fixed64,6,opt,name=avg_response_bytes,json=avgResponseBytes,proto3" json:"avg_response_bytes,omitempty"`
+	MaxRequestBytes    int64                  `protobuf:"varint,7,opt,name=max_request_bytes,json=maxRequestBytes,proto3" json:"max_request_bytes,omitempty"`
+	MaxResponseBytes   int64                  `protobuf:"varint,8,opt,name=max_response_bytes,json=maxResponseBytes,proto3" json:"max_response_bytes,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *AdminMethodPayload) Reset() {
+	*x = AdminMethodPayload{}
+	mi := &file_services_sentinel_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminMethodPayload) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminMethodPayload) ProtoMessage() {}
+
+func (x *AdminMethodPayload) ProtoReflect() protoreflect.Message {
+	mi := &file_services_sentinel_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminMethodPayload.ProtoReflect.Descriptor instead.
+func (*AdminMethodPayload) Descriptor() ([]byte, []int) {
+	return file_services_sentinel_proto_rawDescGZIP(), []int{30}
+}
+
+func (x *AdminMethodPayload) GetMethod() string {
+	if x != nil {
+		return x.Method
+	}
+	return ""
+}
+
+func (x *AdminMethodPayload) GetTotalRequestBytes() int64 {
+	if x != nil {
+		return x.TotalRequestBytes
+	}
+	return 0
+}
+
+func (x *AdminMethodPayload) GetTotalResponseBytes() int64 {
+	if x != nil {
+		return x.TotalResponseBytes
+	}
+	return 0
+}
+
+func (x *AdminMethodPayload) GetRequestCount() int64 {
+	if x != nil {
+		return x.RequestCount
+	}
+	return 0
+}
+
+func (x *AdminMethodPayload) GetAvgRequestBytes() float64 {
+	if x != nil {
+		return x.AvgRequestBytes
+	}
+	return 0
+}
+
+func (x *AdminMethodPayload) GetAvgResponseBytes() float64 {
+	if x != nil {
+		return x.AvgResponseBytes
+	}
+	return 0
+}
+
+func (x *AdminMethodPayload) GetMaxRequestBytes() int64 {
+	if x != nil {
+		return x.MaxRequestBytes
+	}
+	return 0
+}
+
+func (x *AdminMethodPayload) GetMaxResponseBytes() int64 {
+	if x != nil {
+		return x.MaxResponseBytes
+	}
+	return 0
+}
+
+// AdminQueueStats captures statistics for a queue or priority queue boundary.
+// Published per-queue in ClusterState.queue_stats.
+type AdminQueueStats struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Qualified name: "services/snoopy/SnoopyState.TaskQueue"
+	QualifiedName string `protobuf:"bytes,1,opt,name=qualified_name,json=qualifiedName,proto3" json:"qualified_name,omitempty"`
+	// State root: "SnoopyState"
+	StateRoot string `protobuf:"bytes,2,opt,name=state_root,json=stateRoot,proto3" json:"state_root,omitempty"`
+	// Boundary name: "TaskQueue"
+	Boundary string `protobuf:"bytes,3,opt,name=boundary,proto3" json:"boundary,omitempty"`
+	// Whether this is a priority queue
+	IsPriority bool `protobuf:"varint,4,opt,name=is_priority,json=isPriority,proto3" json:"is_priority,omitempty"`
+	// Current queue depth (items waiting)
+	Depth int64 `protobuf:"varint,5,opt,name=depth,proto3" json:"depth,omitempty"`
+	// Total items ever offered to the queue
+	TotalOffered int64 `protobuf:"varint,6,opt,name=total_offered,json=totalOffered,proto3" json:"total_offered,omitempty"`
+	// Total items ever polled/taken from the queue
+	TotalPolled int64 `protobuf:"varint,7,opt,name=total_polled,json=totalPolled,proto3" json:"total_polled,omitempty"`
+	// Total items rejected (queue full, etc.)
+	TotalRejected int64 `protobuf:"varint,8,opt,name=total_rejected,json=totalRejected,proto3" json:"total_rejected,omitempty"`
+	// Offer rate: items/sec over the last publish interval
+	OfferRate float64 `protobuf:"fixed64,9,opt,name=offer_rate,json=offerRate,proto3" json:"offer_rate,omitempty"`
+	// Consume rate: items/sec over the last publish interval
+	ConsumeRate float64 `protobuf:"fixed64,10,opt,name=consume_rate,json=consumeRate,proto3" json:"consume_rate,omitempty"`
+	// Consumer lag: depth trend (positive = growing, negative = draining)
+	LagRate float64 `protobuf:"fixed64,11,opt,name=lag_rate,json=lagRate,proto3" json:"lag_rate,omitempty"`
+	// Average time an item spends in the queue (ms)
+	AvgWaitTimeMs float64 `protobuf:"fixed64,12,opt,name=avg_wait_time_ms,json=avgWaitTimeMs,proto3" json:"avg_wait_time_ms,omitempty"`
+	// Max time any item has waited (ms, current oldest item)
+	MaxWaitTimeMs int64 `protobuf:"varint,13,opt,name=max_wait_time_ms,json=maxWaitTimeMs,proto3" json:"max_wait_time_ms,omitempty"`
+	// Number of active consumers (services polling/taking from the queue)
+	ActiveConsumers int32 `protobuf:"varint,14,opt,name=active_consumers,json=activeConsumers,proto3" json:"active_consumers,omitempty"`
+	// Heap cost in bytes
+	HeapCostBytes int64 `protobuf:"varint,15,opt,name=heap_cost_bytes,json=heapCostBytes,proto3" json:"heap_cost_bytes,omitempty"`
+	// Node that owns this queue (leader for leader-gated queues)
+	NodeId        string `protobuf:"bytes,16,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
+	TimestampMs   int64  `protobuf:"varint,17,opt,name=timestamp_ms,json=timestampMs,proto3" json:"timestamp_ms,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminQueueStats) Reset() {
+	*x = AdminQueueStats{}
+	mi := &file_services_sentinel_proto_msgTypes[31]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminQueueStats) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminQueueStats) ProtoMessage() {}
+
+func (x *AdminQueueStats) ProtoReflect() protoreflect.Message {
+	mi := &file_services_sentinel_proto_msgTypes[31]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminQueueStats.ProtoReflect.Descriptor instead.
+func (*AdminQueueStats) Descriptor() ([]byte, []int) {
+	return file_services_sentinel_proto_rawDescGZIP(), []int{31}
+}
+
+func (x *AdminQueueStats) GetQualifiedName() string {
+	if x != nil {
+		return x.QualifiedName
+	}
+	return ""
+}
+
+func (x *AdminQueueStats) GetStateRoot() string {
+	if x != nil {
+		return x.StateRoot
+	}
+	return ""
+}
+
+func (x *AdminQueueStats) GetBoundary() string {
+	if x != nil {
+		return x.Boundary
+	}
+	return ""
+}
+
+func (x *AdminQueueStats) GetIsPriority() bool {
+	if x != nil {
+		return x.IsPriority
+	}
+	return false
+}
+
+func (x *AdminQueueStats) GetDepth() int64 {
+	if x != nil {
+		return x.Depth
+	}
+	return 0
+}
+
+func (x *AdminQueueStats) GetTotalOffered() int64 {
+	if x != nil {
+		return x.TotalOffered
+	}
+	return 0
+}
+
+func (x *AdminQueueStats) GetTotalPolled() int64 {
+	if x != nil {
+		return x.TotalPolled
+	}
+	return 0
+}
+
+func (x *AdminQueueStats) GetTotalRejected() int64 {
+	if x != nil {
+		return x.TotalRejected
+	}
+	return 0
+}
+
+func (x *AdminQueueStats) GetOfferRate() float64 {
+	if x != nil {
+		return x.OfferRate
+	}
+	return 0
+}
+
+func (x *AdminQueueStats) GetConsumeRate() float64 {
+	if x != nil {
+		return x.ConsumeRate
+	}
+	return 0
+}
+
+func (x *AdminQueueStats) GetLagRate() float64 {
+	if x != nil {
+		return x.LagRate
+	}
+	return 0
+}
+
+func (x *AdminQueueStats) GetAvgWaitTimeMs() float64 {
+	if x != nil {
+		return x.AvgWaitTimeMs
+	}
+	return 0
+}
+
+func (x *AdminQueueStats) GetMaxWaitTimeMs() int64 {
+	if x != nil {
+		return x.MaxWaitTimeMs
+	}
+	return 0
+}
+
+func (x *AdminQueueStats) GetActiveConsumers() int32 {
+	if x != nil {
+		return x.ActiveConsumers
+	}
+	return 0
+}
+
+func (x *AdminQueueStats) GetHeapCostBytes() int64 {
+	if x != nil {
+		return x.HeapCostBytes
+	}
+	return 0
+}
+
+func (x *AdminQueueStats) GetNodeId() string {
+	if x != nil {
+		return x.NodeId
+	}
+	return ""
+}
+
+func (x *AdminQueueStats) GetTimestampMs() int64 {
+	if x != nil {
+		return x.TimestampMs
+	}
+	return 0
+}
+
+// AdminTopicStats captures statistics for a pub/sub topic boundary.
+// Published per-topic in ClusterState.topic_stats.
+type AdminTopicStats struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Qualified name: "services/snoopy/SnoopyState.EventStream"
+	QualifiedName string `protobuf:"bytes,1,opt,name=qualified_name,json=qualifiedName,proto3" json:"qualified_name,omitempty"`
+	// State root: "SnoopyState"
+	StateRoot string `protobuf:"bytes,2,opt,name=state_root,json=stateRoot,proto3" json:"state_root,omitempty"`
+	// Boundary name: "EventStream"
+	Boundary string `protobuf:"bytes,3,opt,name=boundary,proto3" json:"boundary,omitempty"`
+	// Total messages ever published to this topic
+	TotalPublished int64 `protobuf:"varint,4,opt,name=total_published,json=totalPublished,proto3" json:"total_published,omitempty"`
+	// Total messages ever received across all subscribers
+	TotalReceived int64 `protobuf:"varint,5,opt,name=total_received,json=totalReceived,proto3" json:"total_received,omitempty"`
+	// Publish rate: messages/sec over the last publish interval
+	PublishRate float64 `protobuf:"fixed64,6,opt,name=publish_rate,json=publishRate,proto3" json:"publish_rate,omitempty"`
+	// Number of active subscribers
+	SubscriberCount int32 `protobuf:"varint,7,opt,name=subscriber_count,json=subscriberCount,proto3" json:"subscriber_count,omitempty"`
+	// Per-subscriber stats
+	Subscribers []*AdminTopicSubscriber `protobuf:"bytes,8,rep,name=subscribers,proto3" json:"subscribers,omitempty"`
+	// Node reporting these stats
+	NodeId        string `protobuf:"bytes,9,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
+	TimestampMs   int64  `protobuf:"varint,10,opt,name=timestamp_ms,json=timestampMs,proto3" json:"timestamp_ms,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminTopicStats) Reset() {
+	*x = AdminTopicStats{}
+	mi := &file_services_sentinel_proto_msgTypes[32]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminTopicStats) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminTopicStats) ProtoMessage() {}
+
+func (x *AdminTopicStats) ProtoReflect() protoreflect.Message {
+	mi := &file_services_sentinel_proto_msgTypes[32]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminTopicStats.ProtoReflect.Descriptor instead.
+func (*AdminTopicStats) Descriptor() ([]byte, []int) {
+	return file_services_sentinel_proto_rawDescGZIP(), []int{32}
+}
+
+func (x *AdminTopicStats) GetQualifiedName() string {
+	if x != nil {
+		return x.QualifiedName
+	}
+	return ""
+}
+
+func (x *AdminTopicStats) GetStateRoot() string {
+	if x != nil {
+		return x.StateRoot
+	}
+	return ""
+}
+
+func (x *AdminTopicStats) GetBoundary() string {
+	if x != nil {
+		return x.Boundary
+	}
+	return ""
+}
+
+func (x *AdminTopicStats) GetTotalPublished() int64 {
+	if x != nil {
+		return x.TotalPublished
+	}
+	return 0
+}
+
+func (x *AdminTopicStats) GetTotalReceived() int64 {
+	if x != nil {
+		return x.TotalReceived
+	}
+	return 0
+}
+
+func (x *AdminTopicStats) GetPublishRate() float64 {
+	if x != nil {
+		return x.PublishRate
+	}
+	return 0
+}
+
+func (x *AdminTopicStats) GetSubscriberCount() int32 {
+	if x != nil {
+		return x.SubscriberCount
+	}
+	return 0
+}
+
+func (x *AdminTopicStats) GetSubscribers() []*AdminTopicSubscriber {
+	if x != nil {
+		return x.Subscribers
+	}
+	return nil
+}
+
+func (x *AdminTopicStats) GetNodeId() string {
+	if x != nil {
+		return x.NodeId
+	}
+	return ""
+}
+
+func (x *AdminTopicStats) GetTimestampMs() int64 {
+	if x != nil {
+		return x.TimestampMs
+	}
+	return 0
+}
+
+// AdminTopicSubscriber tracks a single subscriber to a topic.
+type AdminTopicSubscriber struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Service identity of the subscriber: "service:snoopy"
+	ServiceId string `protobuf:"bytes,1,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
+	// Total messages received by this subscriber
+	TotalReceived int64 `protobuf:"varint,2,opt,name=total_received,json=totalReceived,proto3" json:"total_received,omitempty"`
+	// Messages dropped (subscriber too slow, buffer overflow)
+	TotalDropped int64 `protobuf:"varint,3,opt,name=total_dropped,json=totalDropped,proto3" json:"total_dropped,omitempty"`
+	// Whether the subscriber is currently connected
+	Connected bool `protobuf:"varint,4,opt,name=connected,proto3" json:"connected,omitempty"`
+	// Last message received timestamp (epoch ms)
+	LastReceivedMs int64 `protobuf:"varint,5,opt,name=last_received_ms,json=lastReceivedMs,proto3" json:"last_received_ms,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *AdminTopicSubscriber) Reset() {
+	*x = AdminTopicSubscriber{}
+	mi := &file_services_sentinel_proto_msgTypes[33]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminTopicSubscriber) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminTopicSubscriber) ProtoMessage() {}
+
+func (x *AdminTopicSubscriber) ProtoReflect() protoreflect.Message {
+	mi := &file_services_sentinel_proto_msgTypes[33]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminTopicSubscriber.ProtoReflect.Descriptor instead.
+func (*AdminTopicSubscriber) Descriptor() ([]byte, []int) {
+	return file_services_sentinel_proto_rawDescGZIP(), []int{33}
+}
+
+func (x *AdminTopicSubscriber) GetServiceId() string {
+	if x != nil {
+		return x.ServiceId
+	}
+	return ""
+}
+
+func (x *AdminTopicSubscriber) GetTotalReceived() int64 {
+	if x != nil {
+		return x.TotalReceived
+	}
+	return 0
+}
+
+func (x *AdminTopicSubscriber) GetTotalDropped() int64 {
+	if x != nil {
+		return x.TotalDropped
+	}
+	return 0
+}
+
+func (x *AdminTopicSubscriber) GetConnected() bool {
+	if x != nil {
+		return x.Connected
+	}
+	return false
+}
+
+func (x *AdminTopicSubscriber) GetLastReceivedMs() int64 {
+	if x != nil {
+		return x.LastReceivedMs
+	}
+	return 0
+}
+
+// AdminWatchHealth tracks the health of an active Watch stream.
+// Published per-active-watch in ClusterState.watch_health.
+// Keyed by watch_id (unique per stream).
+type AdminWatchHealth struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Unique watch identifier: "service:sentinel@node-uuid#WatchNodeMetrics#1"
+	WatchId string `protobuf:"bytes,1,opt,name=watch_id,json=watchId,proto3" json:"watch_id,omitempty"`
+	// Service that opened this watch: "service:sentinel"
+	ServiceId string `protobuf:"bytes,2,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
+	// Node serving this watch stream
+	NodeId string `protobuf:"bytes,3,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
+	// gRPC method: "WatchNodeMetrics"
+	Method string `protobuf:"bytes,4,opt,name=method,proto3" json:"method,omitempty"`
+	// Graph being watched: "ClusterState.NodeMetrics"
+	Graph string `protobuf:"bytes,5,opt,name=graph,proto3" json:"graph,omitempty"`
+	// Total messages sent on this stream
+	MessagesSent int64 `protobuf:"varint,6,opt,name=messages_sent,json=messagesSent,proto3" json:"messages_sent,omitempty"`
+	// Messages pending delivery (buffered, not yet sent)
+	MessagesPending int32 `protobuf:"varint,7,opt,name=messages_pending,json=messagesPending,proto3" json:"messages_pending,omitempty"`
+	// Whether the consumer is keeping up (no backpressure)
+	ConsumerHealthy bool `protobuf:"varint,8,opt,name=consumer_healthy,json=consumerHealthy,proto3" json:"consumer_healthy,omitempty"`
+	// Total backpressure events (flow control paused sending)
+	BackpressureEvents int64 `protobuf:"varint,9,opt,name=backpressure_events,json=backpressureEvents,proto3" json:"backpressure_events,omitempty"`
+	// Last message sent timestamp (epoch ms).
+	// Large gap between this and the last mutation = stalled watcher.
+	LastSentMs int64 `protobuf:"varint,10,opt,name=last_sent_ms,json=lastSentMs,proto3" json:"last_sent_ms,omitempty"`
+	// Last mutation timestamp for the watched graph (epoch ms).
+	// Comparing last_sent_ms to last_mutation_ms shows consumer lag.
+	LastMutationMs int64 `protobuf:"varint,11,opt,name=last_mutation_ms,json=lastMutationMs,proto3" json:"last_mutation_ms,omitempty"`
+	// Consumer lag: last_mutation_ms - last_sent_ms (ms).
+	// Positive = consumer is behind. Zero = caught up.
+	LagMs int64 `protobuf:"varint,12,opt,name=lag_ms,json=lagMs,proto3" json:"lag_ms,omitempty"`
+	// Stream opened timestamp (epoch ms)
+	OpenedAtMs int64 `protobuf:"varint,13,opt,name=opened_at_ms,json=openedAtMs,proto3" json:"opened_at_ms,omitempty"`
+	// Stream duration so far (ms)
+	DurationMs int64 `protobuf:"varint,14,opt,name=duration_ms,json=durationMs,proto3" json:"duration_ms,omitempty"`
+	// Peer address of the watcher
+	PeerAddress   string `protobuf:"bytes,15,opt,name=peer_address,json=peerAddress,proto3" json:"peer_address,omitempty"`
+	TimestampMs   int64  `protobuf:"varint,16,opt,name=timestamp_ms,json=timestampMs,proto3" json:"timestamp_ms,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminWatchHealth) Reset() {
+	*x = AdminWatchHealth{}
+	mi := &file_services_sentinel_proto_msgTypes[34]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminWatchHealth) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminWatchHealth) ProtoMessage() {}
+
+func (x *AdminWatchHealth) ProtoReflect() protoreflect.Message {
+	mi := &file_services_sentinel_proto_msgTypes[34]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminWatchHealth.ProtoReflect.Descriptor instead.
+func (*AdminWatchHealth) Descriptor() ([]byte, []int) {
+	return file_services_sentinel_proto_rawDescGZIP(), []int{34}
+}
+
+func (x *AdminWatchHealth) GetWatchId() string {
+	if x != nil {
+		return x.WatchId
+	}
+	return ""
+}
+
+func (x *AdminWatchHealth) GetServiceId() string {
+	if x != nil {
+		return x.ServiceId
+	}
+	return ""
+}
+
+func (x *AdminWatchHealth) GetNodeId() string {
+	if x != nil {
+		return x.NodeId
+	}
+	return ""
+}
+
+func (x *AdminWatchHealth) GetMethod() string {
+	if x != nil {
+		return x.Method
+	}
+	return ""
+}
+
+func (x *AdminWatchHealth) GetGraph() string {
+	if x != nil {
+		return x.Graph
+	}
+	return ""
+}
+
+func (x *AdminWatchHealth) GetMessagesSent() int64 {
+	if x != nil {
+		return x.MessagesSent
+	}
+	return 0
+}
+
+func (x *AdminWatchHealth) GetMessagesPending() int32 {
+	if x != nil {
+		return x.MessagesPending
+	}
+	return 0
+}
+
+func (x *AdminWatchHealth) GetConsumerHealthy() bool {
+	if x != nil {
+		return x.ConsumerHealthy
+	}
+	return false
+}
+
+func (x *AdminWatchHealth) GetBackpressureEvents() int64 {
+	if x != nil {
+		return x.BackpressureEvents
+	}
+	return 0
+}
+
+func (x *AdminWatchHealth) GetLastSentMs() int64 {
+	if x != nil {
+		return x.LastSentMs
+	}
+	return 0
+}
+
+func (x *AdminWatchHealth) GetLastMutationMs() int64 {
+	if x != nil {
+		return x.LastMutationMs
+	}
+	return 0
+}
+
+func (x *AdminWatchHealth) GetLagMs() int64 {
+	if x != nil {
+		return x.LagMs
+	}
+	return 0
+}
+
+func (x *AdminWatchHealth) GetOpenedAtMs() int64 {
+	if x != nil {
+		return x.OpenedAtMs
+	}
+	return 0
+}
+
+func (x *AdminWatchHealth) GetDurationMs() int64 {
+	if x != nil {
+		return x.DurationMs
+	}
+	return 0
+}
+
+func (x *AdminWatchHealth) GetPeerAddress() string {
+	if x != nil {
+		return x.PeerAddress
+	}
+	return ""
+}
+
+func (x *AdminWatchHealth) GetTimestampMs() int64 {
+	if x != nil {
+		return x.TimestampMs
+	}
+	return 0
+}
+
+// AdminMutationRate captures write throughput for a single boundary.
+// Published per-boundary in ClusterState.mutation_rates.
+type AdminMutationRate struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Qualified name: "services/kernel/ClusterState.NodeMetrics"
+	QualifiedName string `protobuf:"bytes,1,opt,name=qualified_name,json=qualifiedName,proto3" json:"qualified_name,omitempty"`
+	// State root: "ClusterState"
+	StateRoot string `protobuf:"bytes,2,opt,name=state_root,json=stateRoot,proto3" json:"state_root,omitempty"`
+	// Boundary name: "NodeMetrics"
+	Boundary string `protobuf:"bytes,3,opt,name=boundary,proto3" json:"boundary,omitempty"`
+	// Graph type
+	GraphType AdminGraphType `protobuf:"varint,4,opt,name=graph_type,json=graphType,proto3,enum=sentinel.AdminGraphType" json:"graph_type,omitempty"`
+	// Total mutations (puts + sets + deletes) since boot
+	TotalMutations int64 `protobuf:"varint,5,opt,name=total_mutations,json=totalMutations,proto3" json:"total_mutations,omitempty"`
+	// Mutations in the last publish interval
+	IntervalMutations int64 `protobuf:"varint,6,opt,name=interval_mutations,json=intervalMutations,proto3" json:"interval_mutations,omitempty"`
+	// Mutation rate: writes/sec over the last publish interval
+	MutationRate float64 `protobuf:"fixed64,7,opt,name=mutation_rate,json=mutationRate,proto3" json:"mutation_rate,omitempty"`
+	// Total puts
+	PutCount int64 `protobuf:"varint,8,opt,name=put_count,json=putCount,proto3" json:"put_count,omitempty"`
+	// Total sets
+	SetCount int64 `protobuf:"varint,9,opt,name=set_count,json=setCount,proto3" json:"set_count,omitempty"`
+	// Total deletes
+	DeleteCount int64 `protobuf:"varint,10,opt,name=delete_count,json=deleteCount,proto3" json:"delete_count,omitempty"`
+	// Per-service mutation counts: "service:sentinel" -> 50
+	PerServiceMutations map[string]int64 `protobuf:"bytes,11,rep,name=per_service_mutations,json=perServiceMutations,proto3" json:"per_service_mutations,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`
+	// Node reporting
+	NodeId        string `protobuf:"bytes,12,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
+	TimestampMs   int64  `protobuf:"varint,13,opt,name=timestamp_ms,json=timestampMs,proto3" json:"timestamp_ms,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AdminMutationRate) Reset() {
+	*x = AdminMutationRate{}
+	mi := &file_services_sentinel_proto_msgTypes[35]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AdminMutationRate) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AdminMutationRate) ProtoMessage() {}
+
+func (x *AdminMutationRate) ProtoReflect() protoreflect.Message {
+	mi := &file_services_sentinel_proto_msgTypes[35]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AdminMutationRate.ProtoReflect.Descriptor instead.
+func (*AdminMutationRate) Descriptor() ([]byte, []int) {
+	return file_services_sentinel_proto_rawDescGZIP(), []int{35}
+}
+
+func (x *AdminMutationRate) GetQualifiedName() string {
+	if x != nil {
+		return x.QualifiedName
+	}
+	return ""
+}
+
+func (x *AdminMutationRate) GetStateRoot() string {
+	if x != nil {
+		return x.StateRoot
+	}
+	return ""
+}
+
+func (x *AdminMutationRate) GetBoundary() string {
+	if x != nil {
+		return x.Boundary
+	}
+	return ""
+}
+
+func (x *AdminMutationRate) GetGraphType() AdminGraphType {
+	if x != nil {
+		return x.GraphType
+	}
+	return AdminGraphType_ADMIN_GRAPH_TYPE_SINGLETON
+}
+
+func (x *AdminMutationRate) GetTotalMutations() int64 {
+	if x != nil {
+		return x.TotalMutations
+	}
+	return 0
+}
+
+func (x *AdminMutationRate) GetIntervalMutations() int64 {
+	if x != nil {
+		return x.IntervalMutations
+	}
+	return 0
+}
+
+func (x *AdminMutationRate) GetMutationRate() float64 {
+	if x != nil {
+		return x.MutationRate
+	}
+	return 0
+}
+
+func (x *AdminMutationRate) GetPutCount() int64 {
+	if x != nil {
+		return x.PutCount
+	}
+	return 0
+}
+
+func (x *AdminMutationRate) GetSetCount() int64 {
+	if x != nil {
+		return x.SetCount
+	}
+	return 0
+}
+
+func (x *AdminMutationRate) GetDeleteCount() int64 {
+	if x != nil {
+		return x.DeleteCount
+	}
+	return 0
+}
+
+func (x *AdminMutationRate) GetPerServiceMutations() map[string]int64 {
+	if x != nil {
+		return x.PerServiceMutations
+	}
+	return nil
+}
+
+func (x *AdminMutationRate) GetNodeId() string {
+	if x != nil {
+		return x.NodeId
+	}
+	return ""
+}
+
+func (x *AdminMutationRate) GetTimestampMs() int64 {
+	if x != nil {
+		return x.TimestampMs
+	}
+	return 0
 }
 
 type MapEmpty struct {
@@ -576,7 +3625,7 @@ type MapEmpty struct {
 
 func (x *MapEmpty) Reset() {
 	*x = MapEmpty{}
-	mi := &file_services_sentinel_proto_msgTypes[11]
+	mi := &file_services_sentinel_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -588,7 +3637,7 @@ func (x *MapEmpty) String() string {
 func (*MapEmpty) ProtoMessage() {}
 
 func (x *MapEmpty) ProtoReflect() protoreflect.Message {
-	mi := &file_services_sentinel_proto_msgTypes[11]
+	mi := &file_services_sentinel_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -601,51 +3650,404 @@ func (x *MapEmpty) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MapEmpty.ProtoReflect.Descriptor instead.
 func (*MapEmpty) Descriptor() ([]byte, []int) {
-	return file_services_sentinel_proto_rawDescGZIP(), []int{11}
+	return file_services_sentinel_proto_rawDescGZIP(), []int{36}
 }
 
 var File_services_sentinel_proto protoreflect.FileDescriptor
 
 const file_services_sentinel_proto_rawDesc = "" +
 	"\n" +
-	"\x17services/sentinel.proto\x12\bsentinel\x1a\x0flibs/spec.proto\x1a\x16services/presley.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1cgoogle/api/annotations.proto\"\x1a\n" +
+	"\x17services/sentinel.proto\x12\bsentinel\x1a\x0flibs/spec.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1cgoogle/api/annotations.proto\"\x1a\n" +
 	"\x06Config:\x10Ҩ\x1d\f\n" +
 	"\bsentinel\x10\x05\"\"\n" +
 	"\rSentinelState:\x11\x9a\xa8\x1d\rSentinelState\"B\n" +
 	"\x15WatchDashboardRequest\x12)\n" +
-	"\x10interval_seconds\x18\x01 \x01(\x05R\x0fintervalSeconds\"F\n" +
-	"\x13NodeMetricsResponse\x12/\n" +
-	"\x05items\x18\x01 \x03(\v2\x19.presley.AdminNodeMetricsR\x05items\"B\n" +
-	"\x11GrpcStatsResponse\x12-\n" +
-	"\x05items\x18\x01 \x03(\v2\x17.presley.AdminGrpcStatsR\x05items\"R\n" +
-	"\x19PersistenceStatusResponse\x125\n" +
-	"\x05items\x18\x01 \x03(\v2\x1f.presley.AdminPersistenceStatusR\x05items\"H\n" +
-	"\x14NetworkStatsResponse\x120\n" +
-	"\x05items\x18\x01 \x03(\v2\x1a.presley.AdminNetworkStatsR\x05items\"D\n" +
-	"\x12ThreadInfoResponse\x12.\n" +
-	"\x05items\x18\x01 \x03(\v2\x18.presley.AdminThreadInfoR\x05items\"N\n" +
-	"\x17TokenCacheStatsResponse\x123\n" +
-	"\x05items\x18\x01 \x03(\v2\x1d.presley.AdminTokenCacheStatsR\x05items\"@\n" +
-	"\x10MapStatsResponse\x12,\n" +
-	"\x05items\x18\x01 \x03(\v2\x16.presley.AdminMapStatsR\x05items\"\xd7\x04\n" +
-	"\x11DashboardResponse\x12<\n" +
-	"\fcluster_info\x18\x01 \x01(\v2\x19.presley.AdminClusterInfoR\vclusterInfo\x12B\n" +
-	"\x0ecluster_health\x18\x02 \x01(\v2\x1b.presley.AdminClusterHealthR\rclusterHealth\x12<\n" +
-	"\fnode_metrics\x18\x03 \x03(\v2\x19.presley.AdminNodeMetricsR\vnodeMetrics\x126\n" +
+	"\x10interval_seconds\x18\x01 \x01(\x05R\x0fintervalSeconds\"G\n" +
+	"\x13NodeMetricsResponse\x120\n" +
+	"\x05items\x18\x01 \x03(\v2\x1a.sentinel.AdminNodeMetricsR\x05items\"C\n" +
+	"\x11GrpcStatsResponse\x12.\n" +
+	"\x05items\x18\x01 \x03(\v2\x18.sentinel.AdminGrpcStatsR\x05items\"S\n" +
+	"\x19PersistenceStatusResponse\x126\n" +
+	"\x05items\x18\x01 \x03(\v2 .sentinel.AdminPersistenceStatusR\x05items\"I\n" +
+	"\x14NetworkStatsResponse\x121\n" +
+	"\x05items\x18\x01 \x03(\v2\x1b.sentinel.AdminNetworkStatsR\x05items\"E\n" +
+	"\x12ThreadInfoResponse\x12/\n" +
+	"\x05items\x18\x01 \x03(\v2\x19.sentinel.AdminThreadInfoR\x05items\"O\n" +
+	"\x17TokenCacheStatsResponse\x124\n" +
+	"\x05items\x18\x01 \x03(\v2\x1e.sentinel.AdminTokenCacheStatsR\x05items\"A\n" +
+	"\x10MapStatsResponse\x12-\n" +
+	"\x05items\x18\x01 \x03(\v2\x17.sentinel.AdminMapStatsR\x05items\"\xe0\x04\n" +
+	"\x11DashboardResponse\x12=\n" +
+	"\fcluster_info\x18\x01 \x01(\v2\x1a.sentinel.AdminClusterInfoR\vclusterInfo\x12C\n" +
+	"\x0ecluster_health\x18\x02 \x01(\v2\x1c.sentinel.AdminClusterHealthR\rclusterHealth\x12=\n" +
+	"\fnode_metrics\x18\x03 \x03(\v2\x1a.sentinel.AdminNodeMetricsR\vnodeMetrics\x127\n" +
 	"\n" +
-	"grpc_stats\x18\x04 \x03(\v2\x17.presley.AdminGrpcStatsR\tgrpcStats\x12N\n" +
-	"\x12persistence_status\x18\x05 \x03(\v2\x1f.presley.AdminPersistenceStatusR\x11persistenceStatus\x12?\n" +
-	"\rnetwork_stats\x18\x06 \x03(\v2\x1a.presley.AdminNetworkStatsR\fnetworkStats\x129\n" +
-	"\vthread_info\x18\a \x03(\v2\x18.presley.AdminThreadInfoR\n" +
-	"threadInfo\x12I\n" +
-	"\x11token_cache_stats\x18\b \x03(\v2\x1d.presley.AdminTokenCacheStatsR\x0ftokenCacheStats\x123\n" +
-	"\tmap_stats\x18\t \x03(\v2\x16.presley.AdminMapStatsR\bmapStats\"\n" +
+	"grpc_stats\x18\x04 \x03(\v2\x18.sentinel.AdminGrpcStatsR\tgrpcStats\x12O\n" +
+	"\x12persistence_status\x18\x05 \x03(\v2 .sentinel.AdminPersistenceStatusR\x11persistenceStatus\x12@\n" +
+	"\rnetwork_stats\x18\x06 \x03(\v2\x1b.sentinel.AdminNetworkStatsR\fnetworkStats\x12:\n" +
+	"\vthread_info\x18\a \x03(\v2\x19.sentinel.AdminThreadInfoR\n" +
+	"threadInfo\x12J\n" +
+	"\x11token_cache_stats\x18\b \x03(\v2\x1e.sentinel.AdminTokenCacheStatsR\x0ftokenCacheStats\x124\n" +
+	"\tmap_stats\x18\t \x03(\v2\x17.sentinel.AdminMapStatsR\bmapStats\"\x85\x02\n" +
+	"\x10AdminClusterInfo\x12!\n" +
+	"\fcluster_name\x18\x01 \x01(\tR\vclusterName\x12\x14\n" +
+	"\x05state\x18\x02 \x01(\tR\x05state\x12/\n" +
+	"\amembers\x18\x03 \x03(\v2\x15.sentinel.AdminMemberR\amembers\x12!\n" +
+	"\flocal_member\x18\x04 \x01(\tR\vlocalMember\x12'\n" +
+	"\x0fpartition_count\x18\x05 \x01(\x05R\x0epartitionCount\x12!\n" +
+	"\fcluster_size\x18\x06 \x01(\x05R\vclusterSize\x12\x18\n" +
+	"\aversion\x18\a \x01(\tR\aversion\"\xf0\x01\n" +
+	"\vAdminMember\x12\x12\n" +
+	"\x04uuid\x18\x01 \x01(\tR\x04uuid\x12\x18\n" +
+	"\aaddress\x18\x02 \x01(\tR\aaddress\x12\x12\n" +
+	"\x04lite\x18\x03 \x01(\bR\x04lite\x12\x19\n" +
+	"\bis_local\x18\x04 \x01(\bR\aisLocal\x12E\n" +
 	"\n" +
-	"\bMapEmpty2\x83\n" +
+	"attributes\x18\x05 \x03(\v2%.sentinel.AdminMember.AttributesEntryR\n" +
+	"attributes\x1a=\n" +
+	"\x0fAttributesEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x96\x02\n" +
+	"\x12AdminClusterHealth\x12!\n" +
+	"\fcluster_safe\x18\x01 \x01(\bR\vclusterSafe\x12*\n" +
+	"\x11local_member_safe\x18\x02 \x01(\bR\x0flocalMemberSafe\x12#\n" +
+	"\rcluster_state\x18\x03 \x01(\tR\fclusterState\x12\x18\n" +
+	"\arunning\x18\x04 \x01(\bR\arunning\x12!\n" +
+	"\fcluster_size\x18\x05 \x01(\x05R\vclusterSize\x12\x1d\n" +
 	"\n" +
-	"\x0fSentinelService\x12j\n" +
-	"\x0eGetClusterInfo\x12\x16.google.protobuf.Empty\x1a\x19.presley.AdminClusterInfo\"%\x82\xd3\xe4\x93\x02\x1f\x12\x1d/api/sentinel/v1/cluster-info\x12p\n" +
-	"\x10GetClusterHealth\x12\x16.google.protobuf.Empty\x1a\x1b.presley.AdminClusterHealth\"'\x82\xd3\xe4\x93\x02!\x12\x1f/api/sentinel/v1/cluster-health\x12n\n" +
+	"has_quorum\x18\x06 \x01(\bR\thasQuorum\x120\n" +
+	"\x14migration_queue_size\x18\a \x01(\x05R\x12migrationQueueSize\"\xe7\x01\n" +
+	"\x10AdminNodeMetrics\x12\x1d\n" +
+	"\anode_id\x18\x01 \x01(\tB\x04е\x18\x01R\x06nodeId\x124\n" +
+	"\x06memory\x18\x02 \x01(\v2\x1c.sentinel.AdminMemoryMetricsR\x06memory\x12+\n" +
+	"\x03cpu\x18\x03 \x01(\v2\x19.sentinel.AdminCpuMetricsR\x03cpu\x12.\n" +
+	"\x04disk\x18\x04 \x01(\v2\x1a.sentinel.AdminDiskMetricsR\x04disk\x12!\n" +
+	"\ftimestamp_ms\x18\x05 \x01(\x03R\vtimestampMs\"\xfc\x01\n" +
+	"\x12AdminMemoryMetrics\x12&\n" +
+	"\x0fheap_used_bytes\x18\x01 \x01(\x03R\rheapUsedBytes\x12$\n" +
+	"\x0eheap_max_bytes\x18\x02 \x01(\x03R\fheapMaxBytes\x120\n" +
+	"\x14heap_committed_bytes\x18\x03 \x01(\x03R\x12heapCommittedBytes\x12-\n" +
+	"\x13non_heap_used_bytes\x18\x04 \x01(\x03R\x10nonHeapUsedBytes\x12\x19\n" +
+	"\bgc_count\x18\x05 \x01(\x03R\agcCount\x12\x1c\n" +
+	"\n" +
+	"gc_time_ms\x18\x06 \x01(\x03R\bgcTimeMs\"\xe3\x01\n" +
+	"\x0fAdminCpuMetrics\x121\n" +
+	"\x14available_processors\x18\x01 \x01(\x05R\x13availableProcessors\x12(\n" +
+	"\x10process_cpu_load\x18\x02 \x01(\x01R\x0eprocessCpuLoad\x12&\n" +
+	"\x0fsystem_cpu_load\x18\x03 \x01(\x01R\rsystemCpuLoad\x12.\n" +
+	"\x13system_load_average\x18\x04 \x01(\x01R\x11systemLoadAverage\x12\x1b\n" +
+	"\tuptime_ms\x18\x05 \x01(\x03R\buptimeMs\"\xd4\x01\n" +
+	"\x10AdminDiskMetrics\x12'\n" +
+	"\x0fpersistence_dir\x18\x01 \x01(\tR\x0epersistenceDir\x12\x1f\n" +
+	"\vtotal_bytes\x18\x02 \x01(\x03R\n" +
+	"totalBytes\x12!\n" +
+	"\fusable_bytes\x18\x03 \x01(\x03R\vusableBytes\x12\x1d\n" +
+	"\n" +
+	"used_bytes\x18\x04 \x01(\x03R\tusedBytes\x124\n" +
+	"\x16persistence_size_bytes\x18\x05 \x01(\x03R\x14persistenceSizeBytes\"\x94\x02\n" +
+	"\x0eAdminGraphInfo\x12+\n" +
+	"\x0equalified_name\x18\x01 \x01(\tB\x04е\x18\x01R\rqualifiedName\x12\x1d\n" +
+	"\n" +
+	"state_root\x18\x02 \x01(\tR\tstateRoot\x12\x1a\n" +
+	"\bboundary\x18\x03 \x01(\tR\bboundary\x127\n" +
+	"\n" +
+	"graph_type\x18\x04 \x01(\x0e2\x18.sentinel.AdminGraphTypeR\tgraphType\x12 \n" +
+	"\vconsistency\x18\x05 \x01(\tR\vconsistency\x12 \n" +
+	"\vpersistence\x18\x06 \x01(\bR\vpersistence\x12\x1d\n" +
+	"\n" +
+	"value_type\x18\a \x01(\tR\tvalueType\"\x9a\x12\n" +
+	"\x16AdminServiceConnection\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\tB\x04е\x18\x01R\x02id\x12\x1d\n" +
+	"\n" +
+	"service_id\x18\x02 \x01(\tR\tserviceId\x12\x17\n" +
+	"\anode_id\x18\x03 \x01(\tR\x06nodeId\x12-\n" +
+	"\x12active_connections\x18\x04 \x01(\x05R\x11activeConnections\x12+\n" +
+	"\x11total_connections\x18\x05 \x01(\x03R\x10totalConnections\x12\x1d\n" +
+	"\n" +
+	"total_rpcs\x18\x06 \x01(\x03R\ttotalRpcs\x12\x1f\n" +
+	"\vactive_rpcs\x18\a \x01(\x05R\n" +
+	"activeRpcs\x12*\n" +
+	"\x11total_unary_reads\x18\b \x01(\x03R\x0ftotalUnaryReads\x12,\n" +
+	"\x12total_unary_writes\x18\t \x01(\x03R\x10totalUnaryWrites\x12%\n" +
+	"\x0eactive_streams\x18\n" +
+	" \x01(\x05R\ractiveStreams\x120\n" +
+	"\x14total_streams_opened\x18\v \x01(\x03R\x12totalStreamsOpened\x12\x1d\n" +
+	"\n" +
+	"poll_count\x18\f \x01(\x03R\tpollCount\x12\x1b\n" +
+	"\tpoll_rate\x18\r \x01(\x01R\bpollRate\x12n\n" +
+	"\x16per_method_poll_counts\x18\x0e \x03(\v29.sentinel.AdminServiceConnection.PerMethodPollCountsEntryR\x13perMethodPollCounts\x12a\n" +
+	"\x11per_method_counts\x18\x0f \x03(\v25.sentinel.AdminServiceConnection.PerMethodCountsEntryR\x0fperMethodCounts\x12'\n" +
+	"\x0faccessed_graphs\x18\x10 \x03(\tR\x0eaccessedGraphs\x12^\n" +
+	"\x10per_graph_counts\x18\x11 \x03(\v24.sentinel.AdminServiceConnection.PerGraphCountsEntryR\x0eperGraphCounts\x121\n" +
+	"\x05peers\x18\x12 \x03(\v2\x1b.sentinel.AdminPeerActivityR\x05peers\x12&\n" +
+	"\x0fconnected_at_ms\x18\x13 \x01(\x03R\rconnectedAtMs\x12(\n" +
+	"\x10last_activity_ms\x18\x14 \x01(\x03R\x0elastActivityMs\x12!\n" +
+	"\ftimestamp_ms\x18\x15 \x01(\x03R\vtimestampMs\x12,\n" +
+	"\x12rate_limited_count\x18\x16 \x01(\x03R\x10rateLimitedCount\x12q\n" +
+	"\x17per_method_rate_limited\x18\x17 \x03(\v2:.sentinel.AdminServiceConnection.PerMethodRateLimitedEntryR\x14perMethodRateLimited\x12!\n" +
+	"\ftotal_errors\x18\x18 \x01(\x03R\vtotalErrors\x12k\n" +
+	"\x15per_error_code_counts\x18\x19 \x03(\v28.sentinel.AdminServiceConnection.PerErrorCodeCountsEntryR\x12perErrorCodeCounts\x12q\n" +
+	"\x17per_method_error_counts\x18\x1a \x03(\v2:.sentinel.AdminServiceConnection.PerMethodErrorCountsEntryR\x14perMethodErrorCounts\x125\n" +
+	"\alatency\x18\x1b \x01(\v2\x1b.sentinel.AdminLatencyStatsR\alatency\x12J\n" +
+	"\x12per_method_latency\x18\x1c \x03(\v2\x1c.sentinel.AdminMethodLatencyR\x10perMethodLatency\x12%\n" +
+	"\x0ebytes_received\x18\x1d \x01(\x03R\rbytesReceived\x12\x1d\n" +
+	"\n" +
+	"bytes_sent\x18\x1e \x01(\x03R\tbytesSent\x12J\n" +
+	"\x12per_method_payload\x18\x1f \x03(\v2\x1c.sentinel.AdminMethodPayloadR\x10perMethodPayload\x12w\n" +
+	"\x19per_graph_mutation_counts\x18  \x03(\v2<.sentinel.AdminServiceConnection.PerGraphMutationCountsEntryR\x16perGraphMutationCounts\x1aF\n" +
+	"\x18PerMethodPollCountsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\x03R\x05value:\x028\x01\x1aB\n" +
+	"\x14PerMethodCountsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\x03R\x05value:\x028\x01\x1aA\n" +
+	"\x13PerGraphCountsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\x03R\x05value:\x028\x01\x1aG\n" +
+	"\x19PerMethodRateLimitedEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\x03R\x05value:\x028\x01\x1aE\n" +
+	"\x17PerErrorCodeCountsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\x03R\x05value:\x028\x01\x1aG\n" +
+	"\x19PerMethodErrorCountsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\x03R\x05value:\x028\x01\x1aI\n" +
+	"\x1bPerGraphMutationCountsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\x03R\x05value:\x028\x01\"\x97\x06\n" +
+	"\x11AdminPeerActivity\x12!\n" +
+	"\fpeer_address\x18\x01 \x01(\tR\vpeerAddress\x12\x1f\n" +
+	"\vactive_rpcs\x18\x02 \x01(\x05R\n" +
+	"activeRpcs\x12\x1d\n" +
+	"\n" +
+	"total_rpcs\x18\x03 \x01(\x03R\ttotalRpcs\x12%\n" +
+	"\x0eactive_streams\x18\x04 \x01(\x05R\ractiveStreams\x120\n" +
+	"\x14total_streams_opened\x18\x05 \x01(\x03R\x12totalStreamsOpened\x12\x1d\n" +
+	"\n" +
+	"poll_count\x18\x06 \x01(\x03R\tpollCount\x12\x1b\n" +
+	"\tpoll_rate\x18\a \x01(\x01R\bpollRate\x12\\\n" +
+	"\x11per_method_counts\x18\b \x03(\v20.sentinel.AdminPeerActivity.PerMethodCountsEntryR\x0fperMethodCounts\x12&\n" +
+	"\x0fconnected_at_ms\x18\t \x01(\x03R\rconnectedAtMs\x12(\n" +
+	"\x10last_activity_ms\x18\n" +
+	" \x01(\x03R\x0elastActivityMs\x12!\n" +
+	"\ftotal_errors\x18\v \x01(\x03R\vtotalErrors\x12f\n" +
+	"\x15per_error_code_counts\x18\f \x03(\v23.sentinel.AdminPeerActivity.PerErrorCodeCountsEntryR\x12perErrorCodeCounts\x12%\n" +
+	"\x0ebytes_received\x18\r \x01(\x03R\rbytesReceived\x12\x1d\n" +
+	"\n" +
+	"bytes_sent\x18\x0e \x01(\x03R\tbytesSent\x1aB\n" +
+	"\x14PerMethodCountsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\x03R\x05value:\x028\x01\x1aE\n" +
+	"\x17PerErrorCodeCountsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\x03R\x05value:\x028\x01\"\xa9\b\n" +
+	"\rAdminMapStats\x12\x1f\n" +
+	"\bmap_name\x18\x01 \x01(\tB\x04е\x18\x01R\amapName\x12\x12\n" +
+	"\x04size\x18\x02 \x01(\x05R\x04size\x12*\n" +
+	"\x11owned_entry_count\x18\x03 \x01(\x03R\x0fownedEntryCount\x12,\n" +
+	"\x12backup_entry_count\x18\x04 \x01(\x03R\x10backupEntryCount\x12&\n" +
+	"\x0fheap_cost_bytes\x18\x05 \x01(\x03R\rheapCostBytes\x12-\n" +
+	"\x13last_update_time_ms\x18\x06 \x01(\x03R\x10lastUpdateTimeMs\x12\x1b\n" +
+	"\tput_count\x18\a \x01(\x03R\bputCount\x12\x1b\n" +
+	"\tget_count\x18\b \x01(\x03R\bgetCount\x12\x1b\n" +
+	"\thit_count\x18\t \x01(\x03R\bhitCount\x12!\n" +
+	"\ftimestamp_ms\x18\n" +
+	" \x01(\x03R\vtimestampMs\x125\n" +
+	"\x17owned_entry_memory_cost\x18\v \x01(\x03R\x14ownedEntryMemoryCost\x127\n" +
+	"\x18backup_entry_memory_cost\x18\f \x01(\x03R\x15backupEntryMemoryCost\x12*\n" +
+	"\x11dirty_entry_count\x18\r \x01(\x03R\x0fdirtyEntryCount\x12,\n" +
+	"\x12locked_entry_count\x18\x0e \x01(\x03R\x10lockedEntryCount\x12!\n" +
+	"\fremove_count\x18\x0f \x01(\x03R\vremoveCount\x12\x1b\n" +
+	"\tset_count\x18\x10 \x01(\x03R\bsetCount\x12%\n" +
+	"\x0eeviction_count\x18\x11 \x01(\x03R\revictionCount\x12)\n" +
+	"\x10expiration_count\x18\x12 \x01(\x03R\x0fexpirationCount\x12-\n" +
+	"\x13last_access_time_ms\x18\x13 \x01(\x03R\x10lastAccessTimeMs\x12(\n" +
+	"\x10creation_time_ms\x18\x14 \x01(\x03R\x0ecreationTimeMs\x12!\n" +
+	"\fbackup_count\x18\x15 \x01(\x05R\vbackupCount\x12\x1d\n" +
+	"\n" +
+	"value_type\x18\x16 \x01(\tR\tvalueType\x127\n" +
+	"\n" +
+	"graph_type\x18\x17 \x01(\x0e2\x18.sentinel.AdminGraphTypeR\tgraphType\x12%\n" +
+	"\x0equalified_name\x18\x18 \x01(\tR\rqualifiedName\x12\x1d\n" +
+	"\n" +
+	"state_root\x18\x19 \x01(\tR\tstateRoot\x12 \n" +
+	"\vconsistency\x18\x1a \x01(\tR\vconsistency\x12 \n" +
+	"\vpersistence\x18\x1b \x01(\bR\vpersistence\"\xb5\x03\n" +
+	"\x0eAdminGrpcStats\x12\x1d\n" +
+	"\anode_id\x18\x01 \x01(\tB\x04е\x18\x01R\x06nodeId\x12-\n" +
+	"\x12active_connections\x18\x02 \x01(\x05R\x11activeConnections\x12\x1d\n" +
+	"\n" +
+	"total_rpcs\x18\x03 \x01(\x03R\ttotalRpcs\x12\x1f\n" +
+	"\vactive_rpcs\x18\x04 \x01(\x05R\n" +
+	"activeRpcs\x12Y\n" +
+	"\x11per_method_counts\x18\x05 \x03(\v2-.sentinel.AdminGrpcStats.PerMethodCountsEntryR\x0fperMethodCounts\x12,\n" +
+	"\x12rate_limited_count\x18\x06 \x01(\x03R\x10rateLimitedCount\x12%\n" +
+	"\x0eactive_streams\x18\a \x01(\x05R\ractiveStreams\x12!\n" +
+	"\ftimestamp_ms\x18\b \x01(\x03R\vtimestampMs\x1aB\n" +
+	"\x14PerMethodCountsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\x03R\x05value:\x028\x01\"\xfa\x02\n" +
+	"\x16AdminPersistenceStatus\x12\x1d\n" +
+	"\anode_id\x18\x01 \x01(\tB\x04е\x18\x01R\x06nodeId\x12\x18\n" +
+	"\aenabled\x18\x02 \x01(\bR\aenabled\x12'\n" +
+	"\x0fpersistence_dir\x18\x03 \x01(\tR\x0epersistenceDir\x12/\n" +
+	"\x14redo_log_entry_count\x18\x04 \x01(\x03R\x11redoLogEntryCount\x12-\n" +
+	"\x13redo_log_size_bytes\x18\x05 \x01(\x03R\x10redoLogSizeBytes\x12)\n" +
+	"\x11last_dump_time_ms\x18\x06 \x01(\x03R\x0elastDumpTimeMs\x121\n" +
+	"\x15last_dump_entry_count\x18\a \x01(\x03R\x12lastDumpEntryCount\x12\x1d\n" +
+	"\n" +
+	"dump_count\x18\b \x01(\x03R\tdumpCount\x12!\n" +
+	"\ftimestamp_ms\x18\t \x01(\x03R\vtimestampMs\"\x8d\x03\n" +
+	"\x11AdminNetworkStats\x12\x1d\n" +
+	"\anode_id\x18\x01 \x01(\tB\x04е\x18\x01R\x06nodeId\x12.\n" +
+	"\x13grpc_listen_address\x18\x02 \x01(\tR\x11grpcListenAddress\x128\n" +
+	"\x18hazelcast_listen_address\x18\x03 \x01(\tR\x16hazelcastListenAddress\x126\n" +
+	"\x17active_grpc_connections\x18\x04 \x01(\x05R\x15activeGrpcConnections\x12N\n" +
+	"\x12member_connections\x18\x05 \x03(\v2\x1f.sentinel.AdminMemberConnectionR\x11memberConnections\x12\x1d\n" +
+	"\n" +
+	"bytes_sent\x18\x06 \x01(\x03R\tbytesSent\x12%\n" +
+	"\x0ebytes_received\x18\a \x01(\x03R\rbytesReceived\x12!\n" +
+	"\ftimestamp_ms\x18\b \x01(\x03R\vtimestampMs\"z\n" +
+	"\x15AdminMemberConnection\x12\x18\n" +
+	"\aaddress\x18\x01 \x01(\tR\aaddress\x12\x1c\n" +
+	"\tconnected\x18\x02 \x01(\bR\tconnected\x12)\n" +
+	"\x10connection_count\x18\x03 \x01(\x05R\x0fconnectionCount\"\x81\x02\n" +
+	"\x0fAdminThreadInfo\x12\x1d\n" +
+	"\anode_id\x18\x01 \x01(\tB\x04е\x18\x01R\x06nodeId\x12!\n" +
+	"\fthread_count\x18\x02 \x01(\x05R\vthreadCount\x12*\n" +
+	"\x11peak_thread_count\x18\x03 \x01(\x05R\x0fpeakThreadCount\x12.\n" +
+	"\x13daemon_thread_count\x18\x04 \x01(\x05R\x11daemonThreadCount\x12-\n" +
+	"\x12deadlocked_threads\x18\x05 \x03(\tR\x11deadlockedThreads\x12!\n" +
+	"\ftimestamp_ms\x18\x06 \x01(\x03R\vtimestampMs\"\xda\x01\n" +
+	"\x14AdminTokenCacheStats\x12\x1d\n" +
+	"\anode_id\x18\x01 \x01(\tB\x04е\x18\x01R\x06nodeId\x12\x1d\n" +
+	"\n" +
+	"cache_size\x18\x02 \x01(\x05R\tcacheSize\x12\x1b\n" +
+	"\thit_count\x18\x03 \x01(\x03R\bhitCount\x12\x1d\n" +
+	"\n" +
+	"miss_count\x18\x04 \x01(\x03R\tmissCount\x12%\n" +
+	"\x0eeviction_count\x18\x05 \x01(\x03R\revictionCount\x12!\n" +
+	"\ftimestamp_ms\x18\x06 \x01(\x03R\vtimestampMs\"\xd9\x01\n" +
+	"\x11AdminLatencyStats\x12\x15\n" +
+	"\x06p50_us\x18\x01 \x01(\x03R\x05p50Us\x12\x15\n" +
+	"\x06p90_us\x18\x02 \x01(\x03R\x05p90Us\x12\x15\n" +
+	"\x06p95_us\x18\x03 \x01(\x03R\x05p95Us\x12\x15\n" +
+	"\x06p99_us\x18\x04 \x01(\x03R\x05p99Us\x12\x15\n" +
+	"\x06max_us\x18\x05 \x01(\x03R\x05maxUs\x12\x15\n" +
+	"\x06min_us\x18\x06 \x01(\x03R\x05minUs\x12\x17\n" +
+	"\amean_us\x18\a \x01(\x01R\x06meanUs\x12!\n" +
+	"\fsample_count\x18\b \x01(\x03R\vsampleCount\"c\n" +
+	"\x12AdminMethodLatency\x12\x16\n" +
+	"\x06method\x18\x01 \x01(\tR\x06method\x125\n" +
+	"\alatency\x18\x02 \x01(\v2\x1b.sentinel.AdminLatencyStatsR\alatency\"\xe7\x02\n" +
+	"\x12AdminMethodPayload\x12\x16\n" +
+	"\x06method\x18\x01 \x01(\tR\x06method\x12.\n" +
+	"\x13total_request_bytes\x18\x02 \x01(\x03R\x11totalRequestBytes\x120\n" +
+	"\x14total_response_bytes\x18\x03 \x01(\x03R\x12totalResponseBytes\x12#\n" +
+	"\rrequest_count\x18\x04 \x01(\x03R\frequestCount\x12*\n" +
+	"\x11avg_request_bytes\x18\x05 \x01(\x01R\x0favgRequestBytes\x12,\n" +
+	"\x12avg_response_bytes\x18\x06 \x01(\x01R\x10avgResponseBytes\x12*\n" +
+	"\x11max_request_bytes\x18\a \x01(\x03R\x0fmaxRequestBytes\x12,\n" +
+	"\x12max_response_bytes\x18\b \x01(\x03R\x10maxResponseBytes\"\xdd\x04\n" +
+	"\x0fAdminQueueStats\x12+\n" +
+	"\x0equalified_name\x18\x01 \x01(\tB\x04е\x18\x01R\rqualifiedName\x12\x1d\n" +
+	"\n" +
+	"state_root\x18\x02 \x01(\tR\tstateRoot\x12\x1a\n" +
+	"\bboundary\x18\x03 \x01(\tR\bboundary\x12\x1f\n" +
+	"\vis_priority\x18\x04 \x01(\bR\n" +
+	"isPriority\x12\x14\n" +
+	"\x05depth\x18\x05 \x01(\x03R\x05depth\x12#\n" +
+	"\rtotal_offered\x18\x06 \x01(\x03R\ftotalOffered\x12!\n" +
+	"\ftotal_polled\x18\a \x01(\x03R\vtotalPolled\x12%\n" +
+	"\x0etotal_rejected\x18\b \x01(\x03R\rtotalRejected\x12\x1d\n" +
+	"\n" +
+	"offer_rate\x18\t \x01(\x01R\tofferRate\x12!\n" +
+	"\fconsume_rate\x18\n" +
+	" \x01(\x01R\vconsumeRate\x12\x19\n" +
+	"\blag_rate\x18\v \x01(\x01R\alagRate\x12'\n" +
+	"\x10avg_wait_time_ms\x18\f \x01(\x01R\ravgWaitTimeMs\x12'\n" +
+	"\x10max_wait_time_ms\x18\r \x01(\x03R\rmaxWaitTimeMs\x12)\n" +
+	"\x10active_consumers\x18\x0e \x01(\x05R\x0factiveConsumers\x12&\n" +
+	"\x0fheap_cost_bytes\x18\x0f \x01(\x03R\rheapCostBytes\x12\x17\n" +
+	"\anode_id\x18\x10 \x01(\tR\x06nodeId\x12!\n" +
+	"\ftimestamp_ms\x18\x11 \x01(\x03R\vtimestampMs\"\x95\x03\n" +
+	"\x0fAdminTopicStats\x12+\n" +
+	"\x0equalified_name\x18\x01 \x01(\tB\x04е\x18\x01R\rqualifiedName\x12\x1d\n" +
+	"\n" +
+	"state_root\x18\x02 \x01(\tR\tstateRoot\x12\x1a\n" +
+	"\bboundary\x18\x03 \x01(\tR\bboundary\x12'\n" +
+	"\x0ftotal_published\x18\x04 \x01(\x03R\x0etotalPublished\x12%\n" +
+	"\x0etotal_received\x18\x05 \x01(\x03R\rtotalReceived\x12!\n" +
+	"\fpublish_rate\x18\x06 \x01(\x01R\vpublishRate\x12)\n" +
+	"\x10subscriber_count\x18\a \x01(\x05R\x0fsubscriberCount\x12@\n" +
+	"\vsubscribers\x18\b \x03(\v2\x1e.sentinel.AdminTopicSubscriberR\vsubscribers\x12\x17\n" +
+	"\anode_id\x18\t \x01(\tR\x06nodeId\x12!\n" +
+	"\ftimestamp_ms\x18\n" +
+	" \x01(\x03R\vtimestampMs\"\xc9\x01\n" +
+	"\x14AdminTopicSubscriber\x12\x1d\n" +
+	"\n" +
+	"service_id\x18\x01 \x01(\tR\tserviceId\x12%\n" +
+	"\x0etotal_received\x18\x02 \x01(\x03R\rtotalReceived\x12#\n" +
+	"\rtotal_dropped\x18\x03 \x01(\x03R\ftotalDropped\x12\x1c\n" +
+	"\tconnected\x18\x04 \x01(\bR\tconnected\x12(\n" +
+	"\x10last_received_ms\x18\x05 \x01(\x03R\x0elastReceivedMs\"\xb1\x04\n" +
+	"\x10AdminWatchHealth\x12\x1f\n" +
+	"\bwatch_id\x18\x01 \x01(\tB\x04е\x18\x01R\awatchId\x12\x1d\n" +
+	"\n" +
+	"service_id\x18\x02 \x01(\tR\tserviceId\x12\x17\n" +
+	"\anode_id\x18\x03 \x01(\tR\x06nodeId\x12\x16\n" +
+	"\x06method\x18\x04 \x01(\tR\x06method\x12\x14\n" +
+	"\x05graph\x18\x05 \x01(\tR\x05graph\x12#\n" +
+	"\rmessages_sent\x18\x06 \x01(\x03R\fmessagesSent\x12)\n" +
+	"\x10messages_pending\x18\a \x01(\x05R\x0fmessagesPending\x12)\n" +
+	"\x10consumer_healthy\x18\b \x01(\bR\x0fconsumerHealthy\x12/\n" +
+	"\x13backpressure_events\x18\t \x01(\x03R\x12backpressureEvents\x12 \n" +
+	"\flast_sent_ms\x18\n" +
+	" \x01(\x03R\n" +
+	"lastSentMs\x12(\n" +
+	"\x10last_mutation_ms\x18\v \x01(\x03R\x0elastMutationMs\x12\x15\n" +
+	"\x06lag_ms\x18\f \x01(\x03R\x05lagMs\x12 \n" +
+	"\fopened_at_ms\x18\r \x01(\x03R\n" +
+	"openedAtMs\x12\x1f\n" +
+	"\vduration_ms\x18\x0e \x01(\x03R\n" +
+	"durationMs\x12!\n" +
+	"\fpeer_address\x18\x0f \x01(\tR\vpeerAddress\x12!\n" +
+	"\ftimestamp_ms\x18\x10 \x01(\x03R\vtimestampMs\"\xfc\x04\n" +
+	"\x11AdminMutationRate\x12+\n" +
+	"\x0equalified_name\x18\x01 \x01(\tB\x04е\x18\x01R\rqualifiedName\x12\x1d\n" +
+	"\n" +
+	"state_root\x18\x02 \x01(\tR\tstateRoot\x12\x1a\n" +
+	"\bboundary\x18\x03 \x01(\tR\bboundary\x127\n" +
+	"\n" +
+	"graph_type\x18\x04 \x01(\x0e2\x18.sentinel.AdminGraphTypeR\tgraphType\x12'\n" +
+	"\x0ftotal_mutations\x18\x05 \x01(\x03R\x0etotalMutations\x12-\n" +
+	"\x12interval_mutations\x18\x06 \x01(\x03R\x11intervalMutations\x12#\n" +
+	"\rmutation_rate\x18\a \x01(\x01R\fmutationRate\x12\x1b\n" +
+	"\tput_count\x18\b \x01(\x03R\bputCount\x12\x1b\n" +
+	"\tset_count\x18\t \x01(\x03R\bsetCount\x12!\n" +
+	"\fdelete_count\x18\n" +
+	" \x01(\x03R\vdeleteCount\x12h\n" +
+	"\x15per_service_mutations\x18\v \x03(\v24.sentinel.AdminMutationRate.PerServiceMutationsEntryR\x13perServiceMutations\x12\x17\n" +
+	"\anode_id\x18\f \x01(\tR\x06nodeId\x12!\n" +
+	"\ftimestamp_ms\x18\r \x01(\x03R\vtimestampMs\x1aF\n" +
+	"\x18PerServiceMutationsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\x03R\x05value:\x028\x01\"\n" +
+	"\n" +
+	"\bMapEmpty*\xe7\x01\n" +
+	"\x0eAdminGraphType\x12\x1e\n" +
+	"\x1aADMIN_GRAPH_TYPE_SINGLETON\x10\x00\x12\x1f\n" +
+	"\x1bADMIN_GRAPH_TYPE_COLLECTION\x10\x01\x12\x1a\n" +
+	"\x16ADMIN_GRAPH_TYPE_QUEUE\x10\x02\x12#\n" +
+	"\x1fADMIN_GRAPH_TYPE_PRIORITY_QUEUE\x10\x03\x12\x1a\n" +
+	"\x16ADMIN_GRAPH_TYPE_TOPIC\x10\x04\x12\x19\n" +
+	"\x15ADMIN_GRAPH_TYPE_VIEW\x10\x05\x12\x1c\n" +
+	"\x18ADMIN_GRAPH_TYPE_COMMAND\x10\x062\x85\n" +
+	"\n" +
+	"\x0fSentinelService\x12k\n" +
+	"\x0eGetClusterInfo\x12\x16.google.protobuf.Empty\x1a\x1a.sentinel.AdminClusterInfo\"%\x82\xd3\xe4\x93\x02\x1f\x12\x1d/api/sentinel/v1/cluster-info\x12q\n" +
+	"\x10GetClusterHealth\x12\x16.google.protobuf.Empty\x1a\x1c.sentinel.AdminClusterHealth\"'\x82\xd3\xe4\x93\x02!\x12\x1f/api/sentinel/v1/cluster-health\x12n\n" +
 	"\x0eGetNodeMetrics\x12\x16.google.protobuf.Empty\x1a\x1d.sentinel.NodeMetricsResponse\"%\x82\xd3\xe4\x93\x02\x1f\x12\x1d/api/sentinel/v1/node-metrics\x12h\n" +
 	"\fGetGrpcStats\x12\x16.google.protobuf.Empty\x1a\x1b.sentinel.GrpcStatsResponse\"#\x82\xd3\xe4\x93\x02\x1d\x12\x1b/api/sentinel/v1/grpc-stats\x12\x80\x01\n" +
 	"\x14GetPersistenceStatus\x12\x16.google.protobuf.Empty\x1a#.sentinel.PersistenceStatusResponse\"+\x82\xd3\xe4\x93\x02%\x12#/api/sentinel/v1/persistence-status\x12q\n" +
@@ -669,75 +4071,131 @@ func file_services_sentinel_proto_rawDescGZIP() []byte {
 	return file_services_sentinel_proto_rawDescData
 }
 
-var file_services_sentinel_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_services_sentinel_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_services_sentinel_proto_msgTypes = make([]protoimpl.MessageInfo, 49)
 var file_services_sentinel_proto_goTypes = []any{
-	(*Config)(nil),                         // 0: sentinel.Config
-	(*SentinelState)(nil),                  // 1: sentinel.SentinelState
-	(*WatchDashboardRequest)(nil),          // 2: sentinel.WatchDashboardRequest
-	(*NodeMetricsResponse)(nil),            // 3: sentinel.NodeMetricsResponse
-	(*GrpcStatsResponse)(nil),              // 4: sentinel.GrpcStatsResponse
-	(*PersistenceStatusResponse)(nil),      // 5: sentinel.PersistenceStatusResponse
-	(*NetworkStatsResponse)(nil),           // 6: sentinel.NetworkStatsResponse
-	(*ThreadInfoResponse)(nil),             // 7: sentinel.ThreadInfoResponse
-	(*TokenCacheStatsResponse)(nil),        // 8: sentinel.TokenCacheStatsResponse
-	(*MapStatsResponse)(nil),               // 9: sentinel.MapStatsResponse
-	(*DashboardResponse)(nil),              // 10: sentinel.DashboardResponse
-	(*MapEmpty)(nil),                       // 11: sentinel.MapEmpty
-	(*presley.AdminNodeMetrics)(nil),       // 12: presley.AdminNodeMetrics
-	(*presley.AdminGrpcStats)(nil),         // 13: presley.AdminGrpcStats
-	(*presley.AdminPersistenceStatus)(nil), // 14: presley.AdminPersistenceStatus
-	(*presley.AdminNetworkStats)(nil),      // 15: presley.AdminNetworkStats
-	(*presley.AdminThreadInfo)(nil),        // 16: presley.AdminThreadInfo
-	(*presley.AdminTokenCacheStats)(nil),   // 17: presley.AdminTokenCacheStats
-	(*presley.AdminMapStats)(nil),          // 18: presley.AdminMapStats
-	(*presley.AdminClusterInfo)(nil),       // 19: presley.AdminClusterInfo
-	(*presley.AdminClusterHealth)(nil),     // 20: presley.AdminClusterHealth
-	(*emptypb.Empty)(nil),                  // 21: google.protobuf.Empty
+	(AdminGraphType)(0),               // 0: sentinel.AdminGraphType
+	(*Config)(nil),                    // 1: sentinel.Config
+	(*SentinelState)(nil),             // 2: sentinel.SentinelState
+	(*WatchDashboardRequest)(nil),     // 3: sentinel.WatchDashboardRequest
+	(*NodeMetricsResponse)(nil),       // 4: sentinel.NodeMetricsResponse
+	(*GrpcStatsResponse)(nil),         // 5: sentinel.GrpcStatsResponse
+	(*PersistenceStatusResponse)(nil), // 6: sentinel.PersistenceStatusResponse
+	(*NetworkStatsResponse)(nil),      // 7: sentinel.NetworkStatsResponse
+	(*ThreadInfoResponse)(nil),        // 8: sentinel.ThreadInfoResponse
+	(*TokenCacheStatsResponse)(nil),   // 9: sentinel.TokenCacheStatsResponse
+	(*MapStatsResponse)(nil),          // 10: sentinel.MapStatsResponse
+	(*DashboardResponse)(nil),         // 11: sentinel.DashboardResponse
+	(*AdminClusterInfo)(nil),          // 12: sentinel.AdminClusterInfo
+	(*AdminMember)(nil),               // 13: sentinel.AdminMember
+	(*AdminClusterHealth)(nil),        // 14: sentinel.AdminClusterHealth
+	(*AdminNodeMetrics)(nil),          // 15: sentinel.AdminNodeMetrics
+	(*AdminMemoryMetrics)(nil),        // 16: sentinel.AdminMemoryMetrics
+	(*AdminCpuMetrics)(nil),           // 17: sentinel.AdminCpuMetrics
+	(*AdminDiskMetrics)(nil),          // 18: sentinel.AdminDiskMetrics
+	(*AdminGraphInfo)(nil),            // 19: sentinel.AdminGraphInfo
+	(*AdminServiceConnection)(nil),    // 20: sentinel.AdminServiceConnection
+	(*AdminPeerActivity)(nil),         // 21: sentinel.AdminPeerActivity
+	(*AdminMapStats)(nil),             // 22: sentinel.AdminMapStats
+	(*AdminGrpcStats)(nil),            // 23: sentinel.AdminGrpcStats
+	(*AdminPersistenceStatus)(nil),    // 24: sentinel.AdminPersistenceStatus
+	(*AdminNetworkStats)(nil),         // 25: sentinel.AdminNetworkStats
+	(*AdminMemberConnection)(nil),     // 26: sentinel.AdminMemberConnection
+	(*AdminThreadInfo)(nil),           // 27: sentinel.AdminThreadInfo
+	(*AdminTokenCacheStats)(nil),      // 28: sentinel.AdminTokenCacheStats
+	(*AdminLatencyStats)(nil),         // 29: sentinel.AdminLatencyStats
+	(*AdminMethodLatency)(nil),        // 30: sentinel.AdminMethodLatency
+	(*AdminMethodPayload)(nil),        // 31: sentinel.AdminMethodPayload
+	(*AdminQueueStats)(nil),           // 32: sentinel.AdminQueueStats
+	(*AdminTopicStats)(nil),           // 33: sentinel.AdminTopicStats
+	(*AdminTopicSubscriber)(nil),      // 34: sentinel.AdminTopicSubscriber
+	(*AdminWatchHealth)(nil),          // 35: sentinel.AdminWatchHealth
+	(*AdminMutationRate)(nil),         // 36: sentinel.AdminMutationRate
+	(*MapEmpty)(nil),                  // 37: sentinel.MapEmpty
+	nil,                               // 38: sentinel.AdminMember.AttributesEntry
+	nil,                               // 39: sentinel.AdminServiceConnection.PerMethodPollCountsEntry
+	nil,                               // 40: sentinel.AdminServiceConnection.PerMethodCountsEntry
+	nil,                               // 41: sentinel.AdminServiceConnection.PerGraphCountsEntry
+	nil,                               // 42: sentinel.AdminServiceConnection.PerMethodRateLimitedEntry
+	nil,                               // 43: sentinel.AdminServiceConnection.PerErrorCodeCountsEntry
+	nil,                               // 44: sentinel.AdminServiceConnection.PerMethodErrorCountsEntry
+	nil,                               // 45: sentinel.AdminServiceConnection.PerGraphMutationCountsEntry
+	nil,                               // 46: sentinel.AdminPeerActivity.PerMethodCountsEntry
+	nil,                               // 47: sentinel.AdminPeerActivity.PerErrorCodeCountsEntry
+	nil,                               // 48: sentinel.AdminGrpcStats.PerMethodCountsEntry
+	nil,                               // 49: sentinel.AdminMutationRate.PerServiceMutationsEntry
+	(*emptypb.Empty)(nil),             // 50: google.protobuf.Empty
 }
 var file_services_sentinel_proto_depIdxs = []int32{
-	12, // 0: sentinel.NodeMetricsResponse.items:type_name -> presley.AdminNodeMetrics
-	13, // 1: sentinel.GrpcStatsResponse.items:type_name -> presley.AdminGrpcStats
-	14, // 2: sentinel.PersistenceStatusResponse.items:type_name -> presley.AdminPersistenceStatus
-	15, // 3: sentinel.NetworkStatsResponse.items:type_name -> presley.AdminNetworkStats
-	16, // 4: sentinel.ThreadInfoResponse.items:type_name -> presley.AdminThreadInfo
-	17, // 5: sentinel.TokenCacheStatsResponse.items:type_name -> presley.AdminTokenCacheStats
-	18, // 6: sentinel.MapStatsResponse.items:type_name -> presley.AdminMapStats
-	19, // 7: sentinel.DashboardResponse.cluster_info:type_name -> presley.AdminClusterInfo
-	20, // 8: sentinel.DashboardResponse.cluster_health:type_name -> presley.AdminClusterHealth
-	12, // 9: sentinel.DashboardResponse.node_metrics:type_name -> presley.AdminNodeMetrics
-	13, // 10: sentinel.DashboardResponse.grpc_stats:type_name -> presley.AdminGrpcStats
-	14, // 11: sentinel.DashboardResponse.persistence_status:type_name -> presley.AdminPersistenceStatus
-	15, // 12: sentinel.DashboardResponse.network_stats:type_name -> presley.AdminNetworkStats
-	16, // 13: sentinel.DashboardResponse.thread_info:type_name -> presley.AdminThreadInfo
-	17, // 14: sentinel.DashboardResponse.token_cache_stats:type_name -> presley.AdminTokenCacheStats
-	18, // 15: sentinel.DashboardResponse.map_stats:type_name -> presley.AdminMapStats
-	21, // 16: sentinel.SentinelService.GetClusterInfo:input_type -> google.protobuf.Empty
-	21, // 17: sentinel.SentinelService.GetClusterHealth:input_type -> google.protobuf.Empty
-	21, // 18: sentinel.SentinelService.GetNodeMetrics:input_type -> google.protobuf.Empty
-	21, // 19: sentinel.SentinelService.GetGrpcStats:input_type -> google.protobuf.Empty
-	21, // 20: sentinel.SentinelService.GetPersistenceStatus:input_type -> google.protobuf.Empty
-	21, // 21: sentinel.SentinelService.GetNetworkStats:input_type -> google.protobuf.Empty
-	21, // 22: sentinel.SentinelService.GetThreadInfo:input_type -> google.protobuf.Empty
-	21, // 23: sentinel.SentinelService.GetTokenCacheStats:input_type -> google.protobuf.Empty
-	21, // 24: sentinel.SentinelService.GetMapStats:input_type -> google.protobuf.Empty
-	21, // 25: sentinel.SentinelService.GetDashboard:input_type -> google.protobuf.Empty
-	2,  // 26: sentinel.SentinelService.WatchDashboard:input_type -> sentinel.WatchDashboardRequest
-	19, // 27: sentinel.SentinelService.GetClusterInfo:output_type -> presley.AdminClusterInfo
-	20, // 28: sentinel.SentinelService.GetClusterHealth:output_type -> presley.AdminClusterHealth
-	3,  // 29: sentinel.SentinelService.GetNodeMetrics:output_type -> sentinel.NodeMetricsResponse
-	4,  // 30: sentinel.SentinelService.GetGrpcStats:output_type -> sentinel.GrpcStatsResponse
-	5,  // 31: sentinel.SentinelService.GetPersistenceStatus:output_type -> sentinel.PersistenceStatusResponse
-	6,  // 32: sentinel.SentinelService.GetNetworkStats:output_type -> sentinel.NetworkStatsResponse
-	7,  // 33: sentinel.SentinelService.GetThreadInfo:output_type -> sentinel.ThreadInfoResponse
-	8,  // 34: sentinel.SentinelService.GetTokenCacheStats:output_type -> sentinel.TokenCacheStatsResponse
-	9,  // 35: sentinel.SentinelService.GetMapStats:output_type -> sentinel.MapStatsResponse
-	10, // 36: sentinel.SentinelService.GetDashboard:output_type -> sentinel.DashboardResponse
-	10, // 37: sentinel.SentinelService.WatchDashboard:output_type -> sentinel.DashboardResponse
-	27, // [27:38] is the sub-list for method output_type
-	16, // [16:27] is the sub-list for method input_type
-	16, // [16:16] is the sub-list for extension type_name
-	16, // [16:16] is the sub-list for extension extendee
-	0,  // [0:16] is the sub-list for field type_name
+	15, // 0: sentinel.NodeMetricsResponse.items:type_name -> sentinel.AdminNodeMetrics
+	23, // 1: sentinel.GrpcStatsResponse.items:type_name -> sentinel.AdminGrpcStats
+	24, // 2: sentinel.PersistenceStatusResponse.items:type_name -> sentinel.AdminPersistenceStatus
+	25, // 3: sentinel.NetworkStatsResponse.items:type_name -> sentinel.AdminNetworkStats
+	27, // 4: sentinel.ThreadInfoResponse.items:type_name -> sentinel.AdminThreadInfo
+	28, // 5: sentinel.TokenCacheStatsResponse.items:type_name -> sentinel.AdminTokenCacheStats
+	22, // 6: sentinel.MapStatsResponse.items:type_name -> sentinel.AdminMapStats
+	12, // 7: sentinel.DashboardResponse.cluster_info:type_name -> sentinel.AdminClusterInfo
+	14, // 8: sentinel.DashboardResponse.cluster_health:type_name -> sentinel.AdminClusterHealth
+	15, // 9: sentinel.DashboardResponse.node_metrics:type_name -> sentinel.AdminNodeMetrics
+	23, // 10: sentinel.DashboardResponse.grpc_stats:type_name -> sentinel.AdminGrpcStats
+	24, // 11: sentinel.DashboardResponse.persistence_status:type_name -> sentinel.AdminPersistenceStatus
+	25, // 12: sentinel.DashboardResponse.network_stats:type_name -> sentinel.AdminNetworkStats
+	27, // 13: sentinel.DashboardResponse.thread_info:type_name -> sentinel.AdminThreadInfo
+	28, // 14: sentinel.DashboardResponse.token_cache_stats:type_name -> sentinel.AdminTokenCacheStats
+	22, // 15: sentinel.DashboardResponse.map_stats:type_name -> sentinel.AdminMapStats
+	13, // 16: sentinel.AdminClusterInfo.members:type_name -> sentinel.AdminMember
+	38, // 17: sentinel.AdminMember.attributes:type_name -> sentinel.AdminMember.AttributesEntry
+	16, // 18: sentinel.AdminNodeMetrics.memory:type_name -> sentinel.AdminMemoryMetrics
+	17, // 19: sentinel.AdminNodeMetrics.cpu:type_name -> sentinel.AdminCpuMetrics
+	18, // 20: sentinel.AdminNodeMetrics.disk:type_name -> sentinel.AdminDiskMetrics
+	0,  // 21: sentinel.AdminGraphInfo.graph_type:type_name -> sentinel.AdminGraphType
+	39, // 22: sentinel.AdminServiceConnection.per_method_poll_counts:type_name -> sentinel.AdminServiceConnection.PerMethodPollCountsEntry
+	40, // 23: sentinel.AdminServiceConnection.per_method_counts:type_name -> sentinel.AdminServiceConnection.PerMethodCountsEntry
+	41, // 24: sentinel.AdminServiceConnection.per_graph_counts:type_name -> sentinel.AdminServiceConnection.PerGraphCountsEntry
+	21, // 25: sentinel.AdminServiceConnection.peers:type_name -> sentinel.AdminPeerActivity
+	42, // 26: sentinel.AdminServiceConnection.per_method_rate_limited:type_name -> sentinel.AdminServiceConnection.PerMethodRateLimitedEntry
+	43, // 27: sentinel.AdminServiceConnection.per_error_code_counts:type_name -> sentinel.AdminServiceConnection.PerErrorCodeCountsEntry
+	44, // 28: sentinel.AdminServiceConnection.per_method_error_counts:type_name -> sentinel.AdminServiceConnection.PerMethodErrorCountsEntry
+	29, // 29: sentinel.AdminServiceConnection.latency:type_name -> sentinel.AdminLatencyStats
+	30, // 30: sentinel.AdminServiceConnection.per_method_latency:type_name -> sentinel.AdminMethodLatency
+	31, // 31: sentinel.AdminServiceConnection.per_method_payload:type_name -> sentinel.AdminMethodPayload
+	45, // 32: sentinel.AdminServiceConnection.per_graph_mutation_counts:type_name -> sentinel.AdminServiceConnection.PerGraphMutationCountsEntry
+	46, // 33: sentinel.AdminPeerActivity.per_method_counts:type_name -> sentinel.AdminPeerActivity.PerMethodCountsEntry
+	47, // 34: sentinel.AdminPeerActivity.per_error_code_counts:type_name -> sentinel.AdminPeerActivity.PerErrorCodeCountsEntry
+	0,  // 35: sentinel.AdminMapStats.graph_type:type_name -> sentinel.AdminGraphType
+	48, // 36: sentinel.AdminGrpcStats.per_method_counts:type_name -> sentinel.AdminGrpcStats.PerMethodCountsEntry
+	26, // 37: sentinel.AdminNetworkStats.member_connections:type_name -> sentinel.AdminMemberConnection
+	29, // 38: sentinel.AdminMethodLatency.latency:type_name -> sentinel.AdminLatencyStats
+	34, // 39: sentinel.AdminTopicStats.subscribers:type_name -> sentinel.AdminTopicSubscriber
+	0,  // 40: sentinel.AdminMutationRate.graph_type:type_name -> sentinel.AdminGraphType
+	49, // 41: sentinel.AdminMutationRate.per_service_mutations:type_name -> sentinel.AdminMutationRate.PerServiceMutationsEntry
+	50, // 42: sentinel.SentinelService.GetClusterInfo:input_type -> google.protobuf.Empty
+	50, // 43: sentinel.SentinelService.GetClusterHealth:input_type -> google.protobuf.Empty
+	50, // 44: sentinel.SentinelService.GetNodeMetrics:input_type -> google.protobuf.Empty
+	50, // 45: sentinel.SentinelService.GetGrpcStats:input_type -> google.protobuf.Empty
+	50, // 46: sentinel.SentinelService.GetPersistenceStatus:input_type -> google.protobuf.Empty
+	50, // 47: sentinel.SentinelService.GetNetworkStats:input_type -> google.protobuf.Empty
+	50, // 48: sentinel.SentinelService.GetThreadInfo:input_type -> google.protobuf.Empty
+	50, // 49: sentinel.SentinelService.GetTokenCacheStats:input_type -> google.protobuf.Empty
+	50, // 50: sentinel.SentinelService.GetMapStats:input_type -> google.protobuf.Empty
+	50, // 51: sentinel.SentinelService.GetDashboard:input_type -> google.protobuf.Empty
+	3,  // 52: sentinel.SentinelService.WatchDashboard:input_type -> sentinel.WatchDashboardRequest
+	12, // 53: sentinel.SentinelService.GetClusterInfo:output_type -> sentinel.AdminClusterInfo
+	14, // 54: sentinel.SentinelService.GetClusterHealth:output_type -> sentinel.AdminClusterHealth
+	4,  // 55: sentinel.SentinelService.GetNodeMetrics:output_type -> sentinel.NodeMetricsResponse
+	5,  // 56: sentinel.SentinelService.GetGrpcStats:output_type -> sentinel.GrpcStatsResponse
+	6,  // 57: sentinel.SentinelService.GetPersistenceStatus:output_type -> sentinel.PersistenceStatusResponse
+	7,  // 58: sentinel.SentinelService.GetNetworkStats:output_type -> sentinel.NetworkStatsResponse
+	8,  // 59: sentinel.SentinelService.GetThreadInfo:output_type -> sentinel.ThreadInfoResponse
+	9,  // 60: sentinel.SentinelService.GetTokenCacheStats:output_type -> sentinel.TokenCacheStatsResponse
+	10, // 61: sentinel.SentinelService.GetMapStats:output_type -> sentinel.MapStatsResponse
+	11, // 62: sentinel.SentinelService.GetDashboard:output_type -> sentinel.DashboardResponse
+	11, // 63: sentinel.SentinelService.WatchDashboard:output_type -> sentinel.DashboardResponse
+	53, // [53:64] is the sub-list for method output_type
+	42, // [42:53] is the sub-list for method input_type
+	42, // [42:42] is the sub-list for extension type_name
+	42, // [42:42] is the sub-list for extension extendee
+	0,  // [0:42] is the sub-list for field type_name
 }
 
 func init() { file_services_sentinel_proto_init() }
@@ -750,13 +4208,14 @@ func file_services_sentinel_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_services_sentinel_proto_rawDesc), len(file_services_sentinel_proto_rawDesc)),
-			NumEnums:      0,
-			NumMessages:   12,
+			NumEnums:      1,
+			NumMessages:   49,
 			NumExtensions: 0,
 			NumServices:   2,
 		},
 		GoTypes:           file_services_sentinel_proto_goTypes,
 		DependencyIndexes: file_services_sentinel_proto_depIdxs,
+		EnumInfos:         file_services_sentinel_proto_enumTypes,
 		MessageInfos:      file_services_sentinel_proto_msgTypes,
 	}.Build()
 	File_services_sentinel_proto = out.File

@@ -47,7 +47,7 @@ message Config {
 }
 
 // ============================================================================
-// Backend State (stored in elvis)
+// Backend State (stored in kernel)
 // ============================================================================
 
 // LetsEncryptState holds the Let's Encrypt certificate and CertMagic storage

@@ -16,7 +16,6 @@ package entitlement
 import (
 	"bytes"
 	"encoding/json"
-	"strconv"
 	"strings"
 
 	"github.com/pelletier/go-toml/v2"
@@ -25,131 +24,6 @@ import (
 	"google.golang.org/protobuf/proto"
 	"gopkg.in/yaml.v3"
 )
-
-// ============================================================
-// Enum Helpers
-// ============================================================
-// SubjectTypeValues returns all valid SubjectType values (excluding UNDEFINED)
-func SubjectTypeValues() []SubjectType {
-	return []SubjectType{
-		SubjectType_SUBJECT_TYPE_SERVICE,
-		SubjectType_SUBJECT_TYPE_API,
-		SubjectType_SUBJECT_TYPE_WORKLOAD,
-		SubjectType_SUBJECT_TYPE_AGENT,
-	}
-}
-
-// SubjectTypeStringValues returns all valid SubjectType names as strings
-func SubjectTypeStringValues() []string {
-	return []string{"service", "api", "workload", "agent"}
-}
-
-// ParseSubjectType converts a string to a SubjectType enum value
-// Accepts both hyphen and underscore formats for compatibility (case-insensitive)
-func ParseSubjectType(s string) (SubjectType, error) {
-	// Normalize: convert to lowercase and replace underscores with hyphens for case-insensitive comparison
-	normalized := strings.ReplaceAll(strings.ToLower(s), "_", "-")
-	switch normalized {
-	case "":
-		return SubjectType_SUBJECT_TYPE_UNSPECIFIED, nil
-	case "service", "subject-type-service":
-		return SubjectType_SUBJECT_TYPE_SERVICE, nil
-	case "api", "subject-type-api":
-		return SubjectType_SUBJECT_TYPE_API, nil
-	case "workload", "subject-type-workload":
-		return SubjectType_SUBJECT_TYPE_WORKLOAD, nil
-	case "agent", "subject-type-agent":
-		return SubjectType_SUBJECT_TYPE_AGENT, nil
-	default:
-		return SubjectType_SUBJECT_TYPE_UNSPECIFIED, protoerrors.NewErrMissingInvalidData(nil, "invalid subjecttype %s, expecting one of: %v", s, SubjectTypeStringValues())
-	}
-}
-
-// ParseSubjectTypes converts a comma-separated string to a slice of SubjectType enum values
-// Returns an error if any value is invalid
-func ParseSubjectTypes(s string) ([]SubjectType, error) {
-	if s == "" {
-		return nil, nil
-	}
-	parts := strings.Split(s, ",")
-	result := make([]SubjectType, 0, len(parts))
-	for _, part := range parts {
-		trimmed := strings.TrimSpace(part)
-		if trimmed == "" {
-			continue
-		}
-		val, err := ParseSubjectType(trimmed)
-		if err != nil {
-			return nil, err
-		}
-		result = append(result, val)
-	}
-	return result, nil
-}
-
-// SubjectTypeToString converts a SubjectType to its lowercase string representation
-func SubjectTypeToString(v SubjectType) string {
-	switch v {
-	case SubjectType_SUBJECT_TYPE_SERVICE:
-		return "service"
-	case SubjectType_SUBJECT_TYPE_API:
-		return "api"
-	case SubjectType_SUBJECT_TYPE_WORKLOAD:
-		return "workload"
-	case SubjectType_SUBJECT_TYPE_AGENT:
-		return "agent"
-	default:
-		return ""
-	}
-}
-
-// ParseSubjectTypeLiberal parses a SubjectType liberally, accepting:
-// - Integer values (as string or int)
-// - Enum names in any case
-// - RFC-compliant JSON names
-func ParseSubjectTypeLiberal(s string) SubjectType {
-	if s == "" {
-		return SubjectType_SUBJECT_TYPE_UNSPECIFIED
-	}
-	// Try parsing as integer
-	if num, err := strconv.Atoi(s); err == nil {
-		return SubjectType(num)
-	}
-	// Normalize and try parsing
-	normalized := strings.ToLower(strings.TrimSpace(s))
-	normalized = strings.ReplaceAll(normalized, "_", "-")
-	normalized = strings.ReplaceAll(normalized, " ", "-")
-	switch normalized {
-	case "service", "subject-type-service":
-		return SubjectType_SUBJECT_TYPE_SERVICE
-	case "api", "subject-type-api":
-		return SubjectType_SUBJECT_TYPE_API
-	case "workload", "subject-type-workload":
-		return SubjectType_SUBJECT_TYPE_WORKLOAD
-	case "agent", "subject-type-agent":
-		return SubjectType_SUBJECT_TYPE_AGENT
-	default:
-		return SubjectType_SUBJECT_TYPE_UNSPECIFIED
-	}
-}
-
-// SubjectTypeToSpecName converts a SubjectType to its canonical protobuf spec name
-func SubjectTypeToSpecName(v SubjectType) string {
-	switch v {
-	case SubjectType_SUBJECT_TYPE_UNSPECIFIED:
-		return "SUBJECT_TYPE_UNSPECIFIED"
-	case SubjectType_SUBJECT_TYPE_SERVICE:
-		return "SUBJECT_TYPE_SERVICE"
-	case SubjectType_SUBJECT_TYPE_API:
-		return "SUBJECT_TYPE_API"
-	case SubjectType_SUBJECT_TYPE_WORKLOAD:
-		return "SUBJECT_TYPE_WORKLOAD"
-	case SubjectType_SUBJECT_TYPE_AGENT:
-		return "SUBJECT_TYPE_AGENT"
-	default:
-		return ""
-	}
-}
 
 // ============================================================
 // JSON/YAML/TOML Serialization Helpers
@@ -430,10 +304,8 @@ func ServiceEntitlementsToTOML(v *ServiceEntitlements) ([]byte, error) {
 // ServiceEntitlementMappingJSON represents ServiceEntitlementMapping in external JSON format (with string enums)
 // MARKER: JSON helper struct generated from serial.go
 type serviceentitlementmappingJSON struct {
-	StringId       string `json:"string_id,omitempty"`
-	EntitlementsId string `json:"entitlements_id,omitempty"`
-	SubjectType    string `json:"subject_type,omitempty"`
-	Principal      string `json:"principal,omitempty"`
+	CredentialId string `json:"credential_id,omitempty"`
+	Service      string `json:"service,omitempty"`
 }
 
 // ServiceEntitlementMappingToJSON converts ServiceEntitlementMapping to JSON bytes.
@@ -444,10 +316,8 @@ func ServiceEntitlementMappingToJSON(v *ServiceEntitlementMapping) ([]byte, erro
 	}
 	// Convert to JSON helper struct with string enums
 	helper := serviceentitlementmappingJSON{
-		StringId:       v.StringId,
-		EntitlementsId: v.EntitlementsId,
-		SubjectType:    SubjectTypeToString(v.SubjectType),
-		Principal:      v.Principal,
+		CredentialId: v.CredentialId,
+		Service:      v.Service,
 	}
 	return json.Marshal(helper)
 }
@@ -512,15 +382,8 @@ func ServiceEntitlementMappingFromJSON(data []byte) (*ServiceEntitlementMapping,
 	}
 	// Build result with parsed enums
 	result := &ServiceEntitlementMapping{}
-	result.StringId = raw.StringId
-	result.EntitlementsId = raw.EntitlementsId
-	// Parse enum field: SubjectType
-	if raw.SubjectType != "" {
-		if parsed, err := ParseSubjectType(raw.SubjectType); err == nil {
-			result.SubjectType = parsed
-		}
-	}
-	result.Principal = raw.Principal
+	result.CredentialId = raw.CredentialId
+	result.Service = raw.Service
 	return result, nil
 }
 
@@ -616,31 +479,19 @@ func ServiceEntitlementMappingToEnvVar(v *ServiceEntitlementMapping) map[string]
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_LIBS_ENTITLEMENT_SERVICE_ENTITLEMENT_MAPPING_STRING_ID"] = v.StringId
-	result["PROTO_LIBS_ENTITLEMENT_SERVICE_ENTITLEMENT_MAPPING_ENTITLEMENTS_ID"] = v.EntitlementsId
-	result["PROTO_LIBS_ENTITLEMENT_SERVICE_ENTITLEMENT_MAPPING_SUBJECT_TYPE"] = SubjectTypeToString(v.SubjectType)
-	result["PROTO_LIBS_ENTITLEMENT_SERVICE_ENTITLEMENT_MAPPING_PRINCIPAL"] = v.Principal
+	result["PROTO_LIBS_ENTITLEMENT_SERVICE_ENTITLEMENT_MAPPING_CREDENTIAL_ID"] = v.CredentialId
+	result["PROTO_LIBS_ENTITLEMENT_SERVICE_ENTITLEMENT_MAPPING_SERVICE"] = v.Service
 	return result
 }
 
 // ServiceEntitlementMappingFromEnvVar creates ServiceEntitlementMapping from environment variable key-value pairs.
 func ServiceEntitlementMappingFromEnvVar(env map[string]string) (*ServiceEntitlementMapping, error) {
 	result := &ServiceEntitlementMapping{}
-	if val, ok := env["PROTO_LIBS_ENTITLEMENT_SERVICE_ENTITLEMENT_MAPPING_STRING_ID"]; ok && val != "" {
-		result.StringId = val
+	if val, ok := env["PROTO_LIBS_ENTITLEMENT_SERVICE_ENTITLEMENT_MAPPING_CREDENTIAL_ID"]; ok && val != "" {
+		result.CredentialId = val
 	}
-	if val, ok := env["PROTO_LIBS_ENTITLEMENT_SERVICE_ENTITLEMENT_MAPPING_ENTITLEMENTS_ID"]; ok && val != "" {
-		result.EntitlementsId = val
-	}
-	if val, ok := env["PROTO_LIBS_ENTITLEMENT_SERVICE_ENTITLEMENT_MAPPING_SUBJECT_TYPE"]; ok && val != "" {
-		parsed, err := ParseSubjectType(val)
-		if err != nil {
-			return nil, err
-		}
-		result.SubjectType = parsed
-	}
-	if val, ok := env["PROTO_LIBS_ENTITLEMENT_SERVICE_ENTITLEMENT_MAPPING_PRINCIPAL"]; ok && val != "" {
-		result.Principal = val
+	if val, ok := env["PROTO_LIBS_ENTITLEMENT_SERVICE_ENTITLEMENT_MAPPING_SERVICE"]; ok && val != "" {
+		result.Service = val
 	}
 	return result, nil
 }
@@ -705,34 +556,24 @@ func ValidateServiceEntitlementMapping(m *ServiceEntitlementMapping) error {
 		return nil
 	}
 
-	// Validate StringId (assert_required)
-	if m.StringId == "" {
-		return protoerrors.NewErrMissingInvalidData(nil, "field StringId is required")
+	// Validate CredentialId (assert_required)
+	if m.CredentialId == "" {
+		return protoerrors.NewErrMissingInvalidData(nil, "field CredentialId is required")
 	}
 
-	// Validate EntitlementsId (assert_required)
-	if m.EntitlementsId == "" {
-		return protoerrors.NewErrMissingInvalidData(nil, "field EntitlementsId is required")
+	// Validate Service (assert_required)
+	if m.Service == "" {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Service is required")
 	}
 
-	// Validate Principal (assert_required)
-	if m.Principal == "" {
-		return protoerrors.NewErrMissingInvalidData(nil, "field Principal is required")
+	// Validate CredentialId (default max size: 32768 bytes)
+	if len(m.CredentialId) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field CredentialId exceeds max size of 32768 bytes, got: %d", len(m.CredentialId))
 	}
 
-	// Validate StringId (default max size: 32768 bytes)
-	if len(m.StringId) > 32768 {
-		return protoerrors.NewErrMissingInvalidData(nil, "field StringId exceeds max size of 32768 bytes, got: %d", len(m.StringId))
-	}
-
-	// Validate EntitlementsId (default max size: 32768 bytes)
-	if len(m.EntitlementsId) > 32768 {
-		return protoerrors.NewErrMissingInvalidData(nil, "field EntitlementsId exceeds max size of 32768 bytes, got: %d", len(m.EntitlementsId))
-	}
-
-	// Validate Principal (default max size: 32768 bytes)
-	if len(m.Principal) > 32768 {
-		return protoerrors.NewErrMissingInvalidData(nil, "field Principal exceeds max size of 32768 bytes, got: %d", len(m.Principal))
+	// Validate Service (default max size: 32768 bytes)
+	if len(m.Service) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Service exceeds max size of 32768 bytes, got: %d", len(m.Service))
 	}
 
 	return nil
@@ -742,11 +583,10 @@ func ValidateServiceEntitlementMapping(m *ServiceEntitlementMapping) error {
 // Capacity Constants (for utilization monitoring)
 // ============================================================
 const (
-	MaxSizeServiceentitlementServiceName           int = 32768
-	MaxSizeServiceentitlementsId                   int = 32768
-	MaxSizeServiceentitlementmappingStringId       int = 32768
-	MaxSizeServiceentitlementmappingEntitlementsId int = 32768
-	MaxSizeServiceentitlementmappingPrincipal      int = 32768
+	MaxSizeServiceentitlementServiceName         int = 32768
+	MaxSizeServiceentitlementsId                 int = 32768
+	MaxSizeServiceentitlementmappingCredentialId int = 32768
+	MaxSizeServiceentitlementmappingService      int = 32768
 )
 
 // ============================================================
@@ -780,16 +620,10 @@ func MergeServiceEntitlements(dst, src *ServiceEntitlements) {
 // ============================================================
 // MergeServiceEntitlementMapping fills zero-valued fields in dst from src.
 func MergeServiceEntitlementMapping(dst, src *ServiceEntitlementMapping) {
-	if dst.StringId == "" {
-		dst.StringId = src.StringId
+	if dst.CredentialId == "" {
+		dst.CredentialId = src.CredentialId
 	}
-	if dst.EntitlementsId == "" {
-		dst.EntitlementsId = src.EntitlementsId
-	}
-	if dst.SubjectType == 0 {
-		dst.SubjectType = src.SubjectType
-	}
-	if dst.Principal == "" {
-		dst.Principal = src.Principal
+	if dst.Service == "" {
+		dst.Service = src.Service
 	}
 }
