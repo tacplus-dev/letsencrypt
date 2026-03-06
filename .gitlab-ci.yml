@@ -44,10 +44,11 @@ package:
   before_script:
     - *parse-version
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+    - printf "machine gitlab.com\nlogin gitlab-ci-token\npassword %s\n" "$CI_JOB_TOKEN" > /tmp/.netrc
   script:
     - |
       IMAGE="$CI_REGISTRY_IMAGE/letsencrypt-${MAJOR}-${MINOR}"
-      docker build -t "${IMAGE}:${PATCH}" .
+      docker build --secret id=netrc,src=/tmp/.netrc -t "${IMAGE}:${PATCH}" .
       docker tag "${IMAGE}:${PATCH}" "${IMAGE}:latest"
       docker push "${IMAGE}:${PATCH}"
       docker push "${IMAGE}:latest"
