@@ -1,5 +1,10 @@
 // Copyright (c) 2024 Second Star Cavalier, LLC.
 
+// Package alpn defines Application-Layer Protocol Negotiation (ALPN) identifiers
+// used during TLS handshake to negotiate the application protocol. Services
+// reference these values when configuring TLS listeners that must advertise
+// support for HTTP/2 (gRPC) or HTTP/1.1 (REST).
+
 syntax = "proto3";
 
 package alpn;

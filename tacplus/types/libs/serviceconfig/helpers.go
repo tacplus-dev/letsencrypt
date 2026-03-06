@@ -1457,6 +1457,21 @@ func ValidateBootstrapConfig(m *BootstrapConfig) error {
 		}
 	}
 
+	// Validate Endpoints (assert_max_items: 32)
+	if len(m.Endpoints) > 32 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Endpoints exceeds max items of 32, got: %d", len(m.Endpoints))
+	}
+
+	// Validate InstanceId (assert_max_length: 128)
+	if len(m.InstanceId) > 128 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field InstanceId must be at most 128 characters, got: %d", len(m.InstanceId))
+	}
+
+	// Validate TrustedCas (assert_max_items: 32)
+	if len(m.TrustedCas) > 32 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field TrustedCas exceeds max items of 32, got: %d", len(m.TrustedCas))
+	}
+
 	// Validate InstanceId (default max size: 32768 bytes)
 	if len(m.InstanceId) > 32768 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field InstanceId exceeds max size of 32768 bytes, got: %d", len(m.InstanceId))
@@ -1477,6 +1492,11 @@ func ValidateConfig(m *Config) error {
 		if err := utils.ValidateAssertListenAddr(m.ListenAddress); err != nil {
 			return protoerrors.NewErrMissingInvalidData(err, "field ListenAddress listen address validation failed")
 		}
+	}
+
+	// Validate ListenAddress (assert_max_length: 256)
+	if len(m.ListenAddress) > 256 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field ListenAddress must be at most 256 characters, got: %d", len(m.ListenAddress))
 	}
 
 	// Validate MaxRequestSize (assert_gt: 0)
@@ -1513,6 +1533,11 @@ func ValidateLogMessage(m *LogMessage) error {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Message is required")
 	}
 
+	// Validate Message (assert_max_length: 4096)
+	if len(m.Message) > 4096 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Message must be at most 4096 characters, got: %d", len(m.Message))
+	}
+
 	// Validate Message (default max size: 32768 bytes)
 	if len(m.Message) > 32768 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Message exceeds max size of 32768 bytes, got: %d", len(m.Message))
@@ -1535,6 +1560,11 @@ func ValidateClusterMember(m *ClusterMember) error {
 		}
 	}
 
+	// Validate Endpoint (assert_max_length: 256)
+	if len(m.Endpoint) > 256 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Endpoint must be at most 256 characters, got: %d", len(m.Endpoint))
+	}
+
 	// Validate Endpoint (default max size: 32768 bytes)
 	if len(m.Endpoint) > 32768 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Endpoint exceeds max size of 32768 bytes, got: %d", len(m.Endpoint))
@@ -1555,14 +1585,39 @@ func ValidateClusterInfo(m *ClusterInfo) error {
 		return protoerrors.NewErrMissingInvalidData(nil, "field OrgId is required")
 	}
 
+	// Validate OrgId (assert_max_length: 128)
+	if len(m.OrgId) > 128 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field OrgId must be at most 128 characters, got: %d", len(m.OrgId))
+	}
+
 	// Validate Region (assert_required)
 	if m.Region == "" {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Region is required")
 	}
 
+	// Validate Region (assert_max_length: 64)
+	if len(m.Region) > 64 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Region must be at most 64 characters, got: %d", len(m.Region))
+	}
+
+	// Validate Zone (assert_max_length: 64)
+	if len(m.Zone) > 64 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Zone must be at most 64 characters, got: %d", len(m.Zone))
+	}
+
 	// Validate ClusterName (assert_required)
 	if m.ClusterName == "" {
 		return protoerrors.NewErrMissingInvalidData(nil, "field ClusterName is required")
+	}
+
+	// Validate ClusterName (assert_max_length: 128)
+	if len(m.ClusterName) > 128 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field ClusterName must be at most 128 characters, got: %d", len(m.ClusterName))
+	}
+
+	// Validate Members (assert_max_items: 64)
+	if len(m.Members) > 64 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Members exceeds max items of 64, got: %d", len(m.Members))
 	}
 
 	// Validate OrgId (default max size: 32768 bytes)
@@ -1595,7 +1650,11 @@ func ValidateClusterState(m *ClusterState) error {
 		return nil
 	}
 
-	// No field validations defined
+	// Validate Clusters (assert_max_items: 32)
+	if len(m.Clusters) > 32 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Clusters exceeds max items of 32, got: %d", len(m.Clusters))
+	}
+
 	return nil
 }
 
@@ -1627,14 +1686,18 @@ const (
 // Capacity Constants (for utilization monitoring)
 // ============================================================
 const (
-	MaxSizeBootstrapconfigInstanceId int = 32768
-	MaxSizeConfigListenAddress       int = 32768
-	MaxSizeLogmessageMessage         int = 32768
-	MaxSizeClustermemberEndpoint     int = 32768
-	MaxSizeClusterinfoOrgId          int = 32768
-	MaxSizeClusterinfoRegion         int = 32768
-	MaxSizeClusterinfoZone           int = 32768
-	MaxSizeClusterinfoClusterName    int = 32768
+	MaxItemsBootstrapconfigEndpoints  int = 32
+	MaxSizeBootstrapconfigInstanceId  int = 32768
+	MaxItemsBootstrapconfigTrustedCas int = 32
+	MaxSizeConfigListenAddress        int = 32768
+	MaxSizeLogmessageMessage          int = 32768
+	MaxSizeClustermemberEndpoint      int = 32768
+	MaxSizeClusterinfoOrgId           int = 32768
+	MaxSizeClusterinfoRegion          int = 32768
+	MaxSizeClusterinfoZone            int = 32768
+	MaxSizeClusterinfoClusterName     int = 32768
+	MaxItemsClusterinfoMembers        int = 64
+	MaxItemsClusterstateClusters      int = 32
 )
 
 // ============================================================

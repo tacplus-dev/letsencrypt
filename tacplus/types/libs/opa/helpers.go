@@ -228,6 +228,11 @@ func ValidateOpaPolicy(m *OpaPolicy) error {
 		return protoerrors.NewErrMissingInvalidData(nil, "field EntryPoint must be at least 1 characters, got: %d", len(m.EntryPoint))
 	}
 
+	// Validate EntryPoint (assert_max_length: 256)
+	if len(m.EntryPoint) > 256 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field EntryPoint must be at most 256 characters, got: %d", len(m.EntryPoint))
+	}
+
 	// Validate Bundle (assert_base64)
 	if m.Bundle != "" {
 		if err := utils.ValidateAssertBase64(m.Bundle); err != nil {
@@ -248,6 +253,16 @@ func ValidateOpaPolicy(m *OpaPolicy) error {
 		if err := utils.ValidateAssertSemver(m.Version); err != nil {
 			return protoerrors.NewErrMissingInvalidData(err, "field Version must be a valid semantic version (e.g., '1.0.0' or 'v2.3.4')")
 		}
+	}
+
+	// Validate Version (assert_max_length: 64)
+	if len(m.Version) > 64 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Version must be at most 64 characters, got: %d", len(m.Version))
+	}
+
+	// Validate Source (assert_max_size: 1048576 bytes)
+	if len(m.Source) > 1048576 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Source exceeds max size of 1048576 bytes, got: %d", len(m.Source))
 	}
 
 	// Validate Issuer (assert_required)
@@ -277,11 +292,6 @@ func ValidateOpaPolicy(m *OpaPolicy) error {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Version exceeds max size of 32768 bytes, got: %d", len(m.Version))
 	}
 
-	// Validate Source (default max size: 32768 bytes)
-	if len(m.Source) > 32768 {
-		return protoerrors.NewErrMissingInvalidData(nil, "field Source exceeds max size of 32768 bytes, got: %d", len(m.Source))
-	}
-
 	// Validate Issuer (default max size: 32768 bytes)
 	if len(m.Issuer) > 32768 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Issuer exceeds max size of 32768 bytes, got: %d", len(m.Issuer))
@@ -297,7 +307,7 @@ const (
 	MaxSizeOpapolicyEntryPoint int = 32768
 	MaxSizeOpapolicyBundle     int = 5242880
 	MaxSizeOpapolicyVersion    int = 32768
-	MaxSizeOpapolicySource     int = 32768
+	MaxSizeOpapolicySource     int = 1048576
 	MaxSizeOpapolicyIssuer     int = 32768
 )
 

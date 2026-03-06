@@ -34,8 +34,7 @@ const (
 // Every permitted RPC must be listed — there is no wildcard/default-allow.
 type ServiceEntitlement struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// service_name is the target service (matches spec.service_frontend value,
-	// e.g. "fleetwood", "ironmaiden", "gateway").
+	// service_name is the target service (matches spec.service_frontend value).
 	ServiceName string `protobuf:"bytes,1,opt,name=service_name,json=serviceName,proto3" json:"service_name,omitempty"`
 	// allowed_rpcs lists the RPC methods permitted on the target service.
 	// Format: "MethodName" (unqualified). Must not be empty.
@@ -89,13 +88,12 @@ func (x *ServiceEntitlement) GetAllowedRpcs() []string {
 }
 
 // ServiceEntitlements is a named collection of entitlements, typically one per
-// microservice or logical role (e.g. "fleetwood-admin", "full-admin").
+// microservice or logical role (e.g. "sentinel-admin", "full-admin").
 // Defined as JSON files in proto/security/ and loaded into service configs
-// at config build time. Used by the U2S path (ironmaiden's service_entitlements
-// config for expandWildcard).
+// at config build time.
 type ServiceEntitlements struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// id identifies this entitlement set (e.g. "fleetwood-admin", "snoopy-reader").
+	// id identifies this entitlement set (e.g. "sentinel-admin", "snoopy-reader").
 	// Matches the JSON filename in proto/security/.
 	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	// entitlements is the set of services and RPCs this collection grants access to.
@@ -148,6 +146,64 @@ func (x *ServiceEntitlements) GetEntitlements() []*ServiceEntitlement {
 	return nil
 }
 
+// IdentityProfile defines a named set of entitlements for user authorization.
+// OPA entitlements_policy returns zero or more profile names; identity resolves
+// those names to concrete ServiceEntitlements at token exchange time.
+type IdentityProfile struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// id is the profile name (e.g. "user", "admin", "reader").
+	// Referenced by OPA policy output.
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// entitlements is the set of services and RPCs this profile grants access to.
+	Entitlements  []*ServiceEntitlement `protobuf:"bytes,2,rep,name=entitlements,proto3" json:"entitlements,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *IdentityProfile) Reset() {
+	*x = IdentityProfile{}
+	mi := &file_libs_entitlement_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *IdentityProfile) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IdentityProfile) ProtoMessage() {}
+
+func (x *IdentityProfile) ProtoReflect() protoreflect.Message {
+	mi := &file_libs_entitlement_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IdentityProfile.ProtoReflect.Descriptor instead.
+func (*IdentityProfile) Descriptor() ([]byte, []int) {
+	return file_libs_entitlement_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *IdentityProfile) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *IdentityProfile) GetEntitlements() []*ServiceEntitlement {
+	if x != nil {
+		return x.Entitlements
+	}
+	return nil
+}
+
 // ServiceEntitlementMapping maps a credential to a service identity.
 // Used by TokenExchanger (static config) to resolve
 // which service a CredPair or cloud credential represents.
@@ -159,7 +215,7 @@ type ServiceEntitlementMapping struct {
 	// cloud credential ID (e.g. IAM role ARN).
 	CredentialId string `protobuf:"bytes,1,opt,name=credential_id,json=credentialId,proto3" json:"credential_id,omitempty"`
 	// service is the logical service identity this credential maps to.
-	// Becomes the "sub" claim in S2S tokens (e.g. "fleetwood", "ironmaiden").
+	// Becomes the "sub" claim in S2S tokens.
 	Service       string `protobuf:"bytes,2,opt,name=service,proto3" json:"service,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -167,7 +223,7 @@ type ServiceEntitlementMapping struct {
 
 func (x *ServiceEntitlementMapping) Reset() {
 	*x = ServiceEntitlementMapping{}
-	mi := &file_libs_entitlement_proto_msgTypes[2]
+	mi := &file_libs_entitlement_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -179,7 +235,7 @@ func (x *ServiceEntitlementMapping) String() string {
 func (*ServiceEntitlementMapping) ProtoMessage() {}
 
 func (x *ServiceEntitlementMapping) ProtoReflect() protoreflect.Message {
-	mi := &file_libs_entitlement_proto_msgTypes[2]
+	mi := &file_libs_entitlement_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -192,7 +248,7 @@ func (x *ServiceEntitlementMapping) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServiceEntitlementMapping.ProtoReflect.Descriptor instead.
 func (*ServiceEntitlementMapping) Descriptor() ([]byte, []int) {
-	return file_libs_entitlement_proto_rawDescGZIP(), []int{2}
+	return file_libs_entitlement_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *ServiceEntitlementMapping) GetCredentialId() string {
@@ -213,16 +269,19 @@ var File_libs_entitlement_proto protoreflect.FileDescriptor
 
 const file_libs_entitlement_proto_rawDesc = "" +
 	"\n" +
-	"\x16libs/entitlement.proto\x12\ventitlement\x1a\x0flibs/spec.proto\"f\n" +
-	"\x12ServiceEntitlement\x12'\n" +
-	"\fservice_name\x18\x01 \x01(\tB\x04\x88\xa6\x1d\x01R\vserviceName\x12'\n" +
-	"\fallowed_rpcs\x18\x02 \x03(\tB\x04\x88\xa6\x1d\x01R\vallowedRpcs\"v\n" +
-	"\x13ServiceEntitlements\x12\x14\n" +
-	"\x02id\x18\x01 \x01(\tB\x04\x88\xa6\x1d\x01R\x02id\x12I\n" +
-	"\fentitlements\x18\x02 \x03(\v2\x1f.entitlement.ServiceEntitlementB\x04\x88\xa6\x1d\x01R\fentitlements\"f\n" +
-	"\x19ServiceEntitlementMapping\x12)\n" +
-	"\rcredential_id\x18\x01 \x01(\tB\x04\x88\xa6\x1d\x01R\fcredentialId\x12\x1e\n" +
-	"\aservice\x18\x02 \x01(\tB\x04\x88\xa6\x1d\x01R\aserviceB\\ZZgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/entitlementb\x06proto3"
+	"\x16libs/entitlement.proto\x12\ventitlement\x1a\x0flibs/spec.proto\"p\n" +
+	"\x12ServiceEntitlement\x12,\n" +
+	"\fservice_name\x18\x01 \x01(\tB\t\x88\xa6\x1d\x01\x90\xa7\x1d\x80\x01R\vserviceName\x12,\n" +
+	"\fallowed_rpcs\x18\x02 \x03(\tB\t\x88\xa6\x1d\x01\xc0\xa8\x1d\x80\x02R\vallowedRpcs\"\x7f\n" +
+	"\x13ServiceEntitlements\x12\x19\n" +
+	"\x02id\x18\x01 \x01(\tB\t\x88\xa6\x1d\x01\x90\xa7\x1d\x80\x01R\x02id\x12M\n" +
+	"\fentitlements\x18\x02 \x03(\v2\x1f.entitlement.ServiceEntitlementB\b\x88\xa6\x1d\x01\xc0\xa8\x1d@R\fentitlements\"{\n" +
+	"\x0fIdentityProfile\x12\x19\n" +
+	"\x02id\x18\x01 \x01(\tB\t\x88\xa6\x1d\x01\x90\xa7\x1d\x80\x01R\x02id\x12M\n" +
+	"\fentitlements\x18\x02 \x03(\v2\x1f.entitlement.ServiceEntitlementB\b\x88\xa6\x1d\x01\xc0\xa8\x1d@R\fentitlements\"p\n" +
+	"\x19ServiceEntitlementMapping\x12.\n" +
+	"\rcredential_id\x18\x01 \x01(\tB\t\x88\xa6\x1d\x01\x90\xa7\x1d\x80\x04R\fcredentialId\x12#\n" +
+	"\aservice\x18\x02 \x01(\tB\t\x88\xa6\x1d\x01\x90\xa7\x1d\x80\x01R\aserviceB\\ZZgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/entitlementb\x06proto3"
 
 var (
 	file_libs_entitlement_proto_rawDescOnce sync.Once
@@ -236,19 +295,21 @@ func file_libs_entitlement_proto_rawDescGZIP() []byte {
 	return file_libs_entitlement_proto_rawDescData
 }
 
-var file_libs_entitlement_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_libs_entitlement_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_libs_entitlement_proto_goTypes = []any{
 	(*ServiceEntitlement)(nil),        // 0: entitlement.ServiceEntitlement
 	(*ServiceEntitlements)(nil),       // 1: entitlement.ServiceEntitlements
-	(*ServiceEntitlementMapping)(nil), // 2: entitlement.ServiceEntitlementMapping
+	(*IdentityProfile)(nil),           // 2: entitlement.IdentityProfile
+	(*ServiceEntitlementMapping)(nil), // 3: entitlement.ServiceEntitlementMapping
 }
 var file_libs_entitlement_proto_depIdxs = []int32{
 	0, // 0: entitlement.ServiceEntitlements.entitlements:type_name -> entitlement.ServiceEntitlement
-	1, // [1:1] is the sub-list for method output_type
-	1, // [1:1] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	0, // 1: entitlement.IdentityProfile.entitlements:type_name -> entitlement.ServiceEntitlement
+	2, // [2:2] is the sub-list for method output_type
+	2, // [2:2] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_libs_entitlement_proto_init() }
@@ -262,7 +323,7 @@ func file_libs_entitlement_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_libs_entitlement_proto_rawDesc), len(file_libs_entitlement_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

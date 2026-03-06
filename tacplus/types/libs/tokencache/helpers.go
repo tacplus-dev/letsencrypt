@@ -220,7 +220,21 @@ func ValidateConfig(m *Config) error {
 		return nil
 	}
 
-	// No field validations defined
+	// Validate LifetimeSeconds (assert_duration: POSITIVE)
+	if m.LifetimeSeconds <= 0 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field LifetimeSeconds must be positive (> 0), got: %d", m.LifetimeSeconds)
+	}
+
+	// Validate ExpireUnusedSeconds (assert_duration: POSITIVE)
+	if m.ExpireUnusedSeconds <= 0 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field ExpireUnusedSeconds must be positive (> 0), got: %d", m.ExpireUnusedSeconds)
+	}
+
+	// Validate RefreshIntervalSeconds (assert_duration: POSITIVE)
+	if m.RefreshIntervalSeconds <= 0 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field RefreshIntervalSeconds must be positive (> 0), got: %d", m.RefreshIntervalSeconds)
+	}
+
 	return nil
 }
 

@@ -378,9 +378,9 @@ func ValidateCloudIdentityProof(m *CloudIdentityProof) error {
 		return nil
 	}
 
-	// Validate IdentityToken (default max size: 32768 bytes)
-	if len(m.IdentityToken) > 32768 {
-		return protoerrors.NewErrMissingInvalidData(nil, "field IdentityToken exceeds max size of 32768 bytes, got: %d", len(m.IdentityToken))
+	// Validate IdentityToken (assert_max_size: 8192 bytes)
+	if len(m.IdentityToken) > 8192 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field IdentityToken exceeds max size of 8192 bytes, got: %d", len(m.IdentityToken))
 	}
 
 	return nil
@@ -398,9 +398,24 @@ func ValidatePresignedHttpRequest(m *PresignedHttpRequest) error {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Method is required")
 	}
 
+	// Validate Method (assert_max_length: 16)
+	if len(m.Method) > 16 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Method must be at most 16 characters, got: %d", len(m.Method))
+	}
+
+	// Validate Url (assert_max_length: 2048)
+	if len(m.Url) > 2048 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Url must be at most 2048 characters, got: %d", len(m.Url))
+	}
+
 	// Validate Url (assert_required)
 	if m.Url == "" {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Url is required")
+	}
+
+	// Validate Body (assert_max_size: 8192 bytes)
+	if len(m.Body) > 8192 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Body exceeds max size of 8192 bytes, got: %d", len(m.Body))
 	}
 
 	// Validate Method (default max size: 32768 bytes)
@@ -413,11 +428,6 @@ func ValidatePresignedHttpRequest(m *PresignedHttpRequest) error {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Url exceeds max size of 32768 bytes, got: %d", len(m.Url))
 	}
 
-	// Validate Body (default max size: 32768 bytes)
-	if len(m.Body) > 32768 {
-		return protoerrors.NewErrMissingInvalidData(nil, "field Body exceeds max size of 32768 bytes, got: %d", len(m.Body))
-	}
-
 	return nil
 }
 
@@ -425,10 +435,10 @@ func ValidatePresignedHttpRequest(m *PresignedHttpRequest) error {
 // Capacity Constants (for utilization monitoring)
 // ============================================================
 const (
-	MaxSizeCloudidentityproofIdentityToken int = 32768
+	MaxSizeCloudidentityproofIdentityToken int = 8192
 	MaxSizePresignedhttprequestMethod      int = 32768
 	MaxSizePresignedhttprequestUrl         int = 32768
-	MaxSizePresignedhttprequestBody        int = 32768
+	MaxSizePresignedhttprequestBody        int = 8192
 )
 
 // ============================================================

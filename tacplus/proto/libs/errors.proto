@@ -1,5 +1,10 @@
 // Copyright (c) 2024 Second Star Cavalier, LLC.
 
+// Package errors defines the structured Error message used as the canonical
+// error type across all generated code. In Go the generated type implements
+// the error interface; in other languages it maps to the native exception
+// hierarchy. Follows the Google RPC error model (google.rpc.Status).
+
 syntax = "proto3";
 
 package errors;

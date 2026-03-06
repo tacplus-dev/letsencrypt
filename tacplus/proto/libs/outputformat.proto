@@ -1,5 +1,10 @@
 // Copyright (c) 2024 Second Star Cavalier, LLC.
 
+// Package outputformat defines serialization format identifiers used by CLI
+// tools and API responses. Services that support multiple output formats
+// (JSON, YAML, protobuf wire, etc.) reference these values to negotiate
+// the response encoding.
+
 syntax = "proto3";
 
 package outputformat;

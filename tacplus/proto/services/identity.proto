@@ -96,18 +96,18 @@ message Config {
   int64 jwk_refetch_interval_seconds = 7;
 
   // entitlements_policy is a Rego policy evaluated at token exchange time.
-  // Input: {claims: {<flattened IDP claims>}, service: "<target>"}
-  // Expected output: data.entitlements.main → {allow: bool, rpcs: [string]}
-  // Use ["*"] to grant all RPCs for the target service.
+  // Input: {claims: {<flattened IDP claims>}}
+  // Expected output: data.entitlements.main → {profiles: [string]}
+  // Zero profiles = denied. Profile names must match identity_profiles ids.
   string entitlements_policy = 11;
 
-  // entitlement_mappings maps OPA-resolved principals to entitlement definitions.
+  // entitlement_mappings maps credentials to service identities (S2S only).
   repeated entitlement.ServiceEntitlementMapping entitlement_mappings = 8;
 
-  // service_entitlements holds named entitlement definitions loaded from
-  // proto/security/*.json at config build time. Referenced by
-  // entitlement_mappings via entitlements_id.
-  repeated entitlement.ServiceEntitlements service_entitlements = 9;
+  // identity_profiles defines named sets of entitlements for user authorization.
+  // OPA entitlements_policy returns profile names; identity resolves those names
+  // to concrete entitlements at token exchange time.
+  repeated entitlement.IdentityProfile identity_profiles = 9;
 }
 
 // ============================================================================
@@ -173,12 +173,12 @@ message ProviderConfig {
 // Backend State (stored in kernel)
 // ============================================================================
 
-// EntitlementConfig wraps the entitlement mappings and service entitlement
-// definitions. Published by Identity from config so other services (policy)
+// EntitlementConfig wraps the entitlement mappings and identity profiles.
+// Published by Identity from config so other services (policy, policysim)
 // can read them via Watch (RO) without duplicating config.
 message EntitlementConfig {
   repeated entitlement.ServiceEntitlementMapping entitlement_mappings = 1;
-  repeated entitlement.ServiceEntitlements service_entitlements = 2;
+  repeated entitlement.IdentityProfile identity_profiles = 2;
 }
 
 // IdentityState holds public verifying keys and auth config readable by all
@@ -197,7 +197,7 @@ message IdentityState {
   // exchange time. Published by identity from config.
   opa.OpaPolicy entitlements_policy = 2;
 
-  // entitlement_config holds the entitlement mappings and service entitlement
+  // entitlement_config holds the entitlement mappings and identity profile
   // definitions, published from identity's config.
   EntitlementConfig entitlement_config = 4;
 }
@@ -266,7 +266,8 @@ service IdentityService {
 
   // ExchangeToken exchanges a generic access token for a service-specific
   // access token with entitlements. The entitlements are determined by evaluating
-  // the entitlements_policy (OPA) or falling back to static config mappings.
+  // the entitlements_policy (OPA) to get profile names, then resolving those
+  // profiles to concrete entitlements via identity_profiles config.
   rpc ExchangeToken(ExchangeTokenRequest) returns (ExchangeTokenResponse) {
     option (google.api.http) = { post: "/api/identity/v1/exchange" body: "*" };
   }
@@ -275,7 +276,6 @@ service IdentityService {
   rpc Logout(LogoutRequest) returns (LogoutResponse) {
     option (google.api.http) = { post: "/api/identity/v1/logout" body: "*" };
   }
-
 }
 
 // ============================================================================

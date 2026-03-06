@@ -12,6 +12,7 @@ import "services/gateway.proto";
 import "services/identity.proto";
 import "services/letsencrypt.proto";
 import "services/policy.proto";
+import "services/policysim.proto";
 import "services/sentinel.proto";
 import "google/protobuf/empty.proto";
 
@@ -21,6 +22,7 @@ message ConfigHolder {
   gateway.Config gateway_config = 7;
   letsencrypt.Config letsencrypt_config = 9;
   policy.Config policy_config = 10;
+  policysim.Config policysim_config = 11;
 }
 
 message SentinelConfigState {
@@ -46,6 +48,11 @@ message LetsencryptConfigState {
 message PolicyConfigState {
 
   policy.Config config = 1;
+}
+
+message PolicysimConfigState {
+
+  policysim.Config config = 1;
 }
 
 // ServiceConfigState delivers runtime configuration (OPA policy) to all services.
@@ -108,6 +115,17 @@ service PolicyConfigStateBackendService {
 	rpc GetConfig(google.protobuf.Empty) returns (policy.Config);
 	rpc SetConfig(policy.Config) returns (policy.Config);
 	rpc WatchConfig(google.protobuf.Empty) returns (stream policy.Config);
+}
+
+// ============================================================================
+// Auto-generated Backend Service (tacplus)
+// ============================================================================
+
+service PolicysimConfigStateBackendService {
+	// Singleton: Config
+	rpc GetConfig(google.protobuf.Empty) returns (policysim.Config);
+	rpc SetConfig(policysim.Config) returns (policysim.Config);
+	rpc WatchConfig(google.protobuf.Empty) returns (stream policysim.Config);
 }
 
 // ============================================================================

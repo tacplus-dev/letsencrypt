@@ -301,6 +301,154 @@ func ServiceEntitlementsToTOML(v *ServiceEntitlements) ([]byte, error) {
 	return toml.Marshal(obj)
 }
 
+// IdentityProfileJSON represents IdentityProfile in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type identityprofileJSON struct {
+	Id           string            `json:"id,omitempty"`
+	Entitlements []json.RawMessage `json:"entitlements,omitempty"`
+}
+
+// IdentityProfileToJSON converts IdentityProfile to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func IdentityProfileToJSON(v *IdentityProfile) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "identityprofile is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := identityprofileJSON{
+		Id: v.Id,
+		Entitlements: func() []json.RawMessage {
+			if len(v.Entitlements) == 0 {
+				return nil
+			}
+			result := make([]json.RawMessage, 0, len(v.Entitlements))
+			for _, item := range v.Entitlements {
+				if item != nil {
+					if data, err := ServiceEntitlementToJSON(item); err == nil {
+						result = append(result, data)
+					}
+				}
+			}
+			return result
+		}(),
+	}
+	return json.Marshal(helper)
+}
+
+// IdentityProfileFromBytes creates IdentityProfile from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func IdentityProfileFromBytes(data []byte) (*IdentityProfile, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := IdentityProfileFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := IdentityProfileFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := IdentityProfileFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &IdentityProfile{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse IdentityProfile: unsupported format or invalid data")
+}
+
+// IdentityProfileFromJSON creates IdentityProfile from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func IdentityProfileFromJSON(data []byte) (*IdentityProfile, error) {
+	// Unmarshal into helper struct with string enums
+	var raw identityprofileJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &IdentityProfile{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &IdentityProfile{}
+	result.Id = raw.Id
+	// Parse repeated message field: Entitlements
+	if len(raw.Entitlements) > 0 {
+		result.Entitlements = make([]*ServiceEntitlement, 0, len(raw.Entitlements))
+		for _, itemJSON := range raw.Entitlements {
+			if len(itemJSON) > 0 {
+				parsed, err := ServiceEntitlementFromJSON(itemJSON)
+				if err == nil {
+					result.Entitlements = append(result.Entitlements, parsed)
+				}
+			}
+		}
+	}
+	return result, nil
+}
+
+// IdentityProfileToYAML converts IdentityProfile to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func IdentityProfileToYAML(v *IdentityProfile) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "identityprofile is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := IdentityProfileToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// IdentityProfileToTOML converts IdentityProfile to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func IdentityProfileToTOML(v *IdentityProfile) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "identityprofile is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := IdentityProfileToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
 // ServiceEntitlementMappingJSON represents ServiceEntitlementMapping in external JSON format (with string enums)
 // MARKER: JSON helper struct generated from serial.go
 type serviceentitlementmappingJSON struct {
@@ -473,6 +621,25 @@ func ServiceEntitlementsFromEnvVar(env map[string]string) (*ServiceEntitlements,
 	return result, nil
 }
 
+// IdentityProfileToEnvVar converts IdentityProfile to environment variable key-value pairs.
+func IdentityProfileToEnvVar(v *IdentityProfile) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	result["PROTO_LIBS_ENTITLEMENT_IDENTITY_PROFILE_ID"] = v.Id
+	return result
+}
+
+// IdentityProfileFromEnvVar creates IdentityProfile from environment variable key-value pairs.
+func IdentityProfileFromEnvVar(env map[string]string) (*IdentityProfile, error) {
+	result := &IdentityProfile{}
+	if val, ok := env["PROTO_LIBS_ENTITLEMENT_IDENTITY_PROFILE_ID"]; ok && val != "" {
+		result.Id = val
+	}
+	return result, nil
+}
+
 // ServiceEntitlementMappingToEnvVar converts ServiceEntitlementMapping to environment variable key-value pairs.
 func ServiceEntitlementMappingToEnvVar(v *ServiceEntitlementMapping) map[string]string {
 	if v == nil {
@@ -511,9 +678,19 @@ func ValidateServiceEntitlement(m *ServiceEntitlement) error {
 		return protoerrors.NewErrMissingInvalidData(nil, "field ServiceName is required")
 	}
 
+	// Validate ServiceName (assert_max_length: 128)
+	if len(m.ServiceName) > 128 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field ServiceName must be at most 128 characters, got: %d", len(m.ServiceName))
+	}
+
 	// Validate AllowedRpcs (assert_required)
 	if len(m.AllowedRpcs) == 0 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field AllowedRpcs is required")
+	}
+
+	// Validate AllowedRpcs (assert_max_items: 256)
+	if len(m.AllowedRpcs) > 256 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field AllowedRpcs exceeds max items of 256, got: %d", len(m.AllowedRpcs))
 	}
 
 	// Validate ServiceName (default max size: 32768 bytes)
@@ -531,14 +708,59 @@ func ValidateServiceEntitlements(m *ServiceEntitlements) error {
 		return nil
 	}
 
+	// Validate Id (assert_max_length: 128)
+	if len(m.Id) > 128 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Id must be at most 128 characters, got: %d", len(m.Id))
+	}
+
 	// Validate Id (assert_required)
 	if m.Id == "" {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Id is required")
 	}
 
+	// Validate Entitlements (assert_max_items: 64)
+	if len(m.Entitlements) > 64 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Entitlements exceeds max items of 64, got: %d", len(m.Entitlements))
+	}
+
 	// Validate Entitlements (assert_required)
 	if len(m.Entitlements) == 0 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Entitlements is required")
+	}
+
+	// Validate Id (default max size: 32768 bytes)
+	if len(m.Id) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Id exceeds max size of 32768 bytes, got: %d", len(m.Id))
+	}
+
+	return nil
+}
+
+// ValidateIdentityProfile validates all fields in IdentityProfile according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidateIdentityProfile(m *IdentityProfile) error {
+	if m == nil {
+		return nil
+	}
+
+	// Validate Id (assert_required)
+	if m.Id == "" {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Id is required")
+	}
+
+	// Validate Id (assert_max_length: 128)
+	if len(m.Id) > 128 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Id must be at most 128 characters, got: %d", len(m.Id))
+	}
+
+	// Validate Entitlements (assert_required)
+	if len(m.Entitlements) == 0 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Entitlements is required")
+	}
+
+	// Validate Entitlements (assert_max_items: 64)
+	if len(m.Entitlements) > 64 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Entitlements exceeds max items of 64, got: %d", len(m.Entitlements))
 	}
 
 	// Validate Id (default max size: 32768 bytes)
@@ -561,9 +783,19 @@ func ValidateServiceEntitlementMapping(m *ServiceEntitlementMapping) error {
 		return protoerrors.NewErrMissingInvalidData(nil, "field CredentialId is required")
 	}
 
+	// Validate CredentialId (assert_max_length: 512)
+	if len(m.CredentialId) > 512 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field CredentialId must be at most 512 characters, got: %d", len(m.CredentialId))
+	}
+
 	// Validate Service (assert_required)
 	if m.Service == "" {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Service is required")
+	}
+
+	// Validate Service (assert_max_length: 128)
+	if len(m.Service) > 128 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Service must be at most 128 characters, got: %d", len(m.Service))
 	}
 
 	// Validate CredentialId (default max size: 32768 bytes)
@@ -584,7 +816,11 @@ func ValidateServiceEntitlementMapping(m *ServiceEntitlementMapping) error {
 // ============================================================
 const (
 	MaxSizeServiceentitlementServiceName         int = 32768
+	MaxItemsServiceentitlementAllowedRpcs        int = 256
 	MaxSizeServiceentitlementsId                 int = 32768
+	MaxItemsServiceentitlementsEntitlements      int = 64
+	MaxSizeIdentityprofileId                     int = 32768
+	MaxItemsIdentityprofileEntitlements          int = 64
 	MaxSizeServiceentitlementmappingCredentialId int = 32768
 	MaxSizeServiceentitlementmappingService      int = 32768
 )
@@ -607,6 +843,19 @@ func MergeServiceEntitlement(dst, src *ServiceEntitlement) {
 // ============================================================
 // MergeServiceEntitlements fills zero-valued fields in dst from src.
 func MergeServiceEntitlements(dst, src *ServiceEntitlements) {
+	if dst.Id == "" {
+		dst.Id = src.Id
+	}
+	if len(dst.Entitlements) == 0 {
+		dst.Entitlements = src.Entitlements
+	}
+}
+
+// ============================================================
+// Merge: IdentityProfile
+// ============================================================
+// MergeIdentityProfile fills zero-valued fields in dst from src.
+func MergeIdentityProfile(dst, src *IdentityProfile) {
 	if dst.Id == "" {
 		dst.Id = src.Id
 	}

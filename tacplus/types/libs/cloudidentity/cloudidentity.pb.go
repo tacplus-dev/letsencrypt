@@ -180,16 +180,16 @@ var File_libs_cloudidentity_proto protoreflect.FileDescriptor
 
 const file_libs_cloudidentity_proto_rawDesc = "" +
 	"\n" +
-	"\x18libs/cloudidentity.proto\x12\rcloudidentity\x1a\x16libs/cloudvendor.proto\x1a\x0flibs/spec.proto\"\xc5\x01\n" +
+	"\x18libs/cloudidentity.proto\x12\rcloudidentity\x1a\x16libs/cloudvendor.proto\x1a\x0flibs/spec.proto\"\xcc\x01\n" +
 	"\x12CloudIdentityProof\x126\n" +
 	"\x06vendor\x18\x01 \x01(\x0e2\x18.cloudvendor.CloudVendorB\x04\x98\xa7\x1d\x01R\x06vendor\x12P\n" +
-	"\x11presigned_request\x18\x02 \x01(\v2#.cloudidentity.PresignedHttpRequestR\x10presignedRequest\x12%\n" +
-	"\x0eidentity_token\x18\x03 \x01(\tR\ridentityToken\"\xe8\x01\n" +
-	"\x14PresignedHttpRequest\x12\x1c\n" +
-	"\x06method\x18\x01 \x01(\tB\x04\x88\xa6\x1d\x01R\x06method\x12\x16\n" +
-	"\x03url\x18\x02 \x01(\tB\x04\x88\xa6\x1d\x01R\x03url\x12J\n" +
-	"\aheaders\x18\x03 \x03(\v20.cloudidentity.PresignedHttpRequest.HeadersEntryR\aheaders\x12\x12\n" +
-	"\x04body\x18\x04 \x01(\tR\x04body\x1a:\n" +
+	"\x11presigned_request\x18\x02 \x01(\v2#.cloudidentity.PresignedHttpRequestR\x10presignedRequest\x12,\n" +
+	"\x0eidentity_token\x18\x03 \x01(\tB\x05\xb8\xa8\x1d\x80@R\ridentityToken\"\xfe\x01\n" +
+	"\x14PresignedHttpRequest\x12 \n" +
+	"\x06method\x18\x01 \x01(\tB\b\x88\xa6\x1d\x01\x90\xa7\x1d\x10R\x06method\x12\x1b\n" +
+	"\x03url\x18\x02 \x01(\tB\t\x88\xa6\x1d\x01\x90\xa7\x1d\x80\x10R\x03url\x12P\n" +
+	"\aheaders\x18\x03 \x03(\v20.cloudidentity.PresignedHttpRequest.HeadersEntryB\x04\xc0\xa8\x1d R\aheaders\x12\x19\n" +
+	"\x04body\x18\x04 \x01(\tB\x05\xb8\xa8\x1d\x80@R\x04body\x1a:\n" +
 	"\fHeadersEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B^Z\\gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/cloudidentityb\x06proto3"

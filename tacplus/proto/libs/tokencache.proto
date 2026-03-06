@@ -1,5 +1,9 @@
 // Copyright (c) 2024 Second Star Cavalier, LLC.
 
+// Package tokencache defines configuration for the JWT token cache used by
+// frontendserver's OPA authorization layer. Controls JWK key caching,
+// automatic OIDC discovery, and cache eviction timing.
+
 syntax = "proto3";
 
 package tokencache;

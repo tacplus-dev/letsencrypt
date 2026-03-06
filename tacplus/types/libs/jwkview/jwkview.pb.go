@@ -15,6 +15,7 @@ package jwkview
 
 import (
 	jwk "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/jwk"
+	_ "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/spec"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
@@ -174,9 +175,9 @@ var File_libs_jwkview_proto protoreflect.FileDescriptor
 
 const file_libs_jwkview_proto_rawDesc = "" +
 	"\n" +
-	"\x12libs/jwkview.proto\x12\ajwkview\x1a\x0elibs/jwk.proto\x1a\x1bgoogle/protobuf/empty.proto\"\x98\x01\n" +
-	"\x0fJwkViewResponse\x12?\n" +
-	"\aentries\x18\x01 \x03(\v2%.jwkview.JwkViewResponse.EntriesEntryR\aentries\x1aD\n" +
+	"\x12libs/jwkview.proto\x12\ajwkview\x1a\x0elibs/jwk.proto\x1a\x0flibs/spec.proto\x1a\x1bgoogle/protobuf/empty.proto\"\x9f\x01\n" +
+	"\x0fJwkViewResponse\x12F\n" +
+	"\aentries\x18\x01 \x03(\v2%.jwkview.JwkViewResponse.EntriesEntryB\x05\xc0\xa8\x1d\x80\x02R\aentries\x1aD\n" +
 	"\fEntriesEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x1e\n" +
 	"\x05value\x18\x02 \x01(\v2\b.jwk.JwkR\x05value:\x028\x01\"%\n" +

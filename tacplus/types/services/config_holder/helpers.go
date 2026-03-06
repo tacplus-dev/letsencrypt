@@ -24,6 +24,7 @@ import (
 	identity "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/identity"
 	letsencrypt "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/letsencrypt"
 	policy "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/policy"
+	policysim "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/policysim"
 	sentinel "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/sentinel"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
@@ -42,6 +43,7 @@ type configholderJSON struct {
 	GatewayConfig     json.RawMessage `json:"gateway_config,omitempty"`
 	LetsencryptConfig json.RawMessage `json:"letsencrypt_config,omitempty"`
 	PolicyConfig      json.RawMessage `json:"policy_config,omitempty"`
+	PolicysimConfig   json.RawMessage `json:"policysim_config,omitempty"`
 }
 
 // ConfigHolderToJSON converts ConfigHolder to JSON bytes.
@@ -85,6 +87,13 @@ func ConfigHolderToJSON(v *ConfigHolder) ([]byte, error) {
 				return nil
 			}
 			data, _ := policy.ConfigToJSON(v.PolicyConfig)
+			return data
+		}(),
+		PolicysimConfig: func() json.RawMessage {
+			if v.PolicysimConfig == nil {
+				return nil
+			}
+			data, _ := policysim.ConfigToJSON(v.PolicysimConfig)
 			return data
 		}(),
 	}
@@ -184,6 +193,13 @@ func ConfigHolderFromJSON(data []byte) (*ConfigHolder, error) {
 		parsed, err := policy.ConfigFromJSON(raw.PolicyConfig)
 		if err == nil {
 			result.PolicyConfig = parsed
+		}
+	}
+	// Parse message field: PolicysimConfig
+	if len(raw.PolicysimConfig) > 0 {
+		parsed, err := policysim.ConfigFromJSON(raw.PolicysimConfig)
+		if err == nil {
+			result.PolicysimConfig = parsed
 		}
 	}
 	return result, nil
@@ -892,6 +908,139 @@ func PolicyConfigStateToTOML(v *PolicyConfigState) ([]byte, error) {
 	return toml.Marshal(obj)
 }
 
+// PolicysimConfigStateJSON represents PolicysimConfigState in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type policysimconfigstateJSON struct {
+	Config json.RawMessage `json:"config,omitempty"`
+}
+
+// PolicysimConfigStateToJSON converts PolicysimConfigState to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func PolicysimConfigStateToJSON(v *PolicysimConfigState) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "policysimconfigstate is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := policysimconfigstateJSON{
+		Config: func() json.RawMessage {
+			if v.Config == nil {
+				return nil
+			}
+			data, _ := policysim.ConfigToJSON(v.Config)
+			return data
+		}(),
+	}
+	return json.Marshal(helper)
+}
+
+// PolicysimConfigStateFromBytes creates PolicysimConfigState from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func PolicysimConfigStateFromBytes(data []byte) (*PolicysimConfigState, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := PolicysimConfigStateFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := PolicysimConfigStateFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := PolicysimConfigStateFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &PolicysimConfigState{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse PolicysimConfigState: unsupported format or invalid data")
+}
+
+// PolicysimConfigStateFromJSON creates PolicysimConfigState from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func PolicysimConfigStateFromJSON(data []byte) (*PolicysimConfigState, error) {
+	// Unmarshal into helper struct with string enums
+	var raw policysimconfigstateJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &PolicysimConfigState{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &PolicysimConfigState{}
+	// Parse message field: Config
+	if len(raw.Config) > 0 {
+		parsed, err := policysim.ConfigFromJSON(raw.Config)
+		if err == nil {
+			result.Config = parsed
+		}
+	}
+	return result, nil
+}
+
+// PolicysimConfigStateToYAML converts PolicysimConfigState to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func PolicysimConfigStateToYAML(v *PolicysimConfigState) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "policysimconfigstate is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := PolicysimConfigStateToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// PolicysimConfigStateToTOML converts PolicysimConfigState to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func PolicysimConfigStateToTOML(v *PolicysimConfigState) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "policysimconfigstate is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := PolicysimConfigStateToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
 // ServiceConfigStateJSON represents ServiceConfigState in external JSON format (with string enums)
 // MARKER: JSON helper struct generated from serial.go
 type serviceconfigstateJSON struct {
@@ -1177,6 +1326,11 @@ func ConfigHolderToEnvVar(v *ConfigHolder) map[string]string {
 			result[k] = val
 		}
 	}
+	if v.PolicysimConfig != nil {
+		for k, val := range policysim.ConfigToEnvVar(v.PolicysimConfig) {
+			result[k] = val
+		}
+	}
 	return result
 }
 
@@ -1207,6 +1361,11 @@ func ConfigHolderFromEnvVar(env map[string]string) (*ConfigHolder, error) {
 		return nil, err
 	} else if sub != nil {
 		result.PolicyConfig = sub
+	}
+	if sub, err := policysim.ConfigFromEnvVar(env); err != nil {
+		return nil, err
+	} else if sub != nil {
+		result.PolicysimConfig = sub
 	}
 	return result, nil
 }
@@ -1336,6 +1495,31 @@ func PolicyConfigStateFromEnvVar(env map[string]string) (*PolicyConfigState, err
 	return result, nil
 }
 
+// PolicysimConfigStateToEnvVar converts PolicysimConfigState to environment variable key-value pairs.
+func PolicysimConfigStateToEnvVar(v *PolicysimConfigState) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	if v.Config != nil {
+		for k, val := range policysim.ConfigToEnvVar(v.Config) {
+			result[k] = val
+		}
+	}
+	return result
+}
+
+// PolicysimConfigStateFromEnvVar creates PolicysimConfigState from environment variable key-value pairs.
+func PolicysimConfigStateFromEnvVar(env map[string]string) (*PolicysimConfigState, error) {
+	result := &PolicysimConfigState{}
+	if sub, err := policysim.ConfigFromEnvVar(env); err != nil {
+		return nil, err
+	} else if sub != nil {
+		result.Config = sub
+	}
+	return result, nil
+}
+
 // ServiceConfigStateToEnvVar converts ServiceConfigState to environment variable key-value pairs.
 func ServiceConfigStateToEnvVar(v *ServiceConfigState) map[string]string {
 	if v == nil {
@@ -1440,6 +1624,16 @@ func ValidatePolicyConfigState(m *PolicyConfigState) error {
 	return nil
 }
 
+// ValidatePolicysimConfigState validates all fields in PolicysimConfigState according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidatePolicysimConfigState(m *PolicysimConfigState) error {
+	if m == nil {
+		return nil
+	}
+
+	return nil
+}
+
 // ValidateServiceConfigState validates all fields in ServiceConfigState according to their annotations.
 // Returns a BlueErr if validation fails, or nil if all validations pass.
 func ValidateServiceConfigState(m *ServiceConfigState) error {
@@ -1480,6 +1674,9 @@ func MergeConfigHolder(dst, src *ConfigHolder) {
 	}
 	if dst.PolicyConfig == nil {
 		dst.PolicyConfig = src.PolicyConfig
+	}
+	if dst.PolicysimConfig == nil {
+		dst.PolicysimConfig = src.PolicysimConfig
 	}
 }
 
@@ -1528,6 +1725,16 @@ func MergeLetsencryptConfigState(dst, src *LetsencryptConfigState) {
 // ============================================================
 // MergePolicyConfigState fills zero-valued fields in dst from src.
 func MergePolicyConfigState(dst, src *PolicyConfigState) {
+	if dst.Config == nil {
+		dst.Config = src.Config
+	}
+}
+
+// ============================================================
+// Merge: PolicysimConfigState
+// ============================================================
+// MergePolicysimConfigState fills zero-valued fields in dst from src.
+func MergePolicysimConfigState(dst, src *PolicysimConfigState) {
 	if dst.Config == nil {
 		dst.Config = src.Config
 	}

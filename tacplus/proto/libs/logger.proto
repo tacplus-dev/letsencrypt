@@ -1,5 +1,10 @@
 // Copyright (c) 2024 Second Star Cavalier, LLC.
 
+// Package logger defines the LoggerConfig message and associated enums for
+// configuring structured logging across all services. Controls output format
+// (JSON vs console), severity filtering, output destinations, and contextual
+// fields. Used by both serviceconfig.Config and per-service bootstrap configs.
+
 syntax = "proto3";
 
 package logger;

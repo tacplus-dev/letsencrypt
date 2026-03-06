@@ -1169,24 +1169,24 @@ func ValidateJwk(m *Jwk) error {
 		return nil
 	}
 
-	// Validate Alg (assert_min_length: 1)
-	if len(m.Alg) < 1 {
-		return protoerrors.NewErrMissingInvalidData(nil, "field Alg must be at least 1 characters, got: %d", len(m.Alg))
-	}
-
 	// Validate Alg (assert_required)
 	if m.Alg == "" {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Alg is required")
 	}
 
-	// Validate Kid (assert_required)
-	if m.Kid == "" {
-		return protoerrors.NewErrMissingInvalidData(nil, "field Kid is required")
+	// Validate Alg (assert_min_length: 1)
+	if len(m.Alg) < 1 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Alg must be at least 1 characters, got: %d", len(m.Alg))
 	}
 
 	// Validate Kid (assert_min_length: 1)
 	if len(m.Kid) < 1 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Kid must be at least 1 characters, got: %d", len(m.Kid))
+	}
+
+	// Validate Kid (assert_required)
+	if m.Kid == "" {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Kid is required")
 	}
 
 	// Validate E (assert_base64)
@@ -1270,7 +1270,11 @@ func ValidateJwks(m *Jwks) error {
 		return nil
 	}
 
-	// No field validations defined
+	// Validate Keys (assert_max_items: 128)
+	if len(m.Keys) > 128 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Keys exceeds max items of 128, got: %d", len(m.Keys))
+	}
+
 	return nil
 }
 
@@ -1321,6 +1325,11 @@ func ValidateOpenIdConfiguration(m *OpenIdConfiguration) error {
 		}
 	}
 
+	// Validate JwksUri (assert_required)
+	if m.JwksUri == "" {
+		return protoerrors.NewErrMissingInvalidData(nil, "field JwksUri is required")
+	}
+
 	// Validate JwksUri (assert_url: URL_SCHEME_HTTPS)
 	if m.JwksUri != "" {
 		if err := utils.ValidateAssertURL_URL_SCHEME_HTTPS(m.JwksUri); err != nil {
@@ -1328,9 +1337,49 @@ func ValidateOpenIdConfiguration(m *OpenIdConfiguration) error {
 		}
 	}
 
-	// Validate JwksUri (assert_required)
-	if m.JwksUri == "" {
-		return protoerrors.NewErrMissingInvalidData(nil, "field JwksUri is required")
+	// Validate ResponseTypesSupported (assert_max_items: 32)
+	if len(m.ResponseTypesSupported) > 32 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field ResponseTypesSupported exceeds max items of 32, got: %d", len(m.ResponseTypesSupported))
+	}
+
+	// Validate ResponseModesSupported (assert_max_items: 32)
+	if len(m.ResponseModesSupported) > 32 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field ResponseModesSupported exceeds max items of 32, got: %d", len(m.ResponseModesSupported))
+	}
+
+	// Validate GrantTypesSupported (assert_max_items: 32)
+	if len(m.GrantTypesSupported) > 32 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field GrantTypesSupported exceeds max items of 32, got: %d", len(m.GrantTypesSupported))
+	}
+
+	// Validate SubjectTypesSupported (assert_max_items: 32)
+	if len(m.SubjectTypesSupported) > 32 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field SubjectTypesSupported exceeds max items of 32, got: %d", len(m.SubjectTypesSupported))
+	}
+
+	// Validate IdTokenSigningAlgValuesSupported (assert_max_items: 32)
+	if len(m.IdTokenSigningAlgValuesSupported) > 32 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field IdTokenSigningAlgValuesSupported exceeds max items of 32, got: %d", len(m.IdTokenSigningAlgValuesSupported))
+	}
+
+	// Validate ScopesSupported (assert_max_items: 64)
+	if len(m.ScopesSupported) > 64 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field ScopesSupported exceeds max items of 64, got: %d", len(m.ScopesSupported))
+	}
+
+	// Validate TokenEndpointAuthMethodsSupported (assert_max_items: 32)
+	if len(m.TokenEndpointAuthMethodsSupported) > 32 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field TokenEndpointAuthMethodsSupported exceeds max items of 32, got: %d", len(m.TokenEndpointAuthMethodsSupported))
+	}
+
+	// Validate ClaimsSupported (assert_max_items: 128)
+	if len(m.ClaimsSupported) > 128 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field ClaimsSupported exceeds max items of 128, got: %d", len(m.ClaimsSupported))
+	}
+
+	// Validate CodeChallengeMethodsSupported (assert_max_items: 16)
+	if len(m.CodeChallengeMethodsSupported) > 16 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field CodeChallengeMethodsSupported exceeds max items of 16, got: %d", len(m.CodeChallengeMethodsSupported))
 	}
 
 	// Validate IntrospectionEndpoint (assert_url: URL_SCHEME_HTTPS)
@@ -1340,6 +1389,11 @@ func ValidateOpenIdConfiguration(m *OpenIdConfiguration) error {
 		}
 	}
 
+	// Validate IntrospectionEndpointAuthMethodsSupported (assert_max_items: 32)
+	if len(m.IntrospectionEndpointAuthMethodsSupported) > 32 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field IntrospectionEndpointAuthMethodsSupported exceeds max items of 32, got: %d", len(m.IntrospectionEndpointAuthMethodsSupported))
+	}
+
 	// Validate RevocationEndpoint (assert_url: URL_SCHEME_HTTPS)
 	if m.RevocationEndpoint != "" {
 		if err := utils.ValidateAssertURL_URL_SCHEME_HTTPS(m.RevocationEndpoint); err != nil {
@@ -1347,11 +1401,21 @@ func ValidateOpenIdConfiguration(m *OpenIdConfiguration) error {
 		}
 	}
 
+	// Validate RevocationEndpointAuthMethodsSupported (assert_max_items: 32)
+	if len(m.RevocationEndpointAuthMethodsSupported) > 32 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field RevocationEndpointAuthMethodsSupported exceeds max items of 32, got: %d", len(m.RevocationEndpointAuthMethodsSupported))
+	}
+
 	// Validate EndSessionEndpoint (assert_url: URL_SCHEME_HTTPS)
 	if m.EndSessionEndpoint != "" {
 		if err := utils.ValidateAssertURL_URL_SCHEME_HTTPS(m.EndSessionEndpoint); err != nil {
 			return protoerrors.NewErrMissingInvalidData(err, "field EndSessionEndpoint URL validation failed")
 		}
+	}
+
+	// Validate RequestObjectSigningAlgValuesSupported (assert_max_items: 32)
+	if len(m.RequestObjectSigningAlgValuesSupported) > 32 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field RequestObjectSigningAlgValuesSupported exceeds max items of 32, got: %d", len(m.RequestObjectSigningAlgValuesSupported))
 	}
 
 	// Validate DeviceAuthorizationEndpoint (assert_url: URL_SCHEME_HTTPS)
@@ -1387,6 +1451,16 @@ func ValidateOpenIdConfiguration(m *OpenIdConfiguration) error {
 		if err := utils.ValidateAssertURL_URL_SCHEME_HTTPS(m.MfaChallengeEndpoint); err != nil {
 			return protoerrors.NewErrMissingInvalidData(err, "field MfaChallengeEndpoint URL validation failed")
 		}
+	}
+
+	// Validate TokenEndpointAuthSigningAlgValuesSupported (assert_max_items: 32)
+	if len(m.TokenEndpointAuthSigningAlgValuesSupported) > 32 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field TokenEndpointAuthSigningAlgValuesSupported exceeds max items of 32, got: %d", len(m.TokenEndpointAuthSigningAlgValuesSupported))
+	}
+
+	// Validate DpopSigningAlgValuesSupported (assert_max_items: 32)
+	if len(m.DpopSigningAlgValuesSupported) > 32 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field DpopSigningAlgValuesSupported exceeds max items of 32, got: %d", len(m.DpopSigningAlgValuesSupported))
 	}
 
 	// Validate Issuer (default max size: 32768 bytes)
@@ -1508,31 +1582,46 @@ const (
 // Capacity Constants (for utilization monitoring)
 // ============================================================
 const (
-	MaxSizeJwkAlg                                         int = 32768
-	MaxSizeJwkKid                                         int = 32768
-	MaxSizeJwkE                                           int = 32768
-	MaxSizeJwkN                                           int = 32768
-	MaxSizeJwkCrv                                         int = 32768
-	MaxSizeJwkX                                           int = 32768
-	MaxSizeJwkY                                           int = 32768
-	MaxSizeOpenidconfigurationIssuer                      int = 32768
-	MaxSizeOpenidconfigurationAuthorizationEndpoint       int = 32768
-	MaxSizeOpenidconfigurationTokenEndpoint               int = 32768
-	MaxSizeOpenidconfigurationUserinfoEndpoint            int = 32768
-	MaxSizeOpenidconfigurationRegistrationEndpoint        int = 32768
-	MaxSizeOpenidconfigurationJwksUri                     int = 32768
-	MaxSizeOpenidconfigurationIntrospectionEndpoint       int = 32768
-	MaxSizeOpenidconfigurationRevocationEndpoint          int = 32768
-	MaxSizeOpenidconfigurationEndSessionEndpoint          int = 32768
-	MaxSizeOpenidconfigurationDeviceAuthorizationEndpoint int = 32768
-	MaxSizeOpenidconfigurationCheckSessionIframe          int = 32768
-	MaxSizeOpenidconfigurationKerberosEndpoint            int = 32768
-	MaxSizeOpenidconfigurationTenantRegionScope           int = 32768
-	MaxSizeOpenidconfigurationCloudInstanceName           int = 32768
-	MaxSizeOpenidconfigurationCloudGraphHostName          int = 32768
-	MaxSizeOpenidconfigurationMsgraphHost                 int = 32768
-	MaxSizeOpenidconfigurationRbacUrl                     int = 32768
-	MaxSizeOpenidconfigurationMfaChallengeEndpoint        int = 32768
+	MaxSizeJwkAlg                                                         int = 32768
+	MaxSizeJwkKid                                                         int = 32768
+	MaxSizeJwkE                                                           int = 32768
+	MaxSizeJwkN                                                           int = 32768
+	MaxSizeJwkCrv                                                         int = 32768
+	MaxSizeJwkX                                                           int = 32768
+	MaxSizeJwkY                                                           int = 32768
+	MaxItemsJwksKeys                                                      int = 128
+	MaxSizeOpenidconfigurationIssuer                                      int = 32768
+	MaxSizeOpenidconfigurationAuthorizationEndpoint                       int = 32768
+	MaxSizeOpenidconfigurationTokenEndpoint                               int = 32768
+	MaxSizeOpenidconfigurationUserinfoEndpoint                            int = 32768
+	MaxSizeOpenidconfigurationRegistrationEndpoint                        int = 32768
+	MaxSizeOpenidconfigurationJwksUri                                     int = 32768
+	MaxItemsOpenidconfigurationResponseTypesSupported                     int = 32
+	MaxItemsOpenidconfigurationResponseModesSupported                     int = 32
+	MaxItemsOpenidconfigurationGrantTypesSupported                        int = 32
+	MaxItemsOpenidconfigurationSubjectTypesSupported                      int = 32
+	MaxItemsOpenidconfigurationIdTokenSigningAlgValuesSupported           int = 32
+	MaxItemsOpenidconfigurationScopesSupported                            int = 64
+	MaxItemsOpenidconfigurationTokenEndpointAuthMethodsSupported          int = 32
+	MaxItemsOpenidconfigurationClaimsSupported                            int = 128
+	MaxItemsOpenidconfigurationCodeChallengeMethodsSupported              int = 16
+	MaxSizeOpenidconfigurationIntrospectionEndpoint                       int = 32768
+	MaxItemsOpenidconfigurationIntrospectionEndpointAuthMethodsSupported  int = 32
+	MaxSizeOpenidconfigurationRevocationEndpoint                          int = 32768
+	MaxItemsOpenidconfigurationRevocationEndpointAuthMethodsSupported     int = 32
+	MaxSizeOpenidconfigurationEndSessionEndpoint                          int = 32768
+	MaxItemsOpenidconfigurationRequestObjectSigningAlgValuesSupported     int = 32
+	MaxSizeOpenidconfigurationDeviceAuthorizationEndpoint                 int = 32768
+	MaxSizeOpenidconfigurationCheckSessionIframe                          int = 32768
+	MaxSizeOpenidconfigurationKerberosEndpoint                            int = 32768
+	MaxSizeOpenidconfigurationTenantRegionScope                           int = 32768
+	MaxSizeOpenidconfigurationCloudInstanceName                           int = 32768
+	MaxSizeOpenidconfigurationCloudGraphHostName                          int = 32768
+	MaxSizeOpenidconfigurationMsgraphHost                                 int = 32768
+	MaxSizeOpenidconfigurationRbacUrl                                     int = 32768
+	MaxSizeOpenidconfigurationMfaChallengeEndpoint                        int = 32768
+	MaxItemsOpenidconfigurationTokenEndpointAuthSigningAlgValuesSupported int = 32
+	MaxItemsOpenidconfigurationDpopSigningAlgValuesSupported              int = 32
 )
 
 // ============================================================

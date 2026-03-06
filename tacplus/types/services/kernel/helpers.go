@@ -25,13 +25,13 @@ import (
 	entitlement "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/entitlement"
 	protoerrors "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/errors"
 	healthreport "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/healthreport"
-	host "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/host"
 	jwk "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/jwk"
 	logger "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/logger"
 	outputformat "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/outputformat"
 	x509 "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/x509"
 	config_holder "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/config_holder"
 	sentinel "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/sentinel"
+	utils "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/utils"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 	"gopkg.in/yaml.v3"
@@ -631,8 +631,8 @@ func LogicalOpToSpecName(v LogicalOp) string {
 // MARKER: JSON helper struct generated from serial.go
 type bootstrapconfigJSON struct {
 	ClusterName       string            `json:"cluster_name,omitempty"`
-	Listener          json.RawMessage   `json:"listener,omitempty"`
-	Members           []json.RawMessage `json:"members,omitempty"`
+	Listener          string            `json:"listener,omitempty"`
+	Members           []string          `json:"members,omitempty"`
 	NodeCount         int32             `json:"node_count,omitempty"`
 	Secret            string            `json:"secret,omitempty"`
 	PartitionCount    int32             `json:"partition_count,omitempty"`
@@ -656,28 +656,9 @@ func BootstrapConfigToJSON(v *BootstrapConfig) ([]byte, error) {
 	}
 	// Convert to JSON helper struct with string enums
 	helper := bootstrapconfigJSON{
-		ClusterName: v.ClusterName,
-		Listener: func() json.RawMessage {
-			if v.Listener == nil {
-				return nil
-			}
-			data, _ := host.HostToJSON(v.Listener)
-			return data
-		}(),
-		Members: func() []json.RawMessage {
-			if len(v.Members) == 0 {
-				return nil
-			}
-			result := make([]json.RawMessage, 0, len(v.Members))
-			for _, item := range v.Members {
-				if item != nil {
-					if data, err := host.HostToJSON(item); err == nil {
-						result = append(result, data)
-					}
-				}
-			}
-			return result
-		}(),
+		ClusterName:    v.ClusterName,
+		Listener:       v.Listener,
+		Members:        v.Members,
 		NodeCount:      v.NodeCount,
 		Secret:         v.Secret,
 		PartitionCount: v.PartitionCount,
@@ -793,25 +774,8 @@ func BootstrapConfigFromJSON(data []byte) (*BootstrapConfig, error) {
 	// Build result with parsed enums
 	result := &BootstrapConfig{}
 	result.ClusterName = raw.ClusterName
-	// Parse message field: Listener
-	if len(raw.Listener) > 0 {
-		parsed, err := host.HostFromJSON(raw.Listener)
-		if err == nil {
-			result.Listener = parsed
-		}
-	}
-	// Parse repeated message field: Members
-	if len(raw.Members) > 0 {
-		result.Members = make([]*host.Host, 0, len(raw.Members))
-		for _, itemJSON := range raw.Members {
-			if len(itemJSON) > 0 {
-				parsed, err := host.HostFromJSON(itemJSON)
-				if err == nil {
-					result.Members = append(result.Members, parsed)
-				}
-			}
-		}
-	}
+	result.Listener = raw.Listener
+	result.Members = raw.Members
 	result.NodeCount = raw.NodeCount
 	result.Secret = raw.Secret
 	result.PartitionCount = raw.PartitionCount
@@ -28564,10 +28528,9 @@ func BootstrapConfigToEnvVar(v *BootstrapConfig) map[string]string {
 	}
 	result := make(map[string]string)
 	result["PROTO_SERVICES_KERNEL_BOOTSTRAP_CONFIG_CLUSTER_NAME"] = v.ClusterName
-	if v.Listener != nil {
-		for k, val := range host.HostToEnvVar(v.Listener) {
-			result[k] = val
-		}
+	result["PROTO_SERVICES_KERNEL_BOOTSTRAP_CONFIG_LISTENER"] = v.Listener
+	if len(v.Members) > 0 {
+		result["PROTO_SERVICES_KERNEL_BOOTSTRAP_CONFIG_MEMBERS"] = strings.Join(v.Members, ",")
 	}
 	result["PROTO_SERVICES_KERNEL_BOOTSTRAP_CONFIG_NODE_COUNT"] = strconv.FormatInt(int64(v.NodeCount), 10)
 	result["PROTO_SERVICES_KERNEL_BOOTSTRAP_CONFIG_SECRET"] = v.Secret
@@ -28606,10 +28569,11 @@ func BootstrapConfigFromEnvVar(env map[string]string) (*BootstrapConfig, error) 
 	if val, ok := env["PROTO_SERVICES_KERNEL_BOOTSTRAP_CONFIG_CLUSTER_NAME"]; ok && val != "" {
 		result.ClusterName = val
 	}
-	if sub, err := host.HostFromEnvVar(env); err != nil {
-		return nil, err
-	} else if sub != nil {
-		result.Listener = sub
+	if val, ok := env["PROTO_SERVICES_KERNEL_BOOTSTRAP_CONFIG_LISTENER"]; ok && val != "" {
+		result.Listener = val
+	}
+	if val, ok := env["PROTO_SERVICES_KERNEL_BOOTSTRAP_CONFIG_MEMBERS"]; ok && val != "" {
+		result.Members = strings.Split(val, ",")
 	}
 	if val, ok := env["PROTO_SERVICES_KERNEL_BOOTSTRAP_CONFIG_NODE_COUNT"]; ok && val != "" {
 		parsed, err := strconv.ParseInt(val, 10, 32)
@@ -33514,8 +33478,20 @@ func ValidateBootstrapConfig(m *BootstrapConfig) error {
 	}
 
 	// Validate Listener (assert_required)
-	if m.Listener == nil {
+	if m.Listener == "" {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Listener is required")
+	}
+
+	// Validate Listener (assert_listen_addr)
+	if m.Listener != "" {
+		if err := utils.ValidateAssertListenAddr(m.Listener); err != nil {
+			return protoerrors.NewErrMissingInvalidData(err, "field Listener listen address validation failed")
+		}
+	}
+
+	// Validate Members (assert_max_items: 32)
+	if len(m.Members) > 32 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Members exceeds max items of 32, got: %d", len(m.Members))
 	}
 
 	// Validate Members (assert_required)
@@ -33523,9 +33499,13 @@ func ValidateBootstrapConfig(m *BootstrapConfig) error {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Members is required")
 	}
 
-	// Validate Members (assert_max_items: 32)
-	if len(m.Members) > 32 {
-		return protoerrors.NewErrMissingInvalidData(nil, "field Members exceeds max items of 32, got: %d", len(m.Members))
+	// Validate Members (assert_listen_addr)
+	for _, v := range m.Members {
+		if v != "" {
+			if err := utils.ValidateAssertListenAddr(v); err != nil {
+				return protoerrors.NewErrMissingInvalidData(err, "field Members listen address validation failed")
+			}
+		}
 	}
 
 	// Validate NodeCount (assert_gt: 0)
@@ -33549,6 +33529,11 @@ func ValidateBootstrapConfig(m *BootstrapConfig) error {
 	// Validate ClusterName (default max size: 32768 bytes)
 	if len(m.ClusterName) > 32768 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field ClusterName exceeds max size of 32768 bytes, got: %d", len(m.ClusterName))
+	}
+
+	// Validate Listener (default max size: 32768 bytes)
+	if len(m.Listener) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Listener exceeds max size of 32768 bytes, got: %d", len(m.Listener))
 	}
 
 	// Validate Secret (default max size: 32768 bytes)
@@ -36200,6 +36185,7 @@ const (
 // ============================================================
 const (
 	MaxSizeBootstrapconfigClusterName          int = 32768
+	MaxSizeBootstrapconfigListener             int = 32768
 	MaxItemsBootstrapconfigMembers             int = 32
 	MaxSizeBootstrapconfigSecret               int = 32768
 	MaxSizeBootstrapconfigPersistenceDir       int = 32768
@@ -36530,7 +36516,7 @@ func MergeBootstrapConfig(dst, src *BootstrapConfig) {
 	if dst.ClusterName == "" {
 		dst.ClusterName = src.ClusterName
 	}
-	if dst.Listener == nil {
+	if dst.Listener == "" {
 		dst.Listener = src.Listener
 	}
 	if len(dst.Members) == 0 {

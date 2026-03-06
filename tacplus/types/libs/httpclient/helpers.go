@@ -563,6 +563,11 @@ func ValidateHttpClientConfig(m *HttpClientConfig) error {
 		return nil
 	}
 
+	// Validate RootCerts (assert_max_items: 32)
+	if len(m.RootCerts) > 32 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field RootCerts exceeds max items of 32, got: %d", len(m.RootCerts))
+	}
+
 	// Validate TimeoutSeconds (assert_duration: NON_NEGATIVE)
 	if m.TimeoutSeconds < 0 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field TimeoutSeconds must be non-negative (>= 0), got: %d", m.TimeoutSeconds)
@@ -610,6 +615,10 @@ func ValidateRetryConfig(m *RetryConfig) error {
 	if m.MaxRetries < 0 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field MaxRetries must be >= 0, got: %v", m.MaxRetries)
 	}
+	// Validate MaxRetries (assert_le: 10)
+	if m.MaxRetries > 10 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field MaxRetries must be <= 10, got: %v", m.MaxRetries)
+	}
 	// Validate InitialBackoffMs (assert_duration: POSITIVE)
 	if m.InitialBackoffMs <= 0 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field InitialBackoffMs must be positive (> 0), got: %d", m.InitialBackoffMs)
@@ -624,8 +633,21 @@ func ValidateRetryConfig(m *RetryConfig) error {
 	if m.BackoffMultiplier <= 0 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field BackoffMultiplier must be > 0, got: %v", m.BackoffMultiplier)
 	}
+	// Validate RetryableStatusCodes (assert_max_items: 32)
+	if len(m.RetryableStatusCodes) > 32 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field RetryableStatusCodes exceeds max items of 32, got: %d", len(m.RetryableStatusCodes))
+	}
+
 	return nil
 }
+
+// ============================================================
+// Capacity Constants (for utilization monitoring)
+// ============================================================
+const (
+	MaxItemsHttpclientconfigRootCerts       int = 32
+	MaxItemsRetryconfigRetryableStatusCodes int = 32
+)
 
 // ============================================================
 // Merge: HttpClientConfig

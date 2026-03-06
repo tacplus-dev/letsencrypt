@@ -1,5 +1,9 @@
 // Copyright (c) 2024 Second Star Cavalier, LLC.
 
+// Package cloudvendor enumerates supported public cloud providers.
+// Used by cloudidentity.CloudIdentityProof to identify which cloud's
+// identity verification flow to use during token exchange.
+
 syntax = "proto3";
 
 package cloudvendor;

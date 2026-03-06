@@ -525,6 +525,81 @@ func ValidateServiceInstanceHealth(m *ServiceInstanceHealth) error {
 		return nil
 	}
 
+	// Validate Id (assert_max_length: 256)
+	if len(m.Id) > 256 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Id must be at most 256 characters, got: %d", len(m.Id))
+	}
+
+	// Validate ServiceId (assert_max_length: 128)
+	if len(m.ServiceId) > 128 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field ServiceId must be at most 128 characters, got: %d", len(m.ServiceId))
+	}
+
+	// Validate InstanceId (assert_max_length: 128)
+	if len(m.InstanceId) > 128 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field InstanceId must be at most 128 characters, got: %d", len(m.InstanceId))
+	}
+
+	// Validate StatusMessage (assert_max_length: 1024)
+	if len(m.StatusMessage) > 1024 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field StatusMessage must be at most 1024 characters, got: %d", len(m.StatusMessage))
+	}
+
+	// Validate CpuUsage (assert_float)
+	if m.CpuUsage < 0 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field CpuUsage must be >= 0, got: %v", m.CpuUsage)
+	}
+	if m.CpuUsage > 100 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field CpuUsage must be <= 100, got: %v", m.CpuUsage)
+	}
+	// Validate MemoryUsedBytes (assert_ge: 0)
+	if m.MemoryUsedBytes < 0 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field MemoryUsedBytes must be >= 0, got: %v", m.MemoryUsedBytes)
+	}
+	// Validate MemoryMaxBytes (assert_ge: 0)
+	if m.MemoryMaxBytes < 0 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field MemoryMaxBytes must be >= 0, got: %v", m.MemoryMaxBytes)
+	}
+	// Validate ActiveRequests (assert_ge: 0)
+	if m.ActiveRequests < 0 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field ActiveRequests must be >= 0, got: %v", m.ActiveRequests)
+	}
+	// Validate MaxConcurrentRequests (assert_ge: 0)
+	if m.MaxConcurrentRequests < 0 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field MaxConcurrentRequests must be >= 0, got: %v", m.MaxConcurrentRequests)
+	}
+	// Validate RequestRate (assert_float)
+	if m.RequestRate < 0 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field RequestRate must be >= 0, got: %v", m.RequestRate)
+	}
+	// Validate P50LatencyUs (assert_ge: 0)
+	if m.P50LatencyUs < 0 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field P50LatencyUs must be >= 0, got: %v", m.P50LatencyUs)
+	}
+	// Validate P99LatencyUs (assert_ge: 0)
+	if m.P99LatencyUs < 0 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field P99LatencyUs must be >= 0, got: %v", m.P99LatencyUs)
+	}
+	// Validate ErrorRate (assert_float)
+	if m.ErrorRate < 0 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field ErrorRate must be >= 0, got: %v", m.ErrorRate)
+	}
+	if m.ErrorRate > 1 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field ErrorRate must be <= 1, got: %v", m.ErrorRate)
+	}
+	// Validate Version (assert_max_length: 64)
+	if len(m.Version) > 64 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Version must be at most 64 characters, got: %d", len(m.Version))
+	}
+
+	// Validate StartedAtMs (assert_ge: 0)
+	if m.StartedAtMs < 0 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field StartedAtMs must be >= 0, got: %v", m.StartedAtMs)
+	}
+	// Validate TimestampMs (assert_ge: 0)
+	if m.TimestampMs < 0 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field TimestampMs must be >= 0, got: %v", m.TimestampMs)
+	}
 	// Validate Id (default max size: 32768 bytes)
 	if len(m.Id) > 32768 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Id exceeds max size of 32768 bytes, got: %d", len(m.Id))

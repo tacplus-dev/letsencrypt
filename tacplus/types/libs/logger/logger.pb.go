@@ -304,19 +304,19 @@ var File_libs_logger_proto protoreflect.FileDescriptor
 
 const file_libs_logger_proto_rawDesc = "" +
 	"\n" +
-	"\x11libs/logger.proto\x12\x06logger\x1a\x0flibs/spec.proto\"\x85\x04\n" +
-	"\fLoggerConfig\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12,\n" +
+	"\x11libs/logger.proto\x12\x06logger\x1a\x0flibs/spec.proto\"\x9a\x04\n" +
+	"\fLoggerConfig\x12\x19\n" +
+	"\x04name\x18\x01 \x01(\tB\x05\x90\xa7\x1d\x80\x01R\x04name\x12,\n" +
 	"\x06format\x18\x02 \x01(\x0e2\x0e.logger.FormatB\x04\x98\xa7\x1d\x01R\x06format\x12)\n" +
 	"\x05level\x18\x03 \x01(\x0e2\r.logger.LevelB\x04\x98\xa7\x1d\x01R\x05level\x12 \n" +
 	"\vdevelopment\x18\x04 \x01(\bR\vdevelopment\x12!\n" +
-	"\fpretty_print\x18\x05 \x01(\bR\vprettyPrint\x12'\n" +
-	"\foutput_paths\x18\x06 \x03(\tB\x04\xa0\xa7\x1d\x03R\voutputPaths\x122\n" +
-	"\x12error_output_paths\x18\a \x03(\tB\x04\xa0\xa7\x1d\x03R\x10errorOutputPaths\x12%\n" +
+	"\fpretty_print\x18\x05 \x01(\bR\vprettyPrint\x12+\n" +
+	"\foutput_paths\x18\x06 \x03(\tB\b\xa0\xa7\x1d\x03\xc0\xa8\x1d\bR\voutputPaths\x126\n" +
+	"\x12error_output_paths\x18\a \x03(\tB\b\xa0\xa7\x1d\x03\xc0\xa8\x1d\bR\x10errorOutputPaths\x12%\n" +
 	"\x0edisable_caller\x18\b \x01(\bR\rdisableCaller\x12-\n" +
-	"\x12disable_stacktrace\x18\t \x01(\bR\x11disableStacktrace\x12N\n" +
+	"\x12disable_stacktrace\x18\t \x01(\bR\x11disableStacktrace\x12T\n" +
 	"\x0einitial_fields\x18\n" +
-	" \x03(\v2'.logger.LoggerConfig.InitialFieldsEntryR\rinitialFields\x1a@\n" +
+	" \x03(\v2'.logger.LoggerConfig.InitialFieldsEntryB\x04\xc0\xa8\x1d R\rinitialFields\x1a@\n" +
 	"\x12InitialFieldsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01*C\n" +

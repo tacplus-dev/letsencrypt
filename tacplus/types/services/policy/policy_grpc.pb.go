@@ -27,30 +27,22 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	PolicyService_GetServiceCatalog_FullMethodName    = "/policy.PolicyService/GetServiceCatalog"
-	PolicyService_GetMyEntitlements_FullMethodName    = "/policy.PolicyService/GetMyEntitlements"
-	PolicyService_SimulateEntitlements_FullMethodName = "/policy.PolicyService/SimulateEntitlements"
-	PolicyService_EvaluatePolicy_FullMethodName       = "/policy.PolicyService/EvaluatePolicy"
-	PolicyService_GetPolicies_FullMethodName          = "/policy.PolicyService/GetPolicies"
+	PolicyService_GetApiCatalog_FullMethodName   = "/policy.PolicyService/GetApiCatalog"
+	PolicyService_GetEntitlements_FullMethodName = "/policy.PolicyService/GetEntitlements"
+	PolicyService_GetPolicies_FullMethodName     = "/policy.PolicyService/GetPolicies"
 )
 
 // PolicyServiceClient is the client API for PolicyService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PolicyServiceClient interface {
-	// GetServiceCatalog returns the available services and their RPCs,
-	// built from the service_entitlements config.
-	GetServiceCatalog(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ServiceCatalogResponse, error)
-	// GetMyEntitlements returns what services/RPCs the caller's access token
-	// would grant across all catalog services. Accepts access_token in the
-	// request body (same pattern as ExchangeToken — no bearer auth needed).
-	GetMyEntitlements(ctx context.Context, in *GetMyEntitlementsRequest, opts ...grpc.CallOption) (*MyEntitlementsResponse, error)
-	// SimulateEntitlements returns what entitlements a hypothetical set of claims
-	// would produce. No token validation — purely catalog-based simulation.
-	SimulateEntitlements(ctx context.Context, in *SimulateEntitlementsRequest, opts ...grpc.CallOption) (*MyEntitlementsResponse, error)
-	// EvaluatePolicy evaluates an arbitrary OPA Rego policy.
-	EvaluatePolicy(ctx context.Context, in *EvaluatePolicyRequest, opts ...grpc.CallOption) (*EvaluatePolicyResponse, error)
-	// GetPolicies returns the current claim mapping and entitlements Rego policies.
+	// GetApiCatalog returns the available services and their RPCs,
+	// built from the identity_profiles config.
+	GetApiCatalog(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ApiCatalogResponse, error)
+	// GetEntitlements returns the entitlements that the caller's access token
+	// grants across all services. Evaluates identity_profiles via OPA.
+	GetEntitlements(ctx context.Context, in *GetEntitlementsRequest, opts ...grpc.CallOption) (*GetEntitlementsResponse, error)
+	// GetPolicies returns the deployed OPA entitlements policy.
 	GetPolicies(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetPoliciesResponse, error)
 }
 
@@ -62,40 +54,20 @@ func NewPolicyServiceClient(cc grpc.ClientConnInterface) PolicyServiceClient {
 	return &policyServiceClient{cc}
 }
 
-func (c *policyServiceClient) GetServiceCatalog(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ServiceCatalogResponse, error) {
+func (c *policyServiceClient) GetApiCatalog(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ApiCatalogResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ServiceCatalogResponse)
-	err := c.cc.Invoke(ctx, PolicyService_GetServiceCatalog_FullMethodName, in, out, cOpts...)
+	out := new(ApiCatalogResponse)
+	err := c.cc.Invoke(ctx, PolicyService_GetApiCatalog_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *policyServiceClient) GetMyEntitlements(ctx context.Context, in *GetMyEntitlementsRequest, opts ...grpc.CallOption) (*MyEntitlementsResponse, error) {
+func (c *policyServiceClient) GetEntitlements(ctx context.Context, in *GetEntitlementsRequest, opts ...grpc.CallOption) (*GetEntitlementsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(MyEntitlementsResponse)
-	err := c.cc.Invoke(ctx, PolicyService_GetMyEntitlements_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *policyServiceClient) SimulateEntitlements(ctx context.Context, in *SimulateEntitlementsRequest, opts ...grpc.CallOption) (*MyEntitlementsResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(MyEntitlementsResponse)
-	err := c.cc.Invoke(ctx, PolicyService_SimulateEntitlements_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *policyServiceClient) EvaluatePolicy(ctx context.Context, in *EvaluatePolicyRequest, opts ...grpc.CallOption) (*EvaluatePolicyResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(EvaluatePolicyResponse)
-	err := c.cc.Invoke(ctx, PolicyService_EvaluatePolicy_FullMethodName, in, out, cOpts...)
+	out := new(GetEntitlementsResponse)
+	err := c.cc.Invoke(ctx, PolicyService_GetEntitlements_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -116,19 +88,13 @@ func (c *policyServiceClient) GetPolicies(ctx context.Context, in *emptypb.Empty
 // All implementations must embed UnimplementedPolicyServiceServer
 // for forward compatibility.
 type PolicyServiceServer interface {
-	// GetServiceCatalog returns the available services and their RPCs,
-	// built from the service_entitlements config.
-	GetServiceCatalog(context.Context, *emptypb.Empty) (*ServiceCatalogResponse, error)
-	// GetMyEntitlements returns what services/RPCs the caller's access token
-	// would grant across all catalog services. Accepts access_token in the
-	// request body (same pattern as ExchangeToken — no bearer auth needed).
-	GetMyEntitlements(context.Context, *GetMyEntitlementsRequest) (*MyEntitlementsResponse, error)
-	// SimulateEntitlements returns what entitlements a hypothetical set of claims
-	// would produce. No token validation — purely catalog-based simulation.
-	SimulateEntitlements(context.Context, *SimulateEntitlementsRequest) (*MyEntitlementsResponse, error)
-	// EvaluatePolicy evaluates an arbitrary OPA Rego policy.
-	EvaluatePolicy(context.Context, *EvaluatePolicyRequest) (*EvaluatePolicyResponse, error)
-	// GetPolicies returns the current claim mapping and entitlements Rego policies.
+	// GetApiCatalog returns the available services and their RPCs,
+	// built from the identity_profiles config.
+	GetApiCatalog(context.Context, *emptypb.Empty) (*ApiCatalogResponse, error)
+	// GetEntitlements returns the entitlements that the caller's access token
+	// grants across all services. Evaluates identity_profiles via OPA.
+	GetEntitlements(context.Context, *GetEntitlementsRequest) (*GetEntitlementsResponse, error)
+	// GetPolicies returns the deployed OPA entitlements policy.
 	GetPolicies(context.Context, *emptypb.Empty) (*GetPoliciesResponse, error)
 	mustEmbedUnimplementedPolicyServiceServer()
 }
@@ -140,17 +106,11 @@ type PolicyServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedPolicyServiceServer struct{}
 
-func (UnimplementedPolicyServiceServer) GetServiceCatalog(context.Context, *emptypb.Empty) (*ServiceCatalogResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetServiceCatalog not implemented")
+func (UnimplementedPolicyServiceServer) GetApiCatalog(context.Context, *emptypb.Empty) (*ApiCatalogResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetApiCatalog not implemented")
 }
-func (UnimplementedPolicyServiceServer) GetMyEntitlements(context.Context, *GetMyEntitlementsRequest) (*MyEntitlementsResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetMyEntitlements not implemented")
-}
-func (UnimplementedPolicyServiceServer) SimulateEntitlements(context.Context, *SimulateEntitlementsRequest) (*MyEntitlementsResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method SimulateEntitlements not implemented")
-}
-func (UnimplementedPolicyServiceServer) EvaluatePolicy(context.Context, *EvaluatePolicyRequest) (*EvaluatePolicyResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method EvaluatePolicy not implemented")
+func (UnimplementedPolicyServiceServer) GetEntitlements(context.Context, *GetEntitlementsRequest) (*GetEntitlementsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetEntitlements not implemented")
 }
 func (UnimplementedPolicyServiceServer) GetPolicies(context.Context, *emptypb.Empty) (*GetPoliciesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetPolicies not implemented")
@@ -176,74 +136,38 @@ func RegisterPolicyServiceServer(s grpc.ServiceRegistrar, srv PolicyServiceServe
 	s.RegisterService(&PolicyService_ServiceDesc, srv)
 }
 
-func _PolicyService_GetServiceCatalog_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _PolicyService_GetApiCatalog_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PolicyServiceServer).GetServiceCatalog(ctx, in)
+		return srv.(PolicyServiceServer).GetApiCatalog(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: PolicyService_GetServiceCatalog_FullMethodName,
+		FullMethod: PolicyService_GetApiCatalog_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PolicyServiceServer).GetServiceCatalog(ctx, req.(*emptypb.Empty))
+		return srv.(PolicyServiceServer).GetApiCatalog(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _PolicyService_GetMyEntitlements_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetMyEntitlementsRequest)
+func _PolicyService_GetEntitlements_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetEntitlementsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PolicyServiceServer).GetMyEntitlements(ctx, in)
+		return srv.(PolicyServiceServer).GetEntitlements(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: PolicyService_GetMyEntitlements_FullMethodName,
+		FullMethod: PolicyService_GetEntitlements_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PolicyServiceServer).GetMyEntitlements(ctx, req.(*GetMyEntitlementsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _PolicyService_SimulateEntitlements_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SimulateEntitlementsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PolicyServiceServer).SimulateEntitlements(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: PolicyService_SimulateEntitlements_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PolicyServiceServer).SimulateEntitlements(ctx, req.(*SimulateEntitlementsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _PolicyService_EvaluatePolicy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(EvaluatePolicyRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PolicyServiceServer).EvaluatePolicy(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: PolicyService_EvaluatePolicy_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PolicyServiceServer).EvaluatePolicy(ctx, req.(*EvaluatePolicyRequest))
+		return srv.(PolicyServiceServer).GetEntitlements(ctx, req.(*GetEntitlementsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -274,20 +198,12 @@ var PolicyService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*PolicyServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetServiceCatalog",
-			Handler:    _PolicyService_GetServiceCatalog_Handler,
+			MethodName: "GetApiCatalog",
+			Handler:    _PolicyService_GetApiCatalog_Handler,
 		},
 		{
-			MethodName: "GetMyEntitlements",
-			Handler:    _PolicyService_GetMyEntitlements_Handler,
-		},
-		{
-			MethodName: "SimulateEntitlements",
-			Handler:    _PolicyService_SimulateEntitlements_Handler,
-		},
-		{
-			MethodName: "EvaluatePolicy",
-			Handler:    _PolicyService_EvaluatePolicy_Handler,
+			MethodName: "GetEntitlements",
+			Handler:    _PolicyService_GetEntitlements_Handler,
 		},
 		{
 			MethodName: "GetPolicies",

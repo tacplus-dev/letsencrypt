@@ -32,7 +32,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// Policy reads all auth config (OPA policies, entitlement mappings) from
+// Policy reads all auth config (OPA policies, identity profiles) from
 // IdentityState via Watch (RO). No config duplication needed.
 type Config struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -70,28 +70,28 @@ func (*Config) Descriptor() ([]byte, []int) {
 	return file_services_policy_proto_rawDescGZIP(), []int{0}
 }
 
-// ServiceCatalogResponse lists available services and their RPCs.
-type ServiceCatalogResponse struct {
+// ApiCatalogResponse lists available services and their RPCs.
+type ApiCatalogResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Services      []*ServiceCatalogEntry `protobuf:"bytes,1,rep,name=services,proto3" json:"services,omitempty"`
+	Services      []*ApiCatalogEntry     `protobuf:"bytes,1,rep,name=services,proto3" json:"services,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ServiceCatalogResponse) Reset() {
-	*x = ServiceCatalogResponse{}
+func (x *ApiCatalogResponse) Reset() {
+	*x = ApiCatalogResponse{}
 	mi := &file_services_policy_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ServiceCatalogResponse) String() string {
+func (x *ApiCatalogResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ServiceCatalogResponse) ProtoMessage() {}
+func (*ApiCatalogResponse) ProtoMessage() {}
 
-func (x *ServiceCatalogResponse) ProtoReflect() protoreflect.Message {
+func (x *ApiCatalogResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_services_policy_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -103,20 +103,20 @@ func (x *ServiceCatalogResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ServiceCatalogResponse.ProtoReflect.Descriptor instead.
-func (*ServiceCatalogResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use ApiCatalogResponse.ProtoReflect.Descriptor instead.
+func (*ApiCatalogResponse) Descriptor() ([]byte, []int) {
 	return file_services_policy_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ServiceCatalogResponse) GetServices() []*ServiceCatalogEntry {
+func (x *ApiCatalogResponse) GetServices() []*ApiCatalogEntry {
 	if x != nil {
 		return x.Services
 	}
 	return nil
 }
 
-// ServiceCatalogEntry describes a single service and its available RPCs.
-type ServiceCatalogEntry struct {
+// ApiCatalogEntry describes a single service and its available RPCs.
+type ApiCatalogEntry struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// service_name is the service identifier (e.g. "sentinel").
 	ServiceName string `protobuf:"bytes,1,opt,name=service_name,json=serviceName,proto3" json:"service_name,omitempty"`
@@ -126,20 +126,20 @@ type ServiceCatalogEntry struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ServiceCatalogEntry) Reset() {
-	*x = ServiceCatalogEntry{}
+func (x *ApiCatalogEntry) Reset() {
+	*x = ApiCatalogEntry{}
 	mi := &file_services_policy_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ServiceCatalogEntry) String() string {
+func (x *ApiCatalogEntry) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ServiceCatalogEntry) ProtoMessage() {}
+func (*ApiCatalogEntry) ProtoMessage() {}
 
-func (x *ServiceCatalogEntry) ProtoReflect() protoreflect.Message {
+func (x *ApiCatalogEntry) ProtoReflect() protoreflect.Message {
 	mi := &file_services_policy_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -151,27 +151,27 @@ func (x *ServiceCatalogEntry) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ServiceCatalogEntry.ProtoReflect.Descriptor instead.
-func (*ServiceCatalogEntry) Descriptor() ([]byte, []int) {
+// Deprecated: Use ApiCatalogEntry.ProtoReflect.Descriptor instead.
+func (*ApiCatalogEntry) Descriptor() ([]byte, []int) {
 	return file_services_policy_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *ServiceCatalogEntry) GetServiceName() string {
+func (x *ApiCatalogEntry) GetServiceName() string {
 	if x != nil {
 		return x.ServiceName
 	}
 	return ""
 }
 
-func (x *ServiceCatalogEntry) GetRpcs() []string {
+func (x *ApiCatalogEntry) GetRpcs() []string {
 	if x != nil {
 		return x.Rpcs
 	}
 	return nil
 }
 
-// GetMyEntitlementsRequest carries the caller's generic access token.
-type GetMyEntitlementsRequest struct {
+// GetEntitlementsRequest carries the caller's access token.
+type GetEntitlementsRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// access_token is a generic access token (no entitlements) issued by Identity.
 	AccessToken   string `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
@@ -179,20 +179,20 @@ type GetMyEntitlementsRequest struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetMyEntitlementsRequest) Reset() {
-	*x = GetMyEntitlementsRequest{}
+func (x *GetEntitlementsRequest) Reset() {
+	*x = GetEntitlementsRequest{}
 	mi := &file_services_policy_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetMyEntitlementsRequest) String() string {
+func (x *GetEntitlementsRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetMyEntitlementsRequest) ProtoMessage() {}
+func (*GetEntitlementsRequest) ProtoMessage() {}
 
-func (x *GetMyEntitlementsRequest) ProtoReflect() protoreflect.Message {
+func (x *GetEntitlementsRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_services_policy_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -204,40 +204,43 @@ func (x *GetMyEntitlementsRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetMyEntitlementsRequest.ProtoReflect.Descriptor instead.
-func (*GetMyEntitlementsRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetEntitlementsRequest.ProtoReflect.Descriptor instead.
+func (*GetEntitlementsRequest) Descriptor() ([]byte, []int) {
 	return file_services_policy_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *GetMyEntitlementsRequest) GetAccessToken() string {
+func (x *GetEntitlementsRequest) GetAccessToken() string {
 	if x != nil {
 		return x.AccessToken
 	}
 	return ""
 }
 
-// MyEntitlementsResponse lists per-service entitlement information.
-type MyEntitlementsResponse struct {
-	state         protoimpl.MessageState    `protogen:"open.v1"`
-	Entitlements  []*ServiceEntitlementInfo `protobuf:"bytes,1,rep,name=entitlements,proto3" json:"entitlements,omitempty"`
+// GetEntitlementsResponse lists matched profiles and their resolved entitlements.
+type GetEntitlementsResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// profiles lists the matched identity profile names.
+	Profiles []string `protobuf:"bytes,1,rep,name=profiles,proto3" json:"profiles,omitempty"`
+	// entitlements lists the resolved per-service entitlements.
+	Entitlements  []*ServiceEntitlementInfo `protobuf:"bytes,2,rep,name=entitlements,proto3" json:"entitlements,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *MyEntitlementsResponse) Reset() {
-	*x = MyEntitlementsResponse{}
+func (x *GetEntitlementsResponse) Reset() {
+	*x = GetEntitlementsResponse{}
 	mi := &file_services_policy_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *MyEntitlementsResponse) String() string {
+func (x *GetEntitlementsResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*MyEntitlementsResponse) ProtoMessage() {}
+func (*GetEntitlementsResponse) ProtoMessage() {}
 
-func (x *MyEntitlementsResponse) ProtoReflect() protoreflect.Message {
+func (x *GetEntitlementsResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_services_policy_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -249,27 +252,32 @@ func (x *MyEntitlementsResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use MyEntitlementsResponse.ProtoReflect.Descriptor instead.
-func (*MyEntitlementsResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetEntitlementsResponse.ProtoReflect.Descriptor instead.
+func (*GetEntitlementsResponse) Descriptor() ([]byte, []int) {
 	return file_services_policy_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *MyEntitlementsResponse) GetEntitlements() []*ServiceEntitlementInfo {
+func (x *GetEntitlementsResponse) GetProfiles() []string {
+	if x != nil {
+		return x.Profiles
+	}
+	return nil
+}
+
+func (x *GetEntitlementsResponse) GetEntitlements() []*ServiceEntitlementInfo {
 	if x != nil {
 		return x.Entitlements
 	}
 	return nil
 }
 
-// ServiceEntitlementInfo describes a caller's entitlements on a single service.
+// ServiceEntitlementInfo describes entitlements on a single service.
 type ServiceEntitlementInfo struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// service_name is the service identifier (e.g. "sentinel").
 	ServiceName string `protobuf:"bytes,1,opt,name=service_name,json=serviceName,proto3" json:"service_name,omitempty"`
-	// rpcs lists the granted RPCs. ["*"] means all RPCs are granted.
-	Rpcs []string `protobuf:"bytes,2,rep,name=rpcs,proto3" json:"rpcs,omitempty"`
-	// total_rpcs is the total number of RPCs available from the catalog.
-	TotalRpcs     int32 `protobuf:"varint,3,opt,name=total_rpcs,json=totalRpcs,proto3" json:"total_rpcs,omitempty"`
+	// rpcs lists the granted RPC methods.
+	Rpcs          []string `protobuf:"bytes,2,rep,name=rpcs,proto3" json:"rpcs,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -318,206 +326,7 @@ func (x *ServiceEntitlementInfo) GetRpcs() []string {
 	return nil
 }
 
-func (x *ServiceEntitlementInfo) GetTotalRpcs() int32 {
-	if x != nil {
-		return x.TotalRpcs
-	}
-	return 0
-}
-
-// SimulateEntitlementsRequest accepts hypothetical claims for simulation.
-type SimulateEntitlementsRequest struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// claims_json is JSON-encoded origin claims to simulate.
-	ClaimsJson string `protobuf:"bytes,1,opt,name=claims_json,json=claimsJson,proto3" json:"claims_json,omitempty"`
-	// principal is an optional override for simulation.
-	Principal     string `protobuf:"bytes,2,opt,name=principal,proto3" json:"principal,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *SimulateEntitlementsRequest) Reset() {
-	*x = SimulateEntitlementsRequest{}
-	mi := &file_services_policy_proto_msgTypes[6]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SimulateEntitlementsRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SimulateEntitlementsRequest) ProtoMessage() {}
-
-func (x *SimulateEntitlementsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_services_policy_proto_msgTypes[6]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SimulateEntitlementsRequest.ProtoReflect.Descriptor instead.
-func (*SimulateEntitlementsRequest) Descriptor() ([]byte, []int) {
-	return file_services_policy_proto_rawDescGZIP(), []int{6}
-}
-
-func (x *SimulateEntitlementsRequest) GetClaimsJson() string {
-	if x != nil {
-		return x.ClaimsJson
-	}
-	return ""
-}
-
-func (x *SimulateEntitlementsRequest) GetPrincipal() string {
-	if x != nil {
-		return x.Principal
-	}
-	return ""
-}
-
-// EvaluatePolicyRequest evaluates an arbitrary OPA Rego policy.
-type EvaluatePolicyRequest struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// rego_source is the Rego policy source code.
-	RegoSource string `protobuf:"bytes,1,opt,name=rego_source,json=regoSource,proto3" json:"rego_source,omitempty"`
-	// input_json is JSON-encoded input for the policy.
-	InputJson string `protobuf:"bytes,2,opt,name=input_json,json=inputJson,proto3" json:"input_json,omitempty"`
-	// query is the Rego query to evaluate. Default: "data.authz.allow".
-	Query string `protobuf:"bytes,3,opt,name=query,proto3" json:"query,omitempty"`
-	// data_json is optional JSON-encoded external data to load into OPA's store.
-	DataJson      string `protobuf:"bytes,4,opt,name=data_json,json=dataJson,proto3" json:"data_json,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *EvaluatePolicyRequest) Reset() {
-	*x = EvaluatePolicyRequest{}
-	mi := &file_services_policy_proto_msgTypes[7]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *EvaluatePolicyRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*EvaluatePolicyRequest) ProtoMessage() {}
-
-func (x *EvaluatePolicyRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_services_policy_proto_msgTypes[7]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use EvaluatePolicyRequest.ProtoReflect.Descriptor instead.
-func (*EvaluatePolicyRequest) Descriptor() ([]byte, []int) {
-	return file_services_policy_proto_rawDescGZIP(), []int{7}
-}
-
-func (x *EvaluatePolicyRequest) GetRegoSource() string {
-	if x != nil {
-		return x.RegoSource
-	}
-	return ""
-}
-
-func (x *EvaluatePolicyRequest) GetInputJson() string {
-	if x != nil {
-		return x.InputJson
-	}
-	return ""
-}
-
-func (x *EvaluatePolicyRequest) GetQuery() string {
-	if x != nil {
-		return x.Query
-	}
-	return ""
-}
-
-func (x *EvaluatePolicyRequest) GetDataJson() string {
-	if x != nil {
-		return x.DataJson
-	}
-	return ""
-}
-
-// EvaluatePolicyResponse contains the result of arbitrary policy evaluation.
-type EvaluatePolicyResponse struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// result_json is the JSON-encoded evaluation result.
-	ResultJson string `protobuf:"bytes,1,opt,name=result_json,json=resultJson,proto3" json:"result_json,omitempty"`
-	// allowed is true if the result contains an allow=true decision.
-	Allowed bool `protobuf:"varint,2,opt,name=allowed,proto3" json:"allowed,omitempty"`
-	// errors lists any compilation or evaluation errors.
-	Errors        []string `protobuf:"bytes,3,rep,name=errors,proto3" json:"errors,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *EvaluatePolicyResponse) Reset() {
-	*x = EvaluatePolicyResponse{}
-	mi := &file_services_policy_proto_msgTypes[8]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *EvaluatePolicyResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*EvaluatePolicyResponse) ProtoMessage() {}
-
-func (x *EvaluatePolicyResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_services_policy_proto_msgTypes[8]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use EvaluatePolicyResponse.ProtoReflect.Descriptor instead.
-func (*EvaluatePolicyResponse) Descriptor() ([]byte, []int) {
-	return file_services_policy_proto_rawDescGZIP(), []int{8}
-}
-
-func (x *EvaluatePolicyResponse) GetResultJson() string {
-	if x != nil {
-		return x.ResultJson
-	}
-	return ""
-}
-
-func (x *EvaluatePolicyResponse) GetAllowed() bool {
-	if x != nil {
-		return x.Allowed
-	}
-	return false
-}
-
-func (x *EvaluatePolicyResponse) GetErrors() []string {
-	if x != nil {
-		return x.Errors
-	}
-	return nil
-}
-
-// GetPoliciesResponse returns the deployed OPA policies as full OpaPolicy objects.
+// GetPoliciesResponse returns the deployed OPA policies.
 type GetPoliciesResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// entitlements_policy is the OPA policy evaluated to determine entitlements.
@@ -528,7 +337,7 @@ type GetPoliciesResponse struct {
 
 func (x *GetPoliciesResponse) Reset() {
 	*x = GetPoliciesResponse{}
-	mi := &file_services_policy_proto_msgTypes[9]
+	mi := &file_services_policy_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -540,7 +349,7 @@ func (x *GetPoliciesResponse) String() string {
 func (*GetPoliciesResponse) ProtoMessage() {}
 
 func (x *GetPoliciesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_services_policy_proto_msgTypes[9]
+	mi := &file_services_policy_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -553,7 +362,7 @@ func (x *GetPoliciesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPoliciesResponse.ProtoReflect.Descriptor instead.
 func (*GetPoliciesResponse) Descriptor() ([]byte, []int) {
-	return file_services_policy_proto_rawDescGZIP(), []int{9}
+	return file_services_policy_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *GetPoliciesResponse) GetEntitlementsPolicy() *opa.OpaPolicy {
@@ -571,47 +380,25 @@ const file_services_policy_proto_rawDesc = "" +
 	"\x06Config:\x0eҨ\x1d\n" +
 	"\n" +
 	"\x06policy\x10\n" +
-	"\"Q\n" +
-	"\x16ServiceCatalogResponse\x127\n" +
-	"\bservices\x18\x01 \x03(\v2\x1b.policy.ServiceCatalogEntryR\bservices\"R\n" +
-	"\x13ServiceCatalogEntry\x12'\n" +
+	"\"I\n" +
+	"\x12ApiCatalogResponse\x123\n" +
+	"\bservices\x18\x01 \x03(\v2\x17.policy.ApiCatalogEntryR\bservices\"N\n" +
+	"\x0fApiCatalogEntry\x12'\n" +
 	"\fservice_name\x18\x01 \x01(\tB\x04\x88\xa6\x1d\x01R\vserviceName\x12\x12\n" +
-	"\x04rpcs\x18\x02 \x03(\tR\x04rpcs\"C\n" +
-	"\x18GetMyEntitlementsRequest\x12'\n" +
-	"\faccess_token\x18\x01 \x01(\tB\x04\x88\xa6\x1d\x01R\vaccessToken\"\\\n" +
-	"\x16MyEntitlementsResponse\x12B\n" +
-	"\fentitlements\x18\x01 \x03(\v2\x1e.policy.ServiceEntitlementInfoR\fentitlements\"n\n" +
+	"\x04rpcs\x18\x02 \x03(\tR\x04rpcs\"A\n" +
+	"\x16GetEntitlementsRequest\x12'\n" +
+	"\faccess_token\x18\x01 \x01(\tB\x04\x88\xa6\x1d\x01R\vaccessToken\"y\n" +
+	"\x17GetEntitlementsResponse\x12\x1a\n" +
+	"\bprofiles\x18\x01 \x03(\tR\bprofiles\x12B\n" +
+	"\fentitlements\x18\x02 \x03(\v2\x1e.policy.ServiceEntitlementInfoR\fentitlements\"O\n" +
 	"\x16ServiceEntitlementInfo\x12!\n" +
 	"\fservice_name\x18\x01 \x01(\tR\vserviceName\x12\x12\n" +
-	"\x04rpcs\x18\x02 \x03(\tR\x04rpcs\x12\x1d\n" +
-	"\n" +
-	"total_rpcs\x18\x03 \x01(\x05R\ttotalRpcs\"h\n" +
-	"\x1bSimulateEntitlementsRequest\x12+\n" +
-	"\vclaims_json\x18\x01 \x01(\tB\n" +
-	"\x88\xa6\x1d\x01\x90\xa7\x1d\x80\x80\x04R\n" +
-	"claimsJson\x12\x1c\n" +
-	"\tprincipal\x18\x02 \x01(\tR\tprincipal\"\xb1\x01\n" +
-	"\x15EvaluatePolicyRequest\x12+\n" +
-	"\vrego_source\x18\x01 \x01(\tB\n" +
-	"\x88\xa6\x1d\x01\x90\xa7\x1d\x80\x80\x04R\n" +
-	"regoSource\x12)\n" +
-	"\n" +
-	"input_json\x18\x02 \x01(\tB\n" +
-	"\x88\xa6\x1d\x01\x90\xa7\x1d\x80\x80\x04R\tinputJson\x12\x1b\n" +
-	"\x05query\x18\x03 \x01(\tB\x05\x90\xa7\x1d\x80\bR\x05query\x12#\n" +
-	"\tdata_json\x18\x04 \x01(\tB\x06\x90\xa7\x1d\x80\x80\x04R\bdataJson\"k\n" +
-	"\x16EvaluatePolicyResponse\x12\x1f\n" +
-	"\vresult_json\x18\x01 \x01(\tR\n" +
-	"resultJson\x12\x18\n" +
-	"\aallowed\x18\x02 \x01(\bR\aallowed\x12\x16\n" +
-	"\x06errors\x18\x03 \x03(\tR\x06errors\"V\n" +
+	"\x04rpcs\x18\x02 \x03(\tR\x04rpcs\"V\n" +
 	"\x13GetPoliciesResponse\x12?\n" +
-	"\x13entitlements_policy\x18\x01 \x01(\v2\x0e.opa.OpaPolicyR\x12entitlementsPolicy2\xf0\x04\n" +
-	"\rPolicyService\x12k\n" +
-	"\x11GetServiceCatalog\x12\x16.google.protobuf.Empty\x1a\x1e.policy.ServiceCatalogResponse\"\x1e\x82\xd3\xe4\x93\x02\x18\x12\x16/api/policy/v1/catalog\x12}\n" +
-	"\x11GetMyEntitlements\x12 .policy.GetMyEntitlementsRequest\x1a\x1e.policy.MyEntitlementsResponse\"&\x82\xd3\xe4\x93\x02 :\x01*\"\x1b/api/policy/v1/entitlements\x12\x8c\x01\n" +
-	"\x14SimulateEntitlements\x12#.policy.SimulateEntitlementsRequest\x1a\x1e.policy.MyEntitlementsResponse\"/\x82\xd3\xe4\x93\x02):\x01*\"$/api/policy/v1/simulate-entitlements\x12s\n" +
-	"\x0eEvaluatePolicy\x12\x1d.policy.EvaluatePolicyRequest\x1a\x1e.policy.EvaluatePolicyResponse\"\"\x82\xd3\xe4\x93\x02\x1c:\x01*\"\x17/api/policy/v1/evaluate\x12c\n" +
+	"\x13entitlements_policy\x18\x01 \x01(\v2\x0e.opa.OpaPolicyR\x12entitlementsPolicy2\xe1\x02\n" +
+	"\rPolicyService\x12c\n" +
+	"\rGetApiCatalog\x12\x16.google.protobuf.Empty\x1a\x1a.policy.ApiCatalogResponse\"\x1e\x82\xd3\xe4\x93\x02\x18\x12\x16/api/policy/v1/catalog\x12z\n" +
+	"\x0fGetEntitlements\x12\x1e.policy.GetEntitlementsRequest\x1a\x1f.policy.GetEntitlementsResponse\"&\x82\xd3\xe4\x93\x02 :\x01*\"\x1b/api/policy/v1/entitlements\x12c\n" +
 	"\vGetPolicies\x12\x16.google.protobuf.Empty\x1a\x1b.policy.GetPoliciesResponse\"\x1f\x82\xd3\xe4\x93\x02\x19\x12\x17/api/policy/v1/policies\x1a\n" +
 	"\xa2\x97\"\x06policyB[ZYgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/policyb\x06proto3"
 
@@ -627,40 +414,33 @@ func file_services_policy_proto_rawDescGZIP() []byte {
 	return file_services_policy_proto_rawDescData
 }
 
-var file_services_policy_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_services_policy_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_services_policy_proto_goTypes = []any{
-	(*Config)(nil),                      // 0: policy.Config
-	(*ServiceCatalogResponse)(nil),      // 1: policy.ServiceCatalogResponse
-	(*ServiceCatalogEntry)(nil),         // 2: policy.ServiceCatalogEntry
-	(*GetMyEntitlementsRequest)(nil),    // 3: policy.GetMyEntitlementsRequest
-	(*MyEntitlementsResponse)(nil),      // 4: policy.MyEntitlementsResponse
-	(*ServiceEntitlementInfo)(nil),      // 5: policy.ServiceEntitlementInfo
-	(*SimulateEntitlementsRequest)(nil), // 6: policy.SimulateEntitlementsRequest
-	(*EvaluatePolicyRequest)(nil),       // 7: policy.EvaluatePolicyRequest
-	(*EvaluatePolicyResponse)(nil),      // 8: policy.EvaluatePolicyResponse
-	(*GetPoliciesResponse)(nil),         // 9: policy.GetPoliciesResponse
-	(*opa.OpaPolicy)(nil),               // 10: opa.OpaPolicy
-	(*emptypb.Empty)(nil),               // 11: google.protobuf.Empty
+	(*Config)(nil),                  // 0: policy.Config
+	(*ApiCatalogResponse)(nil),      // 1: policy.ApiCatalogResponse
+	(*ApiCatalogEntry)(nil),         // 2: policy.ApiCatalogEntry
+	(*GetEntitlementsRequest)(nil),  // 3: policy.GetEntitlementsRequest
+	(*GetEntitlementsResponse)(nil), // 4: policy.GetEntitlementsResponse
+	(*ServiceEntitlementInfo)(nil),  // 5: policy.ServiceEntitlementInfo
+	(*GetPoliciesResponse)(nil),     // 6: policy.GetPoliciesResponse
+	(*opa.OpaPolicy)(nil),           // 7: opa.OpaPolicy
+	(*emptypb.Empty)(nil),           // 8: google.protobuf.Empty
 }
 var file_services_policy_proto_depIdxs = []int32{
-	2,  // 0: policy.ServiceCatalogResponse.services:type_name -> policy.ServiceCatalogEntry
-	5,  // 1: policy.MyEntitlementsResponse.entitlements:type_name -> policy.ServiceEntitlementInfo
-	10, // 2: policy.GetPoliciesResponse.entitlements_policy:type_name -> opa.OpaPolicy
-	11, // 3: policy.PolicyService.GetServiceCatalog:input_type -> google.protobuf.Empty
-	3,  // 4: policy.PolicyService.GetMyEntitlements:input_type -> policy.GetMyEntitlementsRequest
-	6,  // 5: policy.PolicyService.SimulateEntitlements:input_type -> policy.SimulateEntitlementsRequest
-	7,  // 6: policy.PolicyService.EvaluatePolicy:input_type -> policy.EvaluatePolicyRequest
-	11, // 7: policy.PolicyService.GetPolicies:input_type -> google.protobuf.Empty
-	1,  // 8: policy.PolicyService.GetServiceCatalog:output_type -> policy.ServiceCatalogResponse
-	4,  // 9: policy.PolicyService.GetMyEntitlements:output_type -> policy.MyEntitlementsResponse
-	4,  // 10: policy.PolicyService.SimulateEntitlements:output_type -> policy.MyEntitlementsResponse
-	8,  // 11: policy.PolicyService.EvaluatePolicy:output_type -> policy.EvaluatePolicyResponse
-	9,  // 12: policy.PolicyService.GetPolicies:output_type -> policy.GetPoliciesResponse
-	8,  // [8:13] is the sub-list for method output_type
-	3,  // [3:8] is the sub-list for method input_type
-	3,  // [3:3] is the sub-list for extension type_name
-	3,  // [3:3] is the sub-list for extension extendee
-	0,  // [0:3] is the sub-list for field type_name
+	2, // 0: policy.ApiCatalogResponse.services:type_name -> policy.ApiCatalogEntry
+	5, // 1: policy.GetEntitlementsResponse.entitlements:type_name -> policy.ServiceEntitlementInfo
+	7, // 2: policy.GetPoliciesResponse.entitlements_policy:type_name -> opa.OpaPolicy
+	8, // 3: policy.PolicyService.GetApiCatalog:input_type -> google.protobuf.Empty
+	3, // 4: policy.PolicyService.GetEntitlements:input_type -> policy.GetEntitlementsRequest
+	8, // 5: policy.PolicyService.GetPolicies:input_type -> google.protobuf.Empty
+	1, // 6: policy.PolicyService.GetApiCatalog:output_type -> policy.ApiCatalogResponse
+	4, // 7: policy.PolicyService.GetEntitlements:output_type -> policy.GetEntitlementsResponse
+	6, // 8: policy.PolicyService.GetPolicies:output_type -> policy.GetPoliciesResponse
+	6, // [6:9] is the sub-list for method output_type
+	3, // [3:6] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_services_policy_proto_init() }
@@ -674,7 +454,7 @@ func file_services_policy_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_services_policy_proto_rawDesc), len(file_services_policy_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   10,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

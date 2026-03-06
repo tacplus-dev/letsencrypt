@@ -238,18 +238,18 @@ type Config struct {
 	// Default: 300 (5 minutes).
 	JwkRefetchIntervalSeconds int64 `protobuf:"varint,7,opt,name=jwk_refetch_interval_seconds,json=jwkRefetchIntervalSeconds,proto3" json:"jwk_refetch_interval_seconds,omitempty"`
 	// entitlements_policy is a Rego policy evaluated at token exchange time.
-	// Input: {claims: {<flattened IDP claims>}, service: "<target>"}
-	// Expected output: data.entitlements.main → {allow: bool, rpcs: [string]}
-	// Use ["*"] to grant all RPCs for the target service.
+	// Input: {claims: {<flattened IDP claims>}}
+	// Expected output: data.entitlements.main → {profiles: [string]}
+	// Zero profiles = denied. Profile names must match identity_profiles ids.
 	EntitlementsPolicy string `protobuf:"bytes,11,opt,name=entitlements_policy,json=entitlementsPolicy,proto3" json:"entitlements_policy,omitempty"`
-	// entitlement_mappings maps OPA-resolved principals to entitlement definitions.
+	// entitlement_mappings maps credentials to service identities (S2S only).
 	EntitlementMappings []*entitlement.ServiceEntitlementMapping `protobuf:"bytes,8,rep,name=entitlement_mappings,json=entitlementMappings,proto3" json:"entitlement_mappings,omitempty"`
-	// service_entitlements holds named entitlement definitions loaded from
-	// proto/security/*.json at config build time. Referenced by
-	// entitlement_mappings via entitlements_id.
-	ServiceEntitlements []*entitlement.ServiceEntitlements `protobuf:"bytes,9,rep,name=service_entitlements,json=serviceEntitlements,proto3" json:"service_entitlements,omitempty"`
-	unknownFields       protoimpl.UnknownFields
-	sizeCache           protoimpl.SizeCache
+	// identity_profiles defines named sets of entitlements for user authorization.
+	// OPA entitlements_policy returns profile names; identity resolves those names
+	// to concrete entitlements at token exchange time.
+	IdentityProfiles []*entitlement.IdentityProfile `protobuf:"bytes,9,rep,name=identity_profiles,json=identityProfiles,proto3" json:"identity_profiles,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *Config) Reset() {
@@ -345,9 +345,9 @@ func (x *Config) GetEntitlementMappings() []*entitlement.ServiceEntitlementMappi
 	return nil
 }
 
-func (x *Config) GetServiceEntitlements() []*entitlement.ServiceEntitlements {
+func (x *Config) GetIdentityProfiles() []*entitlement.IdentityProfile {
 	if x != nil {
-		return x.ServiceEntitlements
+		return x.IdentityProfiles
 	}
 	return nil
 }
@@ -565,13 +565,13 @@ func (x *ProviderConfig) GetAudience() string {
 	return ""
 }
 
-// EntitlementConfig wraps the entitlement mappings and service entitlement
-// definitions. Published by Identity from config so other services (policy)
+// EntitlementConfig wraps the entitlement mappings and identity profiles.
+// Published by Identity from config so other services (policy, policysim)
 // can read them via Watch (RO) without duplicating config.
 type EntitlementConfig struct {
 	state               protoimpl.MessageState                   `protogen:"open.v1"`
 	EntitlementMappings []*entitlement.ServiceEntitlementMapping `protobuf:"bytes,1,rep,name=entitlement_mappings,json=entitlementMappings,proto3" json:"entitlement_mappings,omitempty"`
-	ServiceEntitlements []*entitlement.ServiceEntitlements       `protobuf:"bytes,2,rep,name=service_entitlements,json=serviceEntitlements,proto3" json:"service_entitlements,omitempty"`
+	IdentityProfiles    []*entitlement.IdentityProfile           `protobuf:"bytes,2,rep,name=identity_profiles,json=identityProfiles,proto3" json:"identity_profiles,omitempty"`
 	unknownFields       protoimpl.UnknownFields
 	sizeCache           protoimpl.SizeCache
 }
@@ -613,9 +613,9 @@ func (x *EntitlementConfig) GetEntitlementMappings() []*entitlement.ServiceEntit
 	return nil
 }
 
-func (x *EntitlementConfig) GetServiceEntitlements() []*entitlement.ServiceEntitlements {
+func (x *EntitlementConfig) GetIdentityProfiles() []*entitlement.IdentityProfile {
 	if x != nil {
-		return x.ServiceEntitlements
+		return x.IdentityProfiles
 	}
 	return nil
 }
@@ -634,7 +634,7 @@ type IdentityState struct {
 	// entitlements_policy is the OPA policy for determining entitlements at token
 	// exchange time. Published by identity from config.
 	EntitlementsPolicy *opa.OpaPolicy `protobuf:"bytes,2,opt,name=entitlements_policy,json=entitlementsPolicy,proto3" json:"entitlements_policy,omitempty"`
-	// entitlement_config holds the entitlement mappings and service entitlement
+	// entitlement_config holds the entitlement mappings and identity profile
 	// definitions, published from identity's config.
 	EntitlementConfig *EntitlementConfig `protobuf:"bytes,4,opt,name=entitlement_config,json=entitlementConfig,proto3" json:"entitlement_config,omitempty"`
 	unknownFields     protoimpl.UnknownFields
@@ -2945,7 +2945,7 @@ var File_services_identity_proto protoreflect.FileDescriptor
 
 const file_services_identity_proto_rawDesc = "" +
 	"\n" +
-	"\x17services/identity.proto\x12\bidentity\x1a\x0flibs/spec.proto\x1a\x16libs/entitlement.proto\x1a\x0elibs/jwk.proto\x1a\x0elibs/opa.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1cgoogle/api/annotations.proto\"\xb9\x05\n" +
+	"\x17services/identity.proto\x12\bidentity\x1a\x0flibs/spec.proto\x1a\x16libs/entitlement.proto\x1a\x0elibs/jwk.proto\x1a\x0elibs/opa.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1cgoogle/api/annotations.proto\"\xaf\x05\n" +
 	"\x06Config\x12+\n" +
 	"\x05oauth\x18\x01 \x01(\v2\x15.identity.OAuthConfigR\x05oauth\x12L\n" +
 	"\x1daccess_token_lifetime_seconds\x18\x02 \x01(\x03B\t\xc0\xa6\x1d\x01\x90\xa8\x1d\x84\aR\x1aaccessTokenLifetimeSeconds\x12O\n" +
@@ -2956,8 +2956,8 @@ const file_services_identity_proto_rawDesc = "" +
 	"\x06issuer\x18\x06 \x01(\tB\b\x88\xa6\x1d\x01\xa8\xa6\x1d\x02R\x06issuer\x12J\n" +
 	"\x1cjwk_refetch_interval_seconds\x18\a \x01(\x03B\t\xc0\xa6\x1d\x01\x90\xa8\x1d\xac\x02R\x19jwkRefetchIntervalSeconds\x12/\n" +
 	"\x13entitlements_policy\x18\v \x01(\tR\x12entitlementsPolicy\x12Y\n" +
-	"\x14entitlement_mappings\x18\b \x03(\v2&.entitlement.ServiceEntitlementMappingR\x13entitlementMappings\x12S\n" +
-	"\x14service_entitlements\x18\t \x03(\v2 .entitlement.ServiceEntitlementsR\x13serviceEntitlements:\x10Ҩ\x1d\f\n" +
+	"\x14entitlement_mappings\x18\b \x03(\v2&.entitlement.ServiceEntitlementMappingR\x13entitlementMappings\x12I\n" +
+	"\x11identity_profiles\x18\t \x03(\v2\x1c.entitlement.IdentityProfileR\x10identityProfiles:\x10Ҩ\x1d\f\n" +
 	"\bidentity\x10\x06\"\xa3\x01\n" +
 	"\vOAuthConfig\x12\x16\n" +
 	"\x06enable\x18\x01 \x01(\bR\x06enable\x12\x16\n" +
@@ -2976,10 +2976,10 @@ const file_services_identity_proto_rawDesc = "" +
 	"\x14end_session_endpoint\x18\t \x01(\tB\x04\xa8\xa6\x1d\x02R\x12endSessionEndpoint\x12\x16\n" +
 	"\x06scopes\x18\n" +
 	" \x03(\tR\x06scopes\x12 \n" +
-	"\baudience\x18\v \x01(\tB\x04\x88\xa7\x1d\x01R\baudience\"\xc3\x01\n" +
+	"\baudience\x18\v \x01(\tB\x04\x88\xa7\x1d\x01R\baudience\"\xb9\x01\n" +
 	"\x11EntitlementConfig\x12Y\n" +
-	"\x14entitlement_mappings\x18\x01 \x03(\v2&.entitlement.ServiceEntitlementMappingR\x13entitlementMappings\x12S\n" +
-	"\x14service_entitlements\x18\x02 \x03(\v2 .entitlement.ServiceEntitlementsR\x13serviceEntitlements\"\x92\x02\n" +
+	"\x14entitlement_mappings\x18\x01 \x03(\v2&.entitlement.ServiceEntitlementMappingR\x13entitlementMappings\x12I\n" +
+	"\x11identity_profiles\x18\x02 \x03(\v2\x1c.entitlement.IdentityProfileR\x10identityProfiles\"\x92\x02\n" +
 	"\rIdentityState\x12Q\n" +
 	"\x0everifying_keys\x18\x01 \x03(\v2\b.jwk.JwkB \xe0\xb5\x18\x02\xe0\xb6\x18\x01\x9a\xb7\x18\x14JwkVerifyingKeysViewR\rverifyingKeys\x12E\n" +
 	"\x13entitlements_policy\x18\x02 \x01(\v2\x0e.opa.OpaPolicyB\x04\xe0\xb5\x18\x02R\x12entitlementsPolicy\x12P\n" +
@@ -3256,7 +3256,7 @@ var file_services_identity_proto_goTypes = []any{
 	nil,                                           // 52: identity.VerifyingKeysEntriesResponse.EntriesEntry
 	nil,                                           // 53: identity.ExternalJwksEntriesResponse.EntriesEntry
 	(*entitlement.ServiceEntitlementMapping)(nil), // 54: entitlement.ServiceEntitlementMapping
-	(*entitlement.ServiceEntitlements)(nil),       // 55: entitlement.ServiceEntitlements
+	(*entitlement.IdentityProfile)(nil),           // 55: entitlement.IdentityProfile
 	(*jwk.Jwk)(nil),                               // 56: jwk.Jwk
 	(*opa.OpaPolicy)(nil),                         // 57: opa.OpaPolicy
 	(*emptypb.Empty)(nil),                         // 58: google.protobuf.Empty
@@ -3264,10 +3264,10 @@ var file_services_identity_proto_goTypes = []any{
 var file_services_identity_proto_depIdxs = []int32{
 	4,  // 0: identity.Config.oauth:type_name -> identity.OAuthConfig
 	54, // 1: identity.Config.entitlement_mappings:type_name -> entitlement.ServiceEntitlementMapping
-	55, // 2: identity.Config.service_entitlements:type_name -> entitlement.ServiceEntitlements
+	55, // 2: identity.Config.identity_profiles:type_name -> entitlement.IdentityProfile
 	5,  // 3: identity.OAuthConfig.providers:type_name -> identity.ProviderConfig
 	54, // 4: identity.EntitlementConfig.entitlement_mappings:type_name -> entitlement.ServiceEntitlementMapping
-	55, // 5: identity.EntitlementConfig.service_entitlements:type_name -> entitlement.ServiceEntitlements
+	55, // 5: identity.EntitlementConfig.identity_profiles:type_name -> entitlement.IdentityProfile
 	56, // 6: identity.IdentityState.verifying_keys:type_name -> jwk.Jwk
 	57, // 7: identity.IdentityState.entitlements_policy:type_name -> opa.OpaPolicy
 	6,  // 8: identity.IdentityState.entitlement_config:type_name -> identity.EntitlementConfig

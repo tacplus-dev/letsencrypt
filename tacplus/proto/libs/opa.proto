@@ -1,5 +1,10 @@
 // Copyright (c) 2024 Second Star Cavalier, LLC.
 
+// Package opa defines the OpaPolicy message for embedding Open Policy Agent
+// authorization policies. Policies can be provided as raw Rego source or as
+// pre-compiled bundles (base64-encoded tar.gz). Used by identity services
+// (IronMaiden) for entitlements and claim mapping evaluation.
+
 syntax = "proto3";
 
 package opa;

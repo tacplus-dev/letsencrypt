@@ -23,7 +23,6 @@ option go_package = "gitlab.com/secondstarcavalier/controlplane/services/letsenc
 
 import "libs/logger.proto";
 import "libs/outputformat.proto";
-import "libs/host.proto";
 import "libs/jwk.proto";
 import "libs/x509.proto";
 import "libs/token.proto";
@@ -53,12 +52,12 @@ message BootstrapConfig {
   // All nodes in the same cluster must use the same name.
   string cluster_name = 1;
 
-  // listener is the gRPC bind address for the BackendDB server.
-  host.Host listener = 2;
+  // listener is the gRPC bind address for the BackendDB server (e.g. "0.0.0.0:9443").
+  string listener = 2;
 
-  // members is the list of cluster members for discovery.
+  // members is the list of cluster member addresses for discovery (e.g. "10.0.0.1:9443").
   // At least one member must be specified for the node to join the cluster.
-  repeated host.Host members = 3;
+  repeated string members = 3;
 
   // node_count is the expected number of nodes in the cluster.
   // Used for partition planning and quorum calculations.

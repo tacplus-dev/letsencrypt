@@ -15,14 +15,12 @@
 
 // Package policy provides protobuf definitions for the Policy service.
 //
-// Policy is the entitlements introspection and dev tools microservice. It
-// provides service catalog browsing, entitlement inspection, entitlement
-// simulation, and arbitrary OPA policy evaluation — all extracted from
-// identity so the auth gateway can focus purely on authentication.
+// Policy is the entitlements introspection microservice. It provides
+// API catalog browsing, entitlement inspection, and policy viewing.
 //
 // Policy reads identity's verifying_keys (via Watch RO) to verify access
-// tokens for GetMyEntitlements. All other RPCs operate on config-provided
-// data (service_entitlements, OPA policies) and require no token validation.
+// tokens for GetEntitlements. Identity profiles and OPA policies are also
+// read from IdentityState.
 
 syntax = "proto3";
 
@@ -37,7 +35,7 @@ import "google/api/annotations.proto";
 // Config
 // ============================================================================
 
-// Policy reads all auth config (OPA policies, entitlement mappings) from
+// Policy reads all auth config (OPA policies, identity profiles) from
 // IdentityState via Watch (RO). No config duplication needed.
 message Config {
 }
@@ -48,31 +46,19 @@ message Config {
 
 service PolicyService {
 
-  // GetServiceCatalog returns the available services and their RPCs,
-  // built from the service_entitlements config.
-  rpc GetServiceCatalog(google.protobuf.Empty) returns (ServiceCatalogResponse) {
+  // GetApiCatalog returns the available services and their RPCs,
+  // built from the identity_profiles config.
+  rpc GetApiCatalog(google.protobuf.Empty) returns (ApiCatalogResponse) {
     option (google.api.http) = { get: "/api/policy/v1/catalog" };
   }
 
-  // GetMyEntitlements returns what services/RPCs the caller's access token
-  // would grant across all catalog services. Accepts access_token in the
-  // request body (same pattern as ExchangeToken — no bearer auth needed).
-  rpc GetMyEntitlements(GetMyEntitlementsRequest) returns (MyEntitlementsResponse) {
+  // GetEntitlements returns the entitlements that the caller's access token
+  // grants across all services. Evaluates identity_profiles via OPA.
+  rpc GetEntitlements(GetEntitlementsRequest) returns (GetEntitlementsResponse) {
     option (google.api.http) = { post: "/api/policy/v1/entitlements" body: "*" };
   }
 
-  // SimulateEntitlements returns what entitlements a hypothetical set of claims
-  // would produce. No token validation — purely catalog-based simulation.
-  rpc SimulateEntitlements(SimulateEntitlementsRequest) returns (MyEntitlementsResponse) {
-    option (google.api.http) = { post: "/api/policy/v1/simulate-entitlements" body: "*" };
-  }
-
-  // EvaluatePolicy evaluates an arbitrary OPA Rego policy.
-  rpc EvaluatePolicy(EvaluatePolicyRequest) returns (EvaluatePolicyResponse) {
-    option (google.api.http) = { post: "/api/policy/v1/evaluate" body: "*" };
-  }
-
-  // GetPolicies returns the current claim mapping and entitlements Rego policies.
+  // GetPolicies returns the deployed OPA entitlements policy.
   rpc GetPolicies(google.protobuf.Empty) returns (GetPoliciesResponse) {
     option (google.api.http) = { get: "/api/policy/v1/policies" };
   }
@@ -82,13 +68,13 @@ service PolicyService {
 // Request/Response Types
 // ============================================================================
 
-// ServiceCatalogResponse lists available services and their RPCs.
-message ServiceCatalogResponse {
-  repeated ServiceCatalogEntry services = 1;
+// ApiCatalogResponse lists available services and their RPCs.
+message ApiCatalogResponse {
+  repeated ApiCatalogEntry services = 1;
 }
 
-// ServiceCatalogEntry describes a single service and its available RPCs.
-message ServiceCatalogEntry {
+// ApiCatalogEntry describes a single service and its available RPCs.
+message ApiCatalogEntry {
   // service_name is the service identifier (e.g. "sentinel").
   string service_name = 1;
 
@@ -96,66 +82,31 @@ message ServiceCatalogEntry {
   repeated string rpcs = 2;
 }
 
-// GetMyEntitlementsRequest carries the caller's generic access token.
-message GetMyEntitlementsRequest {
+// GetEntitlementsRequest carries the caller's access token.
+message GetEntitlementsRequest {
   // access_token is a generic access token (no entitlements) issued by Identity.
   string access_token = 1;
 }
 
-// MyEntitlementsResponse lists per-service entitlement information.
-message MyEntitlementsResponse {
-  repeated ServiceEntitlementInfo entitlements = 1;
+// GetEntitlementsResponse lists matched profiles and their resolved entitlements.
+message GetEntitlementsResponse {
+  // profiles lists the matched identity profile names.
+  repeated string profiles = 1;
+
+  // entitlements lists the resolved per-service entitlements.
+  repeated ServiceEntitlementInfo entitlements = 2;
 }
 
-// ServiceEntitlementInfo describes a caller's entitlements on a single service.
+// ServiceEntitlementInfo describes entitlements on a single service.
 message ServiceEntitlementInfo {
   // service_name is the service identifier (e.g. "sentinel").
   string service_name = 1;
 
-  // rpcs lists the granted RPCs. ["*"] means all RPCs are granted.
+  // rpcs lists the granted RPC methods.
   repeated string rpcs = 2;
-
-  // total_rpcs is the total number of RPCs available from the catalog.
-  int32 total_rpcs = 3;
 }
 
-// SimulateEntitlementsRequest accepts hypothetical claims for simulation.
-message SimulateEntitlementsRequest {
-  // claims_json is JSON-encoded origin claims to simulate.
-  string claims_json = 1;
-
-  // principal is an optional override for simulation.
-  string principal = 2;
-}
-
-// EvaluatePolicyRequest evaluates an arbitrary OPA Rego policy.
-message EvaluatePolicyRequest {
-  // rego_source is the Rego policy source code.
-  string rego_source = 1;
-
-  // input_json is JSON-encoded input for the policy.
-  string input_json = 2;
-
-  // query is the Rego query to evaluate. Default: "data.authz.allow".
-  string query = 3;
-
-  // data_json is optional JSON-encoded external data to load into OPA's store.
-  string data_json = 4;
-}
-
-// EvaluatePolicyResponse contains the result of arbitrary policy evaluation.
-message EvaluatePolicyResponse {
-  // result_json is the JSON-encoded evaluation result.
-  string result_json = 1;
-
-  // allowed is true if the result contains an allow=true decision.
-  bool allowed = 2;
-
-  // errors lists any compilation or evaluation errors.
-  repeated string errors = 3;
-}
-
-// GetPoliciesResponse returns the deployed OPA policies as full OpaPolicy objects.
+// GetPoliciesResponse returns the deployed OPA policies.
 message GetPoliciesResponse {
   // entitlements_policy is the OPA policy evaluated to determine entitlements.
   opa.OpaPolicy entitlements_policy = 1;

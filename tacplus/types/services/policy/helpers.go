@@ -16,7 +16,6 @@ package policy
 import (
 	"bytes"
 	"encoding/json"
-	"strconv"
 	"strings"
 
 	"github.com/pelletier/go-toml/v2"
@@ -148,20 +147,20 @@ func ConfigToTOML(v *Config) ([]byte, error) {
 	return toml.Marshal(obj)
 }
 
-// ServiceCatalogResponseJSON represents ServiceCatalogResponse in external JSON format (with string enums)
+// ApiCatalogResponseJSON represents ApiCatalogResponse in external JSON format (with string enums)
 // MARKER: JSON helper struct generated from serial.go
-type servicecatalogresponseJSON struct {
+type apicatalogresponseJSON struct {
 	Services []json.RawMessage `json:"services,omitempty"`
 }
 
-// ServiceCatalogResponseToJSON converts ServiceCatalogResponse to JSON bytes.
+// ApiCatalogResponseToJSON converts ApiCatalogResponse to JSON bytes.
 // Uses custom JSON helper for friendly enum strings and proper int64 handling.
-func ServiceCatalogResponseToJSON(v *ServiceCatalogResponse) ([]byte, error) {
+func ApiCatalogResponseToJSON(v *ApiCatalogResponse) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "servicecatalogresponse is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "apicatalogresponse is nil")
 	}
 	// Convert to JSON helper struct with string enums
-	helper := servicecatalogresponseJSON{
+	helper := apicatalogresponseJSON{
 		Services: func() []json.RawMessage {
 			if len(v.Services) == 0 {
 				return nil
@@ -169,7 +168,7 @@ func ServiceCatalogResponseToJSON(v *ServiceCatalogResponse) ([]byte, error) {
 			result := make([]json.RawMessage, 0, len(v.Services))
 			for _, item := range v.Services {
 				if item != nil {
-					if data, err := ServiceCatalogEntryToJSON(item); err == nil {
+					if data, err := ApiCatalogEntryToJSON(item); err == nil {
 						result = append(result, data)
 					}
 				}
@@ -180,9 +179,9 @@ func ServiceCatalogResponseToJSON(v *ServiceCatalogResponse) ([]byte, error) {
 	return json.Marshal(helper)
 }
 
-// ServiceCatalogResponseFromBytes creates ServiceCatalogResponse from bytes, auto-detecting the format.
+// ApiCatalogResponseFromBytes creates ApiCatalogResponse from bytes, auto-detecting the format.
 // Supports JSON, YAML, TOML, and binary protobuf formats.
-func ServiceCatalogResponseFromBytes(data []byte) (*ServiceCatalogResponse, error) {
+func ApiCatalogResponseFromBytes(data []byte) (*ApiCatalogResponse, error) {
 	// Trim leading whitespace to check format
 	trimmed := bytes.TrimSpace(data)
 	if len(trimmed) == 0 {
@@ -190,7 +189,7 @@ func ServiceCatalogResponseFromBytes(data []byte) (*ServiceCatalogResponse, erro
 	}
 	// Try JSON first (most common, starts with { or [)
 	if trimmed[0] == '{' || trimmed[0] == '[' {
-		if result, err := ServiceCatalogResponseFromJSON(data); err == nil {
+		if result, err := ApiCatalogResponseFromJSON(data); err == nil {
 			return result, nil
 		}
 	}
@@ -200,7 +199,7 @@ func ServiceCatalogResponseFromBytes(data []byte) (*ServiceCatalogResponse, erro
 		// Convert TOML to JSON, then parse
 		jsonData, err := json.Marshal(tomlObj)
 		if err == nil {
-			if result, err := ServiceCatalogResponseFromJSON(jsonData); err == nil {
+			if result, err := ApiCatalogResponseFromJSON(jsonData); err == nil {
 				return result, nil
 			}
 		}
@@ -211,41 +210,41 @@ func ServiceCatalogResponseFromBytes(data []byte) (*ServiceCatalogResponse, erro
 		// Convert YAML to JSON, then parse
 		jsonData, err := json.Marshal(yamlObj)
 		if err == nil {
-			if result, err := ServiceCatalogResponseFromJSON(jsonData); err == nil {
+			if result, err := ApiCatalogResponseFromJSON(jsonData); err == nil {
 				return result, nil
 			}
 		}
 	}
 	// Try binary protobuf
-	v := &ServiceCatalogResponse{}
+	v := &ApiCatalogResponse{}
 	if err := proto.Unmarshal(data, v); err == nil {
 		return v, nil
 	}
-	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse ServiceCatalogResponse: unsupported format or invalid data")
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse ApiCatalogResponse: unsupported format or invalid data")
 }
 
-// ServiceCatalogResponseFromJSON creates ServiceCatalogResponse from JSON bytes.
+// ApiCatalogResponseFromJSON creates ApiCatalogResponse from JSON bytes.
 // Uses standard encoding/json and custom enum parsers for external JSON compatibility.
-func ServiceCatalogResponseFromJSON(data []byte) (*ServiceCatalogResponse, error) {
+func ApiCatalogResponseFromJSON(data []byte) (*ApiCatalogResponse, error) {
 	// Unmarshal into helper struct with string enums
-	var raw servicecatalogresponseJSON
+	var raw apicatalogresponseJSON
 	if err := json.Unmarshal(data, &raw); err != nil {
 		// Fall back to protojson which handles proto3 JSON conventions
 		// (string-encoded int64/uint64, standard enum names, etc.)
-		v := &ServiceCatalogResponse{}
+		v := &ApiCatalogResponse{}
 		if pErr := protojson.Unmarshal(data, v); pErr != nil {
 			return nil, err
 		}
 		return v, nil
 	}
 	// Build result with parsed enums
-	result := &ServiceCatalogResponse{}
+	result := &ApiCatalogResponse{}
 	// Parse repeated message field: Services
 	if len(raw.Services) > 0 {
-		result.Services = make([]*ServiceCatalogEntry, 0, len(raw.Services))
+		result.Services = make([]*ApiCatalogEntry, 0, len(raw.Services))
 		for _, itemJSON := range raw.Services {
 			if len(itemJSON) > 0 {
-				parsed, err := ServiceCatalogEntryFromJSON(itemJSON)
+				parsed, err := ApiCatalogEntryFromJSON(itemJSON)
 				if err == nil {
 					result.Services = append(result.Services, parsed)
 				}
@@ -255,14 +254,14 @@ func ServiceCatalogResponseFromJSON(data []byte) (*ServiceCatalogResponse, error
 	return result, nil
 }
 
-// ServiceCatalogResponseToYAML converts ServiceCatalogResponse to YAML bytes.
+// ApiCatalogResponseToYAML converts ApiCatalogResponse to YAML bytes.
 // Converts to JSON first, then to YAML for proper protobuf handling.
-func ServiceCatalogResponseToYAML(v *ServiceCatalogResponse) ([]byte, error) {
+func ApiCatalogResponseToYAML(v *ApiCatalogResponse) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "servicecatalogresponse is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "apicatalogresponse is nil")
 	}
 	// Convert to JSON first
-	jsonData, err := ServiceCatalogResponseToJSON(v)
+	jsonData, err := ApiCatalogResponseToJSON(v)
 	if err != nil {
 		return nil, err
 	}
@@ -274,14 +273,14 @@ func ServiceCatalogResponseToYAML(v *ServiceCatalogResponse) ([]byte, error) {
 	return yaml.Marshal(obj)
 }
 
-// ServiceCatalogResponseToTOML converts ServiceCatalogResponse to TOML bytes.
+// ApiCatalogResponseToTOML converts ApiCatalogResponse to TOML bytes.
 // Converts to JSON first, then to TOML for proper protobuf handling.
-func ServiceCatalogResponseToTOML(v *ServiceCatalogResponse) ([]byte, error) {
+func ApiCatalogResponseToTOML(v *ApiCatalogResponse) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "servicecatalogresponse is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "apicatalogresponse is nil")
 	}
 	// Convert to JSON first
-	jsonData, err := ServiceCatalogResponseToJSON(v)
+	jsonData, err := ApiCatalogResponseToJSON(v)
 	if err != nil {
 		return nil, err
 	}
@@ -293,30 +292,30 @@ func ServiceCatalogResponseToTOML(v *ServiceCatalogResponse) ([]byte, error) {
 	return toml.Marshal(obj)
 }
 
-// ServiceCatalogEntryJSON represents ServiceCatalogEntry in external JSON format (with string enums)
+// ApiCatalogEntryJSON represents ApiCatalogEntry in external JSON format (with string enums)
 // MARKER: JSON helper struct generated from serial.go
-type servicecatalogentryJSON struct {
+type apicatalogentryJSON struct {
 	ServiceName string   `json:"service_name,omitempty"`
 	Rpcs        []string `json:"rpcs,omitempty"`
 }
 
-// ServiceCatalogEntryToJSON converts ServiceCatalogEntry to JSON bytes.
+// ApiCatalogEntryToJSON converts ApiCatalogEntry to JSON bytes.
 // Uses custom JSON helper for friendly enum strings and proper int64 handling.
-func ServiceCatalogEntryToJSON(v *ServiceCatalogEntry) ([]byte, error) {
+func ApiCatalogEntryToJSON(v *ApiCatalogEntry) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "servicecatalogentry is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "apicatalogentry is nil")
 	}
 	// Convert to JSON helper struct with string enums
-	helper := servicecatalogentryJSON{
+	helper := apicatalogentryJSON{
 		ServiceName: v.ServiceName,
 		Rpcs:        v.Rpcs,
 	}
 	return json.Marshal(helper)
 }
 
-// ServiceCatalogEntryFromBytes creates ServiceCatalogEntry from bytes, auto-detecting the format.
+// ApiCatalogEntryFromBytes creates ApiCatalogEntry from bytes, auto-detecting the format.
 // Supports JSON, YAML, TOML, and binary protobuf formats.
-func ServiceCatalogEntryFromBytes(data []byte) (*ServiceCatalogEntry, error) {
+func ApiCatalogEntryFromBytes(data []byte) (*ApiCatalogEntry, error) {
 	// Trim leading whitespace to check format
 	trimmed := bytes.TrimSpace(data)
 	if len(trimmed) == 0 {
@@ -324,7 +323,7 @@ func ServiceCatalogEntryFromBytes(data []byte) (*ServiceCatalogEntry, error) {
 	}
 	// Try JSON first (most common, starts with { or [)
 	if trimmed[0] == '{' || trimmed[0] == '[' {
-		if result, err := ServiceCatalogEntryFromJSON(data); err == nil {
+		if result, err := ApiCatalogEntryFromJSON(data); err == nil {
 			return result, nil
 		}
 	}
@@ -334,7 +333,7 @@ func ServiceCatalogEntryFromBytes(data []byte) (*ServiceCatalogEntry, error) {
 		// Convert TOML to JSON, then parse
 		jsonData, err := json.Marshal(tomlObj)
 		if err == nil {
-			if result, err := ServiceCatalogEntryFromJSON(jsonData); err == nil {
+			if result, err := ApiCatalogEntryFromJSON(jsonData); err == nil {
 				return result, nil
 			}
 		}
@@ -345,48 +344,48 @@ func ServiceCatalogEntryFromBytes(data []byte) (*ServiceCatalogEntry, error) {
 		// Convert YAML to JSON, then parse
 		jsonData, err := json.Marshal(yamlObj)
 		if err == nil {
-			if result, err := ServiceCatalogEntryFromJSON(jsonData); err == nil {
+			if result, err := ApiCatalogEntryFromJSON(jsonData); err == nil {
 				return result, nil
 			}
 		}
 	}
 	// Try binary protobuf
-	v := &ServiceCatalogEntry{}
+	v := &ApiCatalogEntry{}
 	if err := proto.Unmarshal(data, v); err == nil {
 		return v, nil
 	}
-	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse ServiceCatalogEntry: unsupported format or invalid data")
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse ApiCatalogEntry: unsupported format or invalid data")
 }
 
-// ServiceCatalogEntryFromJSON creates ServiceCatalogEntry from JSON bytes.
+// ApiCatalogEntryFromJSON creates ApiCatalogEntry from JSON bytes.
 // Uses standard encoding/json and custom enum parsers for external JSON compatibility.
-func ServiceCatalogEntryFromJSON(data []byte) (*ServiceCatalogEntry, error) {
+func ApiCatalogEntryFromJSON(data []byte) (*ApiCatalogEntry, error) {
 	// Unmarshal into helper struct with string enums
-	var raw servicecatalogentryJSON
+	var raw apicatalogentryJSON
 	if err := json.Unmarshal(data, &raw); err != nil {
 		// Fall back to protojson which handles proto3 JSON conventions
 		// (string-encoded int64/uint64, standard enum names, etc.)
-		v := &ServiceCatalogEntry{}
+		v := &ApiCatalogEntry{}
 		if pErr := protojson.Unmarshal(data, v); pErr != nil {
 			return nil, err
 		}
 		return v, nil
 	}
 	// Build result with parsed enums
-	result := &ServiceCatalogEntry{}
+	result := &ApiCatalogEntry{}
 	result.ServiceName = raw.ServiceName
 	result.Rpcs = raw.Rpcs
 	return result, nil
 }
 
-// ServiceCatalogEntryToYAML converts ServiceCatalogEntry to YAML bytes.
+// ApiCatalogEntryToYAML converts ApiCatalogEntry to YAML bytes.
 // Converts to JSON first, then to YAML for proper protobuf handling.
-func ServiceCatalogEntryToYAML(v *ServiceCatalogEntry) ([]byte, error) {
+func ApiCatalogEntryToYAML(v *ApiCatalogEntry) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "servicecatalogentry is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "apicatalogentry is nil")
 	}
 	// Convert to JSON first
-	jsonData, err := ServiceCatalogEntryToJSON(v)
+	jsonData, err := ApiCatalogEntryToJSON(v)
 	if err != nil {
 		return nil, err
 	}
@@ -398,14 +397,14 @@ func ServiceCatalogEntryToYAML(v *ServiceCatalogEntry) ([]byte, error) {
 	return yaml.Marshal(obj)
 }
 
-// ServiceCatalogEntryToTOML converts ServiceCatalogEntry to TOML bytes.
+// ApiCatalogEntryToTOML converts ApiCatalogEntry to TOML bytes.
 // Converts to JSON first, then to TOML for proper protobuf handling.
-func ServiceCatalogEntryToTOML(v *ServiceCatalogEntry) ([]byte, error) {
+func ApiCatalogEntryToTOML(v *ApiCatalogEntry) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "servicecatalogentry is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "apicatalogentry is nil")
 	}
 	// Convert to JSON first
-	jsonData, err := ServiceCatalogEntryToJSON(v)
+	jsonData, err := ApiCatalogEntryToJSON(v)
 	if err != nil {
 		return nil, err
 	}
@@ -417,28 +416,28 @@ func ServiceCatalogEntryToTOML(v *ServiceCatalogEntry) ([]byte, error) {
 	return toml.Marshal(obj)
 }
 
-// GetMyEntitlementsRequestJSON represents GetMyEntitlementsRequest in external JSON format (with string enums)
+// GetEntitlementsRequestJSON represents GetEntitlementsRequest in external JSON format (with string enums)
 // MARKER: JSON helper struct generated from serial.go
-type getmyentitlementsrequestJSON struct {
+type getentitlementsrequestJSON struct {
 	AccessToken string `json:"access_token,omitempty"`
 }
 
-// GetMyEntitlementsRequestToJSON converts GetMyEntitlementsRequest to JSON bytes.
+// GetEntitlementsRequestToJSON converts GetEntitlementsRequest to JSON bytes.
 // Uses custom JSON helper for friendly enum strings and proper int64 handling.
-func GetMyEntitlementsRequestToJSON(v *GetMyEntitlementsRequest) ([]byte, error) {
+func GetEntitlementsRequestToJSON(v *GetEntitlementsRequest) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "getmyentitlementsrequest is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "getentitlementsrequest is nil")
 	}
 	// Convert to JSON helper struct with string enums
-	helper := getmyentitlementsrequestJSON{
+	helper := getentitlementsrequestJSON{
 		AccessToken: v.AccessToken,
 	}
 	return json.Marshal(helper)
 }
 
-// GetMyEntitlementsRequestFromBytes creates GetMyEntitlementsRequest from bytes, auto-detecting the format.
+// GetEntitlementsRequestFromBytes creates GetEntitlementsRequest from bytes, auto-detecting the format.
 // Supports JSON, YAML, TOML, and binary protobuf formats.
-func GetMyEntitlementsRequestFromBytes(data []byte) (*GetMyEntitlementsRequest, error) {
+func GetEntitlementsRequestFromBytes(data []byte) (*GetEntitlementsRequest, error) {
 	// Trim leading whitespace to check format
 	trimmed := bytes.TrimSpace(data)
 	if len(trimmed) == 0 {
@@ -446,7 +445,7 @@ func GetMyEntitlementsRequestFromBytes(data []byte) (*GetMyEntitlementsRequest, 
 	}
 	// Try JSON first (most common, starts with { or [)
 	if trimmed[0] == '{' || trimmed[0] == '[' {
-		if result, err := GetMyEntitlementsRequestFromJSON(data); err == nil {
+		if result, err := GetEntitlementsRequestFromJSON(data); err == nil {
 			return result, nil
 		}
 	}
@@ -456,7 +455,7 @@ func GetMyEntitlementsRequestFromBytes(data []byte) (*GetMyEntitlementsRequest, 
 		// Convert TOML to JSON, then parse
 		jsonData, err := json.Marshal(tomlObj)
 		if err == nil {
-			if result, err := GetMyEntitlementsRequestFromJSON(jsonData); err == nil {
+			if result, err := GetEntitlementsRequestFromJSON(jsonData); err == nil {
 				return result, nil
 			}
 		}
@@ -467,47 +466,47 @@ func GetMyEntitlementsRequestFromBytes(data []byte) (*GetMyEntitlementsRequest, 
 		// Convert YAML to JSON, then parse
 		jsonData, err := json.Marshal(yamlObj)
 		if err == nil {
-			if result, err := GetMyEntitlementsRequestFromJSON(jsonData); err == nil {
+			if result, err := GetEntitlementsRequestFromJSON(jsonData); err == nil {
 				return result, nil
 			}
 		}
 	}
 	// Try binary protobuf
-	v := &GetMyEntitlementsRequest{}
+	v := &GetEntitlementsRequest{}
 	if err := proto.Unmarshal(data, v); err == nil {
 		return v, nil
 	}
-	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse GetMyEntitlementsRequest: unsupported format or invalid data")
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse GetEntitlementsRequest: unsupported format or invalid data")
 }
 
-// GetMyEntitlementsRequestFromJSON creates GetMyEntitlementsRequest from JSON bytes.
+// GetEntitlementsRequestFromJSON creates GetEntitlementsRequest from JSON bytes.
 // Uses standard encoding/json and custom enum parsers for external JSON compatibility.
-func GetMyEntitlementsRequestFromJSON(data []byte) (*GetMyEntitlementsRequest, error) {
+func GetEntitlementsRequestFromJSON(data []byte) (*GetEntitlementsRequest, error) {
 	// Unmarshal into helper struct with string enums
-	var raw getmyentitlementsrequestJSON
+	var raw getentitlementsrequestJSON
 	if err := json.Unmarshal(data, &raw); err != nil {
 		// Fall back to protojson which handles proto3 JSON conventions
 		// (string-encoded int64/uint64, standard enum names, etc.)
-		v := &GetMyEntitlementsRequest{}
+		v := &GetEntitlementsRequest{}
 		if pErr := protojson.Unmarshal(data, v); pErr != nil {
 			return nil, err
 		}
 		return v, nil
 	}
 	// Build result with parsed enums
-	result := &GetMyEntitlementsRequest{}
+	result := &GetEntitlementsRequest{}
 	result.AccessToken = raw.AccessToken
 	return result, nil
 }
 
-// GetMyEntitlementsRequestToYAML converts GetMyEntitlementsRequest to YAML bytes.
+// GetEntitlementsRequestToYAML converts GetEntitlementsRequest to YAML bytes.
 // Converts to JSON first, then to YAML for proper protobuf handling.
-func GetMyEntitlementsRequestToYAML(v *GetMyEntitlementsRequest) ([]byte, error) {
+func GetEntitlementsRequestToYAML(v *GetEntitlementsRequest) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "getmyentitlementsrequest is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "getentitlementsrequest is nil")
 	}
 	// Convert to JSON first
-	jsonData, err := GetMyEntitlementsRequestToJSON(v)
+	jsonData, err := GetEntitlementsRequestToJSON(v)
 	if err != nil {
 		return nil, err
 	}
@@ -519,14 +518,14 @@ func GetMyEntitlementsRequestToYAML(v *GetMyEntitlementsRequest) ([]byte, error)
 	return yaml.Marshal(obj)
 }
 
-// GetMyEntitlementsRequestToTOML converts GetMyEntitlementsRequest to TOML bytes.
+// GetEntitlementsRequestToTOML converts GetEntitlementsRequest to TOML bytes.
 // Converts to JSON first, then to TOML for proper protobuf handling.
-func GetMyEntitlementsRequestToTOML(v *GetMyEntitlementsRequest) ([]byte, error) {
+func GetEntitlementsRequestToTOML(v *GetEntitlementsRequest) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "getmyentitlementsrequest is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "getentitlementsrequest is nil")
 	}
 	// Convert to JSON first
-	jsonData, err := GetMyEntitlementsRequestToJSON(v)
+	jsonData, err := GetEntitlementsRequestToJSON(v)
 	if err != nil {
 		return nil, err
 	}
@@ -538,20 +537,22 @@ func GetMyEntitlementsRequestToTOML(v *GetMyEntitlementsRequest) ([]byte, error)
 	return toml.Marshal(obj)
 }
 
-// MyEntitlementsResponseJSON represents MyEntitlementsResponse in external JSON format (with string enums)
+// GetEntitlementsResponseJSON represents GetEntitlementsResponse in external JSON format (with string enums)
 // MARKER: JSON helper struct generated from serial.go
-type myentitlementsresponseJSON struct {
+type getentitlementsresponseJSON struct {
+	Profiles     []string          `json:"profiles,omitempty"`
 	Entitlements []json.RawMessage `json:"entitlements,omitempty"`
 }
 
-// MyEntitlementsResponseToJSON converts MyEntitlementsResponse to JSON bytes.
+// GetEntitlementsResponseToJSON converts GetEntitlementsResponse to JSON bytes.
 // Uses custom JSON helper for friendly enum strings and proper int64 handling.
-func MyEntitlementsResponseToJSON(v *MyEntitlementsResponse) ([]byte, error) {
+func GetEntitlementsResponseToJSON(v *GetEntitlementsResponse) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "myentitlementsresponse is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "getentitlementsresponse is nil")
 	}
 	// Convert to JSON helper struct with string enums
-	helper := myentitlementsresponseJSON{
+	helper := getentitlementsresponseJSON{
+		Profiles: v.Profiles,
 		Entitlements: func() []json.RawMessage {
 			if len(v.Entitlements) == 0 {
 				return nil
@@ -570,9 +571,9 @@ func MyEntitlementsResponseToJSON(v *MyEntitlementsResponse) ([]byte, error) {
 	return json.Marshal(helper)
 }
 
-// MyEntitlementsResponseFromBytes creates MyEntitlementsResponse from bytes, auto-detecting the format.
+// GetEntitlementsResponseFromBytes creates GetEntitlementsResponse from bytes, auto-detecting the format.
 // Supports JSON, YAML, TOML, and binary protobuf formats.
-func MyEntitlementsResponseFromBytes(data []byte) (*MyEntitlementsResponse, error) {
+func GetEntitlementsResponseFromBytes(data []byte) (*GetEntitlementsResponse, error) {
 	// Trim leading whitespace to check format
 	trimmed := bytes.TrimSpace(data)
 	if len(trimmed) == 0 {
@@ -580,7 +581,7 @@ func MyEntitlementsResponseFromBytes(data []byte) (*MyEntitlementsResponse, erro
 	}
 	// Try JSON first (most common, starts with { or [)
 	if trimmed[0] == '{' || trimmed[0] == '[' {
-		if result, err := MyEntitlementsResponseFromJSON(data); err == nil {
+		if result, err := GetEntitlementsResponseFromJSON(data); err == nil {
 			return result, nil
 		}
 	}
@@ -590,7 +591,7 @@ func MyEntitlementsResponseFromBytes(data []byte) (*MyEntitlementsResponse, erro
 		// Convert TOML to JSON, then parse
 		jsonData, err := json.Marshal(tomlObj)
 		if err == nil {
-			if result, err := MyEntitlementsResponseFromJSON(jsonData); err == nil {
+			if result, err := GetEntitlementsResponseFromJSON(jsonData); err == nil {
 				return result, nil
 			}
 		}
@@ -601,35 +602,36 @@ func MyEntitlementsResponseFromBytes(data []byte) (*MyEntitlementsResponse, erro
 		// Convert YAML to JSON, then parse
 		jsonData, err := json.Marshal(yamlObj)
 		if err == nil {
-			if result, err := MyEntitlementsResponseFromJSON(jsonData); err == nil {
+			if result, err := GetEntitlementsResponseFromJSON(jsonData); err == nil {
 				return result, nil
 			}
 		}
 	}
 	// Try binary protobuf
-	v := &MyEntitlementsResponse{}
+	v := &GetEntitlementsResponse{}
 	if err := proto.Unmarshal(data, v); err == nil {
 		return v, nil
 	}
-	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse MyEntitlementsResponse: unsupported format or invalid data")
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse GetEntitlementsResponse: unsupported format or invalid data")
 }
 
-// MyEntitlementsResponseFromJSON creates MyEntitlementsResponse from JSON bytes.
+// GetEntitlementsResponseFromJSON creates GetEntitlementsResponse from JSON bytes.
 // Uses standard encoding/json and custom enum parsers for external JSON compatibility.
-func MyEntitlementsResponseFromJSON(data []byte) (*MyEntitlementsResponse, error) {
+func GetEntitlementsResponseFromJSON(data []byte) (*GetEntitlementsResponse, error) {
 	// Unmarshal into helper struct with string enums
-	var raw myentitlementsresponseJSON
+	var raw getentitlementsresponseJSON
 	if err := json.Unmarshal(data, &raw); err != nil {
 		// Fall back to protojson which handles proto3 JSON conventions
 		// (string-encoded int64/uint64, standard enum names, etc.)
-		v := &MyEntitlementsResponse{}
+		v := &GetEntitlementsResponse{}
 		if pErr := protojson.Unmarshal(data, v); pErr != nil {
 			return nil, err
 		}
 		return v, nil
 	}
 	// Build result with parsed enums
-	result := &MyEntitlementsResponse{}
+	result := &GetEntitlementsResponse{}
+	result.Profiles = raw.Profiles
 	// Parse repeated message field: Entitlements
 	if len(raw.Entitlements) > 0 {
 		result.Entitlements = make([]*ServiceEntitlementInfo, 0, len(raw.Entitlements))
@@ -645,14 +647,14 @@ func MyEntitlementsResponseFromJSON(data []byte) (*MyEntitlementsResponse, error
 	return result, nil
 }
 
-// MyEntitlementsResponseToYAML converts MyEntitlementsResponse to YAML bytes.
+// GetEntitlementsResponseToYAML converts GetEntitlementsResponse to YAML bytes.
 // Converts to JSON first, then to YAML for proper protobuf handling.
-func MyEntitlementsResponseToYAML(v *MyEntitlementsResponse) ([]byte, error) {
+func GetEntitlementsResponseToYAML(v *GetEntitlementsResponse) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "myentitlementsresponse is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "getentitlementsresponse is nil")
 	}
 	// Convert to JSON first
-	jsonData, err := MyEntitlementsResponseToJSON(v)
+	jsonData, err := GetEntitlementsResponseToJSON(v)
 	if err != nil {
 		return nil, err
 	}
@@ -664,14 +666,14 @@ func MyEntitlementsResponseToYAML(v *MyEntitlementsResponse) ([]byte, error) {
 	return yaml.Marshal(obj)
 }
 
-// MyEntitlementsResponseToTOML converts MyEntitlementsResponse to TOML bytes.
+// GetEntitlementsResponseToTOML converts GetEntitlementsResponse to TOML bytes.
 // Converts to JSON first, then to TOML for proper protobuf handling.
-func MyEntitlementsResponseToTOML(v *MyEntitlementsResponse) ([]byte, error) {
+func GetEntitlementsResponseToTOML(v *GetEntitlementsResponse) ([]byte, error) {
 	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "myentitlementsresponse is nil")
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "getentitlementsresponse is nil")
 	}
 	// Convert to JSON first
-	jsonData, err := MyEntitlementsResponseToJSON(v)
+	jsonData, err := GetEntitlementsResponseToJSON(v)
 	if err != nil {
 		return nil, err
 	}
@@ -688,7 +690,6 @@ func MyEntitlementsResponseToTOML(v *MyEntitlementsResponse) ([]byte, error) {
 type serviceentitlementinfoJSON struct {
 	ServiceName string   `json:"service_name,omitempty"`
 	Rpcs        []string `json:"rpcs,omitempty"`
-	TotalRpcs   int32    `json:"total_rpcs,omitempty"`
 }
 
 // ServiceEntitlementInfoToJSON converts ServiceEntitlementInfo to JSON bytes.
@@ -701,7 +702,6 @@ func ServiceEntitlementInfoToJSON(v *ServiceEntitlementInfo) ([]byte, error) {
 	helper := serviceentitlementinfoJSON{
 		ServiceName: v.ServiceName,
 		Rpcs:        v.Rpcs,
-		TotalRpcs:   v.TotalRpcs,
 	}
 	return json.Marshal(helper)
 }
@@ -768,7 +768,6 @@ func ServiceEntitlementInfoFromJSON(data []byte) (*ServiceEntitlementInfo, error
 	result := &ServiceEntitlementInfo{}
 	result.ServiceName = raw.ServiceName
 	result.Rpcs = raw.Rpcs
-	result.TotalRpcs = raw.TotalRpcs
 	return result, nil
 }
 
@@ -799,387 +798,6 @@ func ServiceEntitlementInfoToTOML(v *ServiceEntitlementInfo) ([]byte, error) {
 	}
 	// Convert to JSON first
 	jsonData, err := ServiceEntitlementInfoToJSON(v)
-	if err != nil {
-		return nil, err
-	}
-	// Convert JSON to TOML
-	var obj any
-	if err := json.Unmarshal(jsonData, &obj); err != nil {
-		return nil, err
-	}
-	return toml.Marshal(obj)
-}
-
-// SimulateEntitlementsRequestJSON represents SimulateEntitlementsRequest in external JSON format (with string enums)
-// MARKER: JSON helper struct generated from serial.go
-type simulateentitlementsrequestJSON struct {
-	ClaimsJson string `json:"claims_json,omitempty"`
-	Principal  string `json:"principal,omitempty"`
-}
-
-// SimulateEntitlementsRequestToJSON converts SimulateEntitlementsRequest to JSON bytes.
-// Uses custom JSON helper for friendly enum strings and proper int64 handling.
-func SimulateEntitlementsRequestToJSON(v *SimulateEntitlementsRequest) ([]byte, error) {
-	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "simulateentitlementsrequest is nil")
-	}
-	// Convert to JSON helper struct with string enums
-	helper := simulateentitlementsrequestJSON{
-		ClaimsJson: v.ClaimsJson,
-		Principal:  v.Principal,
-	}
-	return json.Marshal(helper)
-}
-
-// SimulateEntitlementsRequestFromBytes creates SimulateEntitlementsRequest from bytes, auto-detecting the format.
-// Supports JSON, YAML, TOML, and binary protobuf formats.
-func SimulateEntitlementsRequestFromBytes(data []byte) (*SimulateEntitlementsRequest, error) {
-	// Trim leading whitespace to check format
-	trimmed := bytes.TrimSpace(data)
-	if len(trimmed) == 0 {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
-	}
-	// Try JSON first (most common, starts with { or [)
-	if trimmed[0] == '{' || trimmed[0] == '[' {
-		if result, err := SimulateEntitlementsRequestFromJSON(data); err == nil {
-			return result, nil
-		}
-	}
-	// Try TOML (try before YAML since YAML is more permissive)
-	var tomlObj any
-	if err := toml.Unmarshal(data, &tomlObj); err == nil {
-		// Convert TOML to JSON, then parse
-		jsonData, err := json.Marshal(tomlObj)
-		if err == nil {
-			if result, err := SimulateEntitlementsRequestFromJSON(jsonData); err == nil {
-				return result, nil
-			}
-		}
-	}
-	// Try YAML
-	var yamlObj any
-	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
-		// Convert YAML to JSON, then parse
-		jsonData, err := json.Marshal(yamlObj)
-		if err == nil {
-			if result, err := SimulateEntitlementsRequestFromJSON(jsonData); err == nil {
-				return result, nil
-			}
-		}
-	}
-	// Try binary protobuf
-	v := &SimulateEntitlementsRequest{}
-	if err := proto.Unmarshal(data, v); err == nil {
-		return v, nil
-	}
-	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse SimulateEntitlementsRequest: unsupported format or invalid data")
-}
-
-// SimulateEntitlementsRequestFromJSON creates SimulateEntitlementsRequest from JSON bytes.
-// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
-func SimulateEntitlementsRequestFromJSON(data []byte) (*SimulateEntitlementsRequest, error) {
-	// Unmarshal into helper struct with string enums
-	var raw simulateentitlementsrequestJSON
-	if err := json.Unmarshal(data, &raw); err != nil {
-		// Fall back to protojson which handles proto3 JSON conventions
-		// (string-encoded int64/uint64, standard enum names, etc.)
-		v := &SimulateEntitlementsRequest{}
-		if pErr := protojson.Unmarshal(data, v); pErr != nil {
-			return nil, err
-		}
-		return v, nil
-	}
-	// Build result with parsed enums
-	result := &SimulateEntitlementsRequest{}
-	result.ClaimsJson = raw.ClaimsJson
-	result.Principal = raw.Principal
-	return result, nil
-}
-
-// SimulateEntitlementsRequestToYAML converts SimulateEntitlementsRequest to YAML bytes.
-// Converts to JSON first, then to YAML for proper protobuf handling.
-func SimulateEntitlementsRequestToYAML(v *SimulateEntitlementsRequest) ([]byte, error) {
-	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "simulateentitlementsrequest is nil")
-	}
-	// Convert to JSON first
-	jsonData, err := SimulateEntitlementsRequestToJSON(v)
-	if err != nil {
-		return nil, err
-	}
-	// Convert JSON to YAML
-	var obj any
-	if err := json.Unmarshal(jsonData, &obj); err != nil {
-		return nil, err
-	}
-	return yaml.Marshal(obj)
-}
-
-// SimulateEntitlementsRequestToTOML converts SimulateEntitlementsRequest to TOML bytes.
-// Converts to JSON first, then to TOML for proper protobuf handling.
-func SimulateEntitlementsRequestToTOML(v *SimulateEntitlementsRequest) ([]byte, error) {
-	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "simulateentitlementsrequest is nil")
-	}
-	// Convert to JSON first
-	jsonData, err := SimulateEntitlementsRequestToJSON(v)
-	if err != nil {
-		return nil, err
-	}
-	// Convert JSON to TOML
-	var obj any
-	if err := json.Unmarshal(jsonData, &obj); err != nil {
-		return nil, err
-	}
-	return toml.Marshal(obj)
-}
-
-// EvaluatePolicyRequestJSON represents EvaluatePolicyRequest in external JSON format (with string enums)
-// MARKER: JSON helper struct generated from serial.go
-type evaluatepolicyrequestJSON struct {
-	RegoSource string `json:"rego_source,omitempty"`
-	InputJson  string `json:"input_json,omitempty"`
-	Query      string `json:"query,omitempty"`
-	DataJson   string `json:"data_json,omitempty"`
-}
-
-// EvaluatePolicyRequestToJSON converts EvaluatePolicyRequest to JSON bytes.
-// Uses custom JSON helper for friendly enum strings and proper int64 handling.
-func EvaluatePolicyRequestToJSON(v *EvaluatePolicyRequest) ([]byte, error) {
-	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "evaluatepolicyrequest is nil")
-	}
-	// Convert to JSON helper struct with string enums
-	helper := evaluatepolicyrequestJSON{
-		RegoSource: v.RegoSource,
-		InputJson:  v.InputJson,
-		Query:      v.Query,
-		DataJson:   v.DataJson,
-	}
-	return json.Marshal(helper)
-}
-
-// EvaluatePolicyRequestFromBytes creates EvaluatePolicyRequest from bytes, auto-detecting the format.
-// Supports JSON, YAML, TOML, and binary protobuf formats.
-func EvaluatePolicyRequestFromBytes(data []byte) (*EvaluatePolicyRequest, error) {
-	// Trim leading whitespace to check format
-	trimmed := bytes.TrimSpace(data)
-	if len(trimmed) == 0 {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
-	}
-	// Try JSON first (most common, starts with { or [)
-	if trimmed[0] == '{' || trimmed[0] == '[' {
-		if result, err := EvaluatePolicyRequestFromJSON(data); err == nil {
-			return result, nil
-		}
-	}
-	// Try TOML (try before YAML since YAML is more permissive)
-	var tomlObj any
-	if err := toml.Unmarshal(data, &tomlObj); err == nil {
-		// Convert TOML to JSON, then parse
-		jsonData, err := json.Marshal(tomlObj)
-		if err == nil {
-			if result, err := EvaluatePolicyRequestFromJSON(jsonData); err == nil {
-				return result, nil
-			}
-		}
-	}
-	// Try YAML
-	var yamlObj any
-	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
-		// Convert YAML to JSON, then parse
-		jsonData, err := json.Marshal(yamlObj)
-		if err == nil {
-			if result, err := EvaluatePolicyRequestFromJSON(jsonData); err == nil {
-				return result, nil
-			}
-		}
-	}
-	// Try binary protobuf
-	v := &EvaluatePolicyRequest{}
-	if err := proto.Unmarshal(data, v); err == nil {
-		return v, nil
-	}
-	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse EvaluatePolicyRequest: unsupported format or invalid data")
-}
-
-// EvaluatePolicyRequestFromJSON creates EvaluatePolicyRequest from JSON bytes.
-// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
-func EvaluatePolicyRequestFromJSON(data []byte) (*EvaluatePolicyRequest, error) {
-	// Unmarshal into helper struct with string enums
-	var raw evaluatepolicyrequestJSON
-	if err := json.Unmarshal(data, &raw); err != nil {
-		// Fall back to protojson which handles proto3 JSON conventions
-		// (string-encoded int64/uint64, standard enum names, etc.)
-		v := &EvaluatePolicyRequest{}
-		if pErr := protojson.Unmarshal(data, v); pErr != nil {
-			return nil, err
-		}
-		return v, nil
-	}
-	// Build result with parsed enums
-	result := &EvaluatePolicyRequest{}
-	result.RegoSource = raw.RegoSource
-	result.InputJson = raw.InputJson
-	result.Query = raw.Query
-	result.DataJson = raw.DataJson
-	return result, nil
-}
-
-// EvaluatePolicyRequestToYAML converts EvaluatePolicyRequest to YAML bytes.
-// Converts to JSON first, then to YAML for proper protobuf handling.
-func EvaluatePolicyRequestToYAML(v *EvaluatePolicyRequest) ([]byte, error) {
-	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "evaluatepolicyrequest is nil")
-	}
-	// Convert to JSON first
-	jsonData, err := EvaluatePolicyRequestToJSON(v)
-	if err != nil {
-		return nil, err
-	}
-	// Convert JSON to YAML
-	var obj any
-	if err := json.Unmarshal(jsonData, &obj); err != nil {
-		return nil, err
-	}
-	return yaml.Marshal(obj)
-}
-
-// EvaluatePolicyRequestToTOML converts EvaluatePolicyRequest to TOML bytes.
-// Converts to JSON first, then to TOML for proper protobuf handling.
-func EvaluatePolicyRequestToTOML(v *EvaluatePolicyRequest) ([]byte, error) {
-	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "evaluatepolicyrequest is nil")
-	}
-	// Convert to JSON first
-	jsonData, err := EvaluatePolicyRequestToJSON(v)
-	if err != nil {
-		return nil, err
-	}
-	// Convert JSON to TOML
-	var obj any
-	if err := json.Unmarshal(jsonData, &obj); err != nil {
-		return nil, err
-	}
-	return toml.Marshal(obj)
-}
-
-// EvaluatePolicyResponseJSON represents EvaluatePolicyResponse in external JSON format (with string enums)
-// MARKER: JSON helper struct generated from serial.go
-type evaluatepolicyresponseJSON struct {
-	ResultJson string   `json:"result_json,omitempty"`
-	Allowed    bool     `json:"allowed,omitempty"`
-	Errors     []string `json:"errors,omitempty"`
-}
-
-// EvaluatePolicyResponseToJSON converts EvaluatePolicyResponse to JSON bytes.
-// Uses custom JSON helper for friendly enum strings and proper int64 handling.
-func EvaluatePolicyResponseToJSON(v *EvaluatePolicyResponse) ([]byte, error) {
-	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "evaluatepolicyresponse is nil")
-	}
-	// Convert to JSON helper struct with string enums
-	helper := evaluatepolicyresponseJSON{
-		ResultJson: v.ResultJson,
-		Allowed:    v.Allowed,
-		Errors:     v.Errors,
-	}
-	return json.Marshal(helper)
-}
-
-// EvaluatePolicyResponseFromBytes creates EvaluatePolicyResponse from bytes, auto-detecting the format.
-// Supports JSON, YAML, TOML, and binary protobuf formats.
-func EvaluatePolicyResponseFromBytes(data []byte) (*EvaluatePolicyResponse, error) {
-	// Trim leading whitespace to check format
-	trimmed := bytes.TrimSpace(data)
-	if len(trimmed) == 0 {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
-	}
-	// Try JSON first (most common, starts with { or [)
-	if trimmed[0] == '{' || trimmed[0] == '[' {
-		if result, err := EvaluatePolicyResponseFromJSON(data); err == nil {
-			return result, nil
-		}
-	}
-	// Try TOML (try before YAML since YAML is more permissive)
-	var tomlObj any
-	if err := toml.Unmarshal(data, &tomlObj); err == nil {
-		// Convert TOML to JSON, then parse
-		jsonData, err := json.Marshal(tomlObj)
-		if err == nil {
-			if result, err := EvaluatePolicyResponseFromJSON(jsonData); err == nil {
-				return result, nil
-			}
-		}
-	}
-	// Try YAML
-	var yamlObj any
-	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
-		// Convert YAML to JSON, then parse
-		jsonData, err := json.Marshal(yamlObj)
-		if err == nil {
-			if result, err := EvaluatePolicyResponseFromJSON(jsonData); err == nil {
-				return result, nil
-			}
-		}
-	}
-	// Try binary protobuf
-	v := &EvaluatePolicyResponse{}
-	if err := proto.Unmarshal(data, v); err == nil {
-		return v, nil
-	}
-	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse EvaluatePolicyResponse: unsupported format or invalid data")
-}
-
-// EvaluatePolicyResponseFromJSON creates EvaluatePolicyResponse from JSON bytes.
-// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
-func EvaluatePolicyResponseFromJSON(data []byte) (*EvaluatePolicyResponse, error) {
-	// Unmarshal into helper struct with string enums
-	var raw evaluatepolicyresponseJSON
-	if err := json.Unmarshal(data, &raw); err != nil {
-		// Fall back to protojson which handles proto3 JSON conventions
-		// (string-encoded int64/uint64, standard enum names, etc.)
-		v := &EvaluatePolicyResponse{}
-		if pErr := protojson.Unmarshal(data, v); pErr != nil {
-			return nil, err
-		}
-		return v, nil
-	}
-	// Build result with parsed enums
-	result := &EvaluatePolicyResponse{}
-	result.ResultJson = raw.ResultJson
-	result.Allowed = raw.Allowed
-	result.Errors = raw.Errors
-	return result, nil
-}
-
-// EvaluatePolicyResponseToYAML converts EvaluatePolicyResponse to YAML bytes.
-// Converts to JSON first, then to YAML for proper protobuf handling.
-func EvaluatePolicyResponseToYAML(v *EvaluatePolicyResponse) ([]byte, error) {
-	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "evaluatepolicyresponse is nil")
-	}
-	// Convert to JSON first
-	jsonData, err := EvaluatePolicyResponseToJSON(v)
-	if err != nil {
-		return nil, err
-	}
-	// Convert JSON to YAML
-	var obj any
-	if err := json.Unmarshal(jsonData, &obj); err != nil {
-		return nil, err
-	}
-	return yaml.Marshal(obj)
-}
-
-// EvaluatePolicyResponseToTOML converts EvaluatePolicyResponse to TOML bytes.
-// Converts to JSON first, then to TOML for proper protobuf handling.
-func EvaluatePolicyResponseToTOML(v *EvaluatePolicyResponse) ([]byte, error) {
-	if v == nil {
-		return nil, protoerrors.NewErrMissingInvalidData(nil, "evaluatepolicyresponse is nil")
-	}
-	// Convert to JSON first
-	jsonData, err := EvaluatePolicyResponseToJSON(v)
 	if err != nil {
 		return nil, err
 	}
@@ -1343,8 +961,8 @@ func ConfigFromEnvVar(env map[string]string) (*Config, error) {
 	return result, nil
 }
 
-// ServiceCatalogResponseToEnvVar converts ServiceCatalogResponse to environment variable key-value pairs.
-func ServiceCatalogResponseToEnvVar(v *ServiceCatalogResponse) map[string]string {
+// ApiCatalogResponseToEnvVar converts ApiCatalogResponse to environment variable key-value pairs.
+func ApiCatalogResponseToEnvVar(v *ApiCatalogResponse) map[string]string {
 	if v == nil {
 		return nil
 	}
@@ -1352,68 +970,74 @@ func ServiceCatalogResponseToEnvVar(v *ServiceCatalogResponse) map[string]string
 	return result
 }
 
-// ServiceCatalogResponseFromEnvVar creates ServiceCatalogResponse from environment variable key-value pairs.
-func ServiceCatalogResponseFromEnvVar(env map[string]string) (*ServiceCatalogResponse, error) {
-	result := &ServiceCatalogResponse{}
+// ApiCatalogResponseFromEnvVar creates ApiCatalogResponse from environment variable key-value pairs.
+func ApiCatalogResponseFromEnvVar(env map[string]string) (*ApiCatalogResponse, error) {
+	result := &ApiCatalogResponse{}
 	return result, nil
 }
 
-// ServiceCatalogEntryToEnvVar converts ServiceCatalogEntry to environment variable key-value pairs.
-func ServiceCatalogEntryToEnvVar(v *ServiceCatalogEntry) map[string]string {
+// ApiCatalogEntryToEnvVar converts ApiCatalogEntry to environment variable key-value pairs.
+func ApiCatalogEntryToEnvVar(v *ApiCatalogEntry) map[string]string {
 	if v == nil {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_POLICY_SERVICE_CATALOG_ENTRY_SERVICE_NAME"] = v.ServiceName
+	result["PROTO_SERVICES_POLICY_API_CATALOG_ENTRY_SERVICE_NAME"] = v.ServiceName
 	if len(v.Rpcs) > 0 {
-		result["PROTO_SERVICES_POLICY_SERVICE_CATALOG_ENTRY_RPCS"] = strings.Join(v.Rpcs, ",")
+		result["PROTO_SERVICES_POLICY_API_CATALOG_ENTRY_RPCS"] = strings.Join(v.Rpcs, ",")
 	}
 	return result
 }
 
-// ServiceCatalogEntryFromEnvVar creates ServiceCatalogEntry from environment variable key-value pairs.
-func ServiceCatalogEntryFromEnvVar(env map[string]string) (*ServiceCatalogEntry, error) {
-	result := &ServiceCatalogEntry{}
-	if val, ok := env["PROTO_SERVICES_POLICY_SERVICE_CATALOG_ENTRY_SERVICE_NAME"]; ok && val != "" {
+// ApiCatalogEntryFromEnvVar creates ApiCatalogEntry from environment variable key-value pairs.
+func ApiCatalogEntryFromEnvVar(env map[string]string) (*ApiCatalogEntry, error) {
+	result := &ApiCatalogEntry{}
+	if val, ok := env["PROTO_SERVICES_POLICY_API_CATALOG_ENTRY_SERVICE_NAME"]; ok && val != "" {
 		result.ServiceName = val
 	}
-	if val, ok := env["PROTO_SERVICES_POLICY_SERVICE_CATALOG_ENTRY_RPCS"]; ok && val != "" {
+	if val, ok := env["PROTO_SERVICES_POLICY_API_CATALOG_ENTRY_RPCS"]; ok && val != "" {
 		result.Rpcs = strings.Split(val, ",")
 	}
 	return result, nil
 }
 
-// GetMyEntitlementsRequestToEnvVar converts GetMyEntitlementsRequest to environment variable key-value pairs.
-func GetMyEntitlementsRequestToEnvVar(v *GetMyEntitlementsRequest) map[string]string {
+// GetEntitlementsRequestToEnvVar converts GetEntitlementsRequest to environment variable key-value pairs.
+func GetEntitlementsRequestToEnvVar(v *GetEntitlementsRequest) map[string]string {
 	if v == nil {
 		return nil
 	}
 	result := make(map[string]string)
-	result["PROTO_SERVICES_POLICY_GET_MY_ENTITLEMENTS_REQUEST_ACCESS_TOKEN"] = v.AccessToken
+	result["PROTO_SERVICES_POLICY_GET_ENTITLEMENTS_REQUEST_ACCESS_TOKEN"] = v.AccessToken
 	return result
 }
 
-// GetMyEntitlementsRequestFromEnvVar creates GetMyEntitlementsRequest from environment variable key-value pairs.
-func GetMyEntitlementsRequestFromEnvVar(env map[string]string) (*GetMyEntitlementsRequest, error) {
-	result := &GetMyEntitlementsRequest{}
-	if val, ok := env["PROTO_SERVICES_POLICY_GET_MY_ENTITLEMENTS_REQUEST_ACCESS_TOKEN"]; ok && val != "" {
+// GetEntitlementsRequestFromEnvVar creates GetEntitlementsRequest from environment variable key-value pairs.
+func GetEntitlementsRequestFromEnvVar(env map[string]string) (*GetEntitlementsRequest, error) {
+	result := &GetEntitlementsRequest{}
+	if val, ok := env["PROTO_SERVICES_POLICY_GET_ENTITLEMENTS_REQUEST_ACCESS_TOKEN"]; ok && val != "" {
 		result.AccessToken = val
 	}
 	return result, nil
 }
 
-// MyEntitlementsResponseToEnvVar converts MyEntitlementsResponse to environment variable key-value pairs.
-func MyEntitlementsResponseToEnvVar(v *MyEntitlementsResponse) map[string]string {
+// GetEntitlementsResponseToEnvVar converts GetEntitlementsResponse to environment variable key-value pairs.
+func GetEntitlementsResponseToEnvVar(v *GetEntitlementsResponse) map[string]string {
 	if v == nil {
 		return nil
 	}
 	result := make(map[string]string)
+	if len(v.Profiles) > 0 {
+		result["PROTO_SERVICES_POLICY_GET_ENTITLEMENTS_RESPONSE_PROFILES"] = strings.Join(v.Profiles, ",")
+	}
 	return result
 }
 
-// MyEntitlementsResponseFromEnvVar creates MyEntitlementsResponse from environment variable key-value pairs.
-func MyEntitlementsResponseFromEnvVar(env map[string]string) (*MyEntitlementsResponse, error) {
-	result := &MyEntitlementsResponse{}
+// GetEntitlementsResponseFromEnvVar creates GetEntitlementsResponse from environment variable key-value pairs.
+func GetEntitlementsResponseFromEnvVar(env map[string]string) (*GetEntitlementsResponse, error) {
+	result := &GetEntitlementsResponse{}
+	if val, ok := env["PROTO_SERVICES_POLICY_GET_ENTITLEMENTS_RESPONSE_PROFILES"]; ok && val != "" {
+		result.Profiles = strings.Split(val, ",")
+	}
 	return result, nil
 }
 
@@ -1427,7 +1051,6 @@ func ServiceEntitlementInfoToEnvVar(v *ServiceEntitlementInfo) map[string]string
 	if len(v.Rpcs) > 0 {
 		result["PROTO_SERVICES_POLICY_SERVICE_ENTITLEMENT_INFO_RPCS"] = strings.Join(v.Rpcs, ",")
 	}
-	result["PROTO_SERVICES_POLICY_SERVICE_ENTITLEMENT_INFO_TOTAL_RPCS"] = strconv.FormatInt(int64(v.TotalRpcs), 10)
 	return result
 }
 
@@ -1439,100 +1062,6 @@ func ServiceEntitlementInfoFromEnvVar(env map[string]string) (*ServiceEntitlemen
 	}
 	if val, ok := env["PROTO_SERVICES_POLICY_SERVICE_ENTITLEMENT_INFO_RPCS"]; ok && val != "" {
 		result.Rpcs = strings.Split(val, ",")
-	}
-	if val, ok := env["PROTO_SERVICES_POLICY_SERVICE_ENTITLEMENT_INFO_TOTAL_RPCS"]; ok && val != "" {
-		parsed, err := strconv.ParseInt(val, 10, 32)
-		if err != nil {
-			return nil, err
-		}
-		result.TotalRpcs = int32(parsed)
-	}
-	return result, nil
-}
-
-// SimulateEntitlementsRequestToEnvVar converts SimulateEntitlementsRequest to environment variable key-value pairs.
-func SimulateEntitlementsRequestToEnvVar(v *SimulateEntitlementsRequest) map[string]string {
-	if v == nil {
-		return nil
-	}
-	result := make(map[string]string)
-	result["PROTO_SERVICES_POLICY_SIMULATE_ENTITLEMENTS_REQUEST_CLAIMS_JSON"] = v.ClaimsJson
-	result["PROTO_SERVICES_POLICY_SIMULATE_ENTITLEMENTS_REQUEST_PRINCIPAL"] = v.Principal
-	return result
-}
-
-// SimulateEntitlementsRequestFromEnvVar creates SimulateEntitlementsRequest from environment variable key-value pairs.
-func SimulateEntitlementsRequestFromEnvVar(env map[string]string) (*SimulateEntitlementsRequest, error) {
-	result := &SimulateEntitlementsRequest{}
-	if val, ok := env["PROTO_SERVICES_POLICY_SIMULATE_ENTITLEMENTS_REQUEST_CLAIMS_JSON"]; ok && val != "" {
-		result.ClaimsJson = val
-	}
-	if val, ok := env["PROTO_SERVICES_POLICY_SIMULATE_ENTITLEMENTS_REQUEST_PRINCIPAL"]; ok && val != "" {
-		result.Principal = val
-	}
-	return result, nil
-}
-
-// EvaluatePolicyRequestToEnvVar converts EvaluatePolicyRequest to environment variable key-value pairs.
-func EvaluatePolicyRequestToEnvVar(v *EvaluatePolicyRequest) map[string]string {
-	if v == nil {
-		return nil
-	}
-	result := make(map[string]string)
-	result["PROTO_SERVICES_POLICY_EVALUATE_POLICY_REQUEST_REGO_SOURCE"] = v.RegoSource
-	result["PROTO_SERVICES_POLICY_EVALUATE_POLICY_REQUEST_INPUT_JSON"] = v.InputJson
-	result["PROTO_SERVICES_POLICY_EVALUATE_POLICY_REQUEST_QUERY"] = v.Query
-	result["PROTO_SERVICES_POLICY_EVALUATE_POLICY_REQUEST_DATA_JSON"] = v.DataJson
-	return result
-}
-
-// EvaluatePolicyRequestFromEnvVar creates EvaluatePolicyRequest from environment variable key-value pairs.
-func EvaluatePolicyRequestFromEnvVar(env map[string]string) (*EvaluatePolicyRequest, error) {
-	result := &EvaluatePolicyRequest{}
-	if val, ok := env["PROTO_SERVICES_POLICY_EVALUATE_POLICY_REQUEST_REGO_SOURCE"]; ok && val != "" {
-		result.RegoSource = val
-	}
-	if val, ok := env["PROTO_SERVICES_POLICY_EVALUATE_POLICY_REQUEST_INPUT_JSON"]; ok && val != "" {
-		result.InputJson = val
-	}
-	if val, ok := env["PROTO_SERVICES_POLICY_EVALUATE_POLICY_REQUEST_QUERY"]; ok && val != "" {
-		result.Query = val
-	}
-	if val, ok := env["PROTO_SERVICES_POLICY_EVALUATE_POLICY_REQUEST_DATA_JSON"]; ok && val != "" {
-		result.DataJson = val
-	}
-	return result, nil
-}
-
-// EvaluatePolicyResponseToEnvVar converts EvaluatePolicyResponse to environment variable key-value pairs.
-func EvaluatePolicyResponseToEnvVar(v *EvaluatePolicyResponse) map[string]string {
-	if v == nil {
-		return nil
-	}
-	result := make(map[string]string)
-	result["PROTO_SERVICES_POLICY_EVALUATE_POLICY_RESPONSE_RESULT_JSON"] = v.ResultJson
-	result["PROTO_SERVICES_POLICY_EVALUATE_POLICY_RESPONSE_ALLOWED"] = strconv.FormatBool(v.Allowed)
-	if len(v.Errors) > 0 {
-		result["PROTO_SERVICES_POLICY_EVALUATE_POLICY_RESPONSE_ERRORS"] = strings.Join(v.Errors, ",")
-	}
-	return result
-}
-
-// EvaluatePolicyResponseFromEnvVar creates EvaluatePolicyResponse from environment variable key-value pairs.
-func EvaluatePolicyResponseFromEnvVar(env map[string]string) (*EvaluatePolicyResponse, error) {
-	result := &EvaluatePolicyResponse{}
-	if val, ok := env["PROTO_SERVICES_POLICY_EVALUATE_POLICY_RESPONSE_RESULT_JSON"]; ok && val != "" {
-		result.ResultJson = val
-	}
-	if val, ok := env["PROTO_SERVICES_POLICY_EVALUATE_POLICY_RESPONSE_ALLOWED"]; ok && val != "" {
-		parsed, err := strconv.ParseBool(val)
-		if err != nil {
-			return nil, err
-		}
-		result.Allowed = parsed
-	}
-	if val, ok := env["PROTO_SERVICES_POLICY_EVALUATE_POLICY_RESPONSE_ERRORS"]; ok && val != "" {
-		result.Errors = strings.Split(val, ",")
 	}
 	return result, nil
 }
@@ -1576,9 +1105,9 @@ func ValidateConfig(m *Config) error {
 	return nil
 }
 
-// ValidateServiceCatalogResponse validates all fields in ServiceCatalogResponse according to their annotations.
+// ValidateApiCatalogResponse validates all fields in ApiCatalogResponse according to their annotations.
 // Returns a BlueErr if validation fails, or nil if all validations pass.
-func ValidateServiceCatalogResponse(m *ServiceCatalogResponse) error {
+func ValidateApiCatalogResponse(m *ApiCatalogResponse) error {
 	if m == nil {
 		return nil
 	}
@@ -1587,9 +1116,9 @@ func ValidateServiceCatalogResponse(m *ServiceCatalogResponse) error {
 	return nil
 }
 
-// ValidateServiceCatalogEntry validates all fields in ServiceCatalogEntry according to their annotations.
+// ValidateApiCatalogEntry validates all fields in ApiCatalogEntry according to their annotations.
 // Returns a BlueErr if validation fails, or nil if all validations pass.
-func ValidateServiceCatalogEntry(m *ServiceCatalogEntry) error {
+func ValidateApiCatalogEntry(m *ApiCatalogEntry) error {
 	if m == nil {
 		return nil
 	}
@@ -1607,9 +1136,9 @@ func ValidateServiceCatalogEntry(m *ServiceCatalogEntry) error {
 	return nil
 }
 
-// ValidateGetMyEntitlementsRequest validates all fields in GetMyEntitlementsRequest according to their annotations.
+// ValidateGetEntitlementsRequest validates all fields in GetEntitlementsRequest according to their annotations.
 // Returns a BlueErr if validation fails, or nil if all validations pass.
-func ValidateGetMyEntitlementsRequest(m *GetMyEntitlementsRequest) error {
+func ValidateGetEntitlementsRequest(m *GetEntitlementsRequest) error {
 	if m == nil {
 		return nil
 	}
@@ -1627,9 +1156,9 @@ func ValidateGetMyEntitlementsRequest(m *GetMyEntitlementsRequest) error {
 	return nil
 }
 
-// ValidateMyEntitlementsResponse validates all fields in MyEntitlementsResponse according to their annotations.
+// ValidateGetEntitlementsResponse validates all fields in GetEntitlementsResponse according to their annotations.
 // Returns a BlueErr if validation fails, or nil if all validations pass.
-func ValidateMyEntitlementsResponse(m *MyEntitlementsResponse) error {
+func ValidateGetEntitlementsResponse(m *GetEntitlementsResponse) error {
 	if m == nil {
 		return nil
 	}
@@ -1653,111 +1182,6 @@ func ValidateServiceEntitlementInfo(m *ServiceEntitlementInfo) error {
 	return nil
 }
 
-// ValidateSimulateEntitlementsRequest validates all fields in SimulateEntitlementsRequest according to their annotations.
-// Returns a BlueErr if validation fails, or nil if all validations pass.
-func ValidateSimulateEntitlementsRequest(m *SimulateEntitlementsRequest) error {
-	if m == nil {
-		return nil
-	}
-
-	// Validate ClaimsJson (assert_max_length: 65536)
-	if len(m.ClaimsJson) > 65536 {
-		return protoerrors.NewErrMissingInvalidData(nil, "field ClaimsJson must be at most 65536 characters, got: %d", len(m.ClaimsJson))
-	}
-
-	// Validate ClaimsJson (assert_required)
-	if m.ClaimsJson == "" {
-		return protoerrors.NewErrMissingInvalidData(nil, "field ClaimsJson is required")
-	}
-
-	// Validate ClaimsJson (default max size: 32768 bytes)
-	if len(m.ClaimsJson) > 32768 {
-		return protoerrors.NewErrMissingInvalidData(nil, "field ClaimsJson exceeds max size of 32768 bytes, got: %d", len(m.ClaimsJson))
-	}
-
-	// Validate Principal (default max size: 32768 bytes)
-	if len(m.Principal) > 32768 {
-		return protoerrors.NewErrMissingInvalidData(nil, "field Principal exceeds max size of 32768 bytes, got: %d", len(m.Principal))
-	}
-
-	return nil
-}
-
-// ValidateEvaluatePolicyRequest validates all fields in EvaluatePolicyRequest according to their annotations.
-// Returns a BlueErr if validation fails, or nil if all validations pass.
-func ValidateEvaluatePolicyRequest(m *EvaluatePolicyRequest) error {
-	if m == nil {
-		return nil
-	}
-
-	// Validate RegoSource (assert_required)
-	if m.RegoSource == "" {
-		return protoerrors.NewErrMissingInvalidData(nil, "field RegoSource is required")
-	}
-
-	// Validate RegoSource (assert_max_length: 65536)
-	if len(m.RegoSource) > 65536 {
-		return protoerrors.NewErrMissingInvalidData(nil, "field RegoSource must be at most 65536 characters, got: %d", len(m.RegoSource))
-	}
-
-	// Validate InputJson (assert_required)
-	if m.InputJson == "" {
-		return protoerrors.NewErrMissingInvalidData(nil, "field InputJson is required")
-	}
-
-	// Validate InputJson (assert_max_length: 65536)
-	if len(m.InputJson) > 65536 {
-		return protoerrors.NewErrMissingInvalidData(nil, "field InputJson must be at most 65536 characters, got: %d", len(m.InputJson))
-	}
-
-	// Validate Query (assert_max_length: 1024)
-	if len(m.Query) > 1024 {
-		return protoerrors.NewErrMissingInvalidData(nil, "field Query must be at most 1024 characters, got: %d", len(m.Query))
-	}
-
-	// Validate DataJson (assert_max_length: 65536)
-	if len(m.DataJson) > 65536 {
-		return protoerrors.NewErrMissingInvalidData(nil, "field DataJson must be at most 65536 characters, got: %d", len(m.DataJson))
-	}
-
-	// Validate RegoSource (default max size: 32768 bytes)
-	if len(m.RegoSource) > 32768 {
-		return protoerrors.NewErrMissingInvalidData(nil, "field RegoSource exceeds max size of 32768 bytes, got: %d", len(m.RegoSource))
-	}
-
-	// Validate InputJson (default max size: 32768 bytes)
-	if len(m.InputJson) > 32768 {
-		return protoerrors.NewErrMissingInvalidData(nil, "field InputJson exceeds max size of 32768 bytes, got: %d", len(m.InputJson))
-	}
-
-	// Validate Query (default max size: 32768 bytes)
-	if len(m.Query) > 32768 {
-		return protoerrors.NewErrMissingInvalidData(nil, "field Query exceeds max size of 32768 bytes, got: %d", len(m.Query))
-	}
-
-	// Validate DataJson (default max size: 32768 bytes)
-	if len(m.DataJson) > 32768 {
-		return protoerrors.NewErrMissingInvalidData(nil, "field DataJson exceeds max size of 32768 bytes, got: %d", len(m.DataJson))
-	}
-
-	return nil
-}
-
-// ValidateEvaluatePolicyResponse validates all fields in EvaluatePolicyResponse according to their annotations.
-// Returns a BlueErr if validation fails, or nil if all validations pass.
-func ValidateEvaluatePolicyResponse(m *EvaluatePolicyResponse) error {
-	if m == nil {
-		return nil
-	}
-
-	// Validate ResultJson (default max size: 32768 bytes)
-	if len(m.ResultJson) > 32768 {
-		return protoerrors.NewErrMissingInvalidData(nil, "field ResultJson exceeds max size of 32768 bytes, got: %d", len(m.ResultJson))
-	}
-
-	return nil
-}
-
 // ValidateGetPoliciesResponse validates all fields in GetPoliciesResponse according to their annotations.
 // Returns a BlueErr if validation fails, or nil if all validations pass.
 func ValidateGetPoliciesResponse(m *GetPoliciesResponse) error {
@@ -1773,33 +1197,26 @@ func ValidateGetPoliciesResponse(m *GetPoliciesResponse) error {
 // Capacity Constants (for utilization monitoring)
 // ============================================================
 const (
-	MaxSizeServicecatalogentryServiceName        int = 32768
-	MaxSizeGetmyentitlementsrequestAccessToken   int = 32768
-	MaxSizeServiceentitlementinfoServiceName     int = 32768
-	MaxSizeSimulateentitlementsrequestClaimsJson int = 32768
-	MaxSizeSimulateentitlementsrequestPrincipal  int = 32768
-	MaxSizeEvaluatepolicyrequestRegoSource       int = 32768
-	MaxSizeEvaluatepolicyrequestInputJson        int = 32768
-	MaxSizeEvaluatepolicyrequestQuery            int = 32768
-	MaxSizeEvaluatepolicyrequestDataJson         int = 32768
-	MaxSizeEvaluatepolicyresponseResultJson      int = 32768
+	MaxSizeApicatalogentryServiceName        int = 32768
+	MaxSizeGetentitlementsrequestAccessToken int = 32768
+	MaxSizeServiceentitlementinfoServiceName int = 32768
 )
 
 // ============================================================
-// Merge: ServiceCatalogResponse
+// Merge: ApiCatalogResponse
 // ============================================================
-// MergeServiceCatalogResponse fills zero-valued fields in dst from src.
-func MergeServiceCatalogResponse(dst, src *ServiceCatalogResponse) {
+// MergeApiCatalogResponse fills zero-valued fields in dst from src.
+func MergeApiCatalogResponse(dst, src *ApiCatalogResponse) {
 	if len(dst.Services) == 0 {
 		dst.Services = src.Services
 	}
 }
 
 // ============================================================
-// Merge: ServiceCatalogEntry
+// Merge: ApiCatalogEntry
 // ============================================================
-// MergeServiceCatalogEntry fills zero-valued fields in dst from src.
-func MergeServiceCatalogEntry(dst, src *ServiceCatalogEntry) {
+// MergeApiCatalogEntry fills zero-valued fields in dst from src.
+func MergeApiCatalogEntry(dst, src *ApiCatalogEntry) {
 	if dst.ServiceName == "" {
 		dst.ServiceName = src.ServiceName
 	}
@@ -1809,20 +1226,23 @@ func MergeServiceCatalogEntry(dst, src *ServiceCatalogEntry) {
 }
 
 // ============================================================
-// Merge: GetMyEntitlementsRequest
+// Merge: GetEntitlementsRequest
 // ============================================================
-// MergeGetMyEntitlementsRequest fills zero-valued fields in dst from src.
-func MergeGetMyEntitlementsRequest(dst, src *GetMyEntitlementsRequest) {
+// MergeGetEntitlementsRequest fills zero-valued fields in dst from src.
+func MergeGetEntitlementsRequest(dst, src *GetEntitlementsRequest) {
 	if dst.AccessToken == "" {
 		dst.AccessToken = src.AccessToken
 	}
 }
 
 // ============================================================
-// Merge: MyEntitlementsResponse
+// Merge: GetEntitlementsResponse
 // ============================================================
-// MergeMyEntitlementsResponse fills zero-valued fields in dst from src.
-func MergeMyEntitlementsResponse(dst, src *MyEntitlementsResponse) {
+// MergeGetEntitlementsResponse fills zero-valued fields in dst from src.
+func MergeGetEntitlementsResponse(dst, src *GetEntitlementsResponse) {
+	if len(dst.Profiles) == 0 {
+		dst.Profiles = src.Profiles
+	}
 	if len(dst.Entitlements) == 0 {
 		dst.Entitlements = src.Entitlements
 	}
@@ -1838,57 +1258,6 @@ func MergeServiceEntitlementInfo(dst, src *ServiceEntitlementInfo) {
 	}
 	if len(dst.Rpcs) == 0 {
 		dst.Rpcs = src.Rpcs
-	}
-	if dst.TotalRpcs == 0 {
-		dst.TotalRpcs = src.TotalRpcs
-	}
-}
-
-// ============================================================
-// Merge: SimulateEntitlementsRequest
-// ============================================================
-// MergeSimulateEntitlementsRequest fills zero-valued fields in dst from src.
-func MergeSimulateEntitlementsRequest(dst, src *SimulateEntitlementsRequest) {
-	if dst.ClaimsJson == "" {
-		dst.ClaimsJson = src.ClaimsJson
-	}
-	if dst.Principal == "" {
-		dst.Principal = src.Principal
-	}
-}
-
-// ============================================================
-// Merge: EvaluatePolicyRequest
-// ============================================================
-// MergeEvaluatePolicyRequest fills zero-valued fields in dst from src.
-func MergeEvaluatePolicyRequest(dst, src *EvaluatePolicyRequest) {
-	if dst.RegoSource == "" {
-		dst.RegoSource = src.RegoSource
-	}
-	if dst.InputJson == "" {
-		dst.InputJson = src.InputJson
-	}
-	if dst.Query == "" {
-		dst.Query = src.Query
-	}
-	if dst.DataJson == "" {
-		dst.DataJson = src.DataJson
-	}
-}
-
-// ============================================================
-// Merge: EvaluatePolicyResponse
-// ============================================================
-// MergeEvaluatePolicyResponse fills zero-valued fields in dst from src.
-func MergeEvaluatePolicyResponse(dst, src *EvaluatePolicyResponse) {
-	if dst.ResultJson == "" {
-		dst.ResultJson = src.ResultJson
-	}
-	if !dst.Allowed {
-		dst.Allowed = src.Allowed
-	}
-	if len(dst.Errors) == 0 {
-		dst.Errors = src.Errors
 	}
 }
 

@@ -733,33 +733,33 @@ const file_libs_jwk_proto_rawDesc = "" +
 	"\x01y\x18\t \x01(\tB\x04\x80\xa7\x1d\x01R\x01y\x12\x10\n" +
 	"\x03exp\x18\n" +
 	" \x01(\x03R\x03exp\x12*\n" +
-	"\acreated\x18\v \x01(\x03B\x10\xb0\xa7\x1d\x80\x8bһ\x06\xc0\xa7\x1d\x80\x86\xc1\xfc\x1dR\acreated\"$\n" +
-	"\x04Jwks\x12\x1c\n" +
-	"\x04keys\x18\x01 \x03(\v2\b.jwk.JwkR\x04keys\"\xea\x12\n" +
+	"\acreated\x18\v \x01(\x03B\x10\xb0\xa7\x1d\x80\x8bһ\x06\xc0\xa7\x1d\x80\x86\xc1\xfc\x1dR\acreated\"+\n" +
+	"\x04Jwks\x12#\n" +
+	"\x04keys\x18\x01 \x03(\v2\b.jwk.JwkB\x05\xc0\xa8\x1d\x80\x01R\x04keys\"\xbf\x13\n" +
 	"\x13OpenIdConfiguration\x12 \n" +
 	"\x06issuer\x18\x01 \x01(\tB\b\x88\xa6\x1d\x01\xa8\xa6\x1d\x02R\x06issuer\x12;\n" +
 	"\x16authorization_endpoint\x18\x02 \x01(\tB\x04\xa8\xa6\x1d\x02R\x15authorizationEndpoint\x12+\n" +
 	"\x0etoken_endpoint\x18\x03 \x01(\tB\x04\xa8\xa6\x1d\x02R\rtokenEndpoint\x121\n" +
 	"\x11userinfo_endpoint\x18\x04 \x01(\tB\x04\xa8\xa6\x1d\x02R\x10userinfoEndpoint\x129\n" +
 	"\x15registration_endpoint\x18\x05 \x01(\tB\x04\xa8\xa6\x1d\x02R\x14registrationEndpoint\x12#\n" +
-	"\bjwks_uri\x18\x06 \x01(\tB\b\x88\xa6\x1d\x01\xa8\xa6\x1d\x02R\ajwksUri\x128\n" +
-	"\x18response_types_supported\x18\a \x03(\tR\x16responseTypesSupported\x128\n" +
-	"\x18response_modes_supported\x18\b \x03(\tR\x16responseModesSupported\x122\n" +
-	"\x15grant_types_supported\x18\t \x03(\tR\x13grantTypesSupported\x126\n" +
+	"\bjwks_uri\x18\x06 \x01(\tB\b\x88\xa6\x1d\x01\xa8\xa6\x1d\x02R\ajwksUri\x12>\n" +
+	"\x18response_types_supported\x18\a \x03(\tB\x04\xc0\xa8\x1d R\x16responseTypesSupported\x12>\n" +
+	"\x18response_modes_supported\x18\b \x03(\tB\x04\xc0\xa8\x1d R\x16responseModesSupported\x128\n" +
+	"\x15grant_types_supported\x18\t \x03(\tB\x04\xc0\xa8\x1d R\x13grantTypesSupported\x12<\n" +
 	"\x17subject_types_supported\x18\n" +
-	" \x03(\tR\x15subjectTypesSupported\x12O\n" +
-	"%id_token_signing_alg_values_supported\x18\v \x03(\tR idTokenSigningAlgValuesSupported\x12)\n" +
-	"\x10scopes_supported\x18\f \x03(\tR\x0fscopesSupported\x12P\n" +
-	"%token_endpoint_auth_methods_supported\x18\r \x03(\tR!tokenEndpointAuthMethodsSupported\x12)\n" +
-	"\x10claims_supported\x18\x0e \x03(\tR\x0fclaimsSupported\x12G\n" +
-	" code_challenge_methods_supported\x18\x0f \x03(\tR\x1dcodeChallengeMethodsSupported\x12;\n" +
-	"\x16introspection_endpoint\x18\x10 \x01(\tB\x04\xa8\xa6\x1d\x02R\x15introspectionEndpoint\x12`\n" +
-	"-introspection_endpoint_auth_methods_supported\x18\x11 \x03(\tR)introspectionEndpointAuthMethodsSupported\x125\n" +
-	"\x13revocation_endpoint\x18\x12 \x01(\tB\x04\xa8\xa6\x1d\x02R\x12revocationEndpoint\x12Z\n" +
-	"*revocation_endpoint_auth_methods_supported\x18\x13 \x03(\tR&revocationEndpointAuthMethodsSupported\x126\n" +
+	" \x03(\tB\x04\xc0\xa8\x1d R\x15subjectTypesSupported\x12U\n" +
+	"%id_token_signing_alg_values_supported\x18\v \x03(\tB\x04\xc0\xa8\x1d R idTokenSigningAlgValuesSupported\x12/\n" +
+	"\x10scopes_supported\x18\f \x03(\tB\x04\xc0\xa8\x1d@R\x0fscopesSupported\x12V\n" +
+	"%token_endpoint_auth_methods_supported\x18\r \x03(\tB\x04\xc0\xa8\x1d R!tokenEndpointAuthMethodsSupported\x120\n" +
+	"\x10claims_supported\x18\x0e \x03(\tB\x05\xc0\xa8\x1d\x80\x01R\x0fclaimsSupported\x12M\n" +
+	" code_challenge_methods_supported\x18\x0f \x03(\tB\x04\xc0\xa8\x1d\x10R\x1dcodeChallengeMethodsSupported\x12;\n" +
+	"\x16introspection_endpoint\x18\x10 \x01(\tB\x04\xa8\xa6\x1d\x02R\x15introspectionEndpoint\x12f\n" +
+	"-introspection_endpoint_auth_methods_supported\x18\x11 \x03(\tB\x04\xc0\xa8\x1d R)introspectionEndpointAuthMethodsSupported\x125\n" +
+	"\x13revocation_endpoint\x18\x12 \x01(\tB\x04\xa8\xa6\x1d\x02R\x12revocationEndpoint\x12`\n" +
+	"*revocation_endpoint_auth_methods_supported\x18\x13 \x03(\tB\x04\xc0\xa8\x1d R&revocationEndpointAuthMethodsSupported\x126\n" +
 	"\x14end_session_endpoint\x18\x14 \x01(\tB\x04\xa8\xa6\x1d\x02R\x12endSessionEndpoint\x12>\n" +
-	"\x1brequest_parameter_supported\x18\x15 \x01(\bR\x19requestParameterSupported\x12[\n" +
-	"+request_object_signing_alg_values_supported\x18\x16 \x03(\tR&requestObjectSigningAlgValuesSupported\x12A\n" +
+	"\x1brequest_parameter_supported\x18\x15 \x01(\bR\x19requestParameterSupported\x12a\n" +
+	"+request_object_signing_alg_values_supported\x18\x16 \x03(\tB\x04\xc0\xa8\x1d R&requestObjectSigningAlgValuesSupported\x12A\n" +
 	"\x1dmicrosoft_multi_refresh_token\x18\x17 \x01(\bR\x1amicrosoftMultiRefreshToken\x12H\n" +
 	"\x1ddevice_authorization_endpoint\x18\x18 \x01(\tB\x04\xa8\xa6\x1d\x02R\x1bdeviceAuthorizationEndpoint\x122\n" +
 	"\x15http_logout_supported\x18\x19 \x01(\bR\x13httpLogoutSupported\x12B\n" +
@@ -772,11 +772,11 @@ const file_libs_jwk_proto_rawDesc = "" +
 	"\fmsgraph_host\x18  \x01(\tR\vmsgraphHost\x12\x1f\n" +
 	"\brbac_url\x18! \x01(\tB\x04\xa8\xa6\x1d\x02R\arbacUrl\x12:\n" +
 	"\x16mfa_challenge_endpoint\x18\" \x01(\tB\x04\xa8\xa6\x1d\x02R\x14mfaChallengeEndpoint\x12E\n" +
-	"\x1frequest_uri_parameter_supported\x18# \x01(\bR\x1crequestUriParameterSupported\x12d\n" +
-	"0token_endpoint_auth_signing_alg_values_supported\x18$ \x03(\tR*tokenEndpointAuthSigningAlgValuesSupported\x12@\n" +
+	"\x1frequest_uri_parameter_supported\x18# \x01(\bR\x1crequestUriParameterSupported\x12j\n" +
+	"0token_endpoint_auth_signing_alg_values_supported\x18$ \x03(\tB\x04\xc0\xa8\x1d R*tokenEndpointAuthSigningAlgValuesSupported\x12@\n" +
 	"\x1cbackchannel_logout_supported\x18% \x01(\bR\x1abackchannelLogoutSupported\x12O\n" +
-	"$backchannel_logout_session_supported\x18& \x01(\bR!backchannelLogoutSessionSupported\x12H\n" +
-	"!dpop_signing_alg_values_supported\x18' \x03(\tR\x1ddpopSigningAlgValuesSupported\"9\n" +
+	"$backchannel_logout_session_supported\x18& \x01(\bR!backchannelLogoutSessionSupported\x12N\n" +
+	"!dpop_signing_alg_values_supported\x18' \x03(\tB\x04\xc0\xa8\x1d R\x1ddpopSigningAlgValuesSupported\"9\n" +
 	"\bCredPair\x12-\n" +
 	"\n" +
 	"public_key\x18\x01 \x01(\v2\b.jwk.JwkB\x04\x88\xa6\x1d\x01R\tpublicKey*f\n" +

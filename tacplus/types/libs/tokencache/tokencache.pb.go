@@ -14,6 +14,7 @@
 package tokencache
 
 import (
+	_ "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/spec"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -114,12 +115,12 @@ var File_libs_tokencache_proto protoreflect.FileDescriptor
 const file_libs_tokencache_proto_rawDesc = "" +
 	"\n" +
 	"\x15libs/tokencache.proto\x12\n" +
-	"tokencache\"\xc8\x01\n" +
+	"tokencache\x1a\x0flibs/spec.proto\"\xda\x01\n" +
 	"\x06Config\x12%\n" +
-	"\x0edynamic_lookup\x18\x01 \x01(\bR\rdynamicLookup\x12)\n" +
-	"\x10lifetime_seconds\x18\x02 \x01(\x03R\x0flifetimeSeconds\x122\n" +
-	"\x15expire_unused_seconds\x18\x03 \x01(\x03R\x13expireUnusedSeconds\x128\n" +
-	"\x18refresh_interval_seconds\x18\x04 \x01(\x03R\x16refreshIntervalSecondsB[ZYgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/tokencacheb\x06proto3"
+	"\x0edynamic_lookup\x18\x01 \x01(\bR\rdynamicLookup\x12/\n" +
+	"\x10lifetime_seconds\x18\x02 \x01(\x03B\x04\xc0\xa6\x1d\x01R\x0flifetimeSeconds\x128\n" +
+	"\x15expire_unused_seconds\x18\x03 \x01(\x03B\x04\xc0\xa6\x1d\x01R\x13expireUnusedSeconds\x12>\n" +
+	"\x18refresh_interval_seconds\x18\x04 \x01(\x03B\x04\xc0\xa6\x1d\x01R\x16refreshIntervalSecondsB[ZYgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/tokencacheb\x06proto3"
 
 var (
 	file_libs_tokencache_proto_rawDescOnce sync.Once

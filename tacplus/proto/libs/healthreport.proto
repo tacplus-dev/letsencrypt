@@ -1,5 +1,10 @@
 // Copyright (c) 2024 Second Star Cavalier, LLC.
 
+// Package healthreport defines the ServiceInstanceHealth model published by
+// each running service instance. Fleetwood aggregates these reports to build
+// a real-time fleet dashboard showing health, load, and reachability across
+// all deployed instances.
+
 syntax = "proto3";
 package healthreport;
 option go_package = "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/healthreport";

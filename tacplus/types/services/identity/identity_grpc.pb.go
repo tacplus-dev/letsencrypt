@@ -57,7 +57,8 @@ type IdentityServiceClient interface {
 	RefreshToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*RefreshTokenResponse, error)
 	// ExchangeToken exchanges a generic access token for a service-specific
 	// access token with entitlements. The entitlements are determined by evaluating
-	// the entitlements_policy (OPA) or falling back to static config mappings.
+	// the entitlements_policy (OPA) to get profile names, then resolving those
+	// profiles to concrete entitlements via identity_profiles config.
 	ExchangeToken(ctx context.Context, in *ExchangeTokenRequest, opts ...grpc.CallOption) (*ExchangeTokenResponse, error)
 	// Logout invalidates the session and optionally redirects to the IDP logout.
 	Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error)
@@ -152,7 +153,8 @@ type IdentityServiceServer interface {
 	RefreshToken(context.Context, *RefreshTokenRequest) (*RefreshTokenResponse, error)
 	// ExchangeToken exchanges a generic access token for a service-specific
 	// access token with entitlements. The entitlements are determined by evaluating
-	// the entitlements_policy (OPA) or falling back to static config mappings.
+	// the entitlements_policy (OPA) to get profile names, then resolving those
+	// profiles to concrete entitlements via identity_profiles config.
 	ExchangeToken(context.Context, *ExchangeTokenRequest) (*ExchangeTokenResponse, error)
 	// Logout invalidates the session and optionally redirects to the IDP logout.
 	Logout(context.Context, *LogoutRequest) (*LogoutResponse, error)

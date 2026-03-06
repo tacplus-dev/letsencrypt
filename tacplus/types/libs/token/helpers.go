@@ -1538,10 +1538,40 @@ func ValidateExchange(m *Exchange) error {
 		return nil
 	}
 
+	// Validate Error (assert_max_length: 128)
+	if len(m.Error) > 128 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Error must be at most 128 characters, got: %d", len(m.Error))
+	}
+
+	// Validate ErrorDescription (assert_max_length: 4096)
+	if len(m.ErrorDescription) > 4096 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field ErrorDescription must be at most 4096 characters, got: %d", len(m.ErrorDescription))
+	}
+
+	// Validate AccessToken (assert_max_size: 16384 bytes)
+	if len(m.AccessToken) > 16384 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field AccessToken exceeds max size of 16384 bytes, got: %d", len(m.AccessToken))
+	}
+
+	// Validate TokenType (assert_max_length: 32)
+	if len(m.TokenType) > 32 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field TokenType must be at most 32 characters, got: %d", len(m.TokenType))
+	}
+
 	// Validate ExpiresIn (assert_gt: 0)
 	if m.ExpiresIn <= 0 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field ExpiresIn must be > 0, got: %v", m.ExpiresIn)
 	}
+	// Validate Scope (assert_max_length: 4096)
+	if len(m.Scope) > 4096 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Scope must be at most 4096 characters, got: %d", len(m.Scope))
+	}
+
+	// Validate IdToken (assert_max_size: 16384 bytes)
+	if len(m.IdToken) > 16384 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field IdToken exceeds max size of 16384 bytes, got: %d", len(m.IdToken))
+	}
+
 	// Validate Error (default max size: 32768 bytes)
 	if len(m.Error) > 32768 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Error exceeds max size of 32768 bytes, got: %d", len(m.Error))
@@ -1552,11 +1582,6 @@ func ValidateExchange(m *Exchange) error {
 		return protoerrors.NewErrMissingInvalidData(nil, "field ErrorDescription exceeds max size of 32768 bytes, got: %d", len(m.ErrorDescription))
 	}
 
-	// Validate AccessToken (default max size: 32768 bytes)
-	if len(m.AccessToken) > 32768 {
-		return protoerrors.NewErrMissingInvalidData(nil, "field AccessToken exceeds max size of 32768 bytes, got: %d", len(m.AccessToken))
-	}
-
 	// Validate TokenType (default max size: 32768 bytes)
 	if len(m.TokenType) > 32768 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field TokenType exceeds max size of 32768 bytes, got: %d", len(m.TokenType))
@@ -1565,11 +1590,6 @@ func ValidateExchange(m *Exchange) error {
 	// Validate Scope (default max size: 32768 bytes)
 	if len(m.Scope) > 32768 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Scope exceeds max size of 32768 bytes, got: %d", len(m.Scope))
-	}
-
-	// Validate IdToken (default max size: 32768 bytes)
-	if len(m.IdToken) > 32768 {
-		return protoerrors.NewErrMissingInvalidData(nil, "field IdToken exceeds max size of 32768 bytes, got: %d", len(m.IdToken))
 	}
 
 	return nil
@@ -1593,6 +1613,16 @@ func ValidateTokenRequestParams(m *TokenRequestParams) error {
 			return protoerrors.NewErrMissingInvalidData(nil, "field Exp must be > 0, got: %v", *m.Exp)
 		}
 	}
+	// Validate IncludeClaims (assert_max_items: 64)
+	if len(m.IncludeClaims) > 64 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field IncludeClaims exceeds max items of 64, got: %d", len(m.IncludeClaims))
+	}
+
+	// Validate ExcludeClaims (assert_max_items: 64)
+	if len(m.ExcludeClaims) > 64 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field ExcludeClaims exceeds max items of 64, got: %d", len(m.ExcludeClaims))
+	}
+
 	// Validate ClientId (default max size: 32768 bytes)
 	if m.ClientId != nil && len(*m.ClientId) > 32768 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field ClientId exceeds max size of 32768 bytes, got: %d", len(*m.ClientId))
@@ -1644,13 +1674,15 @@ const (
 	MaxSizeTokenBase64                         int = 32768
 	MaxSizeExchangeError                       int = 32768
 	MaxSizeExchangeErrorDescription            int = 32768
-	MaxSizeExchangeAccessToken                 int = 32768
+	MaxSizeExchangeAccessToken                 int = 16384
 	MaxSizeExchangeTokenType                   int = 32768
 	MaxSizeExchangeScope                       int = 32768
-	MaxSizeExchangeIdToken                     int = 32768
+	MaxSizeExchangeIdToken                     int = 16384
 	MaxSizeTokenrequestparamsClientId          int = 32768
 	MaxSizeTokenrequestparamsRequestedClientId int = 32768
 	MaxSizeTokenrequestparamsAud               int = 32768
+	MaxItemsTokenrequestparamsIncludeClaims    int = 64
+	MaxItemsTokenrequestparamsExcludeClaims    int = 64
 	MaxSizeTokenrequestparamsStoreCode         int = 32768
 	MaxSizeTokenrequestparamsCode              int = 32768
 	MaxSizeTokenrequestparamsState             int = 32768

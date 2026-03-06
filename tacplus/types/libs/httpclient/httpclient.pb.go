@@ -312,12 +312,12 @@ var File_libs_httpclient_proto protoreflect.FileDescriptor
 const file_libs_httpclient_proto_rawDesc = "" +
 	"\n" +
 	"\x15libs/httpclient.proto\x12\n" +
-	"httpclient\x1a\x0flibs/x509.proto\x1a\x0flibs/spec.proto\"\xfe\x05\n" +
+	"httpclient\x1a\x0flibs/x509.proto\x1a\x0flibs/spec.proto\"\x84\x06\n" +
 	"\x10HttpClientConfig\x120\n" +
 	"\x14insecure_skip_verify\x18\x01 \x01(\bR\x12insecureSkipVerify\x12.\n" +
-	"\x13disable_keep_alives\x18\x02 \x01(\bR\x11disableKeepAlives\x12-\n" +
+	"\x13disable_keep_alives\x18\x02 \x01(\bR\x11disableKeepAlives\x123\n" +
 	"\n" +
-	"root_certs\x18\x03 \x03(\v2\x0e.x509.X509CertR\trootCerts\x123\n" +
+	"root_certs\x18\x03 \x03(\v2\x0e.x509.X509CertB\x04\xc0\xa8\x1d R\trootCerts\x123\n" +
 	"\vclient_cert\x18\x04 \x01(\v2\x12.x509.X509CertPairR\n" +
 	"clientCert\x12-\n" +
 	"\x0ftimeout_seconds\x18\x05 \x01(\x03B\x04\xc0\xa6\x1d\x02R\x0etimeoutSeconds\x12*\n" +
@@ -329,14 +329,15 @@ const file_libs_httpclient_proto_rawDesc = "" +
 	" \x01(\x03B\x04\xc0\xa6\x1d\x02R\x1cexpectContinueTimeoutSeconds\x12K\n" +
 	"\x1fresponse_header_timeout_seconds\x18\v \x01(\x03B\x04\xc0\xa6\x1d\x02R\x1cresponseHeaderTimeoutSeconds\x12:\n" +
 	"\fretry_config\x18\f \x01(\v2\x17.httpclient.RetryConfigR\vretryConfig\x12-\n" +
-	"\x12disable_validation\x18\r \x01(\bR\x11disableValidation\"\xff\x01\n" +
-	"\vRetryConfig\x12%\n" +
-	"\vmax_retries\x18\x01 \x01(\x05B\x04\xb0\xa7\x1d\x00R\n" +
+	"\x12disable_validation\x18\r \x01(\bR\x11disableValidation\"\x89\x02\n" +
+	"\vRetryConfig\x12)\n" +
+	"\vmax_retries\x18\x01 \x01(\x05B\b\xb0\xa7\x1d\x00\xc0\xa7\x1d\n" +
+	"R\n" +
 	"maxRetries\x122\n" +
 	"\x12initial_backoff_ms\x18\x02 \x01(\x03B\x04\xc0\xa6\x1d\x01R\x10initialBackoffMs\x12*\n" +
 	"\x0emax_backoff_ms\x18\x03 \x01(\x03B\x04\xc0\xa6\x1d\x01R\fmaxBackoffMs\x123\n" +
-	"\x12backoff_multiplier\x18\x04 \x01(\x01B\x04\xa8\xa7\x1d\x00R\x11backoffMultiplier\x124\n" +
-	"\x16retryable_status_codes\x18\x05 \x03(\x05R\x14retryableStatusCodesB[ZYgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/httpclientb\x06proto3"
+	"\x12backoff_multiplier\x18\x04 \x01(\x01B\x04\xa8\xa7\x1d\x00R\x11backoffMultiplier\x12:\n" +
+	"\x16retryable_status_codes\x18\x05 \x03(\x05B\x04\xc0\xa8\x1d R\x14retryableStatusCodesB[ZYgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/httpclientb\x06proto3"
 
 var (
 	file_libs_httpclient_proto_rawDescOnce sync.Once

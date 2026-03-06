@@ -149,6 +149,21 @@ func ValidateAssertListenAddr(addr string) error {
 	return nil
 }
 
+// ParseListenAddr parses a "host:port" string into its host and port components.
+// Handles IPv6 addresses in bracket notation (e.g. "[::1]:8080").
+// Returns an error if the address is not in valid host:port format or the port is out of range.
+func ParseListenAddr(addr string) (host string, port int, err error) {
+	h, portStr, splitErr := net.SplitHostPort(addr)
+	if splitErr != nil {
+		return "", 0, protoerrors.NewErrMissingInvalidData(splitErr, "invalid host:port format: %s", addr)
+	}
+	p := 0
+	if _, scanErr := fmt.Sscanf(portStr, "%d", &p); scanErr != nil || p < 0 || p > 65535 {
+		return "", 0, protoerrors.NewErrMissingInvalidData(nil, "invalid port: must be 0-65535, got: %s", portStr)
+	}
+	return h, p, nil
+}
+
 // ValidateAssertBase64 validates that a string is valid base64 encoding.
 // Corresponds to the (consts.assert_base64) annotation.
 func ValidateAssertBase64(s string) error {

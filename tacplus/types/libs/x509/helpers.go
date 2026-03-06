@@ -1157,6 +1157,11 @@ func ValidateX509CertRequest(m *X509CertRequest) error {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Exp must be positive (> 0), got: %d", m.Exp)
 	}
 
+	// Validate ExtKeyUsage (assert_max_items: 16)
+	if len(m.ExtKeyUsage) > 16 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field ExtKeyUsage exceeds max items of 16, got: %d", len(m.ExtKeyUsage))
+	}
+
 	// Validate Issuer (assert_min_length: 1)
 	if len(m.Issuer) < 1 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Issuer must be at least 1 characters, got: %d", len(m.Issuer))
@@ -1179,9 +1184,10 @@ func ValidateX509CertRequest(m *X509CertRequest) error {
 // Capacity Constants (for utilization monitoring)
 // ============================================================
 const (
-	MaxSizeX509certId            int = 32768
-	MaxSizeX509certBase64        int = 32768
-	MaxSizeX509certrequestIssuer int = 32768
+	MaxSizeX509certId                  int = 32768
+	MaxSizeX509certBase64              int = 32768
+	MaxItemsX509certrequestExtKeyUsage int = 16
+	MaxSizeX509certrequestIssuer       int = 32768
 )
 
 // ============================================================

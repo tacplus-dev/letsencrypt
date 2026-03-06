@@ -1,15 +1,16 @@
 {
-  "binary_hash": "30df610691969127460444c77cb5422a4c5077cbd7cb662bc8ac54dbdd8a61d9",
+  "binary_hash": "0b7a449cabdf0000dd73f9e03d23b445b021a7727884203f95473625d96b3a7e",
   "config_hash": "44bb74cc7ceaef5e4d529ce78469deefe5ff7dfc4d75b9e3c0fcc37276f03e6c",
-  "structure_hash": "13763a4e7590a5409a91f6e4b8f16ee9b350f4a6a42505004053caaf52256cbb",
+  "structure_hash": "599ca86daad4ae88ebe4fde60137e487b32f66a48087d1f767647adbea841e81",
   "files": {
     "dependencies.yaml": "b1e3b41802693b989403f5da77d07c50392cbeb70718fbb6341421ffc1ac2442",
     "services/gateway.proto": "ed2598f1c82c856c1df5c9fbb7e1cbb285075d397b4dbf7c2e919b75285fa608",
-    "services/identity.proto": "59b4d7ad9c307135e47507d2527d368bb85652ba8d45e20320df05d53f9ffbea",
-    "services/kernel.proto": "329a24b373e5cecad7f19be8271febf197418bc173f693c3aefbca288bb2e2f2",
+    "services/identity.proto": "daad9a4fa7efbe1a86e4a0a106990a0ca64cc307a1b5fd7d8c99e3c94b929215",
+    "services/kernel.proto": "049e69b874c7ebbfec93fd6909a98d3bc993103427890e79984203fa4b35d019",
     "services/letsencrypt.proto": "a22e104aabe98907b6ea992efa645dfac847b5e2ddd19610480e1d95b88c3aad",
     "services/orchestrator.proto": "6e4c719e915ebed7e6ca9e0105ee9ab484038df2c9b8c65879880e3f8efb5405",
-    "services/policy.proto": "0375f1556cbf8d160143201a287683f8cc7b7878d49e17246c0578d2f7c24b3d",
+    "services/policy.proto": "c0b0e603b28e07f0e8851eba3bf1bb553fe4a87f2a5557d6f7cefd1d8e16eafe",
+    "services/policysim.proto": "0705d802af1f62effe1370b45a2518ff9a3373a34a60c95cc6c1a0d715644c78",
     "services/sentinel.proto": "43c282cac33311112a92e77eaea5878082b3ca7117f472e09e7644b65d70117b",
     "services/snoopy.proto": "3ad109bdcf347d242779c738e937136ab095acf86d05a910307d56c6a84e25b9",
     "services/woodstock.proto": "07da50aa11dcb6531f46b0a6bc343cc766647b52c6f42dae5b21f304262f42db"
