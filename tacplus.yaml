@@ -1,6 +1,4 @@
 language: go
-src: /Users/jody/workspace/services/proto
-tag: latest
 pkg: gitlab.com/secondstarcavalier/controlplane/services/letsencrypt
 backends:
   - services/letsencrypt.LetsEncryptState:rw
