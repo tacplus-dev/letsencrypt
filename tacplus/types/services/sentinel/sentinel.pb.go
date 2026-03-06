@@ -3617,6 +3617,52 @@ func (x *AdminMutationRate) GetTimestampMs() int64 {
 	return 0
 }
 
+// SentinelConfigState is the backend state boundary for sentinel service configuration.
+// Auto-injected by tacplus from (spec.frontend_config) annotation.
+type SentinelConfigState struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Config        *Config                `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SentinelConfigState) Reset() {
+	*x = SentinelConfigState{}
+	mi := &file_services_sentinel_proto_msgTypes[36]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SentinelConfigState) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SentinelConfigState) ProtoMessage() {}
+
+func (x *SentinelConfigState) ProtoReflect() protoreflect.Message {
+	mi := &file_services_sentinel_proto_msgTypes[36]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SentinelConfigState.ProtoReflect.Descriptor instead.
+func (*SentinelConfigState) Descriptor() ([]byte, []int) {
+	return file_services_sentinel_proto_rawDescGZIP(), []int{36}
+}
+
+func (x *SentinelConfigState) GetConfig() *Config {
+	if x != nil {
+		return x.Config
+	}
+	return nil
+}
+
 type MapEmpty struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -3625,7 +3671,7 @@ type MapEmpty struct {
 
 func (x *MapEmpty) Reset() {
 	*x = MapEmpty{}
-	mi := &file_services_sentinel_proto_msgTypes[36]
+	mi := &file_services_sentinel_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3637,7 +3683,7 @@ func (x *MapEmpty) String() string {
 func (*MapEmpty) ProtoMessage() {}
 
 func (x *MapEmpty) ProtoReflect() protoreflect.Message {
-	mi := &file_services_sentinel_proto_msgTypes[36]
+	mi := &file_services_sentinel_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3650,7 +3696,7 @@ func (x *MapEmpty) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MapEmpty.ProtoReflect.Descriptor instead.
 func (*MapEmpty) Descriptor() ([]byte, []int) {
-	return file_services_sentinel_proto_rawDescGZIP(), []int{36}
+	return file_services_sentinel_proto_rawDescGZIP(), []int{37}
 }
 
 var File_services_sentinel_proto protoreflect.FileDescriptor
@@ -4033,7 +4079,9 @@ const file_services_sentinel_proto_rawDesc = "" +
 	"\ftimestamp_ms\x18\r \x01(\x03R\vtimestampMs\x1aF\n" +
 	"\x18PerServiceMutationsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\x03R\x05value:\x028\x01\"\n" +
+	"\x05value\x18\x02 \x01(\x03R\x05value:\x028\x01\"f\n" +
+	"\x13SentinelConfigState\x122\n" +
+	"\x06config\x18\x01 \x01(\v2\x10.sentinel.ConfigB\b\xe0\xb5\x18\x02\xe0\xb6\x18\x01R\x06config:\x1b\x9a\xa8\x1d\x13SentinelConfigState\xa0\xa8\x1d\x02\"\n" +
 	"\n" +
 	"\bMapEmpty*\xe7\x01\n" +
 	"\x0eAdminGraphType\x12\x1e\n" +
@@ -4057,7 +4105,11 @@ const file_services_sentinel_proto_rawDesc = "" +
 	"\vGetMapStats\x12\x16.google.protobuf.Empty\x1a\x1a.sentinel.MapStatsResponse\"\"\x82\xd3\xe4\x93\x02\x1c\x12\x1a/api/sentinel/v1/map-stats\x12g\n" +
 	"\fGetDashboard\x12\x16.google.protobuf.Empty\x1a\x1b.sentinel.DashboardResponse\"\"\x82\xd3\xe4\x93\x02\x1c\x12\x1a/api/sentinel/v1/dashboard\x12z\n" +
 	"\x0eWatchDashboard\x12\x1f.sentinel.WatchDashboardRequest\x1a\x1b.sentinel.DashboardResponse\"(\x82\xd3\xe4\x93\x02\"\x12 /api/sentinel/v1/dashboard/watch0\x01\x1a\f\xa2\x97\"\bsentinel2\x1d\n" +
-	"\x1bSentinelStateBackendServiceB]Z[gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/sentinelb\x06proto3"
+	"\x1bSentinelStateBackendService2\xc6\x01\n" +
+	"!SentinelConfigStateBackendService\x125\n" +
+	"\tGetConfig\x12\x16.google.protobuf.Empty\x1a\x10.sentinel.Config\x12/\n" +
+	"\tSetConfig\x12\x10.sentinel.Config\x1a\x10.sentinel.Config\x129\n" +
+	"\vWatchConfig\x12\x16.google.protobuf.Empty\x1a\x10.sentinel.Config0\x01B]Z[gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/sentinelb\x06proto3"
 
 var (
 	file_services_sentinel_proto_rawDescOnce sync.Once
@@ -4072,7 +4124,7 @@ func file_services_sentinel_proto_rawDescGZIP() []byte {
 }
 
 var file_services_sentinel_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_services_sentinel_proto_msgTypes = make([]protoimpl.MessageInfo, 49)
+var file_services_sentinel_proto_msgTypes = make([]protoimpl.MessageInfo, 50)
 var file_services_sentinel_proto_goTypes = []any{
 	(AdminGraphType)(0),               // 0: sentinel.AdminGraphType
 	(*Config)(nil),                    // 1: sentinel.Config
@@ -4111,20 +4163,21 @@ var file_services_sentinel_proto_goTypes = []any{
 	(*AdminTopicSubscriber)(nil),      // 34: sentinel.AdminTopicSubscriber
 	(*AdminWatchHealth)(nil),          // 35: sentinel.AdminWatchHealth
 	(*AdminMutationRate)(nil),         // 36: sentinel.AdminMutationRate
-	(*MapEmpty)(nil),                  // 37: sentinel.MapEmpty
-	nil,                               // 38: sentinel.AdminMember.AttributesEntry
-	nil,                               // 39: sentinel.AdminServiceConnection.PerMethodPollCountsEntry
-	nil,                               // 40: sentinel.AdminServiceConnection.PerMethodCountsEntry
-	nil,                               // 41: sentinel.AdminServiceConnection.PerGraphCountsEntry
-	nil,                               // 42: sentinel.AdminServiceConnection.PerMethodRateLimitedEntry
-	nil,                               // 43: sentinel.AdminServiceConnection.PerErrorCodeCountsEntry
-	nil,                               // 44: sentinel.AdminServiceConnection.PerMethodErrorCountsEntry
-	nil,                               // 45: sentinel.AdminServiceConnection.PerGraphMutationCountsEntry
-	nil,                               // 46: sentinel.AdminPeerActivity.PerMethodCountsEntry
-	nil,                               // 47: sentinel.AdminPeerActivity.PerErrorCodeCountsEntry
-	nil,                               // 48: sentinel.AdminGrpcStats.PerMethodCountsEntry
-	nil,                               // 49: sentinel.AdminMutationRate.PerServiceMutationsEntry
-	(*emptypb.Empty)(nil),             // 50: google.protobuf.Empty
+	(*SentinelConfigState)(nil),       // 37: sentinel.SentinelConfigState
+	(*MapEmpty)(nil),                  // 38: sentinel.MapEmpty
+	nil,                               // 39: sentinel.AdminMember.AttributesEntry
+	nil,                               // 40: sentinel.AdminServiceConnection.PerMethodPollCountsEntry
+	nil,                               // 41: sentinel.AdminServiceConnection.PerMethodCountsEntry
+	nil,                               // 42: sentinel.AdminServiceConnection.PerGraphCountsEntry
+	nil,                               // 43: sentinel.AdminServiceConnection.PerMethodRateLimitedEntry
+	nil,                               // 44: sentinel.AdminServiceConnection.PerErrorCodeCountsEntry
+	nil,                               // 45: sentinel.AdminServiceConnection.PerMethodErrorCountsEntry
+	nil,                               // 46: sentinel.AdminServiceConnection.PerGraphMutationCountsEntry
+	nil,                               // 47: sentinel.AdminPeerActivity.PerMethodCountsEntry
+	nil,                               // 48: sentinel.AdminPeerActivity.PerErrorCodeCountsEntry
+	nil,                               // 49: sentinel.AdminGrpcStats.PerMethodCountsEntry
+	nil,                               // 50: sentinel.AdminMutationRate.PerServiceMutationsEntry
+	(*emptypb.Empty)(nil),             // 51: google.protobuf.Empty
 }
 var file_services_sentinel_proto_depIdxs = []int32{
 	15, // 0: sentinel.NodeMetricsResponse.items:type_name -> sentinel.AdminNodeMetrics
@@ -4144,58 +4197,65 @@ var file_services_sentinel_proto_depIdxs = []int32{
 	28, // 14: sentinel.DashboardResponse.token_cache_stats:type_name -> sentinel.AdminTokenCacheStats
 	22, // 15: sentinel.DashboardResponse.map_stats:type_name -> sentinel.AdminMapStats
 	13, // 16: sentinel.AdminClusterInfo.members:type_name -> sentinel.AdminMember
-	38, // 17: sentinel.AdminMember.attributes:type_name -> sentinel.AdminMember.AttributesEntry
+	39, // 17: sentinel.AdminMember.attributes:type_name -> sentinel.AdminMember.AttributesEntry
 	16, // 18: sentinel.AdminNodeMetrics.memory:type_name -> sentinel.AdminMemoryMetrics
 	17, // 19: sentinel.AdminNodeMetrics.cpu:type_name -> sentinel.AdminCpuMetrics
 	18, // 20: sentinel.AdminNodeMetrics.disk:type_name -> sentinel.AdminDiskMetrics
 	0,  // 21: sentinel.AdminGraphInfo.graph_type:type_name -> sentinel.AdminGraphType
-	39, // 22: sentinel.AdminServiceConnection.per_method_poll_counts:type_name -> sentinel.AdminServiceConnection.PerMethodPollCountsEntry
-	40, // 23: sentinel.AdminServiceConnection.per_method_counts:type_name -> sentinel.AdminServiceConnection.PerMethodCountsEntry
-	41, // 24: sentinel.AdminServiceConnection.per_graph_counts:type_name -> sentinel.AdminServiceConnection.PerGraphCountsEntry
+	40, // 22: sentinel.AdminServiceConnection.per_method_poll_counts:type_name -> sentinel.AdminServiceConnection.PerMethodPollCountsEntry
+	41, // 23: sentinel.AdminServiceConnection.per_method_counts:type_name -> sentinel.AdminServiceConnection.PerMethodCountsEntry
+	42, // 24: sentinel.AdminServiceConnection.per_graph_counts:type_name -> sentinel.AdminServiceConnection.PerGraphCountsEntry
 	21, // 25: sentinel.AdminServiceConnection.peers:type_name -> sentinel.AdminPeerActivity
-	42, // 26: sentinel.AdminServiceConnection.per_method_rate_limited:type_name -> sentinel.AdminServiceConnection.PerMethodRateLimitedEntry
-	43, // 27: sentinel.AdminServiceConnection.per_error_code_counts:type_name -> sentinel.AdminServiceConnection.PerErrorCodeCountsEntry
-	44, // 28: sentinel.AdminServiceConnection.per_method_error_counts:type_name -> sentinel.AdminServiceConnection.PerMethodErrorCountsEntry
+	43, // 26: sentinel.AdminServiceConnection.per_method_rate_limited:type_name -> sentinel.AdminServiceConnection.PerMethodRateLimitedEntry
+	44, // 27: sentinel.AdminServiceConnection.per_error_code_counts:type_name -> sentinel.AdminServiceConnection.PerErrorCodeCountsEntry
+	45, // 28: sentinel.AdminServiceConnection.per_method_error_counts:type_name -> sentinel.AdminServiceConnection.PerMethodErrorCountsEntry
 	29, // 29: sentinel.AdminServiceConnection.latency:type_name -> sentinel.AdminLatencyStats
 	30, // 30: sentinel.AdminServiceConnection.per_method_latency:type_name -> sentinel.AdminMethodLatency
 	31, // 31: sentinel.AdminServiceConnection.per_method_payload:type_name -> sentinel.AdminMethodPayload
-	45, // 32: sentinel.AdminServiceConnection.per_graph_mutation_counts:type_name -> sentinel.AdminServiceConnection.PerGraphMutationCountsEntry
-	46, // 33: sentinel.AdminPeerActivity.per_method_counts:type_name -> sentinel.AdminPeerActivity.PerMethodCountsEntry
-	47, // 34: sentinel.AdminPeerActivity.per_error_code_counts:type_name -> sentinel.AdminPeerActivity.PerErrorCodeCountsEntry
+	46, // 32: sentinel.AdminServiceConnection.per_graph_mutation_counts:type_name -> sentinel.AdminServiceConnection.PerGraphMutationCountsEntry
+	47, // 33: sentinel.AdminPeerActivity.per_method_counts:type_name -> sentinel.AdminPeerActivity.PerMethodCountsEntry
+	48, // 34: sentinel.AdminPeerActivity.per_error_code_counts:type_name -> sentinel.AdminPeerActivity.PerErrorCodeCountsEntry
 	0,  // 35: sentinel.AdminMapStats.graph_type:type_name -> sentinel.AdminGraphType
-	48, // 36: sentinel.AdminGrpcStats.per_method_counts:type_name -> sentinel.AdminGrpcStats.PerMethodCountsEntry
+	49, // 36: sentinel.AdminGrpcStats.per_method_counts:type_name -> sentinel.AdminGrpcStats.PerMethodCountsEntry
 	26, // 37: sentinel.AdminNetworkStats.member_connections:type_name -> sentinel.AdminMemberConnection
 	29, // 38: sentinel.AdminMethodLatency.latency:type_name -> sentinel.AdminLatencyStats
 	34, // 39: sentinel.AdminTopicStats.subscribers:type_name -> sentinel.AdminTopicSubscriber
 	0,  // 40: sentinel.AdminMutationRate.graph_type:type_name -> sentinel.AdminGraphType
-	49, // 41: sentinel.AdminMutationRate.per_service_mutations:type_name -> sentinel.AdminMutationRate.PerServiceMutationsEntry
-	50, // 42: sentinel.SentinelService.GetClusterInfo:input_type -> google.protobuf.Empty
-	50, // 43: sentinel.SentinelService.GetClusterHealth:input_type -> google.protobuf.Empty
-	50, // 44: sentinel.SentinelService.GetNodeMetrics:input_type -> google.protobuf.Empty
-	50, // 45: sentinel.SentinelService.GetGrpcStats:input_type -> google.protobuf.Empty
-	50, // 46: sentinel.SentinelService.GetPersistenceStatus:input_type -> google.protobuf.Empty
-	50, // 47: sentinel.SentinelService.GetNetworkStats:input_type -> google.protobuf.Empty
-	50, // 48: sentinel.SentinelService.GetThreadInfo:input_type -> google.protobuf.Empty
-	50, // 49: sentinel.SentinelService.GetTokenCacheStats:input_type -> google.protobuf.Empty
-	50, // 50: sentinel.SentinelService.GetMapStats:input_type -> google.protobuf.Empty
-	50, // 51: sentinel.SentinelService.GetDashboard:input_type -> google.protobuf.Empty
-	3,  // 52: sentinel.SentinelService.WatchDashboard:input_type -> sentinel.WatchDashboardRequest
-	12, // 53: sentinel.SentinelService.GetClusterInfo:output_type -> sentinel.AdminClusterInfo
-	14, // 54: sentinel.SentinelService.GetClusterHealth:output_type -> sentinel.AdminClusterHealth
-	4,  // 55: sentinel.SentinelService.GetNodeMetrics:output_type -> sentinel.NodeMetricsResponse
-	5,  // 56: sentinel.SentinelService.GetGrpcStats:output_type -> sentinel.GrpcStatsResponse
-	6,  // 57: sentinel.SentinelService.GetPersistenceStatus:output_type -> sentinel.PersistenceStatusResponse
-	7,  // 58: sentinel.SentinelService.GetNetworkStats:output_type -> sentinel.NetworkStatsResponse
-	8,  // 59: sentinel.SentinelService.GetThreadInfo:output_type -> sentinel.ThreadInfoResponse
-	9,  // 60: sentinel.SentinelService.GetTokenCacheStats:output_type -> sentinel.TokenCacheStatsResponse
-	10, // 61: sentinel.SentinelService.GetMapStats:output_type -> sentinel.MapStatsResponse
-	11, // 62: sentinel.SentinelService.GetDashboard:output_type -> sentinel.DashboardResponse
-	11, // 63: sentinel.SentinelService.WatchDashboard:output_type -> sentinel.DashboardResponse
-	53, // [53:64] is the sub-list for method output_type
-	42, // [42:53] is the sub-list for method input_type
-	42, // [42:42] is the sub-list for extension type_name
-	42, // [42:42] is the sub-list for extension extendee
-	0,  // [0:42] is the sub-list for field type_name
+	50, // 41: sentinel.AdminMutationRate.per_service_mutations:type_name -> sentinel.AdminMutationRate.PerServiceMutationsEntry
+	1,  // 42: sentinel.SentinelConfigState.config:type_name -> sentinel.Config
+	51, // 43: sentinel.SentinelService.GetClusterInfo:input_type -> google.protobuf.Empty
+	51, // 44: sentinel.SentinelService.GetClusterHealth:input_type -> google.protobuf.Empty
+	51, // 45: sentinel.SentinelService.GetNodeMetrics:input_type -> google.protobuf.Empty
+	51, // 46: sentinel.SentinelService.GetGrpcStats:input_type -> google.protobuf.Empty
+	51, // 47: sentinel.SentinelService.GetPersistenceStatus:input_type -> google.protobuf.Empty
+	51, // 48: sentinel.SentinelService.GetNetworkStats:input_type -> google.protobuf.Empty
+	51, // 49: sentinel.SentinelService.GetThreadInfo:input_type -> google.protobuf.Empty
+	51, // 50: sentinel.SentinelService.GetTokenCacheStats:input_type -> google.protobuf.Empty
+	51, // 51: sentinel.SentinelService.GetMapStats:input_type -> google.protobuf.Empty
+	51, // 52: sentinel.SentinelService.GetDashboard:input_type -> google.protobuf.Empty
+	3,  // 53: sentinel.SentinelService.WatchDashboard:input_type -> sentinel.WatchDashboardRequest
+	51, // 54: sentinel.SentinelConfigStateBackendService.GetConfig:input_type -> google.protobuf.Empty
+	1,  // 55: sentinel.SentinelConfigStateBackendService.SetConfig:input_type -> sentinel.Config
+	51, // 56: sentinel.SentinelConfigStateBackendService.WatchConfig:input_type -> google.protobuf.Empty
+	12, // 57: sentinel.SentinelService.GetClusterInfo:output_type -> sentinel.AdminClusterInfo
+	14, // 58: sentinel.SentinelService.GetClusterHealth:output_type -> sentinel.AdminClusterHealth
+	4,  // 59: sentinel.SentinelService.GetNodeMetrics:output_type -> sentinel.NodeMetricsResponse
+	5,  // 60: sentinel.SentinelService.GetGrpcStats:output_type -> sentinel.GrpcStatsResponse
+	6,  // 61: sentinel.SentinelService.GetPersistenceStatus:output_type -> sentinel.PersistenceStatusResponse
+	7,  // 62: sentinel.SentinelService.GetNetworkStats:output_type -> sentinel.NetworkStatsResponse
+	8,  // 63: sentinel.SentinelService.GetThreadInfo:output_type -> sentinel.ThreadInfoResponse
+	9,  // 64: sentinel.SentinelService.GetTokenCacheStats:output_type -> sentinel.TokenCacheStatsResponse
+	10, // 65: sentinel.SentinelService.GetMapStats:output_type -> sentinel.MapStatsResponse
+	11, // 66: sentinel.SentinelService.GetDashboard:output_type -> sentinel.DashboardResponse
+	11, // 67: sentinel.SentinelService.WatchDashboard:output_type -> sentinel.DashboardResponse
+	1,  // 68: sentinel.SentinelConfigStateBackendService.GetConfig:output_type -> sentinel.Config
+	1,  // 69: sentinel.SentinelConfigStateBackendService.SetConfig:output_type -> sentinel.Config
+	1,  // 70: sentinel.SentinelConfigStateBackendService.WatchConfig:output_type -> sentinel.Config
+	57, // [57:71] is the sub-list for method output_type
+	43, // [43:57] is the sub-list for method input_type
+	43, // [43:43] is the sub-list for extension type_name
+	43, // [43:43] is the sub-list for extension extendee
+	0,  // [0:43] is the sub-list for field type_name
 }
 
 func init() { file_services_sentinel_proto_init() }
@@ -4209,9 +4269,9 @@ func file_services_sentinel_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_services_sentinel_proto_rawDesc), len(file_services_sentinel_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   49,
+			NumMessages:   50,
 			NumExtensions: 0,
-			NumServices:   2,
+			NumServices:   3,
 		},
 		GoTypes:           file_services_sentinel_proto_goTypes,
 		DependencyIndexes: file_services_sentinel_proto_depIdxs,

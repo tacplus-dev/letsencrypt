@@ -14,7 +14,6 @@
 package healthreport
 
 import (
-	host "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/host"
 	_ "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/spec"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -96,8 +95,8 @@ type ServiceInstanceHealth struct {
 	ServiceId  string `protobuf:"bytes,2,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`    // from token sub
 	InstanceId string `protobuf:"bytes,3,opt,name=instance_id,json=instanceId,proto3" json:"instance_id,omitempty"` // from token instance_id
 	// Reachability
-	GrpcEndpoint *host.Host `protobuf:"bytes,4,opt,name=grpc_endpoint,json=grpcEndpoint,proto3" json:"grpc_endpoint,omitempty"`
-	HttpEndpoint *host.Host `protobuf:"bytes,5,opt,name=http_endpoint,json=httpEndpoint,proto3" json:"http_endpoint,omitempty"`
+	GrpcEndpoint string `protobuf:"bytes,4,opt,name=grpc_endpoint,json=grpcEndpoint,proto3" json:"grpc_endpoint,omitempty"`
+	HttpEndpoint string `protobuf:"bytes,5,opt,name=http_endpoint,json=httpEndpoint,proto3" json:"http_endpoint,omitempty"`
 	// Health
 	Status        InstanceStatus `protobuf:"varint,6,opt,name=status,proto3,enum=healthreport.InstanceStatus" json:"status,omitempty"`
 	StatusMessage string         `protobuf:"bytes,7,opt,name=status_message,json=statusMessage,proto3" json:"status_message,omitempty"`
@@ -174,18 +173,18 @@ func (x *ServiceInstanceHealth) GetInstanceId() string {
 	return ""
 }
 
-func (x *ServiceInstanceHealth) GetGrpcEndpoint() *host.Host {
+func (x *ServiceInstanceHealth) GetGrpcEndpoint() string {
 	if x != nil {
 		return x.GrpcEndpoint
 	}
-	return nil
+	return ""
 }
 
-func (x *ServiceInstanceHealth) GetHttpEndpoint() *host.Host {
+func (x *ServiceInstanceHealth) GetHttpEndpoint() string {
 	if x != nil {
 		return x.HttpEndpoint
 	}
-	return nil
+	return ""
 }
 
 func (x *ServiceInstanceHealth) GetStatus() InstanceStatus {
@@ -297,17 +296,15 @@ var File_libs_healthreport_proto protoreflect.FileDescriptor
 
 const file_libs_healthreport_proto_rawDesc = "" +
 	"\n" +
-	"\x17libs/healthreport.proto\x12\fhealthreport\x1a\x0flibs/host.proto\x1a\x0flibs/spec.proto\"\x8e\b\n" +
+	"\x17libs/healthreport.proto\x12\fhealthreport\x1a\x0flibs/spec.proto\"\x8c\b\n" +
 	"\x15ServiceInstanceHealth\x12\x19\n" +
 	"\x02id\x18\x01 \x01(\tB\tе\x18\x01\x90\xa7\x1d\x80\x02R\x02id\x12$\n" +
 	"\n" +
 	"service_id\x18\x02 \x01(\tB\x05\x90\xa7\x1d\x80\x01R\tserviceId\x12&\n" +
 	"\vinstance_id\x18\x03 \x01(\tB\x05\x90\xa7\x1d\x80\x01R\n" +
-	"instanceId\x12/\n" +
-	"\rgrpc_endpoint\x18\x04 \x01(\v2\n" +
-	".host.HostR\fgrpcEndpoint\x12/\n" +
-	"\rhttp_endpoint\x18\x05 \x01(\v2\n" +
-	".host.HostR\fhttpEndpoint\x12:\n" +
+	"instanceId\x12.\n" +
+	"\rgrpc_endpoint\x18\x04 \x01(\tB\t\x90\xa7\x1d\x80\x02\x80\xa8\x1d\x01R\fgrpcEndpoint\x12.\n" +
+	"\rhttp_endpoint\x18\x05 \x01(\tB\t\x90\xa7\x1d\x80\x02\x80\xa8\x1d\x01R\fhttpEndpoint\x12:\n" +
 	"\x06status\x18\x06 \x01(\x0e2\x1c.healthreport.InstanceStatusB\x04\x98\xa7\x1d\x01R\x06status\x12,\n" +
 	"\x0estatus_message\x18\a \x01(\tB\x05\x90\xa7\x1d\x80\bR\rstatusMessage\x123\n" +
 	"\tcpu_usage\x18\b \x01(\x01B\x16ҧ\x1d\x12\x11\x00\x00\x00\x00\x00\x00\x00\x00!\x00\x00\x00\x00\x00\x00Y@R\bcpuUsage\x120\n" +
@@ -353,18 +350,15 @@ var file_libs_healthreport_proto_goTypes = []any{
 	(InstanceStatus)(0),           // 0: healthreport.InstanceStatus
 	(*ServiceInstanceHealth)(nil), // 1: healthreport.ServiceInstanceHealth
 	nil,                           // 2: healthreport.ServiceInstanceHealth.LabelsEntry
-	(*host.Host)(nil),             // 3: host.Host
 }
 var file_libs_healthreport_proto_depIdxs = []int32{
-	3, // 0: healthreport.ServiceInstanceHealth.grpc_endpoint:type_name -> host.Host
-	3, // 1: healthreport.ServiceInstanceHealth.http_endpoint:type_name -> host.Host
-	0, // 2: healthreport.ServiceInstanceHealth.status:type_name -> healthreport.InstanceStatus
-	2, // 3: healthreport.ServiceInstanceHealth.labels:type_name -> healthreport.ServiceInstanceHealth.LabelsEntry
-	4, // [4:4] is the sub-list for method output_type
-	4, // [4:4] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	0, // 0: healthreport.ServiceInstanceHealth.status:type_name -> healthreport.InstanceStatus
+	2, // 1: healthreport.ServiceInstanceHealth.labels:type_name -> healthreport.ServiceInstanceHealth.LabelsEntry
+	2, // [2:2] is the sub-list for method output_type
+	2, // [2:2] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_libs_healthreport_proto_init() }

@@ -1189,6 +1189,256 @@ func PingResponseToTOML(v *PingResponse) ([]byte, error) {
 	return toml.Marshal(obj)
 }
 
+// ServiceConfigStateJSON represents ServiceConfigState in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type serviceconfigstateJSON struct {
+	Config json.RawMessage `json:"config,omitempty"`
+}
+
+// ServiceConfigStateToJSON converts ServiceConfigState to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func ServiceConfigStateToJSON(v *ServiceConfigState) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "serviceconfigstate is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := serviceconfigstateJSON{
+		Config: func() json.RawMessage {
+			if v.Config == nil {
+				return nil
+			}
+			data, _ := ConfigToJSON(v.Config)
+			return data
+		}(),
+	}
+	return json.Marshal(helper)
+}
+
+// ServiceConfigStateFromBytes creates ServiceConfigState from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func ServiceConfigStateFromBytes(data []byte) (*ServiceConfigState, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := ServiceConfigStateFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := ServiceConfigStateFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := ServiceConfigStateFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &ServiceConfigState{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse ServiceConfigState: unsupported format or invalid data")
+}
+
+// ServiceConfigStateFromJSON creates ServiceConfigState from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func ServiceConfigStateFromJSON(data []byte) (*ServiceConfigState, error) {
+	// Unmarshal into helper struct with string enums
+	var raw serviceconfigstateJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &ServiceConfigState{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &ServiceConfigState{}
+	// Parse message field: Config
+	if len(raw.Config) > 0 {
+		parsed, err := ConfigFromJSON(raw.Config)
+		if err == nil {
+			result.Config = parsed
+		}
+	}
+	return result, nil
+}
+
+// ServiceConfigStateToYAML converts ServiceConfigState to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func ServiceConfigStateToYAML(v *ServiceConfigState) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "serviceconfigstate is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := ServiceConfigStateToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// ServiceConfigStateToTOML converts ServiceConfigState to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func ServiceConfigStateToTOML(v *ServiceConfigState) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "serviceconfigstate is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := ServiceConfigStateToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
+// MapEmptyJSON represents MapEmpty in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type mapemptyJSON struct {
+}
+
+// MapEmptyToJSON converts MapEmpty to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func MapEmptyToJSON(v *MapEmpty) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "mapempty is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := mapemptyJSON{}
+	return json.Marshal(helper)
+}
+
+// MapEmptyFromBytes creates MapEmpty from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func MapEmptyFromBytes(data []byte) (*MapEmpty, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := MapEmptyFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := MapEmptyFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := MapEmptyFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &MapEmpty{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse MapEmpty: unsupported format or invalid data")
+}
+
+// MapEmptyFromJSON creates MapEmpty from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func MapEmptyFromJSON(data []byte) (*MapEmpty, error) {
+	// Unmarshal into helper struct with string enums
+	var raw mapemptyJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &MapEmpty{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &MapEmpty{}
+	return result, nil
+}
+
+// MapEmptyToYAML converts MapEmpty to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func MapEmptyToYAML(v *MapEmpty) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "mapempty is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := MapEmptyToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// MapEmptyToTOML converts MapEmpty to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func MapEmptyToTOML(v *MapEmpty) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "mapempty is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := MapEmptyToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
 // ============================================================
 // Environment Variable Helpers
 // ============================================================
@@ -1438,6 +1688,46 @@ func PingResponseFromEnvVar(env map[string]string) (*PingResponse, error) {
 	return result, nil
 }
 
+// ServiceConfigStateToEnvVar converts ServiceConfigState to environment variable key-value pairs.
+func ServiceConfigStateToEnvVar(v *ServiceConfigState) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	if v.Config != nil {
+		for k, val := range ConfigToEnvVar(v.Config) {
+			result[k] = val
+		}
+	}
+	return result
+}
+
+// ServiceConfigStateFromEnvVar creates ServiceConfigState from environment variable key-value pairs.
+func ServiceConfigStateFromEnvVar(env map[string]string) (*ServiceConfigState, error) {
+	result := &ServiceConfigState{}
+	if sub, err := ConfigFromEnvVar(env); err != nil {
+		return nil, err
+	} else if sub != nil {
+		result.Config = sub
+	}
+	return result, nil
+}
+
+// MapEmptyToEnvVar converts MapEmpty to environment variable key-value pairs.
+func MapEmptyToEnvVar(v *MapEmpty) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	return result
+}
+
+// MapEmptyFromEnvVar creates MapEmpty from environment variable key-value pairs.
+func MapEmptyFromEnvVar(env map[string]string) (*MapEmpty, error) {
+	result := &MapEmpty{}
+	return result, nil
+}
+
 // ============================================================
 // Validation Helpers
 // ============================================================
@@ -1487,16 +1777,16 @@ func ValidateConfig(m *Config) error {
 		return nil
 	}
 
+	// Validate ListenAddress (assert_max_length: 256)
+	if len(m.ListenAddress) > 256 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field ListenAddress must be at most 256 characters, got: %d", len(m.ListenAddress))
+	}
+
 	// Validate ListenAddress (assert_listen_addr)
 	if m.ListenAddress != "" {
 		if err := utils.ValidateAssertListenAddr(m.ListenAddress); err != nil {
 			return protoerrors.NewErrMissingInvalidData(err, "field ListenAddress listen address validation failed")
 		}
-	}
-
-	// Validate ListenAddress (assert_max_length: 256)
-	if len(m.ListenAddress) > 256 {
-		return protoerrors.NewErrMissingInvalidData(nil, "field ListenAddress must be at most 256 characters, got: %d", len(m.ListenAddress))
 	}
 
 	// Validate MaxRequestSize (assert_gt: 0)
@@ -1669,6 +1959,27 @@ func ValidatePingResponse(m *PingResponse) error {
 	return nil
 }
 
+// ValidateServiceConfigState validates all fields in ServiceConfigState according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidateServiceConfigState(m *ServiceConfigState) error {
+	if m == nil {
+		return nil
+	}
+
+	return nil
+}
+
+// ValidateMapEmpty validates all fields in MapEmpty according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidateMapEmpty(m *MapEmpty) error {
+	if m == nil {
+		return nil
+	}
+
+	// No field validations defined
+	return nil
+}
+
 // ============================================================
 // Constants
 // ============================================================
@@ -1723,6 +2034,16 @@ func ConfigDefaults(v *Config) {
 }
 
 // ============================================================
+// TypeDefaults: ServiceConfigState
+// ============================================================
+// ServiceConfigStateDefaults applies field-level default values to zero-valued fields.
+func ServiceConfigStateDefaults(v *ServiceConfigState) {
+	if v.Config != nil {
+		ConfigDefaults(v.Config)
+	}
+}
+
+// ============================================================
 // TypeUndefaults: Config
 // ============================================================
 // ConfigUndefaults resets fields that match their default values back to zero.
@@ -1742,6 +2063,17 @@ func ConfigUndefaults(v *Config) {
 	}
 	if v.ShutdownTimeoutSeconds == DefaultShutdownTimeoutSeconds {
 		v.ShutdownTimeoutSeconds = 0
+	}
+}
+
+// ============================================================
+// TypeUndefaults: ServiceConfigState
+// ============================================================
+// ServiceConfigStateUndefaults resets fields that match their default values back to zero.
+// Use before persisting to store only explicit user overrides.
+func ServiceConfigStateUndefaults(v *ServiceConfigState) {
+	if v.Config != nil {
+		ConfigUndefaults(v.Config)
 	}
 }
 
@@ -1863,5 +2195,17 @@ func MergeClusterState(dst, src *ClusterState) {
 func MergePingResponse(dst, src *PingResponse) {
 	if dst.Status == 0 {
 		dst.Status = src.Status
+	}
+}
+
+// ============================================================
+// Merge: ServiceConfigState
+// ============================================================
+// MergeServiceConfigState fills zero-valued fields in dst from src.
+func MergeServiceConfigState(dst, src *ServiceConfigState) {
+	if dst.Config == nil {
+		dst.Config = src.Config
+	} else if src.Config != nil {
+		MergeConfig(dst.Config, src.Config)
 	}
 }

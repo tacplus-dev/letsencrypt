@@ -13,6 +13,7 @@ option go_package = "gitlab.com/secondstarcavalier/controlplane/services/letsenc
 // OpaPolicy defines an OPA policy bundle for authorization evaluation.
 // The bundle is a base64-encoded tar.gz containing .rego policy files.
 message OpaPolicy {
+
   // entry_point specifies the main package/decision point for policy evaluation.
   string entry_point = 1;
 

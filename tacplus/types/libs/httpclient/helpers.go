@@ -718,3 +718,224 @@ func MergeRetryConfig(dst, src *RetryConfig) {
 		dst.RetryableStatusCodes = src.RetryableStatusCodes
 	}
 }
+
+// HttpClientConfigLlmTypeDescriptor returns a JSON description of HttpClientConfig for LLM-assisted construction.
+// The description includes field names, types, comments, constraints, defaults,
+// nested message structures, and enum values — everything an LLM needs to
+// construct a valid instance of this type.
+func HttpClientConfigLlmTypeDescriptor() string {
+	return `{
+  "name": "HttpClientConfig",
+  "package": "httpclient",
+  "description": "HttpClientConfig represents configuration for an HTTP client.\n It provides settings for TLS verification, keep-alive behavior, certificates, and timeouts.\n This configuration is typically used to create HTTP clients for making outbound requests\n with specific security and performance requirements.",
+  "fields": [
+    {
+      "name": "insecure_skip_verify",
+      "type": "bool",
+      "description": "InsecureSkipVerify controls whether the client verifies the server's certificate chain and host name.\n If true, TLS accepts any certificate presented by the server and any host name in that certificate.\n This should only be used for testing or in trusted environments.\n WARNING: Setting this to true makes TLS susceptible to machine-in-the-middle attacks."
+    },
+    {
+      "name": "disable_keep_alives",
+      "type": "bool",
+      "description": "DisableKeepAlives, if true, disables HTTP keep-alives and will close the connection\n after each request. This can reduce server load but increases latency for repeated requests.\n Default is false (keep-alives enabled)."
+    },
+    {
+      "name": "root_certs",
+      "type": "message",
+      "description": "RootCerts is a list of X.509 certificates to use as root CAs for verifying server certificates.\n If empty, the system's default root CAs will be used.\n Use this to trust custom or internal certificate authorities.",
+      "repeated": true,
+      "message": {
+        "name": "X509Cert",
+        "package": "x509",
+        "description": "ProtoCert represents an X.509 certificate.\n The certificate is stored as a base64-encoded PEM block.\n Use NewProtoCert() in Go with DER-encoded certificate bytes to create.",
+        "fields": [
+          {
+            "name": "id",
+            "type": "string",
+            "description": "Id is a unique identifier for the certificate"
+          },
+          {
+            "name": "base64",
+            "type": "string",
+            "description": "Base64 contains the base64url-encoded PEM certificate block",
+            "required": true,
+            "constraints": [
+              "must be base64 encoded"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "client_cert",
+      "type": "message",
+      "description": "ClientCert is an X.509 certificate pair (certificate + private key) for client authentication.\n Use this when the server requires mutual TLS (mTLS) authentication.\n The certificate must include both the public certificate and private key.",
+      "message": {
+        "name": "X509CertPair",
+        "package": "x509",
+        "description": "X509CertPair combines a private key with its X.509 certificate.\n This is a convenience wrapper for keys that have associated certificates,\n typically used for TLS/SSL operations.\n Use NewKeyCert() in Go to create from a private key and certificate bytes.",
+        "fields": [
+          {
+            "name": "key",
+            "type": "message",
+            "description": "Key is the private key component",
+            "message": {
+              "name": "Key",
+              "package": "key",
+              "description": "Key represents a private cryptographic key (alias for ProtoKey).",
+              "fields": [
+                {
+                  "name": "id",
+                  "type": "string",
+                  "description": "Id is a unique identifier for the key (corresponds to kid in JWK)",
+                  "required": true,
+                  "constraints": [
+                    "minimum length: 1"
+                  ]
+                },
+                {
+                  "name": "base64",
+                  "type": "string",
+                  "description": "Base64 contains the base64url-encoded PEM private key block",
+                  "required": true,
+                  "constraints": [
+                    "must be base64 encoded",
+                    "encoding type: ENC_TYPE_KEY_PRIVATE_ANY"
+                  ]
+                },
+                {
+                  "name": "created",
+                  "type": "int64",
+                  "description": "Created is the Unix epoch timestamp (seconds) when the key was created\n Valid range: 1735689600 (2025-01-01) to 8045740800 (2225-01-01)",
+                  "required": true,
+                  "constraints": [
+                    "must be \u003e= 1735689600",
+                    "must be \u003c= 8045740800"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "name": "cert",
+            "type": "message (recursive reference: x509.X509Cert)",
+            "description": "Cert is the certificate component"
+          }
+        ]
+      }
+    },
+    {
+      "name": "timeout_seconds",
+      "type": "int64",
+      "description": "TimeoutSeconds is the maximum time in seconds for the entire HTTP request/response cycle.\n This includes connection time, request writing, server processing, and response reading.\n A value of 0 means no timeout (wait indefinitely).\n Recommended: Set a reasonable timeout (e.g., 30 seconds) to prevent hanging requests.",
+      "constraints": [
+        "duration constraint: DURATION_TYPE_NON_NEGATIVE"
+      ]
+    },
+    {
+      "name": "max_idle_conns",
+      "type": "int32",
+      "description": "MaxIdleConns controls the maximum number of idle (keep-alive) connections across all hosts.\n A value of 0 means no limit. Default is typically 100 if not specified.",
+      "constraints": [
+        "must be \u003e= 0"
+      ]
+    },
+    {
+      "name": "max_idle_conns_per_host",
+      "type": "int32",
+      "description": "MaxIdleConnsPerHost controls the maximum number of idle (keep-alive) connections per host.\n A value of 0 means use the default (typically 2). Increase for high-throughput scenarios.",
+      "constraints": [
+        "must be \u003e= 0"
+      ]
+    },
+    {
+      "name": "idle_conn_timeout_seconds",
+      "type": "int64",
+      "description": "IdleConnTimeoutSeconds is the maximum time in seconds an idle connection will remain\n in the connection pool before being closed. A value of 0 means no limit.",
+      "constraints": [
+        "duration constraint: DURATION_TYPE_NON_NEGATIVE"
+      ]
+    },
+    {
+      "name": "tls_handshake_timeout_seconds",
+      "type": "int64",
+      "description": "TlsHandshakeTimeoutSeconds is the maximum time in seconds to wait for a TLS handshake.\n A value of 0 means no timeout. Recommended: 10 seconds.",
+      "constraints": [
+        "duration constraint: DURATION_TYPE_NON_NEGATIVE"
+      ]
+    },
+    {
+      "name": "expect_continue_timeout_seconds",
+      "type": "int64",
+      "description": "ExpectContinueTimeoutSeconds is the maximum time in seconds to wait for a server's\n first response headers after fully writing the request headers if the request has\n \"Expect: 100-continue\" header. A value of 0 means no timeout.",
+      "constraints": [
+        "duration constraint: DURATION_TYPE_NON_NEGATIVE"
+      ]
+    },
+    {
+      "name": "response_header_timeout_seconds",
+      "type": "int64",
+      "description": "ResponseHeaderTimeoutSeconds is the maximum time in seconds to wait for a server's\n response headers after fully writing the request (including body, if any).\n A value of 0 means no timeout.",
+      "constraints": [
+        "duration constraint: DURATION_TYPE_NON_NEGATIVE"
+      ]
+    },
+    {
+      "name": "retry_config",
+      "type": "message",
+      "description": "RetryConfig configures retry behavior for HTTP requests.\n If not specified, default retry configuration will be used (3 retries, exponential backoff).",
+      "message": {
+        "name": "RetryConfig",
+        "package": "httpclient",
+        "description": "RetryConfig configures retry behavior for HTTP requests with exponential backoff.\n This configuration controls how failed requests are retried, including which errors\n and status codes trigger retries, and the backoff timing between attempts.",
+        "fields": [
+          {
+            "name": "max_retries",
+            "type": "int32",
+            "description": "MaxRetries is the maximum number of retry attempts after the initial request.\n A value of 0 means no retries (only the initial request is made).\n Default: 3",
+            "constraints": [
+              "must be \u003e= 0",
+              "must be \u003c= 10"
+            ]
+          },
+          {
+            "name": "initial_backoff_ms",
+            "type": "int64",
+            "description": "InitialBackoffMs is the initial backoff duration in milliseconds before the first retry.\n This value is multiplied by BackoffMultiplier for each subsequent retry.\n Default: 100ms",
+            "constraints": [
+              "duration constraint: DURATION_TYPE_POSITIVE"
+            ]
+          },
+          {
+            "name": "max_backoff_ms",
+            "type": "int64",
+            "description": "MaxBackoffMs is the maximum backoff duration in milliseconds.\n The backoff will never exceed this value, even after many retries.\n Default: 5000ms (5 seconds)",
+            "constraints": [
+              "duration constraint: DURATION_TYPE_POSITIVE"
+            ]
+          },
+          {
+            "name": "backoff_multiplier",
+            "type": "double",
+            "description": "BackoffMultiplier is the multiplier applied to the backoff duration after each retry.\n For exponential backoff, use values like 2.0 (doubles each time).\n For linear backoff, use 1.0 (stays constant).\n Default: 2.0",
+            "constraints": [
+              "must be \u003e 0"
+            ]
+          },
+          {
+            "name": "retryable_status_codes",
+            "type": "int32",
+            "description": "RetryableStatusCodes are HTTP status codes that should trigger a retry.\n Common retryable codes: 429 (Too Many Requests), 500, 502, 503, 504.\n If empty, defaults to [429, 500, 502, 503, 504].\n Network errors (connection failures, timeouts) are always retried regardless of this setting.",
+            "repeated": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "disable_validation",
+      "type": "bool",
+      "description": "DisableValidation controls whether HTTP client responses are validated after retrieval.\n If false (default), responses are validated using ValidateType(*type) after being retrieved.\n If true, validation is skipped and raw responses are returned without validation.\n WARNING: Disabling validation may allow invalid data to propagate through your system."
+    }
+  ]
+}`
+}

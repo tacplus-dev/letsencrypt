@@ -590,6 +590,139 @@ func CertMagicStateToTOML(v *CertMagicState) ([]byte, error) {
 	return toml.Marshal(obj)
 }
 
+// LetsencryptConfigStateJSON represents LetsencryptConfigState in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type letsencryptconfigstateJSON struct {
+	Config json.RawMessage `json:"config,omitempty"`
+}
+
+// LetsencryptConfigStateToJSON converts LetsencryptConfigState to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func LetsencryptConfigStateToJSON(v *LetsencryptConfigState) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "letsencryptconfigstate is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := letsencryptconfigstateJSON{
+		Config: func() json.RawMessage {
+			if v.Config == nil {
+				return nil
+			}
+			data, _ := ConfigToJSON(v.Config)
+			return data
+		}(),
+	}
+	return json.Marshal(helper)
+}
+
+// LetsencryptConfigStateFromBytes creates LetsencryptConfigState from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func LetsencryptConfigStateFromBytes(data []byte) (*LetsencryptConfigState, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := LetsencryptConfigStateFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := LetsencryptConfigStateFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := LetsencryptConfigStateFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &LetsencryptConfigState{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse LetsencryptConfigState: unsupported format or invalid data")
+}
+
+// LetsencryptConfigStateFromJSON creates LetsencryptConfigState from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func LetsencryptConfigStateFromJSON(data []byte) (*LetsencryptConfigState, error) {
+	// Unmarshal into helper struct with string enums
+	var raw letsencryptconfigstateJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &LetsencryptConfigState{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &LetsencryptConfigState{}
+	// Parse message field: Config
+	if len(raw.Config) > 0 {
+		parsed, err := ConfigFromJSON(raw.Config)
+		if err == nil {
+			result.Config = parsed
+		}
+	}
+	return result, nil
+}
+
+// LetsencryptConfigStateToYAML converts LetsencryptConfigState to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func LetsencryptConfigStateToYAML(v *LetsencryptConfigState) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "letsencryptconfigstate is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := LetsencryptConfigStateToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// LetsencryptConfigStateToTOML converts LetsencryptConfigState to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func LetsencryptConfigStateToTOML(v *LetsencryptConfigState) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "letsencryptconfigstate is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := LetsencryptConfigStateToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
 // LockJSON represents Lock in external JSON format (with string enums)
 // MARKER: JSON helper struct generated from serial.go
 type lockJSON struct {
@@ -991,6 +1124,31 @@ func CertMagicStateFromEnvVar(env map[string]string) (*CertMagicState, error) {
 	return result, nil
 }
 
+// LetsencryptConfigStateToEnvVar converts LetsencryptConfigState to environment variable key-value pairs.
+func LetsencryptConfigStateToEnvVar(v *LetsencryptConfigState) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	if v.Config != nil {
+		for k, val := range ConfigToEnvVar(v.Config) {
+			result[k] = val
+		}
+	}
+	return result
+}
+
+// LetsencryptConfigStateFromEnvVar creates LetsencryptConfigState from environment variable key-value pairs.
+func LetsencryptConfigStateFromEnvVar(env map[string]string) (*LetsencryptConfigState, error) {
+	result := &LetsencryptConfigState{}
+	if sub, err := ConfigFromEnvVar(env); err != nil {
+		return nil, err
+	} else if sub != nil {
+		result.Config = sub
+	}
+	return result, nil
+}
+
 // LockToEnvVar converts Lock to environment variable key-value pairs.
 func LockToEnvVar(v *Lock) map[string]string {
 	if v == nil {
@@ -1106,6 +1264,16 @@ func ValidateCertMagicState(m *CertMagicState) error {
 	return nil
 }
 
+// ValidateLetsencryptConfigState validates all fields in LetsencryptConfigState according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidateLetsencryptConfigState(m *LetsencryptConfigState) error {
+	if m == nil {
+		return nil
+	}
+
+	return nil
+}
+
 // ValidateLock validates all fields in Lock according to their annotations.
 // Returns a BlueErr if validation fails, or nil if all validations pass.
 func ValidateLock(m *Lock) error {
@@ -1166,6 +1334,16 @@ func ConfigDefaults(v *Config) {
 }
 
 // ============================================================
+// TypeDefaults: LetsencryptConfigState
+// ============================================================
+// LetsencryptConfigStateDefaults applies field-level default values to zero-valued fields.
+func LetsencryptConfigStateDefaults(v *LetsencryptConfigState) {
+	if v.Config != nil {
+		ConfigDefaults(v.Config)
+	}
+}
+
+// ============================================================
 // TypeUndefaults: Config
 // ============================================================
 // ConfigUndefaults resets fields that match their default values back to zero.
@@ -1176,6 +1354,17 @@ func ConfigUndefaults(v *Config) {
 	}
 	if v.RenewalCheckIntervalSeconds == DefaultRenewalCheckIntervalSeconds {
 		v.RenewalCheckIntervalSeconds = 0
+	}
+}
+
+// ============================================================
+// TypeUndefaults: LetsencryptConfigState
+// ============================================================
+// LetsencryptConfigStateUndefaults resets fields that match their default values back to zero.
+// Use before persisting to store only explicit user overrides.
+func LetsencryptConfigStateUndefaults(v *LetsencryptConfigState) {
+	if v.Config != nil {
+		ConfigUndefaults(v.Config)
 	}
 }
 
@@ -1253,6 +1442,18 @@ func MergeCertMagicState(dst, src *CertMagicState) {
 }
 
 // ============================================================
+// Merge: LetsencryptConfigState
+// ============================================================
+// MergeLetsencryptConfigState fills zero-valued fields in dst from src.
+func MergeLetsencryptConfigState(dst, src *LetsencryptConfigState) {
+	if dst.Config == nil {
+		dst.Config = src.Config
+	} else if src.Config != nil {
+		MergeConfig(dst.Config, src.Config)
+	}
+}
+
+// ============================================================
 // Merge: Lock
 // ============================================================
 // MergeLock fills zero-valued fields in dst from src.
@@ -1263,4 +1464,40 @@ func MergeLock(dst, src *Lock) {
 	if dst.Counter == 0 {
 		dst.Counter = src.Counter
 	}
+}
+
+// ConfigLlmTypeDescriptor returns a JSON description of Config for LLM-assisted construction.
+// The description includes field names, types, comments, constraints, defaults,
+// nested message structures, and enum values — everything an LLM needs to
+// construct a valid instance of this type.
+func ConfigLlmTypeDescriptor() string {
+	return `{
+  "name": "Config",
+  "package": "letsencrypt",
+  "fields": [
+    {
+      "name": "fqdn",
+      "type": "string",
+      "description": "fqdn is the fully qualified domain name to obtain a Let's Encrypt\n certificate for (e.g., \"api.example.com\").",
+      "required": true
+    },
+    {
+      "name": "lets_encrypt_email",
+      "type": "string",
+      "description": "lets_encrypt_email is the email address for Let's Encrypt account\n registration and certificate expiration notifications.\n If empty, letsencrypt will use \"admin@\u003cfqdn\u003e\"."
+    },
+    {
+      "name": "http_listen",
+      "type": "string",
+      "description": "http_listen is the address to bind the HTTP server for ACME HTTP-01\n challenge responses. Must be reachable on port 80 from the internet.\n Default: \":80\".",
+      "default": ":80"
+    },
+    {
+      "name": "renewal_check_interval_seconds",
+      "type": "int64",
+      "description": "renewal_check_interval_seconds is how often to check if the certificate\n needs renewal (seconds). Default: 3600 (1 hour).",
+      "default": 3600
+    }
+  ]
+}`
 }

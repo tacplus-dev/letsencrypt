@@ -396,6 +396,13 @@ message ExchangeTokenResponse {
   int64 expires_in = 2;
 }
 
+// IdentityConfigState is the backend state boundary for identity service configuration.
+// Auto-injected by tacplus from (spec.frontend_config) annotation.
+message IdentityConfigState {
+
+  identity.Config config = 1;
+}
+
 // Collection query types (auto-injected)
 enum ComparisonOp {
   COMPARISON_OP_UNSPECIFIED = 0;
@@ -504,5 +511,16 @@ message ExternalJwksKeysResponse { repeated string keys = 1; }
 message ExternalJwksSizeResponse { int32 size = 1; }
 message ExternalJwksQueryRequest { CollectionQuery query = 1; }
 message ExternalJwksQueryResponse { repeated ExternalJwk results = 1; int32 total_count = 2; }
+
+// ============================================================================
+// Auto-generated Backend Service (tacplus)
+// ============================================================================
+
+service IdentityConfigStateBackendService {
+	// Singleton: Config
+	rpc GetConfig(google.protobuf.Empty) returns (Config);
+	rpc SetConfig(Config) returns (Config);
+	rpc WatchConfig(google.protobuf.Empty) returns (stream Config);
+}
 
 message MapEmpty {}

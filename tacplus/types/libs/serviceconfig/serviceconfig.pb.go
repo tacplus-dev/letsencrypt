@@ -580,6 +580,89 @@ func (x *PingResponse) GetStatus() MemberStatus {
 	return MemberStatus_MEMBER_STATUS_UNKNOWN
 }
 
+// ServiceConfigState delivers runtime configuration (OPA policy, TLS, logging)
+// to all frontend services. The backend writes the config; frontends subscribe
+// via OnChange to receive updates.
+type ServiceConfigState struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Config        *Config                `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ServiceConfigState) Reset() {
+	*x = ServiceConfigState{}
+	mi := &file_libs_serviceconfig_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ServiceConfigState) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ServiceConfigState) ProtoMessage() {}
+
+func (x *ServiceConfigState) ProtoReflect() protoreflect.Message {
+	mi := &file_libs_serviceconfig_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ServiceConfigState.ProtoReflect.Descriptor instead.
+func (*ServiceConfigState) Descriptor() ([]byte, []int) {
+	return file_libs_serviceconfig_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *ServiceConfigState) GetConfig() *Config {
+	if x != nil {
+		return x.Config
+	}
+	return nil
+}
+
+type MapEmpty struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MapEmpty) Reset() {
+	*x = MapEmpty{}
+	mi := &file_libs_serviceconfig_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MapEmpty) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MapEmpty) ProtoMessage() {}
+
+func (x *MapEmpty) ProtoReflect() protoreflect.Message {
+	mi := &file_libs_serviceconfig_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MapEmpty.ProtoReflect.Descriptor instead.
+func (*MapEmpty) Descriptor() ([]byte, []int) {
+	return file_libs_serviceconfig_proto_rawDescGZIP(), []int{8}
+}
+
 var File_libs_serviceconfig_proto protoreflect.FileDescriptor
 
 const file_libs_serviceconfig_proto_rawDesc = "" +
@@ -620,7 +703,11 @@ const file_libs_serviceconfig_proto_rawDesc = "" +
 	"\fClusterState\x12<\n" +
 	"\bclusters\x18\x01 \x03(\v2\x1a.serviceconfig.ClusterInfoB\x04\xc0\xa8\x1d R\bclusters\"C\n" +
 	"\fPingResponse\x123\n" +
-	"\x06status\x18\x01 \x01(\x0e2\x1b.serviceconfig.MemberStatusR\x06status*\xba\x01\n" +
+	"\x06status\x18\x01 \x01(\x0e2\x1b.serviceconfig.MemberStatusR\x06status\"i\n" +
+	"\x12ServiceConfigState\x127\n" +
+	"\x06config\x18\x01 \x01(\v2\x15.serviceconfig.ConfigB\b\xe0\xb5\x18\x02\xe0\xb6\x18\x01R\x06config:\x1a\x9a\xa8\x1d\x12ServiceConfigState\xa0\xa8\x1d\x02\"\n" +
+	"\n" +
+	"\bMapEmpty*\xba\x01\n" +
 	"\fMemberStatus\x12\x19\n" +
 	"\x15MEMBER_STATUS_UNKNOWN\x10\x00\x12\x1a\n" +
 	"\x16MEMBER_STATUS_STARTING\x10\x01\x12\x17\n" +
@@ -632,7 +719,11 @@ const file_libs_serviceconfig_proto_rawDesc = "" +
 	"\x03Log\x12\x16.google.protobuf.Empty\x1a\x19.serviceconfig.LogMessage0\x01\x12;\n" +
 	"\x04Ping\x12\x16.google.protobuf.Empty\x1a\x1b.serviceconfig.PingResponse\x12B\n" +
 	"\tSubscribe\x12\x16.google.protobuf.Empty\x1a\x1b.serviceconfig.ClusterState0\x01\x120\n" +
-	"\tWatchJwks\x12\x16.google.protobuf.Empty\x1a\t.jwk.Jwks0\x01B\xa4\x01\x8a\xb5\x18(\n" +
+	"\tWatchJwks\x12\x16.google.protobuf.Empty\x1a\t.jwk.Jwks0\x012\xd9\x01\n" +
+	" ServiceConfigStateBackendService\x12:\n" +
+	"\tGetConfig\x12\x16.google.protobuf.Empty\x1a\x15.serviceconfig.Config\x129\n" +
+	"\tSetConfig\x12\x15.serviceconfig.Config\x1a\x15.serviceconfig.Config\x12>\n" +
+	"\vWatchConfig\x12\x16.google.protobuf.Empty\x1a\x15.serviceconfig.Config0\x01B\xa4\x01\x8a\xb5\x18(\n" +
 	"\x14BOOTSTRAP_CONFIG_ENV\x12\x10BOOTSTRAP_CONFIG\x8a\xb5\x18\x16\n" +
 	"\vAUTH_ISSUER\x12\abackendZ\\gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/serviceconfigb\x06proto3"
 
@@ -649,7 +740,7 @@ func file_libs_serviceconfig_proto_rawDescGZIP() []byte {
 }
 
 var file_libs_serviceconfig_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_libs_serviceconfig_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_libs_serviceconfig_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_libs_serviceconfig_proto_goTypes = []any{
 	(MemberStatus)(0),           // 0: serviceconfig.MemberStatus
 	(*BootstrapConfig)(nil),     // 1: serviceconfig.BootstrapConfig
@@ -659,37 +750,46 @@ var file_libs_serviceconfig_proto_goTypes = []any{
 	(*ClusterInfo)(nil),         // 5: serviceconfig.ClusterInfo
 	(*ClusterState)(nil),        // 6: serviceconfig.ClusterState
 	(*PingResponse)(nil),        // 7: serviceconfig.PingResponse
-	(*key.Key)(nil),             // 8: key.Key
-	(*x509.X509Cert)(nil),       // 9: x509.X509Cert
-	(*x509.X509CertPair)(nil),   // 10: x509.X509CertPair
-	(*logger.LoggerConfig)(nil), // 11: logger.LoggerConfig
-	(logger.Level)(0),           // 12: logger.Level
-	(*emptypb.Empty)(nil),       // 13: google.protobuf.Empty
-	(*jwk.Jwks)(nil),            // 14: jwk.Jwks
+	(*ServiceConfigState)(nil),  // 8: serviceconfig.ServiceConfigState
+	(*MapEmpty)(nil),            // 9: serviceconfig.MapEmpty
+	(*key.Key)(nil),             // 10: key.Key
+	(*x509.X509Cert)(nil),       // 11: x509.X509Cert
+	(*x509.X509CertPair)(nil),   // 12: x509.X509CertPair
+	(*logger.LoggerConfig)(nil), // 13: logger.LoggerConfig
+	(logger.Level)(0),           // 14: logger.Level
+	(*emptypb.Empty)(nil),       // 15: google.protobuf.Empty
+	(*jwk.Jwks)(nil),            // 16: jwk.Jwks
 }
 var file_libs_serviceconfig_proto_depIdxs = []int32{
-	8,  // 0: serviceconfig.BootstrapConfig.private_key:type_name -> key.Key
-	9,  // 1: serviceconfig.BootstrapConfig.trusted_cas:type_name -> x509.X509Cert
-	10, // 2: serviceconfig.Config.tls_cert:type_name -> x509.X509CertPair
-	11, // 3: serviceconfig.Config.logger:type_name -> logger.LoggerConfig
-	12, // 4: serviceconfig.LogMessage.level:type_name -> logger.Level
+	10, // 0: serviceconfig.BootstrapConfig.private_key:type_name -> key.Key
+	11, // 1: serviceconfig.BootstrapConfig.trusted_cas:type_name -> x509.X509Cert
+	12, // 2: serviceconfig.Config.tls_cert:type_name -> x509.X509CertPair
+	13, // 3: serviceconfig.Config.logger:type_name -> logger.LoggerConfig
+	14, // 4: serviceconfig.LogMessage.level:type_name -> logger.Level
 	0,  // 5: serviceconfig.ClusterMember.status:type_name -> serviceconfig.MemberStatus
 	4,  // 6: serviceconfig.ClusterInfo.members:type_name -> serviceconfig.ClusterMember
 	5,  // 7: serviceconfig.ClusterState.clusters:type_name -> serviceconfig.ClusterInfo
 	0,  // 8: serviceconfig.PingResponse.status:type_name -> serviceconfig.MemberStatus
-	13, // 9: serviceconfig.BackendService.Log:input_type -> google.protobuf.Empty
-	13, // 10: serviceconfig.BackendService.Ping:input_type -> google.protobuf.Empty
-	13, // 11: serviceconfig.BackendService.Subscribe:input_type -> google.protobuf.Empty
-	13, // 12: serviceconfig.BackendService.WatchJwks:input_type -> google.protobuf.Empty
-	3,  // 13: serviceconfig.BackendService.Log:output_type -> serviceconfig.LogMessage
-	7,  // 14: serviceconfig.BackendService.Ping:output_type -> serviceconfig.PingResponse
-	6,  // 15: serviceconfig.BackendService.Subscribe:output_type -> serviceconfig.ClusterState
-	14, // 16: serviceconfig.BackendService.WatchJwks:output_type -> jwk.Jwks
-	13, // [13:17] is the sub-list for method output_type
-	9,  // [9:13] is the sub-list for method input_type
-	9,  // [9:9] is the sub-list for extension type_name
-	9,  // [9:9] is the sub-list for extension extendee
-	0,  // [0:9] is the sub-list for field type_name
+	2,  // 9: serviceconfig.ServiceConfigState.config:type_name -> serviceconfig.Config
+	15, // 10: serviceconfig.BackendService.Log:input_type -> google.protobuf.Empty
+	15, // 11: serviceconfig.BackendService.Ping:input_type -> google.protobuf.Empty
+	15, // 12: serviceconfig.BackendService.Subscribe:input_type -> google.protobuf.Empty
+	15, // 13: serviceconfig.BackendService.WatchJwks:input_type -> google.protobuf.Empty
+	15, // 14: serviceconfig.ServiceConfigStateBackendService.GetConfig:input_type -> google.protobuf.Empty
+	2,  // 15: serviceconfig.ServiceConfigStateBackendService.SetConfig:input_type -> serviceconfig.Config
+	15, // 16: serviceconfig.ServiceConfigStateBackendService.WatchConfig:input_type -> google.protobuf.Empty
+	3,  // 17: serviceconfig.BackendService.Log:output_type -> serviceconfig.LogMessage
+	7,  // 18: serviceconfig.BackendService.Ping:output_type -> serviceconfig.PingResponse
+	6,  // 19: serviceconfig.BackendService.Subscribe:output_type -> serviceconfig.ClusterState
+	16, // 20: serviceconfig.BackendService.WatchJwks:output_type -> jwk.Jwks
+	2,  // 21: serviceconfig.ServiceConfigStateBackendService.GetConfig:output_type -> serviceconfig.Config
+	2,  // 22: serviceconfig.ServiceConfigStateBackendService.SetConfig:output_type -> serviceconfig.Config
+	2,  // 23: serviceconfig.ServiceConfigStateBackendService.WatchConfig:output_type -> serviceconfig.Config
+	17, // [17:24] is the sub-list for method output_type
+	10, // [10:17] is the sub-list for method input_type
+	10, // [10:10] is the sub-list for extension type_name
+	10, // [10:10] is the sub-list for extension extendee
+	0,  // [0:10] is the sub-list for field type_name
 }
 
 func init() { file_libs_serviceconfig_proto_init() }
@@ -703,9 +803,9 @@ func file_libs_serviceconfig_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_libs_serviceconfig_proto_rawDesc), len(file_libs_serviceconfig_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   7,
+			NumMessages:   9,
 			NumExtensions: 0,
-			NumServices:   1,
+			NumServices:   2,
 		},
 		GoTypes:           file_libs_serviceconfig_proto_goTypes,
 		DependencyIndexes: file_libs_serviceconfig_proto_depIdxs,

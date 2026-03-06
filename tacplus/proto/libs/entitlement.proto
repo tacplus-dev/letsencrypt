@@ -16,6 +16,7 @@ option go_package = "gitlab.com/secondstarcavalier/controlplane/services/letsenc
 // The service_name becomes the "aud" claim in access tokens.
 // Every permitted RPC must be listed — there is no wildcard/default-allow.
 message ServiceEntitlement {
+
   // service_name is the target service (matches spec.service_frontend value).
   string service_name = 1;
 
@@ -29,6 +30,7 @@ message ServiceEntitlement {
 // Defined as JSON files in proto/security/ and loaded into service configs
 // at config build time.
 message ServiceEntitlements {
+
   // id identifies this entitlement set (e.g. "sentinel-admin", "snoopy-reader").
   // Matches the JSON filename in proto/security/.
   string id = 1;
@@ -41,6 +43,7 @@ message ServiceEntitlements {
 // OPA entitlements_policy returns zero or more profile names; identity resolves
 // those names to concrete ServiceEntitlements at token exchange time.
 message IdentityProfile {
+
   // id is the profile name (e.g. "user", "admin", "reader").
   // Referenced by OPA policy output.
   string id = 1;
@@ -54,6 +57,7 @@ message IdentityProfile {
 // which service a CredPair or cloud credential represents.
 // Entitlements for S2S are derived from proto definitions — no entitlements_id needed.
 message ServiceEntitlementMapping {
+
   // credential_id is the unique identifier for the authentication credential.
   // For CredPairs this is the public_key.kid. For cloud credentials, the
   // cloud credential ID (e.g. IAM role ARN).

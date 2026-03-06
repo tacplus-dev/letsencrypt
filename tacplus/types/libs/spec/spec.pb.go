@@ -2031,6 +2031,14 @@ var file_libs_spec_proto_extTypes = []protoimpl.ExtensionInfo{
 		Filename:      "libs/spec.proto",
 	},
 	{
+		ExtendedType:  (*descriptorpb.MessageOptions)(nil),
+		ExtensionType: (*bool)(nil),
+		Field:         60045,
+		Name:          "spec.llm_assist",
+		Tag:           "varint,60045,opt,name=llm_assist",
+		Filename:      "libs/spec.proto",
+	},
+	{
 		ExtendedType:  (*descriptorpb.FieldOptions)(nil),
 		ExtensionType: (*bool)(nil),
 		Field:         60001,
@@ -2711,6 +2719,13 @@ var (
 	//
 	// optional bool backend_disable_auth = 60044;
 	E_BackendDisableAuth = &file_libs_spec_proto_extTypes[16]
+	// llm_assist marks a message type for LLM-assisted construction via the MCP service.
+	// When true, tacplus generates a {Type}Assist RPC that sends the type's JSON schema
+	// (with all constraints) to an LLM, which crafts and validates the response.
+	// Example: option (spec.llm_assist) = true;
+	//
+	// optional bool llm_assist = 60045;
+	E_LlmAssist = &file_libs_spec_proto_extTypes[17]
 )
 
 // Extension fields to descriptorpb.FieldOptions.
@@ -2720,110 +2735,110 @@ var (
 	// For repeated fields: must have at least one element
 	//
 	// optional bool assert_required = 60001;
-	E_AssertRequired = &file_libs_spec_proto_extTypes[17]
+	E_AssertRequired = &file_libs_spec_proto_extTypes[18]
 	// optional spec.IpAddrTypes assert_ipaddr_type = 60002;
-	E_AssertIpaddrType = &file_libs_spec_proto_extTypes[18]
+	E_AssertIpaddrType = &file_libs_spec_proto_extTypes[19]
 	// optional spec.EncType assert_enc_type = 60003;
-	E_AssertEncType = &file_libs_spec_proto_extTypes[19]
+	E_AssertEncType = &file_libs_spec_proto_extTypes[20]
 	// optional bool assert_net_port = 60004;
-	E_AssertNetPort = &file_libs_spec_proto_extTypes[20]
+	E_AssertNetPort = &file_libs_spec_proto_extTypes[21]
 	// URL/URI validation
 	//
 	// optional spec.UrlScheme assert_url = 60005;
-	E_AssertUrl = &file_libs_spec_proto_extTypes[21]
+	E_AssertUrl = &file_libs_spec_proto_extTypes[22]
 	// Email validation
 	//
 	// optional bool assert_email = 60006;
-	E_AssertEmail = &file_libs_spec_proto_extTypes[22]
+	E_AssertEmail = &file_libs_spec_proto_extTypes[23]
 	// FQDN validation
 	//
 	// optional bool assert_fqdn = 60007;
-	E_AssertFqdn = &file_libs_spec_proto_extTypes[23]
+	E_AssertFqdn = &file_libs_spec_proto_extTypes[24]
 	// Duration/Timeout validation
 	//
 	// optional spec.DurationType assert_duration = 60008;
-	E_AssertDuration = &file_libs_spec_proto_extTypes[24]
+	E_AssertDuration = &file_libs_spec_proto_extTypes[25]
 	// optional int64 assert_duration_min = 60009;
-	E_AssertDurationMin = &file_libs_spec_proto_extTypes[25]
+	E_AssertDurationMin = &file_libs_spec_proto_extTypes[26]
 	// optional int64 assert_duration_max = 60010;
-	E_AssertDurationMax = &file_libs_spec_proto_extTypes[26]
+	E_AssertDurationMax = &file_libs_spec_proto_extTypes[27]
 	// Listen address validation (host:port format)
 	//
 	// optional bool assert_listen_addr = 60015;
-	E_AssertListenAddr = &file_libs_spec_proto_extTypes[27]
+	E_AssertListenAddr = &file_libs_spec_proto_extTypes[28]
 	// Base64 validation
 	//
 	// optional bool assert_base64 = 60016;
-	E_AssertBase64 = &file_libs_spec_proto_extTypes[28]
+	E_AssertBase64 = &file_libs_spec_proto_extTypes[29]
 	// String length validation
 	//
 	// optional uint32 assert_min_length = 60017;
-	E_AssertMinLength = &file_libs_spec_proto_extTypes[29]
+	E_AssertMinLength = &file_libs_spec_proto_extTypes[30]
 	// optional uint32 assert_max_length = 60018;
-	E_AssertMaxLength = &file_libs_spec_proto_extTypes[30]
+	E_AssertMaxLength = &file_libs_spec_proto_extTypes[31]
 	// Enum non-zero validation (ensures enum is not 0/_UNDEFINED value)
 	//
 	// optional bool assert_enum_defined = 60019;
-	E_AssertEnumDefined = &file_libs_spec_proto_extTypes[31]
+	E_AssertEnumDefined = &file_libs_spec_proto_extTypes[32]
 	// File path validation
 	//
 	// optional spec.PathType assert_file_path = 60020;
-	E_AssertFilePath = &file_libs_spec_proto_extTypes[32]
+	E_AssertFilePath = &file_libs_spec_proto_extTypes[33]
 	// Simple numeric comparisons (for most common cases)
 	// These work with int32, int64, uint32, uint64 fields
 	//
 	// optional int64 assert_gt = 60021;
-	E_AssertGt = &file_libs_spec_proto_extTypes[33] // greater than
+	E_AssertGt = &file_libs_spec_proto_extTypes[34] // greater than
 	// optional int64 assert_ge = 60022;
-	E_AssertGe = &file_libs_spec_proto_extTypes[34] // greater than or equal
+	E_AssertGe = &file_libs_spec_proto_extTypes[35] // greater than or equal
 	// optional int64 assert_lt = 60023;
-	E_AssertLt = &file_libs_spec_proto_extTypes[35] // less than
+	E_AssertLt = &file_libs_spec_proto_extTypes[36] // less than
 	// optional int64 assert_le = 60024;
-	E_AssertLe = &file_libs_spec_proto_extTypes[36] // less than or equal
+	E_AssertLe = &file_libs_spec_proto_extTypes[37] // less than or equal
 	// Complex numeric constraints (for advanced validation scenarios)
 	//
 	// optional spec.NumericConstraint assert_numeric = 60025;
-	E_AssertNumeric = &file_libs_spec_proto_extTypes[37]
+	E_AssertNumeric = &file_libs_spec_proto_extTypes[38]
 	// Floating-point constraints (for float and double fields)
 	//
 	// optional spec.FloatConstraint assert_float = 60026;
-	E_AssertFloat = &file_libs_spec_proto_extTypes[38]
+	E_AssertFloat = &file_libs_spec_proto_extTypes[39]
 	// OPA policy bundle validation
 	// Validates that a string contains a valid base64-encoded OPA policy bundle (tar.gz with .rego files)
 	//
 	// optional bool assert_opa_policy = 60027;
-	E_AssertOpaPolicy = &file_libs_spec_proto_extTypes[39]
+	E_AssertOpaPolicy = &file_libs_spec_proto_extTypes[40]
 	// Semantic version validation
 	// Validates that a string follows semantic versioning format (e.g., "1.0.0", "v2.3.1")
 	// Supports optional 'v' prefix and follows semver.org specification
 	//
 	// optional bool assert_semver = 60028;
-	E_AssertSemver = &file_libs_spec_proto_extTypes[40]
+	E_AssertSemver = &file_libs_spec_proto_extTypes[41]
 	// Parameter key mapping for FromMap generation
 	// Explicitly maps this field to a specific enum value for parameter parsing
 	// Example: [(consts.param_key) = "TOKEN_PARAM_KEY_CLIENT_ID"]
 	//
 	// optional string param_key = 60029;
-	E_ParamKey = &file_libs_spec_proto_extTypes[41]
+	E_ParamKey = &file_libs_spec_proto_extTypes[42]
 	// Conditional requirement: this field is required when another field equals false
 	// Specifies the name of a boolean field that, when false, makes this field required
 	// Example: [(consts.required_if_false) = "disable_tls"] means this field is required when disable_tls is false
 	//
 	// optional string required_if_false = 60030;
-	E_RequiredIfFalse = &file_libs_spec_proto_extTypes[42]
+	E_RequiredIfFalse = &file_libs_spec_proto_extTypes[43]
 	// Conditional requirement: this field is required when another field equals true
 	// Specifies the name of a boolean field that, when true, makes this field required
 	// Example: [(consts.required_if_true) = "enable_cors"] means this field is required when enable_cors is true
 	//
 	// optional string required_if_true = 60031;
-	E_RequiredIfTrue = &file_libs_spec_proto_extTypes[43]
+	E_RequiredIfTrue = &file_libs_spec_proto_extTypes[44]
 	// Host validation (IP address OR FQDN)
 	// Validates that a string is either a valid IP address (IPv4/IPv6) or a valid FQDN.
 	// This is an OR check — the value must satisfy at least one of the two formats.
 	// Use this for fields that accept a network host identifier.
 	//
 	// optional bool assert_host = 60032;
-	E_AssertHost = &file_libs_spec_proto_extTypes[44]
+	E_AssertHost = &file_libs_spec_proto_extTypes[45]
 	// Field-level default value annotations.
 	// Attaches a default constant directly to a field. The code generators will
 	// emit a constant named DEFAULT_{FIELD_NAME_UPPER_SNAKE} in the constants output.
@@ -2832,46 +2847,46 @@ var (
 	//	-> generates: DEFAULT_PARTITION_COUNT = 271
 	//
 	// optional string default_string = 60033;
-	E_DefaultString = &file_libs_spec_proto_extTypes[45]
+	E_DefaultString = &file_libs_spec_proto_extTypes[46]
 	// optional int64 default_int = 60034;
-	E_DefaultInt = &file_libs_spec_proto_extTypes[46]
+	E_DefaultInt = &file_libs_spec_proto_extTypes[47]
 	// optional double default_float = 60035;
-	E_DefaultFloat = &file_libs_spec_proto_extTypes[47]
+	E_DefaultFloat = &file_libs_spec_proto_extTypes[48]
 	// optional bool default_bool = 60036;
-	E_DefaultBool = &file_libs_spec_proto_extTypes[48]
+	E_DefaultBool = &file_libs_spec_proto_extTypes[49]
 	// key provides a string identifier for mapping on Config fields.
 	// Links a frontendserver.Config or statedb.Config field to its target service/state.
 	// Example: statedb.Config state = 2 [(spec.key) = "BaseballState"];
 	//
 	// optional string key = 60037;
-	E_Key = &file_libs_spec_proto_extTypes[49]
+	E_Key = &file_libs_spec_proto_extTypes[50]
 	// Conditional requirement: this field is required when another field equals a specific value.
 	// Works with enum or string sibling fields.
 	// Example: [(spec.required_if_eq) = {field: "action", value: "ACTION_PERMIT"}]
 	//
 	// optional spec.ConditionalRequirement required_if_eq = 60038;
-	E_RequiredIfEq = &file_libs_spec_proto_extTypes[50]
+	E_RequiredIfEq = &file_libs_spec_proto_extTypes[51]
 	// assert_max_size enforces a maximum byte size on string and bytes fields.
 	// When not set, a default of 32,768 bytes (32 KB) is applied automatically.
 	// Fields with assert_opa_policy = true default to 5,242,880 bytes (5 MB) instead.
 	// Use this to override the default for fields that need more or less capacity.
 	//
 	// optional uint32 assert_max_size = 60039;
-	E_AssertMaxSize = &file_libs_spec_proto_extTypes[51]
+	E_AssertMaxSize = &file_libs_spec_proto_extTypes[52]
 	// assert_max_items enforces a maximum element count on repeated and map fields.
 	// REQUIRED on all repeated and map fields — build fails if missing.
 	// This forces implementors to think about capacity and enables utilization monitoring.
 	//
 	// optional uint32 assert_max_items = 60040;
-	E_AssertMaxItems = &file_libs_spec_proto_extTypes[52]
+	E_AssertMaxItems = &file_libs_spec_proto_extTypes[53]
 	// Statedb field indexing: marks a field for Hazelcast index creation
 	//
 	// optional bool indexed = 50010;
-	E_Indexed = &file_libs_spec_proto_extTypes[53]
+	E_Indexed = &file_libs_spec_proto_extTypes[54]
 	// Statedb index type hint for indexed fields
 	//
 	// optional string index_type = 50011;
-	E_IndexType = &file_libs_spec_proto_extTypes[54] // "HASH", "SORTED", "BITMAP"
+	E_IndexType = &file_libs_spec_proto_extTypes[55] // "HASH", "SORTED", "BITMAP"
 	// Statedb consistency model for boundary fields within a backend state root message.
 	// UNSPECIFIED (default): serialized as part of parent message, not a separate IMap.
 	// ATOMIC: own IMap, requires Lock for mutations.
@@ -2880,35 +2895,35 @@ var (
 	// All direct children of a backend state root must have an explicit consistency annotation.
 	//
 	// optional spec.ConsistencyModel consistency = 50012;
-	E_Consistency = &file_libs_spec_proto_extTypes[55]
+	E_Consistency = &file_libs_spec_proto_extTypes[56]
 	// Statedb private: field can never be accessed by other services (owner RW only)
 	//
 	// optional bool private = 50013;
-	E_Private = &file_libs_spec_proto_extTypes[56]
+	E_Private = &file_libs_spec_proto_extTypes[57]
 	// state_import declares that this field's value comes from another service's state.
 	// Example: [(spec.state_import) = "football.FootballState.roster"];
 	//
 	// optional string state_import = 50014;
-	E_StateImport = &file_libs_spec_proto_extTypes[57]
+	E_StateImport = &file_libs_spec_proto_extTypes[58]
 	// queue marks a state root field as a FIFO queue (Hazelcast IQueue).
 	// One consumer receives each item. Operations: offer, poll, peek, size.
 	// Example: TaskItem task_queue = 3 [(spec.queue) = true];
 	//
 	// optional bool queue = 50015;
-	E_Queue = &file_libs_spec_proto_extTypes[58]
+	E_Queue = &file_libs_spec_proto_extTypes[59]
 	// priority_queue marks a state root field as a priority queue.
 	// Value is the name of the field used for priority ordering (e.g., "severity").
 	// Items consumed in priority order (highest first).
 	// Example: AlertItem alert_queue = 4 [(spec.priority_queue) = "severity"];
 	//
 	// optional string priority_queue = 50016;
-	E_PriorityQueue = &file_libs_spec_proto_extTypes[59]
+	E_PriorityQueue = &file_libs_spec_proto_extTypes[60]
 	// topic marks a state root field as a pub/sub topic (Hazelcast ITopic).
 	// Every subscriber receives every message. Operations: publish, subscribe.
 	// Example: EventData event_stream = 5 [(spec.topic) = true];
 	//
 	// optional bool topic = 50017;
-	E_Topic = &file_libs_spec_proto_extTypes[60]
+	E_Topic = &file_libs_spec_proto_extTypes[61]
 	// leader marks a queue, topic, or priority_queue field as requiring leader election.
 	// When set, the generated code automatically manages election, lease renewal, and
 	// watch streams. Write operations (Offer/Publish) are gated on leader status.
@@ -2916,67 +2931,67 @@ var (
 	// Example: TaskItem task_queue = 3 [(spec.queue) = true, (spec.leader) = true];
 	//
 	// optional bool leader = 50018;
-	E_Leader = &file_libs_spec_proto_extTypes[61]
+	E_Leader = &file_libs_spec_proto_extTypes[62]
 	// Statedb storage: number of synchronous backups for this boundary's IMap.
 	// Synchronous backups block writes until complete, providing stronger durability.
 	// Range: 0-6. Default: 1.
 	// Example: TeamRoster roster = 1 [(spec.consistency) = CONSISTENCY_ATOMIC, (spec.sync_backup_count) = 2];
 	//
 	// optional int32 sync_backup_count = 50020;
-	E_SyncBackupCount = &file_libs_spec_proto_extTypes[62]
+	E_SyncBackupCount = &file_libs_spec_proto_extTypes[63]
 	// Statedb storage: number of asynchronous backups for this boundary's IMap.
 	// Asynchronous backups do not block writes, providing better throughput
 	// at the cost of potential data loss during node failure. Range: 0-6. Default: 0.
 	//
 	// optional int32 async_backup_count = 50021;
-	E_AsyncBackupCount = &file_libs_spec_proto_extTypes[63]
+	E_AsyncBackupCount = &file_libs_spec_proto_extTypes[64]
 	// Statedb eviction: which entries to evict when max_size is reached.
 	// Default: EVICTION_POLICY_NONE (no eviction).
 	// Example: SessionData sessions = 2 [(spec.consistency) = CONSISTENCY_CONVERGENT, (spec.eviction_policy) = EVICTION_POLICY_LRU];
 	//
 	// optional spec.EvictionPolicy eviction_policy = 50022;
-	E_EvictionPolicy = &file_libs_spec_proto_extTypes[64]
+	E_EvictionPolicy = &file_libs_spec_proto_extTypes[65]
 	// Statedb eviction: maximum number of entries (or heap metric) before eviction begins.
 	// Default: 0 (no limit).
 	//
 	// optional int32 eviction_max_size = 50023;
-	E_EvictionMaxSize = &file_libs_spec_proto_extTypes[65]
+	E_EvictionMaxSize = &file_libs_spec_proto_extTypes[66]
 	// Statedb eviction: what the eviction_max_size limit refers to.
 	// Default: MAX_SIZE_POLICY_ENTRY_COUNT.
 	//
 	// optional spec.MaxSizePolicy eviction_max_size_policy = 50024;
-	E_EvictionMaxSizePolicy = &file_libs_spec_proto_extTypes[66]
+	E_EvictionMaxSizePolicy = &file_libs_spec_proto_extTypes[67]
 	// Statedb eviction: time-to-live for entries in seconds.
 	// Entries older than this are automatically evicted.
 	// Default: 0 (no TTL, entries live forever).
 	//
 	// optional int64 eviction_ttl_seconds = 50025;
-	E_EvictionTtlSeconds = &file_libs_spec_proto_extTypes[67]
+	E_EvictionTtlSeconds = &file_libs_spec_proto_extTypes[68]
 	// Statedb eviction: maximum idle time for entries in seconds.
 	// Entries not accessed within this period are automatically evicted.
 	// Default: 0 (no idle expiration).
 	//
 	// optional int64 eviction_max_idle_seconds = 50026;
-	E_EvictionMaxIdleSeconds = &file_libs_spec_proto_extTypes[68]
+	E_EvictionMaxIdleSeconds = &file_libs_spec_proto_extTypes[69]
 	// epoch_expiration marks an int64 field as a Unix epoch expiration timestamp (seconds).
 	// Collections only: 0 = no expiration; > 0 must be future and within 1 year.
 	// Hazelcast TTL = epoch - now at write time; entry auto-removed on expiry.
 	//
 	// optional bool epoch_expiration = 50027;
-	E_EpochExpiration = &file_libs_spec_proto_extTypes[69]
+	E_EpochExpiration = &file_libs_spec_proto_extTypes[70]
 	// persistence marks a graph boundary (singleton, collection, map) for durable storage.
 	// When true, the backend persists this boundary's data across restarts.
 	// Can only be set on fields with a (spec.consistency) annotation.
 	// Cannot be set on queues, topics, or priority queues.
 	//
 	// optional bool persistence = 50028;
-	E_Persistence = &file_libs_spec_proto_extTypes[70]
+	E_Persistence = &file_libs_spec_proto_extTypes[71]
 	// uncached marks a boundary as fetch-on-demand.
 	// No local Watch stream, no cached state. All reads go through Fetch(ctx) or Query(ctx).
 	// Valid on fields with (spec.consistency). Cannot combine with queue/topic/priority_queue.
 	//
 	// optional bool uncached = 50029;
-	E_Uncached = &file_libs_spec_proto_extTypes[71]
+	E_Uncached = &file_libs_spec_proto_extTypes[72]
 	// boundary_perms overrides the message-level backend_perms for this boundary field.
 	// Only valid on fields with a (spec.consistency) annotation inside a service_backend message.
 	// Callers not listed inherit the message-level access mode.
@@ -2988,7 +3003,7 @@ var (
 	//	];
 	//
 	// repeated spec.BackendPerms boundary_perms = 50030;
-	E_BoundaryPerms = &file_libs_spec_proto_extTypes[72]
+	E_BoundaryPerms = &file_libs_spec_proto_extTypes[73]
 	// refresh_on_miss names the message type used as the lookup request
 	// for cache-miss-triggered refresh. When set, tacplus generates a
 	// Lookup{FieldName} RPC on the backend service.
@@ -2998,14 +3013,14 @@ var (
 	// Cannot combine with queue/topic/priority_queue.
 	//
 	// optional string refresh_on_miss = 50031;
-	E_RefreshOnMiss = &file_libs_spec_proto_extTypes[73]
+	E_RefreshOnMiss = &file_libs_spec_proto_extTypes[74]
 	// command marks this field as a command RPC on the backend service.
 	// The field type is the request message; the response is always google.protobuf.Empty.
 	// Commands are mutations — only RW callers get the accessor.
 	// Use boundary_perms to restrict which callers can invoke the command.
 	//
 	// optional bool command = 50032;
-	E_Command = &file_libs_spec_proto_extTypes[74]
+	E_Command = &file_libs_spec_proto_extTypes[75]
 	// view_sources marks a field as a read-only view over multiple collection boundaries.
 	// Each entry is the field name of a source collection within the same service_backend.
 	// The view unions all source collections into a single read-only boundary.
@@ -3032,7 +3047,7 @@ var (
 	//	];
 	//
 	// repeated string view_sources = 50033;
-	E_ViewSources = &file_libs_spec_proto_extTypes[75]
+	E_ViewSources = &file_libs_spec_proto_extTypes[76]
 	// boundary_callers lists services allowed to call this boundary cross-namespace.
 	// Applies to queue (offer), topic (publish), and command (exec) boundaries.
 	// Requires matching backend_perms with BACKEND_PERMS_MODE_CALL on the caller's
@@ -3040,7 +3055,7 @@ var (
 	// Example: TaskItem task_queue = 3 [(spec.queue) = true, (spec.boundary_callers) = "woodstock"];
 	//
 	// repeated string boundary_callers = 50036;
-	E_BoundaryCallers = &file_libs_spec_proto_extTypes[76]
+	E_BoundaryCallers = &file_libs_spec_proto_extTypes[77]
 	// view_member registers this collection as a contributing source to a
 	// named cross-boundary view. All collections with the same view_member
 	// value are aggregated by the backend into a single read-only view service.
@@ -3054,13 +3069,13 @@ var (
 	//   - The message type must have an (spec.indexed) field for map keying.
 	//
 	// optional string view_member = 50035;
-	E_ViewMember = &file_libs_spec_proto_extTypes[77]
+	E_ViewMember = &file_libs_spec_proto_extTypes[78]
 	// instance_keyed: server extracts instance_id from the caller's token
 	// and uses "service_id@instance_id" as the map key. The publisher
 	// sees a singleton Set API (no key param). Consumers see a collection.
 	//
 	// optional bool instance_keyed = 50034;
-	E_InstanceKeyed = &file_libs_spec_proto_extTypes[78]
+	E_InstanceKeyed = &file_libs_spec_proto_extTypes[79]
 )
 
 // Extension fields to descriptorpb.ServiceOptions.
@@ -3069,19 +3084,19 @@ var (
 	// Reserved field number 70003.
 	//
 	// repeated string reads_state = 70003;
-	E_ReadsState = &file_libs_spec_proto_extTypes[79]
+	E_ReadsState = &file_libs_spec_proto_extTypes[80]
 	// service_frontend declares this service as a frontend.
 	// Value is comma-separated instance names (e.g., "House,Plane").
 	// Single name = single instance (flat accessor, backward compat).
 	// Example: option (spec.service_frontend) = "SnoopyService";
 	//
 	// optional string service_frontend = 70004;
-	E_ServiceFrontend = &file_libs_spec_proto_extTypes[80]
+	E_ServiceFrontend = &file_libs_spec_proto_extTypes[81]
 	// state_access is DEPRECATED — use backend_perms (MessageOption) instead.
 	// Reserved field number 70005.
 	//
 	// repeated spec.BackendPerms state_access = 70005;
-	E_StateAccess = &file_libs_spec_proto_extTypes[81]
+	E_StateAccess = &file_libs_spec_proto_extTypes[82]
 	// service_backend_rpc declares this service as a backend RPC service.
 	// The value is the backend service name (e.g., "TokenExchanger").
 	// Generates: gRPC client wrappers for callers, server wiring in BackendServers.
@@ -3090,18 +3105,18 @@ var (
 	// this only generates client wrappers and registration plumbing.
 	//
 	// optional string service_backend_rpc = 70006;
-	E_ServiceBackendRpc = &file_libs_spec_proto_extTypes[82]
+	E_ServiceBackendRpc = &file_libs_spec_proto_extTypes[83]
 	// disable_auth disables OPA authorization checks for all RPCs in this service.
 	// Use this for services that must be reachable without a bearer token
 	// (e.g., an authentication provider that issues tokens).
 	//
 	// optional bool disable_auth = 70007;
-	E_DisableAuth = &file_libs_spec_proto_extTypes[83]
+	E_DisableAuth = &file_libs_spec_proto_extTypes[84]
 	// disable_validation disables proto validation on request and response messages
 	// for all RPCs in this service.
 	//
 	// optional bool disable_validation = 70008;
-	E_DisableValidation = &file_libs_spec_proto_extTypes[84]
+	E_DisableValidation = &file_libs_spec_proto_extTypes[85]
 	// allowed_callers restricts which services can call this service.
 	// Each entry is a service identity (token "sub" claim) that is allowed.
 	// Empty list = any authenticated caller is allowed.
@@ -3109,7 +3124,7 @@ var (
 	// Not mutually exclusive with OPA — both are checked.
 	//
 	// repeated string allowed_callers = 70009;
-	E_AllowedCallers = &file_libs_spec_proto_extTypes[85]
+	E_AllowedCallers = &file_libs_spec_proto_extTypes[86]
 )
 
 // Extension fields to descriptorpb.MethodOptions.
@@ -3118,12 +3133,12 @@ var (
 	// Overrides service-level auth settings for individual endpoints.
 	//
 	// optional bool disable_auth_method = 80002;
-	E_DisableAuthMethod = &file_libs_spec_proto_extTypes[86]
+	E_DisableAuthMethod = &file_libs_spec_proto_extTypes[87]
 	// disable_validation disables proto validation on request and response
 	// messages for this specific RPC.
 	//
 	// optional bool disable_validation_method = 80003;
-	E_DisableValidationMethod = &file_libs_spec_proto_extTypes[87]
+	E_DisableValidationMethod = &file_libs_spec_proto_extTypes[88]
 	// allowed_callers_method restricts which services can call this specific RPC.
 	// Overrides service-level allowed_callers for individual endpoints.
 	// Each entry is a service identity (token "sub" claim) that is allowed.
@@ -3131,7 +3146,7 @@ var (
 	// Not mutually exclusive with OPA — both are checked.
 	//
 	// repeated string allowed_callers_method = 80004;
-	E_AllowedCallersMethod = &file_libs_spec_proto_extTypes[88]
+	E_AllowedCallersMethod = &file_libs_spec_proto_extTypes[89]
 )
 
 var File_libs_spec_proto protoreflect.FileDescriptor
@@ -3341,7 +3356,9 @@ const file_libs_spec_proto_rawDesc = "" +
 	"\rbackend_perms\x12\x1f.google.protobuf.MessageOptions\x18\x89\xd5\x03 \x03(\v2\x12.spec.BackendPermsR\fbackendPerms:j\n" +
 	"\x0ffrontend_config\x12\x1f.google.protobuf.MessageOptions\x18\x8a\xd5\x03 \x01(\v2\x1e.spec.FrontendConfigAnnotationR\x0efrontendConfig:L\n" +
 	"\x10backend_internal\x12\x1f.google.protobuf.MessageOptions\x18\x8b\xd5\x03 \x01(\bR\x0fbackendInternal:S\n" +
-	"\x14backend_disable_auth\x12\x1f.google.protobuf.MessageOptions\x18\x8c\xd5\x03 \x01(\bR\x12backendDisableAuth:H\n" +
+	"\x14backend_disable_auth\x12\x1f.google.protobuf.MessageOptions\x18\x8c\xd5\x03 \x01(\bR\x12backendDisableAuth:@\n" +
+	"\n" +
+	"llm_assist\x12\x1f.google.protobuf.MessageOptions\x18\x8d\xd5\x03 \x01(\bR\tllmAssist:H\n" +
 	"\x0fassert_required\x12\x1d.google.protobuf.FieldOptions\x18\xe1\xd4\x03 \x01(\bR\x0eassertRequired:`\n" +
 	"\x12assert_ipaddr_type\x12\x1d.google.protobuf.FieldOptions\x18\xe2\xd4\x03 \x01(\x0e2\x11.spec.IpAddrTypesR\x10assertIpaddrType:V\n" +
 	"\x0fassert_enc_type\x12\x1d.google.protobuf.FieldOptions\x18\xe3\xd4\x03 \x01(\x0e2\r.spec.EncTypeR\rassertEncType:G\n" +
@@ -3500,108 +3517,109 @@ var file_libs_spec_proto_depIdxs = []int32{
 	30,  // 24: spec.frontend_config:extendee -> google.protobuf.MessageOptions
 	30,  // 25: spec.backend_internal:extendee -> google.protobuf.MessageOptions
 	30,  // 26: spec.backend_disable_auth:extendee -> google.protobuf.MessageOptions
-	31,  // 27: spec.assert_required:extendee -> google.protobuf.FieldOptions
-	31,  // 28: spec.assert_ipaddr_type:extendee -> google.protobuf.FieldOptions
-	31,  // 29: spec.assert_enc_type:extendee -> google.protobuf.FieldOptions
-	31,  // 30: spec.assert_net_port:extendee -> google.protobuf.FieldOptions
-	31,  // 31: spec.assert_url:extendee -> google.protobuf.FieldOptions
-	31,  // 32: spec.assert_email:extendee -> google.protobuf.FieldOptions
-	31,  // 33: spec.assert_fqdn:extendee -> google.protobuf.FieldOptions
-	31,  // 34: spec.assert_duration:extendee -> google.protobuf.FieldOptions
-	31,  // 35: spec.assert_duration_min:extendee -> google.protobuf.FieldOptions
-	31,  // 36: spec.assert_duration_max:extendee -> google.protobuf.FieldOptions
-	31,  // 37: spec.assert_listen_addr:extendee -> google.protobuf.FieldOptions
-	31,  // 38: spec.assert_base64:extendee -> google.protobuf.FieldOptions
-	31,  // 39: spec.assert_min_length:extendee -> google.protobuf.FieldOptions
-	31,  // 40: spec.assert_max_length:extendee -> google.protobuf.FieldOptions
-	31,  // 41: spec.assert_enum_defined:extendee -> google.protobuf.FieldOptions
-	31,  // 42: spec.assert_file_path:extendee -> google.protobuf.FieldOptions
-	31,  // 43: spec.assert_gt:extendee -> google.protobuf.FieldOptions
-	31,  // 44: spec.assert_ge:extendee -> google.protobuf.FieldOptions
-	31,  // 45: spec.assert_lt:extendee -> google.protobuf.FieldOptions
-	31,  // 46: spec.assert_le:extendee -> google.protobuf.FieldOptions
-	31,  // 47: spec.assert_numeric:extendee -> google.protobuf.FieldOptions
-	31,  // 48: spec.assert_float:extendee -> google.protobuf.FieldOptions
-	31,  // 49: spec.assert_opa_policy:extendee -> google.protobuf.FieldOptions
-	31,  // 50: spec.assert_semver:extendee -> google.protobuf.FieldOptions
-	31,  // 51: spec.param_key:extendee -> google.protobuf.FieldOptions
-	31,  // 52: spec.required_if_false:extendee -> google.protobuf.FieldOptions
-	31,  // 53: spec.required_if_true:extendee -> google.protobuf.FieldOptions
-	31,  // 54: spec.assert_host:extendee -> google.protobuf.FieldOptions
-	31,  // 55: spec.default_string:extendee -> google.protobuf.FieldOptions
-	31,  // 56: spec.default_int:extendee -> google.protobuf.FieldOptions
-	31,  // 57: spec.default_float:extendee -> google.protobuf.FieldOptions
-	31,  // 58: spec.default_bool:extendee -> google.protobuf.FieldOptions
-	31,  // 59: spec.key:extendee -> google.protobuf.FieldOptions
-	31,  // 60: spec.required_if_eq:extendee -> google.protobuf.FieldOptions
-	31,  // 61: spec.assert_max_size:extendee -> google.protobuf.FieldOptions
-	31,  // 62: spec.assert_max_items:extendee -> google.protobuf.FieldOptions
-	31,  // 63: spec.indexed:extendee -> google.protobuf.FieldOptions
-	31,  // 64: spec.index_type:extendee -> google.protobuf.FieldOptions
-	31,  // 65: spec.consistency:extendee -> google.protobuf.FieldOptions
-	31,  // 66: spec.private:extendee -> google.protobuf.FieldOptions
-	31,  // 67: spec.state_import:extendee -> google.protobuf.FieldOptions
-	31,  // 68: spec.queue:extendee -> google.protobuf.FieldOptions
-	31,  // 69: spec.priority_queue:extendee -> google.protobuf.FieldOptions
-	31,  // 70: spec.topic:extendee -> google.protobuf.FieldOptions
-	31,  // 71: spec.leader:extendee -> google.protobuf.FieldOptions
-	31,  // 72: spec.sync_backup_count:extendee -> google.protobuf.FieldOptions
-	31,  // 73: spec.async_backup_count:extendee -> google.protobuf.FieldOptions
-	31,  // 74: spec.eviction_policy:extendee -> google.protobuf.FieldOptions
-	31,  // 75: spec.eviction_max_size:extendee -> google.protobuf.FieldOptions
-	31,  // 76: spec.eviction_max_size_policy:extendee -> google.protobuf.FieldOptions
-	31,  // 77: spec.eviction_ttl_seconds:extendee -> google.protobuf.FieldOptions
-	31,  // 78: spec.eviction_max_idle_seconds:extendee -> google.protobuf.FieldOptions
-	31,  // 79: spec.epoch_expiration:extendee -> google.protobuf.FieldOptions
-	31,  // 80: spec.persistence:extendee -> google.protobuf.FieldOptions
-	31,  // 81: spec.uncached:extendee -> google.protobuf.FieldOptions
-	31,  // 82: spec.boundary_perms:extendee -> google.protobuf.FieldOptions
-	31,  // 83: spec.refresh_on_miss:extendee -> google.protobuf.FieldOptions
-	31,  // 84: spec.command:extendee -> google.protobuf.FieldOptions
-	31,  // 85: spec.view_sources:extendee -> google.protobuf.FieldOptions
-	31,  // 86: spec.boundary_callers:extendee -> google.protobuf.FieldOptions
-	31,  // 87: spec.view_member:extendee -> google.protobuf.FieldOptions
-	31,  // 88: spec.instance_keyed:extendee -> google.protobuf.FieldOptions
-	32,  // 89: spec.reads_state:extendee -> google.protobuf.ServiceOptions
-	32,  // 90: spec.service_frontend:extendee -> google.protobuf.ServiceOptions
-	32,  // 91: spec.state_access:extendee -> google.protobuf.ServiceOptions
-	32,  // 92: spec.service_backend_rpc:extendee -> google.protobuf.ServiceOptions
-	32,  // 93: spec.disable_auth:extendee -> google.protobuf.ServiceOptions
-	32,  // 94: spec.disable_validation:extendee -> google.protobuf.ServiceOptions
-	32,  // 95: spec.allowed_callers:extendee -> google.protobuf.ServiceOptions
-	33,  // 96: spec.disable_auth_method:extendee -> google.protobuf.MethodOptions
-	33,  // 97: spec.disable_validation_method:extendee -> google.protobuf.MethodOptions
-	33,  // 98: spec.allowed_callers_method:extendee -> google.protobuf.MethodOptions
-	12,  // 99: spec.string_const:type_name -> spec.StringConst
-	13,  // 100: spec.int_const:type_name -> spec.IntConst
-	14,  // 101: spec.float_const:type_name -> spec.FloatConst
-	15,  // 102: spec.bool_const:type_name -> spec.BoolConst
-	18,  // 103: spec.generate_from_map:type_name -> spec.ParamMapConfig
-	5,   // 104: spec.backend_consistency:type_name -> spec.ConsistencyModel
-	6,   // 105: spec.backend_eviction_policy:type_name -> spec.EvictionPolicy
-	21,  // 106: spec.backend_perms:type_name -> spec.BackendPerms
-	20,  // 107: spec.frontend_config:type_name -> spec.FrontendConfigAnnotation
-	0,   // 108: spec.assert_ipaddr_type:type_name -> spec.IpAddrTypes
-	1,   // 109: spec.assert_enc_type:type_name -> spec.EncType
-	2,   // 110: spec.assert_url:type_name -> spec.UrlScheme
-	3,   // 111: spec.assert_duration:type_name -> spec.DurationType
-	4,   // 112: spec.assert_file_path:type_name -> spec.PathType
-	16,  // 113: spec.assert_numeric:type_name -> spec.NumericConstraint
-	17,  // 114: spec.assert_float:type_name -> spec.FloatConstraint
-	19,  // 115: spec.required_if_eq:type_name -> spec.ConditionalRequirement
-	5,   // 116: spec.consistency:type_name -> spec.ConsistencyModel
-	6,   // 117: spec.eviction_policy:type_name -> spec.EvictionPolicy
-	7,   // 118: spec.eviction_max_size_policy:type_name -> spec.MaxSizePolicy
-	21,  // 119: spec.boundary_perms:type_name -> spec.BackendPerms
-	21,  // 120: spec.state_access:type_name -> spec.BackendPerms
-	27,  // 121: spec.LockService.GetLock:input_type -> spec.Lock
-	27,  // 122: spec.LockService.ReleaseLock:input_type -> spec.Lock
-	27,  // 123: spec.LockService.GetLock:output_type -> spec.Lock
-	27,  // 124: spec.LockService.ReleaseLock:output_type -> spec.Lock
-	123, // [123:125] is the sub-list for method output_type
-	121, // [121:123] is the sub-list for method input_type
-	99,  // [99:121] is the sub-list for extension type_name
-	10,  // [10:99] is the sub-list for extension extendee
+	30,  // 27: spec.llm_assist:extendee -> google.protobuf.MessageOptions
+	31,  // 28: spec.assert_required:extendee -> google.protobuf.FieldOptions
+	31,  // 29: spec.assert_ipaddr_type:extendee -> google.protobuf.FieldOptions
+	31,  // 30: spec.assert_enc_type:extendee -> google.protobuf.FieldOptions
+	31,  // 31: spec.assert_net_port:extendee -> google.protobuf.FieldOptions
+	31,  // 32: spec.assert_url:extendee -> google.protobuf.FieldOptions
+	31,  // 33: spec.assert_email:extendee -> google.protobuf.FieldOptions
+	31,  // 34: spec.assert_fqdn:extendee -> google.protobuf.FieldOptions
+	31,  // 35: spec.assert_duration:extendee -> google.protobuf.FieldOptions
+	31,  // 36: spec.assert_duration_min:extendee -> google.protobuf.FieldOptions
+	31,  // 37: spec.assert_duration_max:extendee -> google.protobuf.FieldOptions
+	31,  // 38: spec.assert_listen_addr:extendee -> google.protobuf.FieldOptions
+	31,  // 39: spec.assert_base64:extendee -> google.protobuf.FieldOptions
+	31,  // 40: spec.assert_min_length:extendee -> google.protobuf.FieldOptions
+	31,  // 41: spec.assert_max_length:extendee -> google.protobuf.FieldOptions
+	31,  // 42: spec.assert_enum_defined:extendee -> google.protobuf.FieldOptions
+	31,  // 43: spec.assert_file_path:extendee -> google.protobuf.FieldOptions
+	31,  // 44: spec.assert_gt:extendee -> google.protobuf.FieldOptions
+	31,  // 45: spec.assert_ge:extendee -> google.protobuf.FieldOptions
+	31,  // 46: spec.assert_lt:extendee -> google.protobuf.FieldOptions
+	31,  // 47: spec.assert_le:extendee -> google.protobuf.FieldOptions
+	31,  // 48: spec.assert_numeric:extendee -> google.protobuf.FieldOptions
+	31,  // 49: spec.assert_float:extendee -> google.protobuf.FieldOptions
+	31,  // 50: spec.assert_opa_policy:extendee -> google.protobuf.FieldOptions
+	31,  // 51: spec.assert_semver:extendee -> google.protobuf.FieldOptions
+	31,  // 52: spec.param_key:extendee -> google.protobuf.FieldOptions
+	31,  // 53: spec.required_if_false:extendee -> google.protobuf.FieldOptions
+	31,  // 54: spec.required_if_true:extendee -> google.protobuf.FieldOptions
+	31,  // 55: spec.assert_host:extendee -> google.protobuf.FieldOptions
+	31,  // 56: spec.default_string:extendee -> google.protobuf.FieldOptions
+	31,  // 57: spec.default_int:extendee -> google.protobuf.FieldOptions
+	31,  // 58: spec.default_float:extendee -> google.protobuf.FieldOptions
+	31,  // 59: spec.default_bool:extendee -> google.protobuf.FieldOptions
+	31,  // 60: spec.key:extendee -> google.protobuf.FieldOptions
+	31,  // 61: spec.required_if_eq:extendee -> google.protobuf.FieldOptions
+	31,  // 62: spec.assert_max_size:extendee -> google.protobuf.FieldOptions
+	31,  // 63: spec.assert_max_items:extendee -> google.protobuf.FieldOptions
+	31,  // 64: spec.indexed:extendee -> google.protobuf.FieldOptions
+	31,  // 65: spec.index_type:extendee -> google.protobuf.FieldOptions
+	31,  // 66: spec.consistency:extendee -> google.protobuf.FieldOptions
+	31,  // 67: spec.private:extendee -> google.protobuf.FieldOptions
+	31,  // 68: spec.state_import:extendee -> google.protobuf.FieldOptions
+	31,  // 69: spec.queue:extendee -> google.protobuf.FieldOptions
+	31,  // 70: spec.priority_queue:extendee -> google.protobuf.FieldOptions
+	31,  // 71: spec.topic:extendee -> google.protobuf.FieldOptions
+	31,  // 72: spec.leader:extendee -> google.protobuf.FieldOptions
+	31,  // 73: spec.sync_backup_count:extendee -> google.protobuf.FieldOptions
+	31,  // 74: spec.async_backup_count:extendee -> google.protobuf.FieldOptions
+	31,  // 75: spec.eviction_policy:extendee -> google.protobuf.FieldOptions
+	31,  // 76: spec.eviction_max_size:extendee -> google.protobuf.FieldOptions
+	31,  // 77: spec.eviction_max_size_policy:extendee -> google.protobuf.FieldOptions
+	31,  // 78: spec.eviction_ttl_seconds:extendee -> google.protobuf.FieldOptions
+	31,  // 79: spec.eviction_max_idle_seconds:extendee -> google.protobuf.FieldOptions
+	31,  // 80: spec.epoch_expiration:extendee -> google.protobuf.FieldOptions
+	31,  // 81: spec.persistence:extendee -> google.protobuf.FieldOptions
+	31,  // 82: spec.uncached:extendee -> google.protobuf.FieldOptions
+	31,  // 83: spec.boundary_perms:extendee -> google.protobuf.FieldOptions
+	31,  // 84: spec.refresh_on_miss:extendee -> google.protobuf.FieldOptions
+	31,  // 85: spec.command:extendee -> google.protobuf.FieldOptions
+	31,  // 86: spec.view_sources:extendee -> google.protobuf.FieldOptions
+	31,  // 87: spec.boundary_callers:extendee -> google.protobuf.FieldOptions
+	31,  // 88: spec.view_member:extendee -> google.protobuf.FieldOptions
+	31,  // 89: spec.instance_keyed:extendee -> google.protobuf.FieldOptions
+	32,  // 90: spec.reads_state:extendee -> google.protobuf.ServiceOptions
+	32,  // 91: spec.service_frontend:extendee -> google.protobuf.ServiceOptions
+	32,  // 92: spec.state_access:extendee -> google.protobuf.ServiceOptions
+	32,  // 93: spec.service_backend_rpc:extendee -> google.protobuf.ServiceOptions
+	32,  // 94: spec.disable_auth:extendee -> google.protobuf.ServiceOptions
+	32,  // 95: spec.disable_validation:extendee -> google.protobuf.ServiceOptions
+	32,  // 96: spec.allowed_callers:extendee -> google.protobuf.ServiceOptions
+	33,  // 97: spec.disable_auth_method:extendee -> google.protobuf.MethodOptions
+	33,  // 98: spec.disable_validation_method:extendee -> google.protobuf.MethodOptions
+	33,  // 99: spec.allowed_callers_method:extendee -> google.protobuf.MethodOptions
+	12,  // 100: spec.string_const:type_name -> spec.StringConst
+	13,  // 101: spec.int_const:type_name -> spec.IntConst
+	14,  // 102: spec.float_const:type_name -> spec.FloatConst
+	15,  // 103: spec.bool_const:type_name -> spec.BoolConst
+	18,  // 104: spec.generate_from_map:type_name -> spec.ParamMapConfig
+	5,   // 105: spec.backend_consistency:type_name -> spec.ConsistencyModel
+	6,   // 106: spec.backend_eviction_policy:type_name -> spec.EvictionPolicy
+	21,  // 107: spec.backend_perms:type_name -> spec.BackendPerms
+	20,  // 108: spec.frontend_config:type_name -> spec.FrontendConfigAnnotation
+	0,   // 109: spec.assert_ipaddr_type:type_name -> spec.IpAddrTypes
+	1,   // 110: spec.assert_enc_type:type_name -> spec.EncType
+	2,   // 111: spec.assert_url:type_name -> spec.UrlScheme
+	3,   // 112: spec.assert_duration:type_name -> spec.DurationType
+	4,   // 113: spec.assert_file_path:type_name -> spec.PathType
+	16,  // 114: spec.assert_numeric:type_name -> spec.NumericConstraint
+	17,  // 115: spec.assert_float:type_name -> spec.FloatConstraint
+	19,  // 116: spec.required_if_eq:type_name -> spec.ConditionalRequirement
+	5,   // 117: spec.consistency:type_name -> spec.ConsistencyModel
+	6,   // 118: spec.eviction_policy:type_name -> spec.EvictionPolicy
+	7,   // 119: spec.eviction_max_size_policy:type_name -> spec.MaxSizePolicy
+	21,  // 120: spec.boundary_perms:type_name -> spec.BackendPerms
+	21,  // 121: spec.state_access:type_name -> spec.BackendPerms
+	27,  // 122: spec.LockService.GetLock:input_type -> spec.Lock
+	27,  // 123: spec.LockService.ReleaseLock:input_type -> spec.Lock
+	27,  // 124: spec.LockService.GetLock:output_type -> spec.Lock
+	27,  // 125: spec.LockService.ReleaseLock:output_type -> spec.Lock
+	124, // [124:126] is the sub-list for method output_type
+	122, // [122:124] is the sub-list for method input_type
+	100, // [100:122] is the sub-list for extension type_name
+	10,  // [10:100] is the sub-list for extension extendee
 	0,   // [0:10] is the sub-list for field type_name
 }
 
@@ -3625,7 +3643,7 @@ func file_libs_spec_proto_init() {
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_libs_spec_proto_rawDesc), len(file_libs_spec_proto_rawDesc)),
 			NumEnums:      12,
 			NumMessages:   16,
-			NumExtensions: 89,
+			NumExtensions: 90,
 			NumServices:   1,
 		},
 		GoTypes:           file_libs_spec_proto_goTypes,

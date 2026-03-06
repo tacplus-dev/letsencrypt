@@ -3092,6 +3092,139 @@ func ExchangeTokenResponseToTOML(v *ExchangeTokenResponse) ([]byte, error) {
 	return toml.Marshal(obj)
 }
 
+// IdentityConfigStateJSON represents IdentityConfigState in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type identityconfigstateJSON struct {
+	Config json.RawMessage `json:"config,omitempty"`
+}
+
+// IdentityConfigStateToJSON converts IdentityConfigState to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func IdentityConfigStateToJSON(v *IdentityConfigState) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "identityconfigstate is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := identityconfigstateJSON{
+		Config: func() json.RawMessage {
+			if v.Config == nil {
+				return nil
+			}
+			data, _ := ConfigToJSON(v.Config)
+			return data
+		}(),
+	}
+	return json.Marshal(helper)
+}
+
+// IdentityConfigStateFromBytes creates IdentityConfigState from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func IdentityConfigStateFromBytes(data []byte) (*IdentityConfigState, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := IdentityConfigStateFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := IdentityConfigStateFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := IdentityConfigStateFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &IdentityConfigState{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse IdentityConfigState: unsupported format or invalid data")
+}
+
+// IdentityConfigStateFromJSON creates IdentityConfigState from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func IdentityConfigStateFromJSON(data []byte) (*IdentityConfigState, error) {
+	// Unmarshal into helper struct with string enums
+	var raw identityconfigstateJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &IdentityConfigState{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &IdentityConfigState{}
+	// Parse message field: Config
+	if len(raw.Config) > 0 {
+		parsed, err := ConfigFromJSON(raw.Config)
+		if err == nil {
+			result.Config = parsed
+		}
+	}
+	return result, nil
+}
+
+// IdentityConfigStateToYAML converts IdentityConfigState to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func IdentityConfigStateToYAML(v *IdentityConfigState) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "identityconfigstate is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := IdentityConfigStateToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// IdentityConfigStateToTOML converts IdentityConfigState to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func IdentityConfigStateToTOML(v *IdentityConfigState) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "identityconfigstate is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := IdentityConfigStateToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
 // QueryValueJSON represents QueryValue in external JSON format (with string enums)
 // MARKER: JSON helper struct generated from serial.go
 type queryvalueJSON struct {
@@ -7565,6 +7698,31 @@ func ExchangeTokenResponseFromEnvVar(env map[string]string) (*ExchangeTokenRespo
 	return result, nil
 }
 
+// IdentityConfigStateToEnvVar converts IdentityConfigState to environment variable key-value pairs.
+func IdentityConfigStateToEnvVar(v *IdentityConfigState) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	if v.Config != nil {
+		for k, val := range ConfigToEnvVar(v.Config) {
+			result[k] = val
+		}
+	}
+	return result
+}
+
+// IdentityConfigStateFromEnvVar creates IdentityConfigState from environment variable key-value pairs.
+func IdentityConfigStateFromEnvVar(env map[string]string) (*IdentityConfigState, error) {
+	result := &IdentityConfigState{}
+	if sub, err := ConfigFromEnvVar(env); err != nil {
+		return nil, err
+	} else if sub != nil {
+		result.Config = sub
+	}
+	return result, nil
+}
+
 // QueryValueToEnvVar converts QueryValue to environment variable key-value pairs.
 func QueryValueToEnvVar(v *QueryValue) map[string]string {
 	if v == nil {
@@ -8265,14 +8423,14 @@ func ValidateConfig(m *Config) error {
 		return protoerrors.NewErrMissingInvalidData(nil, "field KeyLifetimeSeconds must be >= 3600, got: %d", m.KeyLifetimeSeconds)
 	}
 
-	// Validate NonceExpireSeconds (assert_duration_min: 1)
-	if m.NonceExpireSeconds < 1 {
-		return protoerrors.NewErrMissingInvalidData(nil, "field NonceExpireSeconds must be >= 1, got: %d", m.NonceExpireSeconds)
-	}
-
 	// Validate NonceExpireSeconds (assert_duration: POSITIVE)
 	if m.NonceExpireSeconds <= 0 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field NonceExpireSeconds must be positive (> 0), got: %d", m.NonceExpireSeconds)
+	}
+
+	// Validate NonceExpireSeconds (assert_duration_min: 1)
+	if m.NonceExpireSeconds < 1 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field NonceExpireSeconds must be >= 1, got: %d", m.NonceExpireSeconds)
 	}
 
 	// Validate Issuer (assert_required)
@@ -8337,16 +8495,16 @@ func ValidateProviderConfig(m *ProviderConfig) error {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Name must be at least 1 characters, got: %d", len(m.Name))
 	}
 
-	// Validate Issuer (assert_required)
-	if m.Issuer == "" {
-		return protoerrors.NewErrMissingInvalidData(nil, "field Issuer is required")
-	}
-
 	// Validate Issuer (assert_url: URL_SCHEME_HTTPS)
 	if m.Issuer != "" {
 		if err := utils.ValidateAssertURL_URL_SCHEME_HTTPS(m.Issuer); err != nil {
 			return protoerrors.NewErrMissingInvalidData(err, "field Issuer URL validation failed")
 		}
+	}
+
+	// Validate Issuer (assert_required)
+	if m.Issuer == "" {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Issuer is required")
 	}
 
 	// Validate ClientId (assert_required)
@@ -8359,14 +8517,14 @@ func ValidateProviderConfig(m *ProviderConfig) error {
 		return protoerrors.NewErrMissingInvalidData(nil, "field ClientId must be at least 1 characters, got: %d", len(m.ClientId))
 	}
 
-	// Validate ClientSecret (assert_min_length: 1)
-	if len(m.ClientSecret) < 1 {
-		return protoerrors.NewErrMissingInvalidData(nil, "field ClientSecret must be at least 1 characters, got: %d", len(m.ClientSecret))
-	}
-
 	// Validate ClientSecret (assert_required)
 	if m.ClientSecret == "" {
 		return protoerrors.NewErrMissingInvalidData(nil, "field ClientSecret is required")
+	}
+
+	// Validate ClientSecret (assert_min_length: 1)
+	if len(m.ClientSecret) < 1 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field ClientSecret must be at least 1 characters, got: %d", len(m.ClientSecret))
 	}
 
 	// Validate AuthorizationEndpoint (assert_url: URL_SCHEME_HTTPS)
@@ -8880,6 +9038,16 @@ func ValidateExchangeTokenResponse(m *ExchangeTokenResponse) error {
 	return nil
 }
 
+// ValidateIdentityConfigState validates all fields in IdentityConfigState according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidateIdentityConfigState(m *IdentityConfigState) error {
+	if m == nil {
+		return nil
+	}
+
+	return nil
+}
+
 // ValidateQueryValue validates all fields in QueryValue according to their annotations.
 // Returns a BlueErr if validation fails, or nil if all validations pass.
 func ValidateQueryValue(m *QueryValue) error {
@@ -9325,6 +9493,16 @@ func OAuthConfigDefaults(v *OAuthConfig) {
 }
 
 // ============================================================
+// TypeDefaults: IdentityConfigState
+// ============================================================
+// IdentityConfigStateDefaults applies field-level default values to zero-valued fields.
+func IdentityConfigStateDefaults(v *IdentityConfigState) {
+	if v.Config != nil {
+		ConfigDefaults(v.Config)
+	}
+}
+
+// ============================================================
 // TypeUndefaults: Config
 // ============================================================
 // ConfigUndefaults resets fields that match their default values back to zero.
@@ -9358,6 +9536,17 @@ func ConfigUndefaults(v *Config) {
 func OAuthConfigUndefaults(v *OAuthConfig) {
 	if v.Audience == DefaultAudience {
 		v.Audience = ""
+	}
+}
+
+// ============================================================
+// TypeUndefaults: IdentityConfigState
+// ============================================================
+// IdentityConfigStateUndefaults resets fields that match their default values back to zero.
+// Use before persisting to store only explicit user overrides.
+func IdentityConfigStateUndefaults(v *IdentityConfigState) {
+	if v.Config != nil {
+		ConfigUndefaults(v.Config)
 	}
 }
 
@@ -9679,6 +9868,18 @@ func MergeExchangeTokenResponse(dst, src *ExchangeTokenResponse) {
 }
 
 // ============================================================
+// Merge: IdentityConfigState
+// ============================================================
+// MergeIdentityConfigState fills zero-valued fields in dst from src.
+func MergeIdentityConfigState(dst, src *IdentityConfigState) {
+	if dst.Config == nil {
+		dst.Config = src.Config
+	} else if src.Config != nil {
+		MergeConfig(dst.Config, src.Config)
+	}
+}
+
+// ============================================================
 // Merge: QueryValue
 // ============================================================
 // MergeQueryValue fills zero-valued fields in dst from src.
@@ -9929,4 +10130,290 @@ func MergeExternalJwksQueryResponse(dst, src *ExternalJwksQueryResponse) {
 	if dst.TotalCount == 0 {
 		dst.TotalCount = src.TotalCount
 	}
+}
+
+// ConfigLlmTypeDescriptor returns a JSON description of Config for LLM-assisted construction.
+// The description includes field names, types, comments, constraints, defaults,
+// nested message structures, and enum values — everything an LLM needs to
+// construct a valid instance of this type.
+func ConfigLlmTypeDescriptor() string {
+	return `{
+  "name": "Config",
+  "package": "identity",
+  "fields": [
+    {
+      "name": "oauth",
+      "type": "message",
+      "description": "oauth configures OAuth2 authentication providers and settings.",
+      "message": {
+        "name": "OAuthConfig",
+        "package": "identity",
+        "description": "OAuthConfig configures OAuth2 authentication.",
+        "fields": [
+          {
+            "name": "enable",
+            "type": "bool",
+            "description": "enable enables or disables OAuth2 authentication."
+          },
+          {
+            "name": "scopes",
+            "type": "string",
+            "description": "scopes are the default OAuth2 scopes requested from all providers.\n If empty, defaults to [\"openid\", \"profile\", \"email\"].",
+            "repeated": true
+          },
+          {
+            "name": "providers",
+            "type": "message",
+            "description": "providers is the list of OAuth2 identity provider configurations.",
+            "repeated": true,
+            "message": {
+              "name": "ProviderConfig",
+              "package": "identity",
+              "description": "ProviderConfig configures a single OAuth2 identity provider.",
+              "fields": [
+                {
+                  "name": "enable",
+                  "type": "bool",
+                  "description": "enable enables or disables this provider."
+                },
+                {
+                  "name": "name",
+                  "type": "string",
+                  "description": "name is a human-friendly label (e.g. \"Google\", \"Okta\", \"Microsoft\").",
+                  "constraints": [
+                    "minimum length: 1"
+                  ]
+                },
+                {
+                  "name": "domains",
+                  "type": "string",
+                  "description": "domains maps email domains to this provider. When a user's email domain\n matches, they are routed to this IDP automatically.",
+                  "repeated": true
+                },
+                {
+                  "name": "issuer",
+                  "type": "string",
+                  "description": "issuer is the OpenID Connect issuer URL.\n Used for .well-known/openid-configuration auto-discovery.",
+                  "required": true,
+                  "constraints": [
+                    "must be a valid URL (scheme: URL_SCHEME_HTTPS)"
+                  ]
+                },
+                {
+                  "name": "client_id",
+                  "type": "string",
+                  "description": "client_id is the OAuth2 client identifier.",
+                  "required": true,
+                  "constraints": [
+                    "minimum length: 1"
+                  ]
+                },
+                {
+                  "name": "client_secret",
+                  "type": "string",
+                  "description": "client_secret is the OAuth2 client secret.",
+                  "required": true,
+                  "constraints": [
+                    "minimum length: 1"
+                  ]
+                },
+                {
+                  "name": "authorization_endpoint",
+                  "type": "string",
+                  "description": "authorization_endpoint overrides the auto-discovered authorization URL.",
+                  "constraints": [
+                    "must be a valid URL (scheme: URL_SCHEME_HTTPS)"
+                  ]
+                },
+                {
+                  "name": "token_endpoint",
+                  "type": "string",
+                  "description": "token_endpoint overrides the auto-discovered token URL.",
+                  "constraints": [
+                    "must be a valid URL (scheme: URL_SCHEME_HTTPS)"
+                  ]
+                },
+                {
+                  "name": "end_session_endpoint",
+                  "type": "string",
+                  "description": "end_session_endpoint overrides the auto-discovered logout URL.",
+                  "constraints": [
+                    "must be a valid URL (scheme: URL_SCHEME_HTTPS)"
+                  ]
+                },
+                {
+                  "name": "scopes",
+                  "type": "string",
+                  "description": "scopes overrides the default scopes for this provider.",
+                  "repeated": true
+                },
+                {
+                  "name": "audience",
+                  "type": "string",
+                  "description": "audience overrides the default audience for tokens from this provider.",
+                  "constraints": [
+                    "minimum length: 1"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "name": "audience",
+            "type": "string",
+            "description": "audience is the default audience claim for issued tokens.\n Individual providers can override this.",
+            "default": "identity",
+            "constraints": [
+              "minimum length: 1"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "access_token_lifetime_seconds",
+      "type": "int64",
+      "description": "access_token_lifetime_seconds is the lifetime of short-lived access tokens.\n Default: 900 (15 minutes).",
+      "default": 900,
+      "constraints": [
+        "duration constraint: DURATION_TYPE_POSITIVE"
+      ]
+    },
+    {
+      "name": "refresh_token_lifetime_seconds",
+      "type": "int64",
+      "description": "refresh_token_lifetime_seconds is the lifetime of refresh tokens.\n Default: 86400 (24 hours).",
+      "default": 86400,
+      "constraints": [
+        "duration constraint: DURATION_TYPE_POSITIVE"
+      ]
+    },
+    {
+      "name": "key_lifetime_seconds",
+      "type": "int64",
+      "description": "key_lifetime_seconds controls how long each instance's signing key is used.\n On rotation the instance generates a new key pair, publishes the new JWK\n to kernel (consumers receive it immediately via Watch), and starts\n signing with the new key. The old JWK remains in verifying_keys until\n all tokens signed by it have expired (access_token_lifetime_seconds).\n Minimum: 3600 (1 hour). Default: 86400 (24 hours).",
+      "default": 86400,
+      "constraints": [
+        "duration constraint: DURATION_TYPE_POSITIVE",
+        "minimum value: 3600"
+      ]
+    },
+    {
+      "name": "nonce_expire_seconds",
+      "type": "int64",
+      "description": "nonce_expire_seconds is how long OAuth2 nonces/state remain valid.\n Nonces prevent replay attacks in the authorization code flow.\n Minimum: 1 second. Default: 300 (5 minutes).",
+      "default": 300,
+      "constraints": [
+        "duration constraint: DURATION_TYPE_POSITIVE",
+        "minimum value: 1"
+      ]
+    },
+    {
+      "name": "issuer",
+      "type": "string",
+      "description": "issuer is the issuer claim (iss) for tokens minted by this service.\n Must match the public-facing URL of Identity.",
+      "required": true,
+      "constraints": [
+        "must be a valid URL (scheme: URL_SCHEME_HTTPS)"
+      ]
+    },
+    {
+      "name": "jwk_refetch_interval_seconds",
+      "type": "int64",
+      "description": "jwk_refetch_interval_seconds is the minimum interval between JWKS fetches\n from the same external IDP. Prevents excessive outbound requests.\n Default: 300 (5 minutes).",
+      "default": 300,
+      "constraints": [
+        "duration constraint: DURATION_TYPE_POSITIVE"
+      ]
+    },
+    {
+      "name": "entitlements_policy",
+      "type": "string",
+      "description": "entitlements_policy is a Rego policy evaluated at token exchange time.\n Input: {claims: {\u003cflattened IDP claims\u003e}}\n Expected output: data.entitlements.main → {profiles: [string]}\n Zero profiles = denied. Profile names must match identity_profiles ids."
+    },
+    {
+      "name": "entitlement_mappings",
+      "type": "message",
+      "description": "entitlement_mappings maps credentials to service identities (S2S only).",
+      "repeated": true,
+      "message": {
+        "name": "ServiceEntitlementMapping",
+        "package": "entitlement",
+        "description": "ServiceEntitlementMapping maps a credential to a service identity.\n Used by TokenExchanger (static config) to resolve\n which service a CredPair or cloud credential represents.\n Entitlements for S2S are derived from proto definitions — no entitlements_id needed.",
+        "fields": [
+          {
+            "name": "credential_id",
+            "type": "string",
+            "description": "credential_id is the unique identifier for the authentication credential.\n For CredPairs this is the public_key.kid. For cloud credentials, the\n cloud credential ID (e.g. IAM role ARN).",
+            "required": true,
+            "constraints": [
+              "maximum length: 512"
+            ]
+          },
+          {
+            "name": "service",
+            "type": "string",
+            "description": "service is the logical service identity this credential maps to.\n Becomes the \"sub\" claim in S2S tokens.",
+            "required": true,
+            "constraints": [
+              "maximum length: 128"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "identity_profiles",
+      "type": "message",
+      "description": "identity_profiles defines named sets of entitlements for user authorization.\n OPA entitlements_policy returns profile names; identity resolves those names\n to concrete entitlements at token exchange time.",
+      "repeated": true,
+      "message": {
+        "name": "IdentityProfile",
+        "package": "entitlement",
+        "description": "IdentityProfile defines a named set of entitlements for user authorization.\n OPA entitlements_policy returns zero or more profile names; identity resolves\n those names to concrete ServiceEntitlements at token exchange time.",
+        "fields": [
+          {
+            "name": "id",
+            "type": "string",
+            "description": "id is the profile name (e.g. \"user\", \"admin\", \"reader\").\n Referenced by OPA policy output.",
+            "required": true,
+            "constraints": [
+              "maximum length: 128"
+            ]
+          },
+          {
+            "name": "entitlements",
+            "type": "message",
+            "description": "entitlements is the set of services and RPCs this profile grants access to.",
+            "required": true,
+            "repeated": true,
+            "message": {
+              "name": "ServiceEntitlement",
+              "package": "entitlement",
+              "description": "ServiceEntitlement defines what a caller is allowed to do on a target service.\n The service_name becomes the \"aud\" claim in access tokens.\n Every permitted RPC must be listed — there is no wildcard/default-allow.",
+              "fields": [
+                {
+                  "name": "service_name",
+                  "type": "string",
+                  "description": "service_name is the target service (matches spec.service_frontend value).",
+                  "required": true,
+                  "constraints": [
+                    "maximum length: 128"
+                  ]
+                },
+                {
+                  "name": "allowed_rpcs",
+                  "type": "string",
+                  "description": "allowed_rpcs lists the RPC methods permitted on the target service.\n Format: \"MethodName\" (unqualified). Must not be empty.",
+                  "required": true,
+                  "repeated": true
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}`
 }

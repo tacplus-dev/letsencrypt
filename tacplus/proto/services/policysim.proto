@@ -29,6 +29,7 @@ package policysim;
 option go_package = "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/policysim";
 
 import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
 
 // ============================================================================
 // Config
@@ -111,3 +112,23 @@ message EvaluatePolicyResponse {
   // errors lists any compilation or evaluation errors.
   repeated string errors = 3;
 }
+
+// PolicysimConfigState is the backend state boundary for policysim service configuration.
+// Auto-injected by tacplus from (spec.frontend_config) annotation.
+message PolicysimConfigState {
+
+  policysim.Config config = 1;
+}
+
+// ============================================================================
+// Auto-generated Backend Service (tacplus)
+// ============================================================================
+
+service PolicysimConfigStateBackendService {
+	// Singleton: Config
+	rpc GetConfig(google.protobuf.Empty) returns (Config);
+	rpc SetConfig(Config) returns (Config);
+	rpc WatchConfig(google.protobuf.Empty) returns (stream Config);
+}
+
+message MapEmpty {}

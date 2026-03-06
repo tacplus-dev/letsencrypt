@@ -641,14 +641,19 @@ func ValidateKey(m *Key) error {
 		return nil
 	}
 
+	// Validate Id (assert_min_length: 1)
+	if len(m.Id) < 1 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Id must be at least 1 characters, got: %d", len(m.Id))
+	}
+
 	// Validate Id (assert_required)
 	if m.Id == "" {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Id is required")
 	}
 
-	// Validate Id (assert_min_length: 1)
-	if len(m.Id) < 1 {
-		return protoerrors.NewErrMissingInvalidData(nil, "field Id must be at least 1 characters, got: %d", len(m.Id))
+	// Validate Base64 (assert_required)
+	if m.Base64 == "" {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Base64 is required")
 	}
 
 	// Validate Base64 (assert_base64)
@@ -663,11 +668,6 @@ func ValidateKey(m *Key) error {
 		if err := validateENC_TYPE_KEY_PRIVATE_ANY(m.Base64); err != nil {
 			return protoerrors.NewErrMissingInvalidData(err, "field Base64 validation failed")
 		}
-	}
-
-	// Validate Base64 (assert_required)
-	if m.Base64 == "" {
-		return protoerrors.NewErrMissingInvalidData(nil, "field Base64 is required")
 	}
 
 	// Validate Created (assert_required: must be > 0)

@@ -130,7 +130,7 @@ var File_libs_opa_proto protoreflect.FileDescriptor
 
 const file_libs_opa_proto_rawDesc = "" +
 	"\n" +
-	"\x0elibs/opa.proto\x12\x03opa\x1a\x0flibs/spec.proto\"\xeb\x01\n" +
+	"\x0elibs/opa.proto\x12\x03opa\x1a\x0flibs/spec.proto\"\xf1\x01\n" +
 	"\tOpaPolicy\x12*\n" +
 	"\ventry_point\x18\x01 \x01(\tB\t\x88\xa7\x1d\x01\x90\xa7\x1d\x80\x02R\n" +
 	"entryPoint\x12 \n" +
@@ -138,7 +138,7 @@ const file_libs_opa_proto_rawDesc = "" +
 	"\acreated\x18\x03 \x01(\x03B\x10\xb0\xa7\x1d\x80\x8bһ\x06\xc0\xa7\x1d\x80\x86\xc1\xfc\x1dR\acreated\x12\"\n" +
 	"\aversion\x18\x04 \x01(\tB\b\x90\xa7\x1d@\xe0\xa7\x1d\x01R\aversion\x12\x1e\n" +
 	"\x06source\x18\x05 \x01(\tB\x06\xb8\xa8\x1d\x80\x80@R\x06source\x12 \n" +
-	"\x06issuer\x18\x06 \x01(\tB\b\x88\xa6\x1d\x01\xa8\xa6\x1d\x02R\x06issuerBTZRgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/opab\x06proto3"
+	"\x06issuer\x18\x06 \x01(\tB\b\x88\xa6\x1d\x01\xa8\xa6\x1d\x02R\x06issuer:\x04\xe8\xa8\x1d\x01BTZRgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/opab\x06proto3"
 
 var (
 	file_libs_opa_proto_rawDescOnce sync.Once

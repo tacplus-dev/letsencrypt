@@ -17,6 +17,7 @@ import (
 	_ "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/spec"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -92,18 +93,108 @@ func (x *Config) GetEnableQuic() bool {
 	return false
 }
 
+// GatewayConfigState is the backend state boundary for gateway service configuration.
+// Auto-injected by tacplus from (spec.frontend_config) annotation.
+type GatewayConfigState struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Config        *Config                `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GatewayConfigState) Reset() {
+	*x = GatewayConfigState{}
+	mi := &file_services_gateway_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GatewayConfigState) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GatewayConfigState) ProtoMessage() {}
+
+func (x *GatewayConfigState) ProtoReflect() protoreflect.Message {
+	mi := &file_services_gateway_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GatewayConfigState.ProtoReflect.Descriptor instead.
+func (*GatewayConfigState) Descriptor() ([]byte, []int) {
+	return file_services_gateway_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *GatewayConfigState) GetConfig() *Config {
+	if x != nil {
+		return x.Config
+	}
+	return nil
+}
+
+type MapEmpty struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MapEmpty) Reset() {
+	*x = MapEmpty{}
+	mi := &file_services_gateway_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MapEmpty) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MapEmpty) ProtoMessage() {}
+
+func (x *MapEmpty) ProtoReflect() protoreflect.Message {
+	mi := &file_services_gateway_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MapEmpty.ProtoReflect.Descriptor instead.
+func (*MapEmpty) Descriptor() ([]byte, []int) {
+	return file_services_gateway_proto_rawDescGZIP(), []int{2}
+}
+
 var File_services_gateway_proto protoreflect.FileDescriptor
 
 const file_services_gateway_proto_rawDesc = "" +
 	"\n" +
-	"\x16services/gateway.proto\x12\agateway\x1a\x0flibs/spec.proto\"\xac\x01\n" +
+	"\x16services/gateway.proto\x12\agateway\x1a\x0flibs/spec.proto\x1a\x1bgoogle/protobuf/empty.proto\"\xb0\x01\n" +
 	"\x06Config\x12E\n" +
 	"\x1chealth_poll_interval_seconds\x18\x01 \x01(\x03B\x04\x90\xa8\x1d\x05R\x19healthPollIntervalSeconds\x12#\n" +
 	"\n" +
 	"enable_tcp\x18\x02 \x01(\bB\x04\xa0\xa8\x1d\x01R\tenableTcp\x12%\n" +
 	"\venable_quic\x18\x03 \x01(\bB\x04\xa0\xa8\x1d\x01R\n" +
-	"enableQuic:\x0fҨ\x1d\v\n" +
-	"\agateway\x10\aB\\ZZgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/gatewayb\x06proto3"
+	"enableQuic:\x13Ҩ\x1d\v\n" +
+	"\agateway\x10\a\xe8\xa8\x1d\x01\"c\n" +
+	"\x12GatewayConfigState\x121\n" +
+	"\x06config\x18\x01 \x01(\v2\x0f.gateway.ConfigB\b\xe0\xb5\x18\x02\xe0\xb6\x18\x01R\x06config:\x1a\x9a\xa8\x1d\x12GatewayConfigState\xa0\xa8\x1d\x02\"\n" +
+	"\n" +
+	"\bMapEmpty2\xc1\x01\n" +
+	" GatewayConfigStateBackendService\x124\n" +
+	"\tGetConfig\x12\x16.google.protobuf.Empty\x1a\x0f.gateway.Config\x12-\n" +
+	"\tSetConfig\x12\x0f.gateway.Config\x1a\x0f.gateway.Config\x128\n" +
+	"\vWatchConfig\x12\x16.google.protobuf.Empty\x1a\x0f.gateway.Config0\x01B\\ZZgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/gatewayb\x06proto3"
 
 var (
 	file_services_gateway_proto_rawDescOnce sync.Once
@@ -117,16 +208,26 @@ func file_services_gateway_proto_rawDescGZIP() []byte {
 	return file_services_gateway_proto_rawDescData
 }
 
-var file_services_gateway_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_services_gateway_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_services_gateway_proto_goTypes = []any{
-	(*Config)(nil), // 0: gateway.Config
+	(*Config)(nil),             // 0: gateway.Config
+	(*GatewayConfigState)(nil), // 1: gateway.GatewayConfigState
+	(*MapEmpty)(nil),           // 2: gateway.MapEmpty
+	(*emptypb.Empty)(nil),      // 3: google.protobuf.Empty
 }
 var file_services_gateway_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0, // 0: gateway.GatewayConfigState.config:type_name -> gateway.Config
+	3, // 1: gateway.GatewayConfigStateBackendService.GetConfig:input_type -> google.protobuf.Empty
+	0, // 2: gateway.GatewayConfigStateBackendService.SetConfig:input_type -> gateway.Config
+	3, // 3: gateway.GatewayConfigStateBackendService.WatchConfig:input_type -> google.protobuf.Empty
+	0, // 4: gateway.GatewayConfigStateBackendService.GetConfig:output_type -> gateway.Config
+	0, // 5: gateway.GatewayConfigStateBackendService.SetConfig:output_type -> gateway.Config
+	0, // 6: gateway.GatewayConfigStateBackendService.WatchConfig:output_type -> gateway.Config
+	4, // [4:7] is the sub-list for method output_type
+	1, // [1:4] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_services_gateway_proto_init() }
@@ -140,9 +241,9 @@ func file_services_gateway_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_services_gateway_proto_rawDesc), len(file_services_gateway_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   1,
+			NumMessages:   3,
 			NumExtensions: 0,
-			NumServices:   0,
+			NumServices:   1,
 		},
 		GoTypes:           file_services_gateway_proto_goTypes,
 		DependencyIndexes: file_services_gateway_proto_depIdxs,

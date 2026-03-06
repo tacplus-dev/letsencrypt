@@ -16,12 +16,13 @@ package healthreport
 import (
 	"bytes"
 	"encoding/json"
+	"net"
 	"strconv"
 	"strings"
 
 	"github.com/pelletier/go-toml/v2"
 	protoerrors "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/errors"
-	host "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/host"
+	utils "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/utils"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 	"gopkg.in/yaml.v3"
@@ -159,25 +160,25 @@ func InstanceStatusToSpecName(v InstanceStatus) string {
 // ServiceInstanceHealthJSON represents ServiceInstanceHealth in external JSON format (with string enums)
 // MARKER: JSON helper struct generated from serial.go
 type serviceinstancehealthJSON struct {
-	Id                    string          `json:"id,omitempty"`
-	ServiceId             string          `json:"service_id,omitempty"`
-	InstanceId            string          `json:"instance_id,omitempty"`
-	GrpcEndpoint          json.RawMessage `json:"grpc_endpoint,omitempty"`
-	HttpEndpoint          json.RawMessage `json:"http_endpoint,omitempty"`
-	Status                string          `json:"status,omitempty"`
-	StatusMessage         string          `json:"status_message,omitempty"`
-	CpuUsage              float64         `json:"cpu_usage,omitempty"`
-	MemoryUsedBytes       int64           `json:"memory_used_bytes,omitempty"`
-	MemoryMaxBytes        int64           `json:"memory_max_bytes,omitempty"`
-	ActiveRequests        int32           `json:"active_requests,omitempty"`
-	MaxConcurrentRequests int32           `json:"max_concurrent_requests,omitempty"`
-	RequestRate           float64         `json:"request_rate,omitempty"`
-	P50LatencyUs          int64           `json:"p50_latency_us,omitempty"`
-	P99LatencyUs          int64           `json:"p99_latency_us,omitempty"`
-	ErrorRate             float64         `json:"error_rate,omitempty"`
-	Version               string          `json:"version,omitempty"`
-	StartedAtMs           int64           `json:"started_at_ms,omitempty"`
-	TimestampMs           int64           `json:"timestamp_ms,omitempty"`
+	Id                    string  `json:"id,omitempty"`
+	ServiceId             string  `json:"service_id,omitempty"`
+	InstanceId            string  `json:"instance_id,omitempty"`
+	GrpcEndpoint          string  `json:"grpc_endpoint,omitempty"`
+	HttpEndpoint          string  `json:"http_endpoint,omitempty"`
+	Status                string  `json:"status,omitempty"`
+	StatusMessage         string  `json:"status_message,omitempty"`
+	CpuUsage              float64 `json:"cpu_usage,omitempty"`
+	MemoryUsedBytes       int64   `json:"memory_used_bytes,omitempty"`
+	MemoryMaxBytes        int64   `json:"memory_max_bytes,omitempty"`
+	ActiveRequests        int32   `json:"active_requests,omitempty"`
+	MaxConcurrentRequests int32   `json:"max_concurrent_requests,omitempty"`
+	RequestRate           float64 `json:"request_rate,omitempty"`
+	P50LatencyUs          int64   `json:"p50_latency_us,omitempty"`
+	P99LatencyUs          int64   `json:"p99_latency_us,omitempty"`
+	ErrorRate             float64 `json:"error_rate,omitempty"`
+	Version               string  `json:"version,omitempty"`
+	StartedAtMs           int64   `json:"started_at_ms,omitempty"`
+	TimestampMs           int64   `json:"timestamp_ms,omitempty"`
 }
 
 // ServiceInstanceHealthToJSON converts ServiceInstanceHealth to JSON bytes.
@@ -188,23 +189,11 @@ func ServiceInstanceHealthToJSON(v *ServiceInstanceHealth) ([]byte, error) {
 	}
 	// Convert to JSON helper struct with string enums
 	helper := serviceinstancehealthJSON{
-		Id:         v.Id,
-		ServiceId:  v.ServiceId,
-		InstanceId: v.InstanceId,
-		GrpcEndpoint: func() json.RawMessage {
-			if v.GrpcEndpoint == nil {
-				return nil
-			}
-			data, _ := host.HostToJSON(v.GrpcEndpoint)
-			return data
-		}(),
-		HttpEndpoint: func() json.RawMessage {
-			if v.HttpEndpoint == nil {
-				return nil
-			}
-			data, _ := host.HostToJSON(v.HttpEndpoint)
-			return data
-		}(),
+		Id:                    v.Id,
+		ServiceId:             v.ServiceId,
+		InstanceId:            v.InstanceId,
+		GrpcEndpoint:          v.GrpcEndpoint,
+		HttpEndpoint:          v.HttpEndpoint,
 		Status:                InstanceStatusToString(v.Status),
 		StatusMessage:         v.StatusMessage,
 		CpuUsage:              v.CpuUsage,
@@ -286,20 +275,8 @@ func ServiceInstanceHealthFromJSON(data []byte) (*ServiceInstanceHealth, error) 
 	result.Id = raw.Id
 	result.ServiceId = raw.ServiceId
 	result.InstanceId = raw.InstanceId
-	// Parse message field: GrpcEndpoint
-	if len(raw.GrpcEndpoint) > 0 {
-		parsed, err := host.HostFromJSON(raw.GrpcEndpoint)
-		if err == nil {
-			result.GrpcEndpoint = parsed
-		}
-	}
-	// Parse message field: HttpEndpoint
-	if len(raw.HttpEndpoint) > 0 {
-		parsed, err := host.HostFromJSON(raw.HttpEndpoint)
-		if err == nil {
-			result.HttpEndpoint = parsed
-		}
-	}
+	result.GrpcEndpoint = raw.GrpcEndpoint
+	result.HttpEndpoint = raw.HttpEndpoint
 	// Parse enum field: Status
 	if raw.Status != "" {
 		if parsed, err := ParseInstanceStatus(raw.Status); err == nil {
@@ -373,16 +350,8 @@ func ServiceInstanceHealthToEnvVar(v *ServiceInstanceHealth) map[string]string {
 	result["PROTO_LIBS_HEALTHREPORT_SERVICE_INSTANCE_HEALTH_ID"] = v.Id
 	result["PROTO_LIBS_HEALTHREPORT_SERVICE_INSTANCE_HEALTH_SERVICE_ID"] = v.ServiceId
 	result["PROTO_LIBS_HEALTHREPORT_SERVICE_INSTANCE_HEALTH_INSTANCE_ID"] = v.InstanceId
-	if v.GrpcEndpoint != nil {
-		for k, val := range host.HostToEnvVar(v.GrpcEndpoint) {
-			result[k] = val
-		}
-	}
-	if v.HttpEndpoint != nil {
-		for k, val := range host.HostToEnvVar(v.HttpEndpoint) {
-			result[k] = val
-		}
-	}
+	result["PROTO_LIBS_HEALTHREPORT_SERVICE_INSTANCE_HEALTH_GRPC_ENDPOINT"] = v.GrpcEndpoint
+	result["PROTO_LIBS_HEALTHREPORT_SERVICE_INSTANCE_HEALTH_HTTP_ENDPOINT"] = v.HttpEndpoint
 	result["PROTO_LIBS_HEALTHREPORT_SERVICE_INSTANCE_HEALTH_STATUS"] = InstanceStatusToString(v.Status)
 	result["PROTO_LIBS_HEALTHREPORT_SERVICE_INSTANCE_HEALTH_STATUS_MESSAGE"] = v.StatusMessage
 	result["PROTO_LIBS_HEALTHREPORT_SERVICE_INSTANCE_HEALTH_CPU_USAGE"] = strconv.FormatFloat(v.CpuUsage, 'f', -1, 64)
@@ -412,15 +381,11 @@ func ServiceInstanceHealthFromEnvVar(env map[string]string) (*ServiceInstanceHea
 	if val, ok := env["PROTO_LIBS_HEALTHREPORT_SERVICE_INSTANCE_HEALTH_INSTANCE_ID"]; ok && val != "" {
 		result.InstanceId = val
 	}
-	if sub, err := host.HostFromEnvVar(env); err != nil {
-		return nil, err
-	} else if sub != nil {
-		result.GrpcEndpoint = sub
+	if val, ok := env["PROTO_LIBS_HEALTHREPORT_SERVICE_INSTANCE_HEALTH_GRPC_ENDPOINT"]; ok && val != "" {
+		result.GrpcEndpoint = val
 	}
-	if sub, err := host.HostFromEnvVar(env); err != nil {
-		return nil, err
-	} else if sub != nil {
-		result.HttpEndpoint = sub
+	if val, ok := env["PROTO_LIBS_HEALTHREPORT_SERVICE_INSTANCE_HEALTH_HTTP_ENDPOINT"]; ok && val != "" {
+		result.HttpEndpoint = val
 	}
 	if val, ok := env["PROTO_LIBS_HEALTHREPORT_SERVICE_INSTANCE_HEALTH_STATUS"]; ok && val != "" {
 		parsed, err := ParseInstanceStatus(val)
@@ -540,6 +505,34 @@ func ValidateServiceInstanceHealth(m *ServiceInstanceHealth) error {
 		return protoerrors.NewErrMissingInvalidData(nil, "field InstanceId must be at most 128 characters, got: %d", len(m.InstanceId))
 	}
 
+	// Validate GrpcEndpoint (assert_host: IP address or FQDN)
+	if m.GrpcEndpoint != "" {
+		if ip := net.ParseIP(m.GrpcEndpoint); ip == nil {
+			if err := utils.ValidateAssertFQDN(m.GrpcEndpoint); err != nil {
+				return protoerrors.NewErrMissingInvalidData(nil, "field GrpcEndpoint must be a valid IP address or FQDN, got: %s", m.GrpcEndpoint)
+			}
+		}
+	}
+
+	// Validate GrpcEndpoint (assert_max_length: 256)
+	if len(m.GrpcEndpoint) > 256 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field GrpcEndpoint must be at most 256 characters, got: %d", len(m.GrpcEndpoint))
+	}
+
+	// Validate HttpEndpoint (assert_host: IP address or FQDN)
+	if m.HttpEndpoint != "" {
+		if ip := net.ParseIP(m.HttpEndpoint); ip == nil {
+			if err := utils.ValidateAssertFQDN(m.HttpEndpoint); err != nil {
+				return protoerrors.NewErrMissingInvalidData(nil, "field HttpEndpoint must be a valid IP address or FQDN, got: %s", m.HttpEndpoint)
+			}
+		}
+	}
+
+	// Validate HttpEndpoint (assert_max_length: 256)
+	if len(m.HttpEndpoint) > 256 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field HttpEndpoint must be at most 256 characters, got: %d", len(m.HttpEndpoint))
+	}
+
 	// Validate StatusMessage (assert_max_length: 1024)
 	if len(m.StatusMessage) > 1024 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field StatusMessage must be at most 1024 characters, got: %d", len(m.StatusMessage))
@@ -615,6 +608,16 @@ func ValidateServiceInstanceHealth(m *ServiceInstanceHealth) error {
 		return protoerrors.NewErrMissingInvalidData(nil, "field InstanceId exceeds max size of 32768 bytes, got: %d", len(m.InstanceId))
 	}
 
+	// Validate GrpcEndpoint (default max size: 32768 bytes)
+	if len(m.GrpcEndpoint) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field GrpcEndpoint exceeds max size of 32768 bytes, got: %d", len(m.GrpcEndpoint))
+	}
+
+	// Validate HttpEndpoint (default max size: 32768 bytes)
+	if len(m.HttpEndpoint) > 32768 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field HttpEndpoint exceeds max size of 32768 bytes, got: %d", len(m.HttpEndpoint))
+	}
+
 	// Validate StatusMessage (default max size: 32768 bytes)
 	if len(m.StatusMessage) > 32768 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field StatusMessage exceeds max size of 32768 bytes, got: %d", len(m.StatusMessage))
@@ -635,6 +638,8 @@ const (
 	MaxSizeServiceinstancehealthId            int = 32768
 	MaxSizeServiceinstancehealthServiceId     int = 32768
 	MaxSizeServiceinstancehealthInstanceId    int = 32768
+	MaxSizeServiceinstancehealthGrpcEndpoint  int = 32768
+	MaxSizeServiceinstancehealthHttpEndpoint  int = 32768
 	MaxSizeServiceinstancehealthStatusMessage int = 32768
 	MaxSizeServiceinstancehealthVersion       int = 32768
 )
@@ -653,10 +658,10 @@ func MergeServiceInstanceHealth(dst, src *ServiceInstanceHealth) {
 	if dst.InstanceId == "" {
 		dst.InstanceId = src.InstanceId
 	}
-	if dst.GrpcEndpoint == nil {
+	if dst.GrpcEndpoint == "" {
 		dst.GrpcEndpoint = src.GrpcEndpoint
 	}
-	if dst.HttpEndpoint == nil {
+	if dst.HttpEndpoint == "" {
 		dst.HttpEndpoint = src.HttpEndpoint
 	}
 	if dst.Status == 0 {

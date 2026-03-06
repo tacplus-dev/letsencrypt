@@ -304,7 +304,7 @@ var File_libs_logger_proto protoreflect.FileDescriptor
 
 const file_libs_logger_proto_rawDesc = "" +
 	"\n" +
-	"\x11libs/logger.proto\x12\x06logger\x1a\x0flibs/spec.proto\"\x9a\x04\n" +
+	"\x11libs/logger.proto\x12\x06logger\x1a\x0flibs/spec.proto\"\xa0\x04\n" +
 	"\fLoggerConfig\x12\x19\n" +
 	"\x04name\x18\x01 \x01(\tB\x05\x90\xa7\x1d\x80\x01R\x04name\x12,\n" +
 	"\x06format\x18\x02 \x01(\x0e2\x0e.logger.FormatB\x04\x98\xa7\x1d\x01R\x06format\x12)\n" +
@@ -319,7 +319,7 @@ const file_libs_logger_proto_rawDesc = "" +
 	" \x03(\v2'.logger.LoggerConfig.InitialFieldsEntryB\x04\xc0\xa8\x1d R\rinitialFields\x1a@\n" +
 	"\x12InitialFieldsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01*C\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01:\x04\xe8\xa8\x1d\x01*C\n" +
 	"\x06Format\x12\x14\n" +
 	"\x10FORMAT_UNDEFINED\x10\x00\x12\x0f\n" +
 	"\vFORMAT_JSON\x10\x01\x12\x12\n" +

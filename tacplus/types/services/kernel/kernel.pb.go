@@ -10767,7 +10767,7 @@ const file_services_kernel_proto_rawDesc = "" +
 	"\x0everifying_keys\x18\x01 \x03(\v2\b.jwk.JwkB \xe0\xb5\x18\x02\xe0\xb6\x18\x01\x9a\xb7\x18\x14JwkVerifyingKeysViewR\rverifyingKeys:\x1f\x9a\xa8\x1d\x13TokenExchangerState\xa0\xa8\x1d\x02\xe0\xa8\x1d\x01\"c\n" +
 	"\x0eTrustedCaState\x125\n" +
 	"\vtrusted_cas\x18\x01 \x03(\v2\x0e.x509.X509CertB\x04\xe0\xb5\x18\x02R\n" +
-	"trustedCas:\x1a\x9a\xa8\x1d\x0eTrustedCaState\xa0\xa8\x1d\x02\xe0\xa8\x1d\x01\"\x94\x04\n" +
+	"trustedCas:\x1a\x9a\xa8\x1d\x0eTrustedCaState\xa0\xa8\x1d\x02\xe0\xa8\x1d\x01\"\x9a\x04\n" +
 	"\x06Config\x125\n" +
 	"\vtrusted_cas\x18\x02 \x03(\v2\x0e.x509.X509CertB\x04\xc0\xa8\x1d\x10R\n" +
 	"trustedCas\x126\n" +
@@ -10780,7 +10780,7 @@ const file_services_kernel_proto_rawDesc = "" +
 	"\n" +
 	"cred_pairs\x18\x10 \x03(\v2\r.jwk.CredPairB\x05\xc0\xa8\x1d\x80\x01R\tcredPairs\x12Y\n" +
 	"\x14entitlement_mappings\x18\x15 \x03(\v2&.entitlement.ServiceEntitlementMappingR\x13entitlementMappings\x12S\n" +
-	"\x14service_entitlements\x18\x16 \x03(\v2 .entitlement.ServiceEntitlementsR\x13serviceEntitlements\"9\n" +
+	"\x14service_entitlements\x18\x16 \x03(\v2 .entitlement.ServiceEntitlementsR\x13serviceEntitlements:\x04\xe8\xa8\x1d\x01\"9\n" +
 	"\tUrlLoader\x12\x16\n" +
 	"\x03url\x18\x01 \x01(\tB\x04\x88\xa6\x1d\x01R\x03url\x12\x14\n" +
 	"\x05token\x18\x02 \x01(\tR\x05token\"&\n" +

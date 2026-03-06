@@ -240,24 +240,24 @@ func ValidateOpaPolicy(m *OpaPolicy) error {
 		}
 	}
 
-	// Validate Created (assert_ge: 1735689600)
-	if m.Created < 1735689600 {
-		return protoerrors.NewErrMissingInvalidData(nil, "field Created must be >= 1735689600, got: %v", m.Created)
-	}
 	// Validate Created (assert_le: 8045740800)
 	if m.Created > 8045740800 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Created must be <= 8045740800, got: %v", m.Created)
 	}
+	// Validate Created (assert_ge: 1735689600)
+	if m.Created < 1735689600 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Created must be >= 1735689600, got: %v", m.Created)
+	}
+	// Validate Version (assert_max_length: 64)
+	if len(m.Version) > 64 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Version must be at most 64 characters, got: %d", len(m.Version))
+	}
+
 	// Validate Version (assert_semver)
 	if m.Version != "" {
 		if err := utils.ValidateAssertSemver(m.Version); err != nil {
 			return protoerrors.NewErrMissingInvalidData(err, "field Version must be a valid semantic version (e.g., '1.0.0' or 'v2.3.4')")
 		}
-	}
-
-	// Validate Version (assert_max_length: 64)
-	if len(m.Version) > 64 {
-		return protoerrors.NewErrMissingInvalidData(nil, "field Version must be at most 64 characters, got: %d", len(m.Version))
 	}
 
 	// Validate Source (assert_max_size: 1048576 bytes)
@@ -334,4 +334,68 @@ func MergeOpaPolicy(dst, src *OpaPolicy) {
 	if dst.Issuer == "" {
 		dst.Issuer = src.Issuer
 	}
+}
+
+// OpaPolicyLlmTypeDescriptor returns a JSON description of OpaPolicy for LLM-assisted construction.
+// The description includes field names, types, comments, constraints, defaults,
+// nested message structures, and enum values — everything an LLM needs to
+// construct a valid instance of this type.
+func OpaPolicyLlmTypeDescriptor() string {
+	return `{
+  "name": "OpaPolicy",
+  "package": "opa",
+  "description": "OpaPolicy defines an OPA policy bundle for authorization evaluation.\n The bundle is a base64-encoded tar.gz containing .rego policy files.",
+  "fields": [
+    {
+      "name": "entry_point",
+      "type": "string",
+      "description": "entry_point specifies the main package/decision point for policy evaluation.",
+      "constraints": [
+        "maximum length: 256",
+        "minimum length: 1"
+      ]
+    },
+    {
+      "name": "bundle",
+      "type": "string",
+      "description": "bundle contains the base64-encoded OPA policy bundle (tar.gz format).\n Optional — policies can be provided as raw source instead.",
+      "constraints": [
+        "must be base64 encoded",
+        "must be a valid OPA/Rego policy"
+      ]
+    },
+    {
+      "name": "created",
+      "type": "int64",
+      "description": "created is the Unix epoch timestamp (seconds) when the policy was created.",
+      "constraints": [
+        "must be \u003e= 1735689600",
+        "must be \u003c= 8045740800"
+      ]
+    },
+    {
+      "name": "version",
+      "type": "string",
+      "description": "version is an optional version string for this policy (e.g., \"1.0.0\").",
+      "constraints": [
+        "must be a valid semantic version",
+        "maximum length: 64"
+      ]
+    },
+    {
+      "name": "source",
+      "type": "string",
+      "description": "source is the raw .rego policy source code. A builder can compile this\n into the bundle field (base64-encoded tar.gz). It may be a directory or\n a file"
+    },
+    {
+      "name": "issuer",
+      "type": "string",
+      "description": "issuer is the required token issuer URL. Verified in code BEFORE OPA\n evaluation — tokens from unexpected issuers are rejected before the\n policy runs.",
+      "required": true,
+      "constraints": [
+        "must be a valid URL (scheme: URL_SCHEME_HTTPS)"
+      ]
+    }
+  ]
+}`
 }

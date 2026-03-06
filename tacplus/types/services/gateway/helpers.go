@@ -156,6 +156,256 @@ func ConfigToTOML(v *Config) ([]byte, error) {
 	return toml.Marshal(obj)
 }
 
+// GatewayConfigStateJSON represents GatewayConfigState in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type gatewayconfigstateJSON struct {
+	Config json.RawMessage `json:"config,omitempty"`
+}
+
+// GatewayConfigStateToJSON converts GatewayConfigState to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func GatewayConfigStateToJSON(v *GatewayConfigState) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "gatewayconfigstate is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := gatewayconfigstateJSON{
+		Config: func() json.RawMessage {
+			if v.Config == nil {
+				return nil
+			}
+			data, _ := ConfigToJSON(v.Config)
+			return data
+		}(),
+	}
+	return json.Marshal(helper)
+}
+
+// GatewayConfigStateFromBytes creates GatewayConfigState from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func GatewayConfigStateFromBytes(data []byte) (*GatewayConfigState, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := GatewayConfigStateFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := GatewayConfigStateFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := GatewayConfigStateFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &GatewayConfigState{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse GatewayConfigState: unsupported format or invalid data")
+}
+
+// GatewayConfigStateFromJSON creates GatewayConfigState from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func GatewayConfigStateFromJSON(data []byte) (*GatewayConfigState, error) {
+	// Unmarshal into helper struct with string enums
+	var raw gatewayconfigstateJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &GatewayConfigState{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &GatewayConfigState{}
+	// Parse message field: Config
+	if len(raw.Config) > 0 {
+		parsed, err := ConfigFromJSON(raw.Config)
+		if err == nil {
+			result.Config = parsed
+		}
+	}
+	return result, nil
+}
+
+// GatewayConfigStateToYAML converts GatewayConfigState to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func GatewayConfigStateToYAML(v *GatewayConfigState) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "gatewayconfigstate is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := GatewayConfigStateToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// GatewayConfigStateToTOML converts GatewayConfigState to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func GatewayConfigStateToTOML(v *GatewayConfigState) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "gatewayconfigstate is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := GatewayConfigStateToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
+// MapEmptyJSON represents MapEmpty in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type mapemptyJSON struct {
+}
+
+// MapEmptyToJSON converts MapEmpty to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func MapEmptyToJSON(v *MapEmpty) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "mapempty is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := mapemptyJSON{}
+	return json.Marshal(helper)
+}
+
+// MapEmptyFromBytes creates MapEmpty from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func MapEmptyFromBytes(data []byte) (*MapEmpty, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := MapEmptyFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := MapEmptyFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := MapEmptyFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &MapEmpty{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse MapEmpty: unsupported format or invalid data")
+}
+
+// MapEmptyFromJSON creates MapEmpty from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func MapEmptyFromJSON(data []byte) (*MapEmpty, error) {
+	// Unmarshal into helper struct with string enums
+	var raw mapemptyJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &MapEmpty{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &MapEmpty{}
+	return result, nil
+}
+
+// MapEmptyToYAML converts MapEmpty to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func MapEmptyToYAML(v *MapEmpty) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "mapempty is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := MapEmptyToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// MapEmptyToTOML converts MapEmpty to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func MapEmptyToTOML(v *MapEmpty) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "mapempty is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := MapEmptyToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
 // ============================================================
 // Environment Variable Helpers
 // ============================================================
@@ -199,6 +449,46 @@ func ConfigFromEnvVar(env map[string]string) (*Config, error) {
 	return result, nil
 }
 
+// GatewayConfigStateToEnvVar converts GatewayConfigState to environment variable key-value pairs.
+func GatewayConfigStateToEnvVar(v *GatewayConfigState) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	if v.Config != nil {
+		for k, val := range ConfigToEnvVar(v.Config) {
+			result[k] = val
+		}
+	}
+	return result
+}
+
+// GatewayConfigStateFromEnvVar creates GatewayConfigState from environment variable key-value pairs.
+func GatewayConfigStateFromEnvVar(env map[string]string) (*GatewayConfigState, error) {
+	result := &GatewayConfigState{}
+	if sub, err := ConfigFromEnvVar(env); err != nil {
+		return nil, err
+	} else if sub != nil {
+		result.Config = sub
+	}
+	return result, nil
+}
+
+// MapEmptyToEnvVar converts MapEmpty to environment variable key-value pairs.
+func MapEmptyToEnvVar(v *MapEmpty) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	return result
+}
+
+// MapEmptyFromEnvVar creates MapEmpty from environment variable key-value pairs.
+func MapEmptyFromEnvVar(env map[string]string) (*MapEmpty, error) {
+	result := &MapEmpty{}
+	return result, nil
+}
+
 // ============================================================
 // Validation Helpers
 // ============================================================
@@ -209,6 +499,27 @@ func ValidateConfig(m *Config) error {
 		return nil
 	}
 
+	return nil
+}
+
+// ValidateGatewayConfigState validates all fields in GatewayConfigState according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidateGatewayConfigState(m *GatewayConfigState) error {
+	if m == nil {
+		return nil
+	}
+
+	return nil
+}
+
+// ValidateMapEmpty validates all fields in MapEmpty according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidateMapEmpty(m *MapEmpty) error {
+	if m == nil {
+		return nil
+	}
+
+	// No field validations defined
 	return nil
 }
 
@@ -232,6 +543,16 @@ func ConfigDefaults(v *Config) {
 }
 
 // ============================================================
+// TypeDefaults: GatewayConfigState
+// ============================================================
+// GatewayConfigStateDefaults applies field-level default values to zero-valued fields.
+func GatewayConfigStateDefaults(v *GatewayConfigState) {
+	if v.Config != nil {
+		ConfigDefaults(v.Config)
+	}
+}
+
+// ============================================================
 // TypeUndefaults: Config
 // ============================================================
 // ConfigUndefaults resets fields that match their default values back to zero.
@@ -249,6 +570,17 @@ func ConfigUndefaults(v *Config) {
 }
 
 // ============================================================
+// TypeUndefaults: GatewayConfigState
+// ============================================================
+// GatewayConfigStateUndefaults resets fields that match their default values back to zero.
+// Use before persisting to store only explicit user overrides.
+func GatewayConfigStateUndefaults(v *GatewayConfigState) {
+	if v.Config != nil {
+		ConfigUndefaults(v.Config)
+	}
+}
+
+// ============================================================
 // Merge: Config
 // ============================================================
 // MergeConfig fills zero-valued fields in dst from src.
@@ -262,4 +594,47 @@ func MergeConfig(dst, src *Config) {
 	if !dst.EnableQuic {
 		dst.EnableQuic = src.EnableQuic
 	}
+}
+
+// ============================================================
+// Merge: GatewayConfigState
+// ============================================================
+// MergeGatewayConfigState fills zero-valued fields in dst from src.
+func MergeGatewayConfigState(dst, src *GatewayConfigState) {
+	if dst.Config == nil {
+		dst.Config = src.Config
+	} else if src.Config != nil {
+		MergeConfig(dst.Config, src.Config)
+	}
+}
+
+// ConfigLlmTypeDescriptor returns a JSON description of Config for LLM-assisted construction.
+// The description includes field names, types, comments, constraints, defaults,
+// nested message structures, and enum values — everything an LLM needs to
+// construct a valid instance of this type.
+func ConfigLlmTypeDescriptor() string {
+	return `{
+  "name": "Config",
+  "package": "gateway",
+  "fields": [
+    {
+      "name": "health_poll_interval_seconds",
+      "type": "int64",
+      "description": "How often to refresh health state (seconds). Default 5.",
+      "default": 5
+    },
+    {
+      "name": "enable_tcp",
+      "type": "bool",
+      "description": "Enable TCP listener for HTTP/1.1, HTTP/2, and gRPC. Default true.",
+      "default": true
+    },
+    {
+      "name": "enable_quic",
+      "type": "bool",
+      "description": "Enable QUIC/UDP listener for HTTP/3. Default true.",
+      "default": true
+    }
+  ]
+}`
 }

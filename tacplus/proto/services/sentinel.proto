@@ -834,11 +834,29 @@ message AdminMutationRate {
   int64 timestamp_ms = 13;
 }
 
+// SentinelConfigState is the backend state boundary for sentinel service configuration.
+// Auto-injected by tacplus from (spec.frontend_config) annotation.
+message SentinelConfigState {
+
+  sentinel.Config config = 1;
+}
+
 // ============================================================================
 // Auto-generated Backend Service (tacplus)
 // ============================================================================
 
 service SentinelStateBackendService {
+}
+
+// ============================================================================
+// Auto-generated Backend Service (tacplus)
+// ============================================================================
+
+service SentinelConfigStateBackendService {
+	// Singleton: Config
+	rpc GetConfig(google.protobuf.Empty) returns (Config);
+	rpc SetConfig(Config) returns (Config);
+	rpc WatchConfig(google.protobuf.Empty) returns (stream Config);
 }
 
 message MapEmpty {}

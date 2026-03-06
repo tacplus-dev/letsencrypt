@@ -92,6 +92,13 @@ message CertMagicState {
   map<string, CertMagicState> children = 4;
 }
 
+// LetsencryptConfigState is the backend state boundary for letsencrypt service configuration.
+// Auto-injected by tacplus from (spec.frontend_config) annotation.
+message LetsencryptConfigState {
+
+  letsencrypt.Config config = 1;
+}
+
 // Lock provides optimistic concurrency control for atomic state boundaries.
 message Lock {
   string id = 1;
@@ -107,6 +114,17 @@ service LetsEncryptStateBackendService {
 	rpc GetCertData(google.protobuf.Empty) returns (LetsEncryptCertData);
 	rpc SetCertData(LetsEncryptCertData) returns (LetsEncryptCertData);
 	rpc WatchCertData(google.protobuf.Empty) returns (stream LetsEncryptCertData);
+}
+
+// ============================================================================
+// Auto-generated Backend Service (tacplus)
+// ============================================================================
+
+service LetsencryptConfigStateBackendService {
+	// Singleton: Config
+	rpc GetConfig(google.protobuf.Empty) returns (Config);
+	rpc SetConfig(Config) returns (Config);
+	rpc WatchConfig(google.protobuf.Empty) returns (stream Config);
 }
 
 message MapEmpty {}

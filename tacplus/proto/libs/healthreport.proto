@@ -9,8 +9,6 @@ syntax = "proto3";
 package healthreport;
 option go_package = "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/healthreport";
 
-import "libs/host.proto";
-
 // InstanceStatus represents the health status of a service instance.
 enum InstanceStatus {
   INSTANCE_STATUS_STARTING = 0;
@@ -30,8 +28,8 @@ message ServiceInstanceHealth {
   string instance_id = 3;    // from token instance_id
 
   // Reachability
-  host.Host grpc_endpoint = 4;
-  host.Host http_endpoint = 5;
+  string grpc_endpoint = 4;
+  string http_endpoint = 5;
 
   // Health
   InstanceStatus status = 6;

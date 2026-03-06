@@ -17,6 +17,8 @@ syntax = "proto3";
 package gateway;
 option go_package = "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/gateway";
 
+import "google/protobuf/empty.proto";
+
 message Config {
 
   // How often to refresh health state (seconds). Default 5.
@@ -28,3 +30,23 @@ message Config {
   // Enable QUIC/UDP listener for HTTP/3. Default true.
   bool enable_quic = 3;
 }
+
+// GatewayConfigState is the backend state boundary for gateway service configuration.
+// Auto-injected by tacplus from (spec.frontend_config) annotation.
+message GatewayConfigState {
+
+  gateway.Config config = 1;
+}
+
+// ============================================================================
+// Auto-generated Backend Service (tacplus)
+// ============================================================================
+
+service GatewayConfigStateBackendService {
+	// Singleton: Config
+	rpc GetConfig(google.protobuf.Empty) returns (Config);
+	rpc SetConfig(Config) returns (Config);
+	rpc WatchConfig(google.protobuf.Empty) returns (stream Config);
+}
+
+message MapEmpty {}

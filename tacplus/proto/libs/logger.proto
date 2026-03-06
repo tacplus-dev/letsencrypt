@@ -52,6 +52,7 @@ enum Level {
 //   - Development mode with console output and pretty printing for local debugging
 //   - Production mode with JSON output and no pretty printing for log aggregation
 message LoggerConfig {
+
   // Name is the logger name/component identifier
   string name = 1;
 

@@ -12,6 +12,7 @@ import "libs/x509.proto";
 // This configuration is typically used to create HTTP clients for making outbound requests
 // with specific security and performance requirements.
 message HttpClientConfig {
+
   // InsecureSkipVerify controls whether the client verifies the server's certificate chain and host name.
   // If true, TLS accepts any certificate presented by the server and any host name in that certificate.
   // This should only be used for testing or in trusted environments.

@@ -213,3 +213,188 @@ var PolicyService_ServiceDesc = grpc.ServiceDesc{
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "services/policy.proto",
 }
+
+const (
+	PolicyConfigStateBackendService_GetConfig_FullMethodName   = "/policy.PolicyConfigStateBackendService/GetConfig"
+	PolicyConfigStateBackendService_SetConfig_FullMethodName   = "/policy.PolicyConfigStateBackendService/SetConfig"
+	PolicyConfigStateBackendService_WatchConfig_FullMethodName = "/policy.PolicyConfigStateBackendService/WatchConfig"
+)
+
+// PolicyConfigStateBackendServiceClient is the client API for PolicyConfigStateBackendService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type PolicyConfigStateBackendServiceClient interface {
+	// Singleton: Config
+	GetConfig(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*Config, error)
+	SetConfig(ctx context.Context, in *Config, opts ...grpc.CallOption) (*Config, error)
+	WatchConfig(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[Config], error)
+}
+
+type policyConfigStateBackendServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewPolicyConfigStateBackendServiceClient(cc grpc.ClientConnInterface) PolicyConfigStateBackendServiceClient {
+	return &policyConfigStateBackendServiceClient{cc}
+}
+
+func (c *policyConfigStateBackendServiceClient) GetConfig(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*Config, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Config)
+	err := c.cc.Invoke(ctx, PolicyConfigStateBackendService_GetConfig_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *policyConfigStateBackendServiceClient) SetConfig(ctx context.Context, in *Config, opts ...grpc.CallOption) (*Config, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Config)
+	err := c.cc.Invoke(ctx, PolicyConfigStateBackendService_SetConfig_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *policyConfigStateBackendServiceClient) WatchConfig(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[Config], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &PolicyConfigStateBackendService_ServiceDesc.Streams[0], PolicyConfigStateBackendService_WatchConfig_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[emptypb.Empty, Config]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type PolicyConfigStateBackendService_WatchConfigClient = grpc.ServerStreamingClient[Config]
+
+// PolicyConfigStateBackendServiceServer is the server API for PolicyConfigStateBackendService service.
+// All implementations must embed UnimplementedPolicyConfigStateBackendServiceServer
+// for forward compatibility.
+type PolicyConfigStateBackendServiceServer interface {
+	// Singleton: Config
+	GetConfig(context.Context, *emptypb.Empty) (*Config, error)
+	SetConfig(context.Context, *Config) (*Config, error)
+	WatchConfig(*emptypb.Empty, grpc.ServerStreamingServer[Config]) error
+	mustEmbedUnimplementedPolicyConfigStateBackendServiceServer()
+}
+
+// UnimplementedPolicyConfigStateBackendServiceServer must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedPolicyConfigStateBackendServiceServer struct{}
+
+func (UnimplementedPolicyConfigStateBackendServiceServer) GetConfig(context.Context, *emptypb.Empty) (*Config, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetConfig not implemented")
+}
+func (UnimplementedPolicyConfigStateBackendServiceServer) SetConfig(context.Context, *Config) (*Config, error) {
+	return nil, status.Error(codes.Unimplemented, "method SetConfig not implemented")
+}
+func (UnimplementedPolicyConfigStateBackendServiceServer) WatchConfig(*emptypb.Empty, grpc.ServerStreamingServer[Config]) error {
+	return status.Error(codes.Unimplemented, "method WatchConfig not implemented")
+}
+func (UnimplementedPolicyConfigStateBackendServiceServer) mustEmbedUnimplementedPolicyConfigStateBackendServiceServer() {
+}
+func (UnimplementedPolicyConfigStateBackendServiceServer) testEmbeddedByValue() {}
+
+// UnsafePolicyConfigStateBackendServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to PolicyConfigStateBackendServiceServer will
+// result in compilation errors.
+type UnsafePolicyConfigStateBackendServiceServer interface {
+	mustEmbedUnimplementedPolicyConfigStateBackendServiceServer()
+}
+
+func RegisterPolicyConfigStateBackendServiceServer(s grpc.ServiceRegistrar, srv PolicyConfigStateBackendServiceServer) {
+	// If the following call panics, it indicates UnimplementedPolicyConfigStateBackendServiceServer was
+	// embedded by pointer and is nil.  This will cause panics if an
+	// unimplemented method is ever invoked, so we test this at initialization
+	// time to prevent it from happening at runtime later due to I/O.
+	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
+		t.testEmbeddedByValue()
+	}
+	s.RegisterService(&PolicyConfigStateBackendService_ServiceDesc, srv)
+}
+
+func _PolicyConfigStateBackendService_GetConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PolicyConfigStateBackendServiceServer).GetConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PolicyConfigStateBackendService_GetConfig_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PolicyConfigStateBackendServiceServer).GetConfig(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PolicyConfigStateBackendService_SetConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Config)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PolicyConfigStateBackendServiceServer).SetConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PolicyConfigStateBackendService_SetConfig_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PolicyConfigStateBackendServiceServer).SetConfig(ctx, req.(*Config))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PolicyConfigStateBackendService_WatchConfig_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(emptypb.Empty)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(PolicyConfigStateBackendServiceServer).WatchConfig(m, &grpc.GenericServerStream[emptypb.Empty, Config]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type PolicyConfigStateBackendService_WatchConfigServer = grpc.ServerStreamingServer[Config]
+
+// PolicyConfigStateBackendService_ServiceDesc is the grpc.ServiceDesc for PolicyConfigStateBackendService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var PolicyConfigStateBackendService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "policy.PolicyConfigStateBackendService",
+	HandlerType: (*PolicyConfigStateBackendServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetConfig",
+			Handler:    _PolicyConfigStateBackendService_GetConfig_Handler,
+		},
+		{
+			MethodName: "SetConfig",
+			Handler:    _PolicyConfigStateBackendService_SetConfig_Handler,
+		},
+	},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "WatchConfig",
+			Handler:       _PolicyConfigStateBackendService_WatchConfig_Handler,
+			ServerStreams: true,
+		},
+	},
+	Metadata: "services/policy.proto",
+}

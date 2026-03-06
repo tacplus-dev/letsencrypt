@@ -2,8 +2,8 @@
 
 syntax = "proto3";
 
-package spec;
-option go_package = "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/spec";
+package tacplus;
+option go_package = "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/tacplus";
 
 // ============================================================================
 // Dependencies Configuration Schema

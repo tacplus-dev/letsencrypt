@@ -312,7 +312,7 @@ var File_libs_httpclient_proto protoreflect.FileDescriptor
 const file_libs_httpclient_proto_rawDesc = "" +
 	"\n" +
 	"\x15libs/httpclient.proto\x12\n" +
-	"httpclient\x1a\x0flibs/x509.proto\x1a\x0flibs/spec.proto\"\x84\x06\n" +
+	"httpclient\x1a\x0flibs/x509.proto\x1a\x0flibs/spec.proto\"\x8a\x06\n" +
 	"\x10HttpClientConfig\x120\n" +
 	"\x14insecure_skip_verify\x18\x01 \x01(\bR\x12insecureSkipVerify\x12.\n" +
 	"\x13disable_keep_alives\x18\x02 \x01(\bR\x11disableKeepAlives\x123\n" +
@@ -329,7 +329,7 @@ const file_libs_httpclient_proto_rawDesc = "" +
 	" \x01(\x03B\x04\xc0\xa6\x1d\x02R\x1cexpectContinueTimeoutSeconds\x12K\n" +
 	"\x1fresponse_header_timeout_seconds\x18\v \x01(\x03B\x04\xc0\xa6\x1d\x02R\x1cresponseHeaderTimeoutSeconds\x12:\n" +
 	"\fretry_config\x18\f \x01(\v2\x17.httpclient.RetryConfigR\vretryConfig\x12-\n" +
-	"\x12disable_validation\x18\r \x01(\bR\x11disableValidation\"\x89\x02\n" +
+	"\x12disable_validation\x18\r \x01(\bR\x11disableValidation:\x04\xe8\xa8\x1d\x01\"\x89\x02\n" +
 	"\vRetryConfig\x12)\n" +
 	"\vmax_retries\x18\x01 \x01(\x05B\b\xb0\xa7\x1d\x00\xc0\xa7\x1d\n" +
 	"R\n" +

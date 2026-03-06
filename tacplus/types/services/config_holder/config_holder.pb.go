@@ -14,17 +14,15 @@
 package config_holder
 
 import (
-	serviceconfig "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/serviceconfig"
-	_ "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/spec"
 	gateway "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/gateway"
 	identity "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/identity"
 	letsencrypt "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/letsencrypt"
+	mcp_assist "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/mcp_assist"
 	policy "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/policy"
 	policysim "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/policysim"
 	sentinel "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/sentinel"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -37,6 +35,8 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// ConfigHolder wraps all frontend service configs for YAML loading by kernel.
+// Field IDs must match the (spec.frontend_config) id annotation on each Config message.
 type ConfigHolder struct {
 	state             protoimpl.MessageState `protogen:"open.v1"`
 	SentinelConfig    *sentinel.Config       `protobuf:"bytes,5,opt,name=sentinel_config,json=sentinelConfig,proto3" json:"sentinel_config,omitempty"`
@@ -45,6 +45,7 @@ type ConfigHolder struct {
 	LetsencryptConfig *letsencrypt.Config    `protobuf:"bytes,9,opt,name=letsencrypt_config,json=letsencryptConfig,proto3" json:"letsencrypt_config,omitempty"`
 	PolicyConfig      *policy.Config         `protobuf:"bytes,10,opt,name=policy_config,json=policyConfig,proto3" json:"policy_config,omitempty"`
 	PolicysimConfig   *policysim.Config      `protobuf:"bytes,11,opt,name=policysim_config,json=policysimConfig,proto3" json:"policysim_config,omitempty"`
+	McpConfig         *mcp_assist.Config     `protobuf:"bytes,12,opt,name=mcp_config,json=mcpConfig,proto3" json:"mcp_config,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -121,357 +122,18 @@ func (x *ConfigHolder) GetPolicysimConfig() *policysim.Config {
 	return nil
 }
 
-type SentinelConfigState struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Config        *sentinel.Config       `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *SentinelConfigState) Reset() {
-	*x = SentinelConfigState{}
-	mi := &file_services_config_holder_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SentinelConfigState) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SentinelConfigState) ProtoMessage() {}
-
-func (x *SentinelConfigState) ProtoReflect() protoreflect.Message {
-	mi := &file_services_config_holder_proto_msgTypes[1]
+func (x *ConfigHolder) GetMcpConfig() *mcp_assist.Config {
 	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SentinelConfigState.ProtoReflect.Descriptor instead.
-func (*SentinelConfigState) Descriptor() ([]byte, []int) {
-	return file_services_config_holder_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *SentinelConfigState) GetConfig() *sentinel.Config {
-	if x != nil {
-		return x.Config
+		return x.McpConfig
 	}
 	return nil
-}
-
-type IdentityConfigState struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Config        *identity.Config       `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *IdentityConfigState) Reset() {
-	*x = IdentityConfigState{}
-	mi := &file_services_config_holder_proto_msgTypes[2]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *IdentityConfigState) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*IdentityConfigState) ProtoMessage() {}
-
-func (x *IdentityConfigState) ProtoReflect() protoreflect.Message {
-	mi := &file_services_config_holder_proto_msgTypes[2]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use IdentityConfigState.ProtoReflect.Descriptor instead.
-func (*IdentityConfigState) Descriptor() ([]byte, []int) {
-	return file_services_config_holder_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *IdentityConfigState) GetConfig() *identity.Config {
-	if x != nil {
-		return x.Config
-	}
-	return nil
-}
-
-type GatewayConfigState struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Config        *gateway.Config        `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GatewayConfigState) Reset() {
-	*x = GatewayConfigState{}
-	mi := &file_services_config_holder_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GatewayConfigState) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GatewayConfigState) ProtoMessage() {}
-
-func (x *GatewayConfigState) ProtoReflect() protoreflect.Message {
-	mi := &file_services_config_holder_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GatewayConfigState.ProtoReflect.Descriptor instead.
-func (*GatewayConfigState) Descriptor() ([]byte, []int) {
-	return file_services_config_holder_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *GatewayConfigState) GetConfig() *gateway.Config {
-	if x != nil {
-		return x.Config
-	}
-	return nil
-}
-
-type LetsencryptConfigState struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Config        *letsencrypt.Config    `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *LetsencryptConfigState) Reset() {
-	*x = LetsencryptConfigState{}
-	mi := &file_services_config_holder_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *LetsencryptConfigState) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*LetsencryptConfigState) ProtoMessage() {}
-
-func (x *LetsencryptConfigState) ProtoReflect() protoreflect.Message {
-	mi := &file_services_config_holder_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use LetsencryptConfigState.ProtoReflect.Descriptor instead.
-func (*LetsencryptConfigState) Descriptor() ([]byte, []int) {
-	return file_services_config_holder_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *LetsencryptConfigState) GetConfig() *letsencrypt.Config {
-	if x != nil {
-		return x.Config
-	}
-	return nil
-}
-
-type PolicyConfigState struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Config        *policy.Config         `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *PolicyConfigState) Reset() {
-	*x = PolicyConfigState{}
-	mi := &file_services_config_holder_proto_msgTypes[5]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *PolicyConfigState) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*PolicyConfigState) ProtoMessage() {}
-
-func (x *PolicyConfigState) ProtoReflect() protoreflect.Message {
-	mi := &file_services_config_holder_proto_msgTypes[5]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use PolicyConfigState.ProtoReflect.Descriptor instead.
-func (*PolicyConfigState) Descriptor() ([]byte, []int) {
-	return file_services_config_holder_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *PolicyConfigState) GetConfig() *policy.Config {
-	if x != nil {
-		return x.Config
-	}
-	return nil
-}
-
-type PolicysimConfigState struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Config        *policysim.Config      `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *PolicysimConfigState) Reset() {
-	*x = PolicysimConfigState{}
-	mi := &file_services_config_holder_proto_msgTypes[6]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *PolicysimConfigState) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*PolicysimConfigState) ProtoMessage() {}
-
-func (x *PolicysimConfigState) ProtoReflect() protoreflect.Message {
-	mi := &file_services_config_holder_proto_msgTypes[6]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use PolicysimConfigState.ProtoReflect.Descriptor instead.
-func (*PolicysimConfigState) Descriptor() ([]byte, []int) {
-	return file_services_config_holder_proto_rawDescGZIP(), []int{6}
-}
-
-func (x *PolicysimConfigState) GetConfig() *policysim.Config {
-	if x != nil {
-		return x.Config
-	}
-	return nil
-}
-
-// ServiceConfigState delivers runtime configuration (OPA policy) to all services.
-// The backend writes the OPA policy; frontends subscribe via OnChange.
-type ServiceConfigState struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Config        *serviceconfig.Config  `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ServiceConfigState) Reset() {
-	*x = ServiceConfigState{}
-	mi := &file_services_config_holder_proto_msgTypes[7]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ServiceConfigState) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ServiceConfigState) ProtoMessage() {}
-
-func (x *ServiceConfigState) ProtoReflect() protoreflect.Message {
-	mi := &file_services_config_holder_proto_msgTypes[7]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ServiceConfigState.ProtoReflect.Descriptor instead.
-func (*ServiceConfigState) Descriptor() ([]byte, []int) {
-	return file_services_config_holder_proto_rawDescGZIP(), []int{7}
-}
-
-func (x *ServiceConfigState) GetConfig() *serviceconfig.Config {
-	if x != nil {
-		return x.Config
-	}
-	return nil
-}
-
-type MapEmpty struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *MapEmpty) Reset() {
-	*x = MapEmpty{}
-	mi := &file_services_config_holder_proto_msgTypes[8]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *MapEmpty) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*MapEmpty) ProtoMessage() {}
-
-func (x *MapEmpty) ProtoReflect() protoreflect.Message {
-	mi := &file_services_config_holder_proto_msgTypes[8]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use MapEmpty.ProtoReflect.Descriptor instead.
-func (*MapEmpty) Descriptor() ([]byte, []int) {
-	return file_services_config_holder_proto_rawDescGZIP(), []int{8}
 }
 
 var File_services_config_holder_proto protoreflect.FileDescriptor
 
 const file_services_config_holder_proto_rawDesc = "" +
 	"\n" +
-	"\x1cservices/config_holder.proto\x12\rconfig_holder\x1a\x0flibs/spec.proto\x1a\x18libs/serviceconfig.proto\x1a\x16services/gateway.proto\x1a\x17services/identity.proto\x1a\x1aservices/letsencrypt.proto\x1a\x15services/policy.proto\x1a\x18services/policysim.proto\x1a\x17services/sentinel.proto\x1a\x1bgoogle/protobuf/empty.proto\"\xf3\x02\n" +
+	"\x1cservices/config_holder.proto\x12\rconfig_holder\x1a\x16services/gateway.proto\x1a\x17services/identity.proto\x1a\x1aservices/letsencrypt.proto\x1a\x19services/mcp_assist.proto\x1a\x15services/policy.proto\x1a\x18services/policysim.proto\x1a\x17services/sentinel.proto\"\xa6\x03\n" +
 	"\fConfigHolder\x129\n" +
 	"\x0fsentinel_config\x18\x05 \x01(\v2\x10.sentinel.ConfigR\x0esentinelConfig\x129\n" +
 	"\x0fidentity_config\x18\x06 \x01(\v2\x10.identity.ConfigR\x0eidentityConfig\x126\n" +
@@ -479,51 +141,9 @@ const file_services_config_holder_proto_rawDesc = "" +
 	"\x12letsencrypt_config\x18\t \x01(\v2\x13.letsencrypt.ConfigR\x11letsencryptConfig\x123\n" +
 	"\rpolicy_config\x18\n" +
 	" \x01(\v2\x0e.policy.ConfigR\fpolicyConfig\x12<\n" +
-	"\x10policysim_config\x18\v \x01(\v2\x11.policysim.ConfigR\x0fpolicysimConfig\"f\n" +
-	"\x13SentinelConfigState\x122\n" +
-	"\x06config\x18\x01 \x01(\v2\x10.sentinel.ConfigB\b\xe0\xb5\x18\x02\xe0\xb6\x18\x01R\x06config:\x1b\x9a\xa8\x1d\x13SentinelConfigState\xa0\xa8\x1d\x02\"f\n" +
-	"\x13IdentityConfigState\x122\n" +
-	"\x06config\x18\x01 \x01(\v2\x10.identity.ConfigB\b\xe0\xb5\x18\x02\xe0\xb6\x18\x01R\x06config:\x1b\x9a\xa8\x1d\x13IdentityConfigState\xa0\xa8\x1d\x02\"c\n" +
-	"\x12GatewayConfigState\x121\n" +
-	"\x06config\x18\x01 \x01(\v2\x0f.gateway.ConfigB\b\xe0\xb5\x18\x02\xe0\xb6\x18\x01R\x06config:\x1a\x9a\xa8\x1d\x12GatewayConfigState\xa0\xa8\x1d\x02\"o\n" +
-	"\x16LetsencryptConfigState\x125\n" +
-	"\x06config\x18\x01 \x01(\v2\x13.letsencrypt.ConfigB\b\xe0\xb5\x18\x02\xe0\xb6\x18\x01R\x06config:\x1e\x9a\xa8\x1d\x16LetsencryptConfigState\xa0\xa8\x1d\x02\"`\n" +
-	"\x11PolicyConfigState\x120\n" +
-	"\x06config\x18\x01 \x01(\v2\x0e.policy.ConfigB\b\xe0\xb5\x18\x02\xe0\xb6\x18\x01R\x06config:\x19\x9a\xa8\x1d\x11PolicyConfigState\xa0\xa8\x1d\x02\"i\n" +
-	"\x14PolicysimConfigState\x123\n" +
-	"\x06config\x18\x01 \x01(\v2\x11.policysim.ConfigB\b\xe0\xb5\x18\x02\xe0\xb6\x18\x01R\x06config:\x1c\x9a\xa8\x1d\x14PolicysimConfigState\xa0\xa8\x1d\x02\"i\n" +
-	"\x12ServiceConfigState\x127\n" +
-	"\x06config\x18\x01 \x01(\v2\x15.serviceconfig.ConfigB\b\xe0\xb5\x18\x02\xe0\xb6\x18\x01R\x06config:\x1a\x9a\xa8\x1d\x12ServiceConfigState\xa0\xa8\x1d\x02\"\n" +
+	"\x10policysim_config\x18\v \x01(\v2\x11.policysim.ConfigR\x0fpolicysimConfig\x121\n" +
 	"\n" +
-	"\bMapEmpty2\xc6\x01\n" +
-	"!SentinelConfigStateBackendService\x125\n" +
-	"\tGetConfig\x12\x16.google.protobuf.Empty\x1a\x10.sentinel.Config\x12/\n" +
-	"\tSetConfig\x12\x10.sentinel.Config\x1a\x10.sentinel.Config\x129\n" +
-	"\vWatchConfig\x12\x16.google.protobuf.Empty\x1a\x10.sentinel.Config0\x012\xc6\x01\n" +
-	"!IdentityConfigStateBackendService\x125\n" +
-	"\tGetConfig\x12\x16.google.protobuf.Empty\x1a\x10.identity.Config\x12/\n" +
-	"\tSetConfig\x12\x10.identity.Config\x1a\x10.identity.Config\x129\n" +
-	"\vWatchConfig\x12\x16.google.protobuf.Empty\x1a\x10.identity.Config0\x012\xc1\x01\n" +
-	" GatewayConfigStateBackendService\x124\n" +
-	"\tGetConfig\x12\x16.google.protobuf.Empty\x1a\x0f.gateway.Config\x12-\n" +
-	"\tSetConfig\x12\x0f.gateway.Config\x1a\x0f.gateway.Config\x128\n" +
-	"\vWatchConfig\x12\x16.google.protobuf.Empty\x1a\x0f.gateway.Config0\x012\xd5\x01\n" +
-	"$LetsencryptConfigStateBackendService\x128\n" +
-	"\tGetConfig\x12\x16.google.protobuf.Empty\x1a\x13.letsencrypt.Config\x125\n" +
-	"\tSetConfig\x12\x13.letsencrypt.Config\x1a\x13.letsencrypt.Config\x12<\n" +
-	"\vWatchConfig\x12\x16.google.protobuf.Empty\x1a\x13.letsencrypt.Config0\x012\xbc\x01\n" +
-	"\x1fPolicyConfigStateBackendService\x123\n" +
-	"\tGetConfig\x12\x16.google.protobuf.Empty\x1a\x0e.policy.Config\x12+\n" +
-	"\tSetConfig\x12\x0e.policy.Config\x1a\x0e.policy.Config\x127\n" +
-	"\vWatchConfig\x12\x16.google.protobuf.Empty\x1a\x0e.policy.Config0\x012\xcb\x01\n" +
-	"\"PolicysimConfigStateBackendService\x126\n" +
-	"\tGetConfig\x12\x16.google.protobuf.Empty\x1a\x11.policysim.Config\x121\n" +
-	"\tSetConfig\x12\x11.policysim.Config\x1a\x11.policysim.Config\x12:\n" +
-	"\vWatchConfig\x12\x16.google.protobuf.Empty\x1a\x11.policysim.Config0\x012\xd9\x01\n" +
-	" ServiceConfigStateBackendService\x12:\n" +
-	"\tGetConfig\x12\x16.google.protobuf.Empty\x1a\x15.serviceconfig.Config\x129\n" +
-	"\tSetConfig\x12\x15.serviceconfig.Config\x1a\x15.serviceconfig.Config\x12>\n" +
-	"\vWatchConfig\x12\x16.google.protobuf.Empty\x1a\x15.serviceconfig.Config0\x01BbZ`gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/config_holderb\x06proto3"
+	"mcp_config\x18\f \x01(\v2\x12.mcp_assist.ConfigR\tmcpConfigBbZ`gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/config_holderb\x06proto3"
 
 var (
 	file_services_config_holder_proto_rawDescOnce sync.Once
@@ -537,87 +157,30 @@ func file_services_config_holder_proto_rawDescGZIP() []byte {
 	return file_services_config_holder_proto_rawDescData
 }
 
-var file_services_config_holder_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_services_config_holder_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
 var file_services_config_holder_proto_goTypes = []any{
-	(*ConfigHolder)(nil),           // 0: config_holder.ConfigHolder
-	(*SentinelConfigState)(nil),    // 1: config_holder.SentinelConfigState
-	(*IdentityConfigState)(nil),    // 2: config_holder.IdentityConfigState
-	(*GatewayConfigState)(nil),     // 3: config_holder.GatewayConfigState
-	(*LetsencryptConfigState)(nil), // 4: config_holder.LetsencryptConfigState
-	(*PolicyConfigState)(nil),      // 5: config_holder.PolicyConfigState
-	(*PolicysimConfigState)(nil),   // 6: config_holder.PolicysimConfigState
-	(*ServiceConfigState)(nil),     // 7: config_holder.ServiceConfigState
-	(*MapEmpty)(nil),               // 8: config_holder.MapEmpty
-	(*sentinel.Config)(nil),        // 9: sentinel.Config
-	(*identity.Config)(nil),        // 10: identity.Config
-	(*gateway.Config)(nil),         // 11: gateway.Config
-	(*letsencrypt.Config)(nil),     // 12: letsencrypt.Config
-	(*policy.Config)(nil),          // 13: policy.Config
-	(*policysim.Config)(nil),       // 14: policysim.Config
-	(*serviceconfig.Config)(nil),   // 15: serviceconfig.Config
-	(*emptypb.Empty)(nil),          // 16: google.protobuf.Empty
+	(*ConfigHolder)(nil),       // 0: config_holder.ConfigHolder
+	(*sentinel.Config)(nil),    // 1: sentinel.Config
+	(*identity.Config)(nil),    // 2: identity.Config
+	(*gateway.Config)(nil),     // 3: gateway.Config
+	(*letsencrypt.Config)(nil), // 4: letsencrypt.Config
+	(*policy.Config)(nil),      // 5: policy.Config
+	(*policysim.Config)(nil),   // 6: policysim.Config
+	(*mcp_assist.Config)(nil),  // 7: mcp_assist.Config
 }
 var file_services_config_holder_proto_depIdxs = []int32{
-	9,  // 0: config_holder.ConfigHolder.sentinel_config:type_name -> sentinel.Config
-	10, // 1: config_holder.ConfigHolder.identity_config:type_name -> identity.Config
-	11, // 2: config_holder.ConfigHolder.gateway_config:type_name -> gateway.Config
-	12, // 3: config_holder.ConfigHolder.letsencrypt_config:type_name -> letsencrypt.Config
-	13, // 4: config_holder.ConfigHolder.policy_config:type_name -> policy.Config
-	14, // 5: config_holder.ConfigHolder.policysim_config:type_name -> policysim.Config
-	9,  // 6: config_holder.SentinelConfigState.config:type_name -> sentinel.Config
-	10, // 7: config_holder.IdentityConfigState.config:type_name -> identity.Config
-	11, // 8: config_holder.GatewayConfigState.config:type_name -> gateway.Config
-	12, // 9: config_holder.LetsencryptConfigState.config:type_name -> letsencrypt.Config
-	13, // 10: config_holder.PolicyConfigState.config:type_name -> policy.Config
-	14, // 11: config_holder.PolicysimConfigState.config:type_name -> policysim.Config
-	15, // 12: config_holder.ServiceConfigState.config:type_name -> serviceconfig.Config
-	16, // 13: config_holder.SentinelConfigStateBackendService.GetConfig:input_type -> google.protobuf.Empty
-	9,  // 14: config_holder.SentinelConfigStateBackendService.SetConfig:input_type -> sentinel.Config
-	16, // 15: config_holder.SentinelConfigStateBackendService.WatchConfig:input_type -> google.protobuf.Empty
-	16, // 16: config_holder.IdentityConfigStateBackendService.GetConfig:input_type -> google.protobuf.Empty
-	10, // 17: config_holder.IdentityConfigStateBackendService.SetConfig:input_type -> identity.Config
-	16, // 18: config_holder.IdentityConfigStateBackendService.WatchConfig:input_type -> google.protobuf.Empty
-	16, // 19: config_holder.GatewayConfigStateBackendService.GetConfig:input_type -> google.protobuf.Empty
-	11, // 20: config_holder.GatewayConfigStateBackendService.SetConfig:input_type -> gateway.Config
-	16, // 21: config_holder.GatewayConfigStateBackendService.WatchConfig:input_type -> google.protobuf.Empty
-	16, // 22: config_holder.LetsencryptConfigStateBackendService.GetConfig:input_type -> google.protobuf.Empty
-	12, // 23: config_holder.LetsencryptConfigStateBackendService.SetConfig:input_type -> letsencrypt.Config
-	16, // 24: config_holder.LetsencryptConfigStateBackendService.WatchConfig:input_type -> google.protobuf.Empty
-	16, // 25: config_holder.PolicyConfigStateBackendService.GetConfig:input_type -> google.protobuf.Empty
-	13, // 26: config_holder.PolicyConfigStateBackendService.SetConfig:input_type -> policy.Config
-	16, // 27: config_holder.PolicyConfigStateBackendService.WatchConfig:input_type -> google.protobuf.Empty
-	16, // 28: config_holder.PolicysimConfigStateBackendService.GetConfig:input_type -> google.protobuf.Empty
-	14, // 29: config_holder.PolicysimConfigStateBackendService.SetConfig:input_type -> policysim.Config
-	16, // 30: config_holder.PolicysimConfigStateBackendService.WatchConfig:input_type -> google.protobuf.Empty
-	16, // 31: config_holder.ServiceConfigStateBackendService.GetConfig:input_type -> google.protobuf.Empty
-	15, // 32: config_holder.ServiceConfigStateBackendService.SetConfig:input_type -> serviceconfig.Config
-	16, // 33: config_holder.ServiceConfigStateBackendService.WatchConfig:input_type -> google.protobuf.Empty
-	9,  // 34: config_holder.SentinelConfigStateBackendService.GetConfig:output_type -> sentinel.Config
-	9,  // 35: config_holder.SentinelConfigStateBackendService.SetConfig:output_type -> sentinel.Config
-	9,  // 36: config_holder.SentinelConfigStateBackendService.WatchConfig:output_type -> sentinel.Config
-	10, // 37: config_holder.IdentityConfigStateBackendService.GetConfig:output_type -> identity.Config
-	10, // 38: config_holder.IdentityConfigStateBackendService.SetConfig:output_type -> identity.Config
-	10, // 39: config_holder.IdentityConfigStateBackendService.WatchConfig:output_type -> identity.Config
-	11, // 40: config_holder.GatewayConfigStateBackendService.GetConfig:output_type -> gateway.Config
-	11, // 41: config_holder.GatewayConfigStateBackendService.SetConfig:output_type -> gateway.Config
-	11, // 42: config_holder.GatewayConfigStateBackendService.WatchConfig:output_type -> gateway.Config
-	12, // 43: config_holder.LetsencryptConfigStateBackendService.GetConfig:output_type -> letsencrypt.Config
-	12, // 44: config_holder.LetsencryptConfigStateBackendService.SetConfig:output_type -> letsencrypt.Config
-	12, // 45: config_holder.LetsencryptConfigStateBackendService.WatchConfig:output_type -> letsencrypt.Config
-	13, // 46: config_holder.PolicyConfigStateBackendService.GetConfig:output_type -> policy.Config
-	13, // 47: config_holder.PolicyConfigStateBackendService.SetConfig:output_type -> policy.Config
-	13, // 48: config_holder.PolicyConfigStateBackendService.WatchConfig:output_type -> policy.Config
-	14, // 49: config_holder.PolicysimConfigStateBackendService.GetConfig:output_type -> policysim.Config
-	14, // 50: config_holder.PolicysimConfigStateBackendService.SetConfig:output_type -> policysim.Config
-	14, // 51: config_holder.PolicysimConfigStateBackendService.WatchConfig:output_type -> policysim.Config
-	15, // 52: config_holder.ServiceConfigStateBackendService.GetConfig:output_type -> serviceconfig.Config
-	15, // 53: config_holder.ServiceConfigStateBackendService.SetConfig:output_type -> serviceconfig.Config
-	15, // 54: config_holder.ServiceConfigStateBackendService.WatchConfig:output_type -> serviceconfig.Config
-	34, // [34:55] is the sub-list for method output_type
-	13, // [13:34] is the sub-list for method input_type
-	13, // [13:13] is the sub-list for extension type_name
-	13, // [13:13] is the sub-list for extension extendee
-	0,  // [0:13] is the sub-list for field type_name
+	1, // 0: config_holder.ConfigHolder.sentinel_config:type_name -> sentinel.Config
+	2, // 1: config_holder.ConfigHolder.identity_config:type_name -> identity.Config
+	3, // 2: config_holder.ConfigHolder.gateway_config:type_name -> gateway.Config
+	4, // 3: config_holder.ConfigHolder.letsencrypt_config:type_name -> letsencrypt.Config
+	5, // 4: config_holder.ConfigHolder.policy_config:type_name -> policy.Config
+	6, // 5: config_holder.ConfigHolder.policysim_config:type_name -> policysim.Config
+	7, // 6: config_holder.ConfigHolder.mcp_config:type_name -> mcp_assist.Config
+	7, // [7:7] is the sub-list for method output_type
+	7, // [7:7] is the sub-list for method input_type
+	7, // [7:7] is the sub-list for extension type_name
+	7, // [7:7] is the sub-list for extension extendee
+	0, // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_services_config_holder_proto_init() }
@@ -631,9 +194,9 @@ func file_services_config_holder_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_services_config_holder_proto_rawDesc), len(file_services_config_holder_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   9,
+			NumMessages:   1,
 			NumExtensions: 0,
-			NumServices:   7,
+			NumServices:   0,
 		},
 		GoTypes:           file_services_config_holder_proto_goTypes,
 		DependencyIndexes: file_services_config_holder_proto_depIdxs,

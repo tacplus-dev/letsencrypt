@@ -5730,6 +5730,139 @@ func AdminMutationRateToTOML(v *AdminMutationRate) ([]byte, error) {
 	return toml.Marshal(obj)
 }
 
+// SentinelConfigStateJSON represents SentinelConfigState in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type sentinelconfigstateJSON struct {
+	Config json.RawMessage `json:"config,omitempty"`
+}
+
+// SentinelConfigStateToJSON converts SentinelConfigState to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func SentinelConfigStateToJSON(v *SentinelConfigState) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "sentinelconfigstate is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := sentinelconfigstateJSON{
+		Config: func() json.RawMessage {
+			if v.Config == nil {
+				return nil
+			}
+			data, _ := ConfigToJSON(v.Config)
+			return data
+		}(),
+	}
+	return json.Marshal(helper)
+}
+
+// SentinelConfigStateFromBytes creates SentinelConfigState from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func SentinelConfigStateFromBytes(data []byte) (*SentinelConfigState, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := SentinelConfigStateFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := SentinelConfigStateFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := SentinelConfigStateFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &SentinelConfigState{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse SentinelConfigState: unsupported format or invalid data")
+}
+
+// SentinelConfigStateFromJSON creates SentinelConfigState from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func SentinelConfigStateFromJSON(data []byte) (*SentinelConfigState, error) {
+	// Unmarshal into helper struct with string enums
+	var raw sentinelconfigstateJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &SentinelConfigState{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &SentinelConfigState{}
+	// Parse message field: Config
+	if len(raw.Config) > 0 {
+		parsed, err := ConfigFromJSON(raw.Config)
+		if err == nil {
+			result.Config = parsed
+		}
+	}
+	return result, nil
+}
+
+// SentinelConfigStateToYAML converts SentinelConfigState to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func SentinelConfigStateToYAML(v *SentinelConfigState) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "sentinelconfigstate is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := SentinelConfigStateToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// SentinelConfigStateToTOML converts SentinelConfigState to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func SentinelConfigStateToTOML(v *SentinelConfigState) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "sentinelconfigstate is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := SentinelConfigStateToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
 // MapEmptyJSON represents MapEmpty in external JSON format (with string enums)
 // MARKER: JSON helper struct generated from serial.go
 type mapemptyJSON struct {
@@ -7981,6 +8114,31 @@ func AdminMutationRateFromEnvVar(env map[string]string) (*AdminMutationRate, err
 	return result, nil
 }
 
+// SentinelConfigStateToEnvVar converts SentinelConfigState to environment variable key-value pairs.
+func SentinelConfigStateToEnvVar(v *SentinelConfigState) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	if v.Config != nil {
+		for k, val := range ConfigToEnvVar(v.Config) {
+			result[k] = val
+		}
+	}
+	return result
+}
+
+// SentinelConfigStateFromEnvVar creates SentinelConfigState from environment variable key-value pairs.
+func SentinelConfigStateFromEnvVar(env map[string]string) (*SentinelConfigState, error) {
+	result := &SentinelConfigState{}
+	if sub, err := ConfigFromEnvVar(env); err != nil {
+		return nil, err
+	} else if sub != nil {
+		result.Config = sub
+	}
+	return result, nil
+}
+
 // MapEmptyToEnvVar converts MapEmpty to environment variable key-value pairs.
 func MapEmptyToEnvVar(v *MapEmpty) map[string]string {
 	if v == nil {
@@ -8633,6 +8791,16 @@ func ValidateAdminMutationRate(m *AdminMutationRate) error {
 	// Validate NodeId (default max size: 32768 bytes)
 	if len(m.NodeId) > 32768 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field NodeId exceeds max size of 32768 bytes, got: %d", len(m.NodeId))
+	}
+
+	return nil
+}
+
+// ValidateSentinelConfigState validates all fields in SentinelConfigState according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidateSentinelConfigState(m *SentinelConfigState) error {
+	if m == nil {
+		return nil
 	}
 
 	return nil
@@ -9689,5 +9857,15 @@ func MergeAdminMutationRate(dst, src *AdminMutationRate) {
 	}
 	if dst.TimestampMs == 0 {
 		dst.TimestampMs = src.TimestampMs
+	}
+}
+
+// ============================================================
+// Merge: SentinelConfigState
+// ============================================================
+// MergeSentinelConfigState fills zero-valued fields in dst from src.
+func MergeSentinelConfigState(dst, src *SentinelConfigState) {
+	if dst.Config == nil {
+		dst.Config = src.Config
 	}
 }

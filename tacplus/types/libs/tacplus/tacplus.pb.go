@@ -11,7 +11,7 @@
 //
 // Source: libs/tacplus.proto
 
-package spec
+package tacplus
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -212,35 +212,35 @@ var File_libs_tacplus_proto protoreflect.FileDescriptor
 
 const file_libs_tacplus_proto_rawDesc = "" +
 	"\n" +
-	"\x12libs/tacplus.proto\x12\x04spec\"\xa9\x01\n" +
-	"\x14LanguageDependencies\x12P\n" +
-	"\fdependencies\x18\x01 \x03(\v2,.spec.LanguageDependencies.DependenciesEntryR\fdependencies\x1a?\n" +
+	"\x12libs/tacplus.proto\x12\atacplus\"\xac\x01\n" +
+	"\x14LanguageDependencies\x12S\n" +
+	"\fdependencies\x18\x01 \x03(\v2/.tacplus.LanguageDependencies.DependenciesEntryR\fdependencies\x1a?\n" +
 	"\x11DependenciesEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xcc\x02\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xd2\x02\n" +
 	"\x14DependenciesRegistry\x12*\n" +
-	"\x11gitlab_project_id\x18\x01 \x01(\tR\x0fgitlabProjectId\x12J\n" +
+	"\x11gitlab_project_id\x18\x01 \x01(\tR\x0fgitlabProjectId\x12M\n" +
 	"\n" +
-	"interfaces\x18\x02 \x03(\v2*.spec.DependenciesRegistry.InterfacesEntryR\n" +
-	"interfaces\x12A\n" +
-	"\aimports\x18\x03 \x03(\v2'.spec.DependenciesRegistry.ImportsEntryR\aimports\x1a=\n" +
+	"interfaces\x18\x02 \x03(\v2-.tacplus.DependenciesRegistry.InterfacesEntryR\n" +
+	"interfaces\x12D\n" +
+	"\aimports\x18\x03 \x03(\v2*.tacplus.DependenciesRegistry.ImportsEntryR\aimports\x1a=\n" +
 	"\x0fInterfacesEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1a:\n" +
 	"\fImportsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xce\x02\n" +
-	"\x12DependenciesConfig\x126\n" +
-	"\bregistry\x18\x01 \x01(\v2\x1a.spec.DependenciesRegistryR\bregistry\x129\n" +
-	"\x05tools\x18\x02 \x03(\v2#.spec.DependenciesConfig.ToolsEntryR\x05tools\x126\n" +
-	"\x04lang\x18\x03 \x03(\v2\".spec.DependenciesConfig.LangEntryR\x04lang\x1a8\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xda\x02\n" +
+	"\x12DependenciesConfig\x129\n" +
+	"\bregistry\x18\x01 \x01(\v2\x1d.tacplus.DependenciesRegistryR\bregistry\x12<\n" +
+	"\x05tools\x18\x02 \x03(\v2&.tacplus.DependenciesConfig.ToolsEntryR\x05tools\x129\n" +
+	"\x04lang\x18\x03 \x03(\v2%.tacplus.DependenciesConfig.LangEntryR\x04lang\x1a8\n" +
 	"\n" +
 	"ToolsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1aS\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1aV\n" +
 	"\tLangEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x120\n" +
-	"\x05value\x18\x02 \x01(\v2\x1a.spec.LanguageDependenciesR\x05value:\x028\x01BUZSgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/specb\x06proto3"
+	"\x03key\x18\x01 \x01(\tR\x03key\x123\n" +
+	"\x05value\x18\x02 \x01(\v2\x1d.tacplus.LanguageDependenciesR\x05value:\x028\x01BXZVgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/tacplusb\x06proto3"
 
 var (
 	file_libs_tacplus_proto_rawDescOnce sync.Once
@@ -256,23 +256,23 @@ func file_libs_tacplus_proto_rawDescGZIP() []byte {
 
 var file_libs_tacplus_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_libs_tacplus_proto_goTypes = []any{
-	(*LanguageDependencies)(nil), // 0: spec.LanguageDependencies
-	(*DependenciesRegistry)(nil), // 1: spec.DependenciesRegistry
-	(*DependenciesConfig)(nil),   // 2: spec.DependenciesConfig
-	nil,                          // 3: spec.LanguageDependencies.DependenciesEntry
-	nil,                          // 4: spec.DependenciesRegistry.InterfacesEntry
-	nil,                          // 5: spec.DependenciesRegistry.ImportsEntry
-	nil,                          // 6: spec.DependenciesConfig.ToolsEntry
-	nil,                          // 7: spec.DependenciesConfig.LangEntry
+	(*LanguageDependencies)(nil), // 0: tacplus.LanguageDependencies
+	(*DependenciesRegistry)(nil), // 1: tacplus.DependenciesRegistry
+	(*DependenciesConfig)(nil),   // 2: tacplus.DependenciesConfig
+	nil,                          // 3: tacplus.LanguageDependencies.DependenciesEntry
+	nil,                          // 4: tacplus.DependenciesRegistry.InterfacesEntry
+	nil,                          // 5: tacplus.DependenciesRegistry.ImportsEntry
+	nil,                          // 6: tacplus.DependenciesConfig.ToolsEntry
+	nil,                          // 7: tacplus.DependenciesConfig.LangEntry
 }
 var file_libs_tacplus_proto_depIdxs = []int32{
-	3, // 0: spec.LanguageDependencies.dependencies:type_name -> spec.LanguageDependencies.DependenciesEntry
-	4, // 1: spec.DependenciesRegistry.interfaces:type_name -> spec.DependenciesRegistry.InterfacesEntry
-	5, // 2: spec.DependenciesRegistry.imports:type_name -> spec.DependenciesRegistry.ImportsEntry
-	1, // 3: spec.DependenciesConfig.registry:type_name -> spec.DependenciesRegistry
-	6, // 4: spec.DependenciesConfig.tools:type_name -> spec.DependenciesConfig.ToolsEntry
-	7, // 5: spec.DependenciesConfig.lang:type_name -> spec.DependenciesConfig.LangEntry
-	0, // 6: spec.DependenciesConfig.LangEntry.value:type_name -> spec.LanguageDependencies
+	3, // 0: tacplus.LanguageDependencies.dependencies:type_name -> tacplus.LanguageDependencies.DependenciesEntry
+	4, // 1: tacplus.DependenciesRegistry.interfaces:type_name -> tacplus.DependenciesRegistry.InterfacesEntry
+	5, // 2: tacplus.DependenciesRegistry.imports:type_name -> tacplus.DependenciesRegistry.ImportsEntry
+	1, // 3: tacplus.DependenciesConfig.registry:type_name -> tacplus.DependenciesRegistry
+	6, // 4: tacplus.DependenciesConfig.tools:type_name -> tacplus.DependenciesConfig.ToolsEntry
+	7, // 5: tacplus.DependenciesConfig.lang:type_name -> tacplus.DependenciesConfig.LangEntry
+	0, // 6: tacplus.DependenciesConfig.LangEntry.value:type_name -> tacplus.LanguageDependencies
 	7, // [7:7] is the sub-list for method output_type
 	7, // [7:7] is the sub-list for method input_type
 	7, // [7:7] is the sub-list for extension type_name

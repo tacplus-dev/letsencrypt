@@ -268,3 +268,188 @@ var BackendService_ServiceDesc = grpc.ServiceDesc{
 	},
 	Metadata: "libs/serviceconfig.proto",
 }
+
+const (
+	ServiceConfigStateBackendService_GetConfig_FullMethodName   = "/serviceconfig.ServiceConfigStateBackendService/GetConfig"
+	ServiceConfigStateBackendService_SetConfig_FullMethodName   = "/serviceconfig.ServiceConfigStateBackendService/SetConfig"
+	ServiceConfigStateBackendService_WatchConfig_FullMethodName = "/serviceconfig.ServiceConfigStateBackendService/WatchConfig"
+)
+
+// ServiceConfigStateBackendServiceClient is the client API for ServiceConfigStateBackendService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type ServiceConfigStateBackendServiceClient interface {
+	// Singleton: Config
+	GetConfig(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*Config, error)
+	SetConfig(ctx context.Context, in *Config, opts ...grpc.CallOption) (*Config, error)
+	WatchConfig(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[Config], error)
+}
+
+type serviceConfigStateBackendServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewServiceConfigStateBackendServiceClient(cc grpc.ClientConnInterface) ServiceConfigStateBackendServiceClient {
+	return &serviceConfigStateBackendServiceClient{cc}
+}
+
+func (c *serviceConfigStateBackendServiceClient) GetConfig(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*Config, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Config)
+	err := c.cc.Invoke(ctx, ServiceConfigStateBackendService_GetConfig_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *serviceConfigStateBackendServiceClient) SetConfig(ctx context.Context, in *Config, opts ...grpc.CallOption) (*Config, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Config)
+	err := c.cc.Invoke(ctx, ServiceConfigStateBackendService_SetConfig_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *serviceConfigStateBackendServiceClient) WatchConfig(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[Config], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &ServiceConfigStateBackendService_ServiceDesc.Streams[0], ServiceConfigStateBackendService_WatchConfig_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[emptypb.Empty, Config]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type ServiceConfigStateBackendService_WatchConfigClient = grpc.ServerStreamingClient[Config]
+
+// ServiceConfigStateBackendServiceServer is the server API for ServiceConfigStateBackendService service.
+// All implementations must embed UnimplementedServiceConfigStateBackendServiceServer
+// for forward compatibility.
+type ServiceConfigStateBackendServiceServer interface {
+	// Singleton: Config
+	GetConfig(context.Context, *emptypb.Empty) (*Config, error)
+	SetConfig(context.Context, *Config) (*Config, error)
+	WatchConfig(*emptypb.Empty, grpc.ServerStreamingServer[Config]) error
+	mustEmbedUnimplementedServiceConfigStateBackendServiceServer()
+}
+
+// UnimplementedServiceConfigStateBackendServiceServer must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedServiceConfigStateBackendServiceServer struct{}
+
+func (UnimplementedServiceConfigStateBackendServiceServer) GetConfig(context.Context, *emptypb.Empty) (*Config, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetConfig not implemented")
+}
+func (UnimplementedServiceConfigStateBackendServiceServer) SetConfig(context.Context, *Config) (*Config, error) {
+	return nil, status.Error(codes.Unimplemented, "method SetConfig not implemented")
+}
+func (UnimplementedServiceConfigStateBackendServiceServer) WatchConfig(*emptypb.Empty, grpc.ServerStreamingServer[Config]) error {
+	return status.Error(codes.Unimplemented, "method WatchConfig not implemented")
+}
+func (UnimplementedServiceConfigStateBackendServiceServer) mustEmbedUnimplementedServiceConfigStateBackendServiceServer() {
+}
+func (UnimplementedServiceConfigStateBackendServiceServer) testEmbeddedByValue() {}
+
+// UnsafeServiceConfigStateBackendServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to ServiceConfigStateBackendServiceServer will
+// result in compilation errors.
+type UnsafeServiceConfigStateBackendServiceServer interface {
+	mustEmbedUnimplementedServiceConfigStateBackendServiceServer()
+}
+
+func RegisterServiceConfigStateBackendServiceServer(s grpc.ServiceRegistrar, srv ServiceConfigStateBackendServiceServer) {
+	// If the following call panics, it indicates UnimplementedServiceConfigStateBackendServiceServer was
+	// embedded by pointer and is nil.  This will cause panics if an
+	// unimplemented method is ever invoked, so we test this at initialization
+	// time to prevent it from happening at runtime later due to I/O.
+	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
+		t.testEmbeddedByValue()
+	}
+	s.RegisterService(&ServiceConfigStateBackendService_ServiceDesc, srv)
+}
+
+func _ServiceConfigStateBackendService_GetConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ServiceConfigStateBackendServiceServer).GetConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ServiceConfigStateBackendService_GetConfig_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ServiceConfigStateBackendServiceServer).GetConfig(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ServiceConfigStateBackendService_SetConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Config)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ServiceConfigStateBackendServiceServer).SetConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ServiceConfigStateBackendService_SetConfig_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ServiceConfigStateBackendServiceServer).SetConfig(ctx, req.(*Config))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ServiceConfigStateBackendService_WatchConfig_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(emptypb.Empty)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ServiceConfigStateBackendServiceServer).WatchConfig(m, &grpc.GenericServerStream[emptypb.Empty, Config]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type ServiceConfigStateBackendService_WatchConfigServer = grpc.ServerStreamingServer[Config]
+
+// ServiceConfigStateBackendService_ServiceDesc is the grpc.ServiceDesc for ServiceConfigStateBackendService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var ServiceConfigStateBackendService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "serviceconfig.ServiceConfigStateBackendService",
+	HandlerType: (*ServiceConfigStateBackendServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetConfig",
+			Handler:    _ServiceConfigStateBackendService_GetConfig_Handler,
+		},
+		{
+			MethodName: "SetConfig",
+			Handler:    _ServiceConfigStateBackendService_SetConfig_Handler,
+		},
+	},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "WatchConfig",
+			Handler:       _ServiceConfigStateBackendService_WatchConfig_Handler,
+			ServerStreams: true,
+		},
+	},
+	Metadata: "libs/serviceconfig.proto",
+}

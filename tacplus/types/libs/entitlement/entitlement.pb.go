@@ -269,19 +269,19 @@ var File_libs_entitlement_proto protoreflect.FileDescriptor
 
 const file_libs_entitlement_proto_rawDesc = "" +
 	"\n" +
-	"\x16libs/entitlement.proto\x12\ventitlement\x1a\x0flibs/spec.proto\"p\n" +
+	"\x16libs/entitlement.proto\x12\ventitlement\x1a\x0flibs/spec.proto\"v\n" +
 	"\x12ServiceEntitlement\x12,\n" +
 	"\fservice_name\x18\x01 \x01(\tB\t\x88\xa6\x1d\x01\x90\xa7\x1d\x80\x01R\vserviceName\x12,\n" +
-	"\fallowed_rpcs\x18\x02 \x03(\tB\t\x88\xa6\x1d\x01\xc0\xa8\x1d\x80\x02R\vallowedRpcs\"\x7f\n" +
+	"\fallowed_rpcs\x18\x02 \x03(\tB\t\x88\xa6\x1d\x01\xc0\xa8\x1d\x80\x02R\vallowedRpcs:\x04\xe8\xa8\x1d\x01\"\x85\x01\n" +
 	"\x13ServiceEntitlements\x12\x19\n" +
 	"\x02id\x18\x01 \x01(\tB\t\x88\xa6\x1d\x01\x90\xa7\x1d\x80\x01R\x02id\x12M\n" +
-	"\fentitlements\x18\x02 \x03(\v2\x1f.entitlement.ServiceEntitlementB\b\x88\xa6\x1d\x01\xc0\xa8\x1d@R\fentitlements\"{\n" +
+	"\fentitlements\x18\x02 \x03(\v2\x1f.entitlement.ServiceEntitlementB\b\x88\xa6\x1d\x01\xc0\xa8\x1d@R\fentitlements:\x04\xe8\xa8\x1d\x01\"\x81\x01\n" +
 	"\x0fIdentityProfile\x12\x19\n" +
 	"\x02id\x18\x01 \x01(\tB\t\x88\xa6\x1d\x01\x90\xa7\x1d\x80\x01R\x02id\x12M\n" +
-	"\fentitlements\x18\x02 \x03(\v2\x1f.entitlement.ServiceEntitlementB\b\x88\xa6\x1d\x01\xc0\xa8\x1d@R\fentitlements\"p\n" +
+	"\fentitlements\x18\x02 \x03(\v2\x1f.entitlement.ServiceEntitlementB\b\x88\xa6\x1d\x01\xc0\xa8\x1d@R\fentitlements:\x04\xe8\xa8\x1d\x01\"v\n" +
 	"\x19ServiceEntitlementMapping\x12.\n" +
 	"\rcredential_id\x18\x01 \x01(\tB\t\x88\xa6\x1d\x01\x90\xa7\x1d\x80\x04R\fcredentialId\x12#\n" +
-	"\aservice\x18\x02 \x01(\tB\t\x88\xa6\x1d\x01\x90\xa7\x1d\x80\x01R\aserviceB\\ZZgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/entitlementb\x06proto3"
+	"\aservice\x18\x02 \x01(\tB\t\x88\xa6\x1d\x01\x90\xa7\x1d\x80\x01R\aservice:\x04\xe8\xa8\x1d\x01B\\ZZgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/entitlementb\x06proto3"
 
 var (
 	file_libs_entitlement_proto_rawDescOnce sync.Once

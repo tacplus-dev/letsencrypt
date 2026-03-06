@@ -111,3 +111,23 @@ message GetPoliciesResponse {
   // entitlements_policy is the OPA policy evaluated to determine entitlements.
   opa.OpaPolicy entitlements_policy = 1;
 }
+
+// PolicyConfigState is the backend state boundary for policy service configuration.
+// Auto-injected by tacplus from (spec.frontend_config) annotation.
+message PolicyConfigState {
+
+  policy.Config config = 1;
+}
+
+// ============================================================================
+// Auto-generated Backend Service (tacplus)
+// ============================================================================
+
+service PolicyConfigStateBackendService {
+	// Singleton: Config
+	rpc GetConfig(google.protobuf.Empty) returns (Config);
+	rpc SetConfig(Config) returns (Config);
+	rpc WatchConfig(google.protobuf.Empty) returns (stream Config);
+}
+
+message MapEmpty {}

@@ -1487,6 +1487,52 @@ func (x *ExchangeTokenResponse) GetExpiresIn() int64 {
 	return 0
 }
 
+// IdentityConfigState is the backend state boundary for identity service configuration.
+// Auto-injected by tacplus from (spec.frontend_config) annotation.
+type IdentityConfigState struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Config        *Config                `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *IdentityConfigState) Reset() {
+	*x = IdentityConfigState{}
+	mi := &file_services_identity_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *IdentityConfigState) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IdentityConfigState) ProtoMessage() {}
+
+func (x *IdentityConfigState) ProtoReflect() protoreflect.Message {
+	mi := &file_services_identity_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IdentityConfigState.ProtoReflect.Descriptor instead.
+func (*IdentityConfigState) Descriptor() ([]byte, []int) {
+	return file_services_identity_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *IdentityConfigState) GetConfig() *Config {
+	if x != nil {
+		return x.Config
+	}
+	return nil
+}
+
 type QueryValue struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Types that are valid to be assigned to Value:
@@ -1502,7 +1548,7 @@ type QueryValue struct {
 
 func (x *QueryValue) Reset() {
 	*x = QueryValue{}
-	mi := &file_services_identity_proto_msgTypes[19]
+	mi := &file_services_identity_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1514,7 +1560,7 @@ func (x *QueryValue) String() string {
 func (*QueryValue) ProtoMessage() {}
 
 func (x *QueryValue) ProtoReflect() protoreflect.Message {
-	mi := &file_services_identity_proto_msgTypes[19]
+	mi := &file_services_identity_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1527,7 +1573,7 @@ func (x *QueryValue) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QueryValue.ProtoReflect.Descriptor instead.
 func (*QueryValue) Descriptor() ([]byte, []int) {
-	return file_services_identity_proto_rawDescGZIP(), []int{19}
+	return file_services_identity_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *QueryValue) GetValue() isQueryValue_Value {
@@ -1613,7 +1659,7 @@ type Predicate struct {
 
 func (x *Predicate) Reset() {
 	*x = Predicate{}
-	mi := &file_services_identity_proto_msgTypes[20]
+	mi := &file_services_identity_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1625,7 +1671,7 @@ func (x *Predicate) String() string {
 func (*Predicate) ProtoMessage() {}
 
 func (x *Predicate) ProtoReflect() protoreflect.Message {
-	mi := &file_services_identity_proto_msgTypes[20]
+	mi := &file_services_identity_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1638,7 +1684,7 @@ func (x *Predicate) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Predicate.ProtoReflect.Descriptor instead.
 func (*Predicate) Descriptor() ([]byte, []int) {
-	return file_services_identity_proto_rawDescGZIP(), []int{20}
+	return file_services_identity_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *Predicate) GetFieldName() string {
@@ -1680,7 +1726,7 @@ type PredicateGroup struct {
 
 func (x *PredicateGroup) Reset() {
 	*x = PredicateGroup{}
-	mi := &file_services_identity_proto_msgTypes[21]
+	mi := &file_services_identity_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1692,7 +1738,7 @@ func (x *PredicateGroup) String() string {
 func (*PredicateGroup) ProtoMessage() {}
 
 func (x *PredicateGroup) ProtoReflect() protoreflect.Message {
-	mi := &file_services_identity_proto_msgTypes[21]
+	mi := &file_services_identity_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1705,7 +1751,7 @@ func (x *PredicateGroup) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PredicateGroup.ProtoReflect.Descriptor instead.
 func (*PredicateGroup) Descriptor() ([]byte, []int) {
-	return file_services_identity_proto_rawDescGZIP(), []int{21}
+	return file_services_identity_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *PredicateGroup) GetOp() LogicalOp {
@@ -1739,7 +1785,7 @@ type SortField struct {
 
 func (x *SortField) Reset() {
 	*x = SortField{}
-	mi := &file_services_identity_proto_msgTypes[22]
+	mi := &file_services_identity_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1751,7 +1797,7 @@ func (x *SortField) String() string {
 func (*SortField) ProtoMessage() {}
 
 func (x *SortField) ProtoReflect() protoreflect.Message {
-	mi := &file_services_identity_proto_msgTypes[22]
+	mi := &file_services_identity_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1764,7 +1810,7 @@ func (x *SortField) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SortField.ProtoReflect.Descriptor instead.
 func (*SortField) Descriptor() ([]byte, []int) {
-	return file_services_identity_proto_rawDescGZIP(), []int{22}
+	return file_services_identity_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *SortField) GetFieldName() string {
@@ -1793,7 +1839,7 @@ type CollectionQuery struct {
 
 func (x *CollectionQuery) Reset() {
 	*x = CollectionQuery{}
-	mi := &file_services_identity_proto_msgTypes[23]
+	mi := &file_services_identity_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1805,7 +1851,7 @@ func (x *CollectionQuery) String() string {
 func (*CollectionQuery) ProtoMessage() {}
 
 func (x *CollectionQuery) ProtoReflect() protoreflect.Message {
-	mi := &file_services_identity_proto_msgTypes[23]
+	mi := &file_services_identity_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1818,7 +1864,7 @@ func (x *CollectionQuery) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CollectionQuery.ProtoReflect.Descriptor instead.
 func (*CollectionQuery) Descriptor() ([]byte, []int) {
-	return file_services_identity_proto_rawDescGZIP(), []int{23}
+	return file_services_identity_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *CollectionQuery) GetWhere() *PredicateGroup {
@@ -1858,7 +1904,7 @@ type VerifyingKeysGetRequest struct {
 
 func (x *VerifyingKeysGetRequest) Reset() {
 	*x = VerifyingKeysGetRequest{}
-	mi := &file_services_identity_proto_msgTypes[24]
+	mi := &file_services_identity_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1870,7 +1916,7 @@ func (x *VerifyingKeysGetRequest) String() string {
 func (*VerifyingKeysGetRequest) ProtoMessage() {}
 
 func (x *VerifyingKeysGetRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_services_identity_proto_msgTypes[24]
+	mi := &file_services_identity_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1883,7 +1929,7 @@ func (x *VerifyingKeysGetRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VerifyingKeysGetRequest.ProtoReflect.Descriptor instead.
 func (*VerifyingKeysGetRequest) Descriptor() ([]byte, []int) {
-	return file_services_identity_proto_rawDescGZIP(), []int{24}
+	return file_services_identity_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *VerifyingKeysGetRequest) GetKey() string {
@@ -1904,7 +1950,7 @@ type VerifyingKeysPutRequest struct {
 
 func (x *VerifyingKeysPutRequest) Reset() {
 	*x = VerifyingKeysPutRequest{}
-	mi := &file_services_identity_proto_msgTypes[25]
+	mi := &file_services_identity_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1916,7 +1962,7 @@ func (x *VerifyingKeysPutRequest) String() string {
 func (*VerifyingKeysPutRequest) ProtoMessage() {}
 
 func (x *VerifyingKeysPutRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_services_identity_proto_msgTypes[25]
+	mi := &file_services_identity_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1929,7 +1975,7 @@ func (x *VerifyingKeysPutRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VerifyingKeysPutRequest.ProtoReflect.Descriptor instead.
 func (*VerifyingKeysPutRequest) Descriptor() ([]byte, []int) {
-	return file_services_identity_proto_rawDescGZIP(), []int{25}
+	return file_services_identity_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *VerifyingKeysPutRequest) GetKey() string {
@@ -1961,7 +2007,7 @@ type VerifyingKeysGetAllRequest struct {
 
 func (x *VerifyingKeysGetAllRequest) Reset() {
 	*x = VerifyingKeysGetAllRequest{}
-	mi := &file_services_identity_proto_msgTypes[26]
+	mi := &file_services_identity_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1973,7 +2019,7 @@ func (x *VerifyingKeysGetAllRequest) String() string {
 func (*VerifyingKeysGetAllRequest) ProtoMessage() {}
 
 func (x *VerifyingKeysGetAllRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_services_identity_proto_msgTypes[26]
+	mi := &file_services_identity_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1986,7 +2032,7 @@ func (x *VerifyingKeysGetAllRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VerifyingKeysGetAllRequest.ProtoReflect.Descriptor instead.
 func (*VerifyingKeysGetAllRequest) Descriptor() ([]byte, []int) {
-	return file_services_identity_proto_rawDescGZIP(), []int{26}
+	return file_services_identity_proto_rawDescGZIP(), []int{27}
 }
 
 type VerifyingKeysKeysRequest struct {
@@ -1997,7 +2043,7 @@ type VerifyingKeysKeysRequest struct {
 
 func (x *VerifyingKeysKeysRequest) Reset() {
 	*x = VerifyingKeysKeysRequest{}
-	mi := &file_services_identity_proto_msgTypes[27]
+	mi := &file_services_identity_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2009,7 +2055,7 @@ func (x *VerifyingKeysKeysRequest) String() string {
 func (*VerifyingKeysKeysRequest) ProtoMessage() {}
 
 func (x *VerifyingKeysKeysRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_services_identity_proto_msgTypes[27]
+	mi := &file_services_identity_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2022,7 +2068,7 @@ func (x *VerifyingKeysKeysRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VerifyingKeysKeysRequest.ProtoReflect.Descriptor instead.
 func (*VerifyingKeysKeysRequest) Descriptor() ([]byte, []int) {
-	return file_services_identity_proto_rawDescGZIP(), []int{27}
+	return file_services_identity_proto_rawDescGZIP(), []int{28}
 }
 
 type VerifyingKeysSizeRequest struct {
@@ -2033,7 +2079,7 @@ type VerifyingKeysSizeRequest struct {
 
 func (x *VerifyingKeysSizeRequest) Reset() {
 	*x = VerifyingKeysSizeRequest{}
-	mi := &file_services_identity_proto_msgTypes[28]
+	mi := &file_services_identity_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2045,7 +2091,7 @@ func (x *VerifyingKeysSizeRequest) String() string {
 func (*VerifyingKeysSizeRequest) ProtoMessage() {}
 
 func (x *VerifyingKeysSizeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_services_identity_proto_msgTypes[28]
+	mi := &file_services_identity_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2058,7 +2104,7 @@ func (x *VerifyingKeysSizeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VerifyingKeysSizeRequest.ProtoReflect.Descriptor instead.
 func (*VerifyingKeysSizeRequest) Descriptor() ([]byte, []int) {
-	return file_services_identity_proto_rawDescGZIP(), []int{28}
+	return file_services_identity_proto_rawDescGZIP(), []int{29}
 }
 
 type VerifyingKeysClearRequest struct {
@@ -2069,7 +2115,7 @@ type VerifyingKeysClearRequest struct {
 
 func (x *VerifyingKeysClearRequest) Reset() {
 	*x = VerifyingKeysClearRequest{}
-	mi := &file_services_identity_proto_msgTypes[29]
+	mi := &file_services_identity_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2081,7 +2127,7 @@ func (x *VerifyingKeysClearRequest) String() string {
 func (*VerifyingKeysClearRequest) ProtoMessage() {}
 
 func (x *VerifyingKeysClearRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_services_identity_proto_msgTypes[29]
+	mi := &file_services_identity_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2094,7 +2140,7 @@ func (x *VerifyingKeysClearRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VerifyingKeysClearRequest.ProtoReflect.Descriptor instead.
 func (*VerifyingKeysClearRequest) Descriptor() ([]byte, []int) {
-	return file_services_identity_proto_rawDescGZIP(), []int{29}
+	return file_services_identity_proto_rawDescGZIP(), []int{30}
 }
 
 type VerifyingKeysValueResponse struct {
@@ -2107,7 +2153,7 @@ type VerifyingKeysValueResponse struct {
 
 func (x *VerifyingKeysValueResponse) Reset() {
 	*x = VerifyingKeysValueResponse{}
-	mi := &file_services_identity_proto_msgTypes[30]
+	mi := &file_services_identity_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2119,7 +2165,7 @@ func (x *VerifyingKeysValueResponse) String() string {
 func (*VerifyingKeysValueResponse) ProtoMessage() {}
 
 func (x *VerifyingKeysValueResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_services_identity_proto_msgTypes[30]
+	mi := &file_services_identity_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2132,7 +2178,7 @@ func (x *VerifyingKeysValueResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VerifyingKeysValueResponse.ProtoReflect.Descriptor instead.
 func (*VerifyingKeysValueResponse) Descriptor() ([]byte, []int) {
-	return file_services_identity_proto_rawDescGZIP(), []int{30}
+	return file_services_identity_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *VerifyingKeysValueResponse) GetValue() *jwk.Jwk {
@@ -2158,7 +2204,7 @@ type VerifyingKeysEntriesResponse struct {
 
 func (x *VerifyingKeysEntriesResponse) Reset() {
 	*x = VerifyingKeysEntriesResponse{}
-	mi := &file_services_identity_proto_msgTypes[31]
+	mi := &file_services_identity_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2170,7 +2216,7 @@ func (x *VerifyingKeysEntriesResponse) String() string {
 func (*VerifyingKeysEntriesResponse) ProtoMessage() {}
 
 func (x *VerifyingKeysEntriesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_services_identity_proto_msgTypes[31]
+	mi := &file_services_identity_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2183,7 +2229,7 @@ func (x *VerifyingKeysEntriesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VerifyingKeysEntriesResponse.ProtoReflect.Descriptor instead.
 func (*VerifyingKeysEntriesResponse) Descriptor() ([]byte, []int) {
-	return file_services_identity_proto_rawDescGZIP(), []int{31}
+	return file_services_identity_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *VerifyingKeysEntriesResponse) GetEntries() map[string]*jwk.Jwk {
@@ -2202,7 +2248,7 @@ type VerifyingKeysKeysResponse struct {
 
 func (x *VerifyingKeysKeysResponse) Reset() {
 	*x = VerifyingKeysKeysResponse{}
-	mi := &file_services_identity_proto_msgTypes[32]
+	mi := &file_services_identity_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2214,7 +2260,7 @@ func (x *VerifyingKeysKeysResponse) String() string {
 func (*VerifyingKeysKeysResponse) ProtoMessage() {}
 
 func (x *VerifyingKeysKeysResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_services_identity_proto_msgTypes[32]
+	mi := &file_services_identity_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2227,7 +2273,7 @@ func (x *VerifyingKeysKeysResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VerifyingKeysKeysResponse.ProtoReflect.Descriptor instead.
 func (*VerifyingKeysKeysResponse) Descriptor() ([]byte, []int) {
-	return file_services_identity_proto_rawDescGZIP(), []int{32}
+	return file_services_identity_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *VerifyingKeysKeysResponse) GetKeys() []string {
@@ -2246,7 +2292,7 @@ type VerifyingKeysSizeResponse struct {
 
 func (x *VerifyingKeysSizeResponse) Reset() {
 	*x = VerifyingKeysSizeResponse{}
-	mi := &file_services_identity_proto_msgTypes[33]
+	mi := &file_services_identity_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2258,7 +2304,7 @@ func (x *VerifyingKeysSizeResponse) String() string {
 func (*VerifyingKeysSizeResponse) ProtoMessage() {}
 
 func (x *VerifyingKeysSizeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_services_identity_proto_msgTypes[33]
+	mi := &file_services_identity_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2271,7 +2317,7 @@ func (x *VerifyingKeysSizeResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VerifyingKeysSizeResponse.ProtoReflect.Descriptor instead.
 func (*VerifyingKeysSizeResponse) Descriptor() ([]byte, []int) {
-	return file_services_identity_proto_rawDescGZIP(), []int{33}
+	return file_services_identity_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *VerifyingKeysSizeResponse) GetSize() int32 {
@@ -2290,7 +2336,7 @@ type VerifyingKeysQueryRequest struct {
 
 func (x *VerifyingKeysQueryRequest) Reset() {
 	*x = VerifyingKeysQueryRequest{}
-	mi := &file_services_identity_proto_msgTypes[34]
+	mi := &file_services_identity_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2302,7 +2348,7 @@ func (x *VerifyingKeysQueryRequest) String() string {
 func (*VerifyingKeysQueryRequest) ProtoMessage() {}
 
 func (x *VerifyingKeysQueryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_services_identity_proto_msgTypes[34]
+	mi := &file_services_identity_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2315,7 +2361,7 @@ func (x *VerifyingKeysQueryRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VerifyingKeysQueryRequest.ProtoReflect.Descriptor instead.
 func (*VerifyingKeysQueryRequest) Descriptor() ([]byte, []int) {
-	return file_services_identity_proto_rawDescGZIP(), []int{34}
+	return file_services_identity_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *VerifyingKeysQueryRequest) GetQuery() *CollectionQuery {
@@ -2335,7 +2381,7 @@ type VerifyingKeysQueryResponse struct {
 
 func (x *VerifyingKeysQueryResponse) Reset() {
 	*x = VerifyingKeysQueryResponse{}
-	mi := &file_services_identity_proto_msgTypes[35]
+	mi := &file_services_identity_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2347,7 +2393,7 @@ func (x *VerifyingKeysQueryResponse) String() string {
 func (*VerifyingKeysQueryResponse) ProtoMessage() {}
 
 func (x *VerifyingKeysQueryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_services_identity_proto_msgTypes[35]
+	mi := &file_services_identity_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2360,7 +2406,7 @@ func (x *VerifyingKeysQueryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VerifyingKeysQueryResponse.ProtoReflect.Descriptor instead.
 func (*VerifyingKeysQueryResponse) Descriptor() ([]byte, []int) {
-	return file_services_identity_proto_rawDescGZIP(), []int{35}
+	return file_services_identity_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *VerifyingKeysQueryResponse) GetResults() []*jwk.Jwk {
@@ -2386,7 +2432,7 @@ type ExternalJwksGetRequest struct {
 
 func (x *ExternalJwksGetRequest) Reset() {
 	*x = ExternalJwksGetRequest{}
-	mi := &file_services_identity_proto_msgTypes[36]
+	mi := &file_services_identity_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2398,7 +2444,7 @@ func (x *ExternalJwksGetRequest) String() string {
 func (*ExternalJwksGetRequest) ProtoMessage() {}
 
 func (x *ExternalJwksGetRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_services_identity_proto_msgTypes[36]
+	mi := &file_services_identity_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2411,7 +2457,7 @@ func (x *ExternalJwksGetRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExternalJwksGetRequest.ProtoReflect.Descriptor instead.
 func (*ExternalJwksGetRequest) Descriptor() ([]byte, []int) {
-	return file_services_identity_proto_rawDescGZIP(), []int{36}
+	return file_services_identity_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *ExternalJwksGetRequest) GetKey() string {
@@ -2432,7 +2478,7 @@ type ExternalJwksPutRequest struct {
 
 func (x *ExternalJwksPutRequest) Reset() {
 	*x = ExternalJwksPutRequest{}
-	mi := &file_services_identity_proto_msgTypes[37]
+	mi := &file_services_identity_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2444,7 +2490,7 @@ func (x *ExternalJwksPutRequest) String() string {
 func (*ExternalJwksPutRequest) ProtoMessage() {}
 
 func (x *ExternalJwksPutRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_services_identity_proto_msgTypes[37]
+	mi := &file_services_identity_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2457,7 +2503,7 @@ func (x *ExternalJwksPutRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExternalJwksPutRequest.ProtoReflect.Descriptor instead.
 func (*ExternalJwksPutRequest) Descriptor() ([]byte, []int) {
-	return file_services_identity_proto_rawDescGZIP(), []int{37}
+	return file_services_identity_proto_rawDescGZIP(), []int{38}
 }
 
 func (x *ExternalJwksPutRequest) GetKey() string {
@@ -2489,7 +2535,7 @@ type ExternalJwksGetAllRequest struct {
 
 func (x *ExternalJwksGetAllRequest) Reset() {
 	*x = ExternalJwksGetAllRequest{}
-	mi := &file_services_identity_proto_msgTypes[38]
+	mi := &file_services_identity_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2501,7 +2547,7 @@ func (x *ExternalJwksGetAllRequest) String() string {
 func (*ExternalJwksGetAllRequest) ProtoMessage() {}
 
 func (x *ExternalJwksGetAllRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_services_identity_proto_msgTypes[38]
+	mi := &file_services_identity_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2514,7 +2560,7 @@ func (x *ExternalJwksGetAllRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExternalJwksGetAllRequest.ProtoReflect.Descriptor instead.
 func (*ExternalJwksGetAllRequest) Descriptor() ([]byte, []int) {
-	return file_services_identity_proto_rawDescGZIP(), []int{38}
+	return file_services_identity_proto_rawDescGZIP(), []int{39}
 }
 
 type ExternalJwksKeysRequest struct {
@@ -2525,7 +2571,7 @@ type ExternalJwksKeysRequest struct {
 
 func (x *ExternalJwksKeysRequest) Reset() {
 	*x = ExternalJwksKeysRequest{}
-	mi := &file_services_identity_proto_msgTypes[39]
+	mi := &file_services_identity_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2537,7 +2583,7 @@ func (x *ExternalJwksKeysRequest) String() string {
 func (*ExternalJwksKeysRequest) ProtoMessage() {}
 
 func (x *ExternalJwksKeysRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_services_identity_proto_msgTypes[39]
+	mi := &file_services_identity_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2550,7 +2596,7 @@ func (x *ExternalJwksKeysRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExternalJwksKeysRequest.ProtoReflect.Descriptor instead.
 func (*ExternalJwksKeysRequest) Descriptor() ([]byte, []int) {
-	return file_services_identity_proto_rawDescGZIP(), []int{39}
+	return file_services_identity_proto_rawDescGZIP(), []int{40}
 }
 
 type ExternalJwksSizeRequest struct {
@@ -2561,7 +2607,7 @@ type ExternalJwksSizeRequest struct {
 
 func (x *ExternalJwksSizeRequest) Reset() {
 	*x = ExternalJwksSizeRequest{}
-	mi := &file_services_identity_proto_msgTypes[40]
+	mi := &file_services_identity_proto_msgTypes[41]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2573,7 +2619,7 @@ func (x *ExternalJwksSizeRequest) String() string {
 func (*ExternalJwksSizeRequest) ProtoMessage() {}
 
 func (x *ExternalJwksSizeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_services_identity_proto_msgTypes[40]
+	mi := &file_services_identity_proto_msgTypes[41]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2586,7 +2632,7 @@ func (x *ExternalJwksSizeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExternalJwksSizeRequest.ProtoReflect.Descriptor instead.
 func (*ExternalJwksSizeRequest) Descriptor() ([]byte, []int) {
-	return file_services_identity_proto_rawDescGZIP(), []int{40}
+	return file_services_identity_proto_rawDescGZIP(), []int{41}
 }
 
 type ExternalJwksClearRequest struct {
@@ -2597,7 +2643,7 @@ type ExternalJwksClearRequest struct {
 
 func (x *ExternalJwksClearRequest) Reset() {
 	*x = ExternalJwksClearRequest{}
-	mi := &file_services_identity_proto_msgTypes[41]
+	mi := &file_services_identity_proto_msgTypes[42]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2609,7 +2655,7 @@ func (x *ExternalJwksClearRequest) String() string {
 func (*ExternalJwksClearRequest) ProtoMessage() {}
 
 func (x *ExternalJwksClearRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_services_identity_proto_msgTypes[41]
+	mi := &file_services_identity_proto_msgTypes[42]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2622,7 +2668,7 @@ func (x *ExternalJwksClearRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExternalJwksClearRequest.ProtoReflect.Descriptor instead.
 func (*ExternalJwksClearRequest) Descriptor() ([]byte, []int) {
-	return file_services_identity_proto_rawDescGZIP(), []int{41}
+	return file_services_identity_proto_rawDescGZIP(), []int{42}
 }
 
 type ExternalJwksValueResponse struct {
@@ -2635,7 +2681,7 @@ type ExternalJwksValueResponse struct {
 
 func (x *ExternalJwksValueResponse) Reset() {
 	*x = ExternalJwksValueResponse{}
-	mi := &file_services_identity_proto_msgTypes[42]
+	mi := &file_services_identity_proto_msgTypes[43]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2647,7 +2693,7 @@ func (x *ExternalJwksValueResponse) String() string {
 func (*ExternalJwksValueResponse) ProtoMessage() {}
 
 func (x *ExternalJwksValueResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_services_identity_proto_msgTypes[42]
+	mi := &file_services_identity_proto_msgTypes[43]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2660,7 +2706,7 @@ func (x *ExternalJwksValueResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExternalJwksValueResponse.ProtoReflect.Descriptor instead.
 func (*ExternalJwksValueResponse) Descriptor() ([]byte, []int) {
-	return file_services_identity_proto_rawDescGZIP(), []int{42}
+	return file_services_identity_proto_rawDescGZIP(), []int{43}
 }
 
 func (x *ExternalJwksValueResponse) GetValue() *ExternalJwk {
@@ -2686,7 +2732,7 @@ type ExternalJwksEntriesResponse struct {
 
 func (x *ExternalJwksEntriesResponse) Reset() {
 	*x = ExternalJwksEntriesResponse{}
-	mi := &file_services_identity_proto_msgTypes[43]
+	mi := &file_services_identity_proto_msgTypes[44]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2698,7 +2744,7 @@ func (x *ExternalJwksEntriesResponse) String() string {
 func (*ExternalJwksEntriesResponse) ProtoMessage() {}
 
 func (x *ExternalJwksEntriesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_services_identity_proto_msgTypes[43]
+	mi := &file_services_identity_proto_msgTypes[44]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2711,7 +2757,7 @@ func (x *ExternalJwksEntriesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExternalJwksEntriesResponse.ProtoReflect.Descriptor instead.
 func (*ExternalJwksEntriesResponse) Descriptor() ([]byte, []int) {
-	return file_services_identity_proto_rawDescGZIP(), []int{43}
+	return file_services_identity_proto_rawDescGZIP(), []int{44}
 }
 
 func (x *ExternalJwksEntriesResponse) GetEntries() map[string]*ExternalJwk {
@@ -2730,7 +2776,7 @@ type ExternalJwksKeysResponse struct {
 
 func (x *ExternalJwksKeysResponse) Reset() {
 	*x = ExternalJwksKeysResponse{}
-	mi := &file_services_identity_proto_msgTypes[44]
+	mi := &file_services_identity_proto_msgTypes[45]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2742,7 +2788,7 @@ func (x *ExternalJwksKeysResponse) String() string {
 func (*ExternalJwksKeysResponse) ProtoMessage() {}
 
 func (x *ExternalJwksKeysResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_services_identity_proto_msgTypes[44]
+	mi := &file_services_identity_proto_msgTypes[45]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2755,7 +2801,7 @@ func (x *ExternalJwksKeysResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExternalJwksKeysResponse.ProtoReflect.Descriptor instead.
 func (*ExternalJwksKeysResponse) Descriptor() ([]byte, []int) {
-	return file_services_identity_proto_rawDescGZIP(), []int{44}
+	return file_services_identity_proto_rawDescGZIP(), []int{45}
 }
 
 func (x *ExternalJwksKeysResponse) GetKeys() []string {
@@ -2774,7 +2820,7 @@ type ExternalJwksSizeResponse struct {
 
 func (x *ExternalJwksSizeResponse) Reset() {
 	*x = ExternalJwksSizeResponse{}
-	mi := &file_services_identity_proto_msgTypes[45]
+	mi := &file_services_identity_proto_msgTypes[46]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2786,7 +2832,7 @@ func (x *ExternalJwksSizeResponse) String() string {
 func (*ExternalJwksSizeResponse) ProtoMessage() {}
 
 func (x *ExternalJwksSizeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_services_identity_proto_msgTypes[45]
+	mi := &file_services_identity_proto_msgTypes[46]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2799,7 +2845,7 @@ func (x *ExternalJwksSizeResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExternalJwksSizeResponse.ProtoReflect.Descriptor instead.
 func (*ExternalJwksSizeResponse) Descriptor() ([]byte, []int) {
-	return file_services_identity_proto_rawDescGZIP(), []int{45}
+	return file_services_identity_proto_rawDescGZIP(), []int{46}
 }
 
 func (x *ExternalJwksSizeResponse) GetSize() int32 {
@@ -2818,7 +2864,7 @@ type ExternalJwksQueryRequest struct {
 
 func (x *ExternalJwksQueryRequest) Reset() {
 	*x = ExternalJwksQueryRequest{}
-	mi := &file_services_identity_proto_msgTypes[46]
+	mi := &file_services_identity_proto_msgTypes[47]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2830,7 +2876,7 @@ func (x *ExternalJwksQueryRequest) String() string {
 func (*ExternalJwksQueryRequest) ProtoMessage() {}
 
 func (x *ExternalJwksQueryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_services_identity_proto_msgTypes[46]
+	mi := &file_services_identity_proto_msgTypes[47]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2843,7 +2889,7 @@ func (x *ExternalJwksQueryRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExternalJwksQueryRequest.ProtoReflect.Descriptor instead.
 func (*ExternalJwksQueryRequest) Descriptor() ([]byte, []int) {
-	return file_services_identity_proto_rawDescGZIP(), []int{46}
+	return file_services_identity_proto_rawDescGZIP(), []int{47}
 }
 
 func (x *ExternalJwksQueryRequest) GetQuery() *CollectionQuery {
@@ -2863,7 +2909,7 @@ type ExternalJwksQueryResponse struct {
 
 func (x *ExternalJwksQueryResponse) Reset() {
 	*x = ExternalJwksQueryResponse{}
-	mi := &file_services_identity_proto_msgTypes[47]
+	mi := &file_services_identity_proto_msgTypes[48]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2875,7 +2921,7 @@ func (x *ExternalJwksQueryResponse) String() string {
 func (*ExternalJwksQueryResponse) ProtoMessage() {}
 
 func (x *ExternalJwksQueryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_services_identity_proto_msgTypes[47]
+	mi := &file_services_identity_proto_msgTypes[48]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2888,7 +2934,7 @@ func (x *ExternalJwksQueryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExternalJwksQueryResponse.ProtoReflect.Descriptor instead.
 func (*ExternalJwksQueryResponse) Descriptor() ([]byte, []int) {
-	return file_services_identity_proto_rawDescGZIP(), []int{47}
+	return file_services_identity_proto_rawDescGZIP(), []int{48}
 }
 
 func (x *ExternalJwksQueryResponse) GetResults() []*ExternalJwk {
@@ -2913,7 +2959,7 @@ type MapEmpty struct {
 
 func (x *MapEmpty) Reset() {
 	*x = MapEmpty{}
-	mi := &file_services_identity_proto_msgTypes[48]
+	mi := &file_services_identity_proto_msgTypes[49]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2925,7 +2971,7 @@ func (x *MapEmpty) String() string {
 func (*MapEmpty) ProtoMessage() {}
 
 func (x *MapEmpty) ProtoReflect() protoreflect.Message {
-	mi := &file_services_identity_proto_msgTypes[48]
+	mi := &file_services_identity_proto_msgTypes[49]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2938,14 +2984,14 @@ func (x *MapEmpty) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MapEmpty.ProtoReflect.Descriptor instead.
 func (*MapEmpty) Descriptor() ([]byte, []int) {
-	return file_services_identity_proto_rawDescGZIP(), []int{48}
+	return file_services_identity_proto_rawDescGZIP(), []int{49}
 }
 
 var File_services_identity_proto protoreflect.FileDescriptor
 
 const file_services_identity_proto_rawDesc = "" +
 	"\n" +
-	"\x17services/identity.proto\x12\bidentity\x1a\x0flibs/spec.proto\x1a\x16libs/entitlement.proto\x1a\x0elibs/jwk.proto\x1a\x0elibs/opa.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1cgoogle/api/annotations.proto\"\xaf\x05\n" +
+	"\x17services/identity.proto\x12\bidentity\x1a\x0flibs/spec.proto\x1a\x16libs/entitlement.proto\x1a\x0elibs/jwk.proto\x1a\x0elibs/opa.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1cgoogle/api/annotations.proto\"\xb3\x05\n" +
 	"\x06Config\x12+\n" +
 	"\x05oauth\x18\x01 \x01(\v2\x15.identity.OAuthConfigR\x05oauth\x12L\n" +
 	"\x1daccess_token_lifetime_seconds\x18\x02 \x01(\x03B\t\xc0\xa6\x1d\x01\x90\xa8\x1d\x84\aR\x1aaccessTokenLifetimeSeconds\x12O\n" +
@@ -2957,8 +3003,8 @@ const file_services_identity_proto_rawDesc = "" +
 	"\x1cjwk_refetch_interval_seconds\x18\a \x01(\x03B\t\xc0\xa6\x1d\x01\x90\xa8\x1d\xac\x02R\x19jwkRefetchIntervalSeconds\x12/\n" +
 	"\x13entitlements_policy\x18\v \x01(\tR\x12entitlementsPolicy\x12Y\n" +
 	"\x14entitlement_mappings\x18\b \x03(\v2&.entitlement.ServiceEntitlementMappingR\x13entitlementMappings\x12I\n" +
-	"\x11identity_profiles\x18\t \x03(\v2\x1c.entitlement.IdentityProfileR\x10identityProfiles:\x10Ҩ\x1d\f\n" +
-	"\bidentity\x10\x06\"\xa3\x01\n" +
+	"\x11identity_profiles\x18\t \x03(\v2\x1c.entitlement.IdentityProfileR\x10identityProfiles:\x14Ҩ\x1d\f\n" +
+	"\bidentity\x10\x06\xe8\xa8\x1d\x01\"\xa3\x01\n" +
 	"\vOAuthConfig\x12\x16\n" +
 	"\x06enable\x18\x01 \x01(\bR\x06enable\x12\x16\n" +
 	"\x06scopes\x18\x02 \x03(\tR\x06scopes\x126\n" +
@@ -3031,7 +3077,9 @@ const file_services_identity_proto_rawDesc = "" +
 	"\x15ExchangeTokenResponse\x12+\n" +
 	"\faccess_token\x18\x01 \x01(\tB\b\x88\xa6\x1d\x01\x88\xa7\x1d\x01R\vaccessToken\x12#\n" +
 	"\n" +
-	"expires_in\x18\x02 \x01(\x03B\x04\xa8\xa7\x1d\x00R\texpiresIn\"\x9f\x01\n" +
+	"expires_in\x18\x02 \x01(\x03B\x04\xa8\xa7\x1d\x00R\texpiresIn\"f\n" +
+	"\x13IdentityConfigState\x122\n" +
+	"\x06config\x18\x01 \x01(\v2\x10.identity.ConfigB\b\xe0\xb5\x18\x02\xe0\xb6\x18\x01R\x06config:\x1b\x9a\xa8\x1d\x13IdentityConfigState\xa0\xa8\x1d\x02\"\x9f\x01\n" +
 	"\n" +
 	"QueryValue\x12#\n" +
 	"\fstring_value\x18\x01 \x01(\tH\x00R\vstringValue\x12\x1d\n" +
@@ -3184,7 +3232,11 @@ const file_services_identity_proto_rawDesc = "" +
 	"\x17PutIfAbsentExternalJwks\x12 .identity.ExternalJwksPutRequest\x1a#.identity.ExternalJwksValueResponse\x12T\n" +
 	"\x11WatchExternalJwks\x12\x16.google.protobuf.Empty\x1a%.identity.ExternalJwksEntriesResponse0\x01\x12\\\n" +
 	"\x11QueryExternalJwks\x12\".identity.ExternalJwksQueryRequest\x1a#.identity.ExternalJwksQueryResponse\x12c\n" +
-	"\x16WatchQueryExternalJwks\x12\".identity.ExternalJwksQueryRequest\x1a#.identity.ExternalJwksQueryResponse0\x01B]Z[gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/identityb\x06proto3"
+	"\x16WatchQueryExternalJwks\x12\".identity.ExternalJwksQueryRequest\x1a#.identity.ExternalJwksQueryResponse0\x012\xc6\x01\n" +
+	"!IdentityConfigStateBackendService\x125\n" +
+	"\tGetConfig\x12\x16.google.protobuf.Empty\x1a\x10.identity.Config\x12/\n" +
+	"\tSetConfig\x12\x10.identity.Config\x1a\x10.identity.Config\x129\n" +
+	"\vWatchConfig\x12\x16.google.protobuf.Empty\x1a\x10.identity.Config0\x01B]Z[gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/identityb\x06proto3"
 
 var (
 	file_services_identity_proto_rawDescOnce sync.Once
@@ -3199,7 +3251,7 @@ func file_services_identity_proto_rawDescGZIP() []byte {
 }
 
 var file_services_identity_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_services_identity_proto_msgTypes = make([]protoimpl.MessageInfo, 51)
+var file_services_identity_proto_msgTypes = make([]protoimpl.MessageInfo, 52)
 var file_services_identity_proto_goTypes = []any{
 	(ComparisonOp)(0),                             // 0: identity.ComparisonOp
 	(SortDirection)(0),                            // 1: identity.SortDirection
@@ -3223,163 +3275,171 @@ var file_services_identity_proto_goTypes = []any{
 	(*LogoutResponse)(nil),                        // 19: identity.LogoutResponse
 	(*ExchangeTokenRequest)(nil),                  // 20: identity.ExchangeTokenRequest
 	(*ExchangeTokenResponse)(nil),                 // 21: identity.ExchangeTokenResponse
-	(*QueryValue)(nil),                            // 22: identity.QueryValue
-	(*Predicate)(nil),                             // 23: identity.Predicate
-	(*PredicateGroup)(nil),                        // 24: identity.PredicateGroup
-	(*SortField)(nil),                             // 25: identity.SortField
-	(*CollectionQuery)(nil),                       // 26: identity.CollectionQuery
-	(*VerifyingKeysGetRequest)(nil),               // 27: identity.VerifyingKeysGetRequest
-	(*VerifyingKeysPutRequest)(nil),               // 28: identity.VerifyingKeysPutRequest
-	(*VerifyingKeysGetAllRequest)(nil),            // 29: identity.VerifyingKeysGetAllRequest
-	(*VerifyingKeysKeysRequest)(nil),              // 30: identity.VerifyingKeysKeysRequest
-	(*VerifyingKeysSizeRequest)(nil),              // 31: identity.VerifyingKeysSizeRequest
-	(*VerifyingKeysClearRequest)(nil),             // 32: identity.VerifyingKeysClearRequest
-	(*VerifyingKeysValueResponse)(nil),            // 33: identity.VerifyingKeysValueResponse
-	(*VerifyingKeysEntriesResponse)(nil),          // 34: identity.VerifyingKeysEntriesResponse
-	(*VerifyingKeysKeysResponse)(nil),             // 35: identity.VerifyingKeysKeysResponse
-	(*VerifyingKeysSizeResponse)(nil),             // 36: identity.VerifyingKeysSizeResponse
-	(*VerifyingKeysQueryRequest)(nil),             // 37: identity.VerifyingKeysQueryRequest
-	(*VerifyingKeysQueryResponse)(nil),            // 38: identity.VerifyingKeysQueryResponse
-	(*ExternalJwksGetRequest)(nil),                // 39: identity.ExternalJwksGetRequest
-	(*ExternalJwksPutRequest)(nil),                // 40: identity.ExternalJwksPutRequest
-	(*ExternalJwksGetAllRequest)(nil),             // 41: identity.ExternalJwksGetAllRequest
-	(*ExternalJwksKeysRequest)(nil),               // 42: identity.ExternalJwksKeysRequest
-	(*ExternalJwksSizeRequest)(nil),               // 43: identity.ExternalJwksSizeRequest
-	(*ExternalJwksClearRequest)(nil),              // 44: identity.ExternalJwksClearRequest
-	(*ExternalJwksValueResponse)(nil),             // 45: identity.ExternalJwksValueResponse
-	(*ExternalJwksEntriesResponse)(nil),           // 46: identity.ExternalJwksEntriesResponse
-	(*ExternalJwksKeysResponse)(nil),              // 47: identity.ExternalJwksKeysResponse
-	(*ExternalJwksSizeResponse)(nil),              // 48: identity.ExternalJwksSizeResponse
-	(*ExternalJwksQueryRequest)(nil),              // 49: identity.ExternalJwksQueryRequest
-	(*ExternalJwksQueryResponse)(nil),             // 50: identity.ExternalJwksQueryResponse
-	(*MapEmpty)(nil),                              // 51: identity.MapEmpty
-	nil,                                           // 52: identity.VerifyingKeysEntriesResponse.EntriesEntry
-	nil,                                           // 53: identity.ExternalJwksEntriesResponse.EntriesEntry
-	(*entitlement.ServiceEntitlementMapping)(nil), // 54: entitlement.ServiceEntitlementMapping
-	(*entitlement.IdentityProfile)(nil),           // 55: entitlement.IdentityProfile
-	(*jwk.Jwk)(nil),                               // 56: jwk.Jwk
-	(*opa.OpaPolicy)(nil),                         // 57: opa.OpaPolicy
-	(*emptypb.Empty)(nil),                         // 58: google.protobuf.Empty
+	(*IdentityConfigState)(nil),                   // 22: identity.IdentityConfigState
+	(*QueryValue)(nil),                            // 23: identity.QueryValue
+	(*Predicate)(nil),                             // 24: identity.Predicate
+	(*PredicateGroup)(nil),                        // 25: identity.PredicateGroup
+	(*SortField)(nil),                             // 26: identity.SortField
+	(*CollectionQuery)(nil),                       // 27: identity.CollectionQuery
+	(*VerifyingKeysGetRequest)(nil),               // 28: identity.VerifyingKeysGetRequest
+	(*VerifyingKeysPutRequest)(nil),               // 29: identity.VerifyingKeysPutRequest
+	(*VerifyingKeysGetAllRequest)(nil),            // 30: identity.VerifyingKeysGetAllRequest
+	(*VerifyingKeysKeysRequest)(nil),              // 31: identity.VerifyingKeysKeysRequest
+	(*VerifyingKeysSizeRequest)(nil),              // 32: identity.VerifyingKeysSizeRequest
+	(*VerifyingKeysClearRequest)(nil),             // 33: identity.VerifyingKeysClearRequest
+	(*VerifyingKeysValueResponse)(nil),            // 34: identity.VerifyingKeysValueResponse
+	(*VerifyingKeysEntriesResponse)(nil),          // 35: identity.VerifyingKeysEntriesResponse
+	(*VerifyingKeysKeysResponse)(nil),             // 36: identity.VerifyingKeysKeysResponse
+	(*VerifyingKeysSizeResponse)(nil),             // 37: identity.VerifyingKeysSizeResponse
+	(*VerifyingKeysQueryRequest)(nil),             // 38: identity.VerifyingKeysQueryRequest
+	(*VerifyingKeysQueryResponse)(nil),            // 39: identity.VerifyingKeysQueryResponse
+	(*ExternalJwksGetRequest)(nil),                // 40: identity.ExternalJwksGetRequest
+	(*ExternalJwksPutRequest)(nil),                // 41: identity.ExternalJwksPutRequest
+	(*ExternalJwksGetAllRequest)(nil),             // 42: identity.ExternalJwksGetAllRequest
+	(*ExternalJwksKeysRequest)(nil),               // 43: identity.ExternalJwksKeysRequest
+	(*ExternalJwksSizeRequest)(nil),               // 44: identity.ExternalJwksSizeRequest
+	(*ExternalJwksClearRequest)(nil),              // 45: identity.ExternalJwksClearRequest
+	(*ExternalJwksValueResponse)(nil),             // 46: identity.ExternalJwksValueResponse
+	(*ExternalJwksEntriesResponse)(nil),           // 47: identity.ExternalJwksEntriesResponse
+	(*ExternalJwksKeysResponse)(nil),              // 48: identity.ExternalJwksKeysResponse
+	(*ExternalJwksSizeResponse)(nil),              // 49: identity.ExternalJwksSizeResponse
+	(*ExternalJwksQueryRequest)(nil),              // 50: identity.ExternalJwksQueryRequest
+	(*ExternalJwksQueryResponse)(nil),             // 51: identity.ExternalJwksQueryResponse
+	(*MapEmpty)(nil),                              // 52: identity.MapEmpty
+	nil,                                           // 53: identity.VerifyingKeysEntriesResponse.EntriesEntry
+	nil,                                           // 54: identity.ExternalJwksEntriesResponse.EntriesEntry
+	(*entitlement.ServiceEntitlementMapping)(nil), // 55: entitlement.ServiceEntitlementMapping
+	(*entitlement.IdentityProfile)(nil),           // 56: entitlement.IdentityProfile
+	(*jwk.Jwk)(nil),                               // 57: jwk.Jwk
+	(*opa.OpaPolicy)(nil),                         // 58: opa.OpaPolicy
+	(*emptypb.Empty)(nil),                         // 59: google.protobuf.Empty
 }
 var file_services_identity_proto_depIdxs = []int32{
 	4,  // 0: identity.Config.oauth:type_name -> identity.OAuthConfig
-	54, // 1: identity.Config.entitlement_mappings:type_name -> entitlement.ServiceEntitlementMapping
-	55, // 2: identity.Config.identity_profiles:type_name -> entitlement.IdentityProfile
+	55, // 1: identity.Config.entitlement_mappings:type_name -> entitlement.ServiceEntitlementMapping
+	56, // 2: identity.Config.identity_profiles:type_name -> entitlement.IdentityProfile
 	5,  // 3: identity.OAuthConfig.providers:type_name -> identity.ProviderConfig
-	54, // 4: identity.EntitlementConfig.entitlement_mappings:type_name -> entitlement.ServiceEntitlementMapping
-	55, // 5: identity.EntitlementConfig.identity_profiles:type_name -> entitlement.IdentityProfile
-	56, // 6: identity.IdentityState.verifying_keys:type_name -> jwk.Jwk
-	57, // 7: identity.IdentityState.entitlements_policy:type_name -> opa.OpaPolicy
+	55, // 4: identity.EntitlementConfig.entitlement_mappings:type_name -> entitlement.ServiceEntitlementMapping
+	56, // 5: identity.EntitlementConfig.identity_profiles:type_name -> entitlement.IdentityProfile
+	57, // 6: identity.IdentityState.verifying_keys:type_name -> jwk.Jwk
+	58, // 7: identity.IdentityState.entitlements_policy:type_name -> opa.OpaPolicy
 	6,  // 8: identity.IdentityState.entitlement_config:type_name -> identity.EntitlementConfig
 	9,  // 9: identity.IdentityStateInternal.external_jwks:type_name -> identity.ExternalJwk
-	56, // 10: identity.ExternalJwk.key:type_name -> jwk.Jwk
+	57, // 10: identity.ExternalJwk.key:type_name -> jwk.Jwk
 	11, // 11: identity.ListProvidersResponse.providers:type_name -> identity.ProviderInfo
-	0,  // 12: identity.Predicate.op:type_name -> identity.ComparisonOp
-	22, // 13: identity.Predicate.value:type_name -> identity.QueryValue
-	22, // 14: identity.Predicate.values:type_name -> identity.QueryValue
-	2,  // 15: identity.PredicateGroup.op:type_name -> identity.LogicalOp
-	23, // 16: identity.PredicateGroup.predicates:type_name -> identity.Predicate
-	24, // 17: identity.PredicateGroup.groups:type_name -> identity.PredicateGroup
-	1,  // 18: identity.SortField.direction:type_name -> identity.SortDirection
-	24, // 19: identity.CollectionQuery.where:type_name -> identity.PredicateGroup
-	25, // 20: identity.CollectionQuery.order_by:type_name -> identity.SortField
-	56, // 21: identity.VerifyingKeysPutRequest.value:type_name -> jwk.Jwk
-	56, // 22: identity.VerifyingKeysValueResponse.value:type_name -> jwk.Jwk
-	52, // 23: identity.VerifyingKeysEntriesResponse.entries:type_name -> identity.VerifyingKeysEntriesResponse.EntriesEntry
-	26, // 24: identity.VerifyingKeysQueryRequest.query:type_name -> identity.CollectionQuery
-	56, // 25: identity.VerifyingKeysQueryResponse.results:type_name -> jwk.Jwk
-	9,  // 26: identity.ExternalJwksPutRequest.value:type_name -> identity.ExternalJwk
-	9,  // 27: identity.ExternalJwksValueResponse.value:type_name -> identity.ExternalJwk
-	53, // 28: identity.ExternalJwksEntriesResponse.entries:type_name -> identity.ExternalJwksEntriesResponse.EntriesEntry
-	26, // 29: identity.ExternalJwksQueryRequest.query:type_name -> identity.CollectionQuery
-	9,  // 30: identity.ExternalJwksQueryResponse.results:type_name -> identity.ExternalJwk
-	56, // 31: identity.VerifyingKeysEntriesResponse.EntriesEntry.value:type_name -> jwk.Jwk
-	9,  // 32: identity.ExternalJwksEntriesResponse.EntriesEntry.value:type_name -> identity.ExternalJwk
-	58, // 33: identity.IdentityService.ListProviders:input_type -> google.protobuf.Empty
-	12, // 34: identity.IdentityService.Authorize:input_type -> identity.AuthorizeRequest
-	14, // 35: identity.IdentityService.Callback:input_type -> identity.CallbackRequest
-	16, // 36: identity.IdentityService.RefreshToken:input_type -> identity.RefreshTokenRequest
-	20, // 37: identity.IdentityService.ExchangeToken:input_type -> identity.ExchangeTokenRequest
-	18, // 38: identity.IdentityService.Logout:input_type -> identity.LogoutRequest
-	58, // 39: identity.IdentityStateBackendService.GetEntitlementsPolicy:input_type -> google.protobuf.Empty
-	57, // 40: identity.IdentityStateBackendService.SetEntitlementsPolicy:input_type -> opa.OpaPolicy
-	58, // 41: identity.IdentityStateBackendService.WatchEntitlementsPolicy:input_type -> google.protobuf.Empty
-	58, // 42: identity.IdentityStateBackendService.GetEntitlementConfig:input_type -> google.protobuf.Empty
-	6,  // 43: identity.IdentityStateBackendService.SetEntitlementConfig:input_type -> identity.EntitlementConfig
-	58, // 44: identity.IdentityStateBackendService.WatchEntitlementConfig:input_type -> google.protobuf.Empty
-	27, // 45: identity.IdentityStateBackendService.GetVerifyingKeys:input_type -> identity.VerifyingKeysGetRequest
-	28, // 46: identity.IdentityStateBackendService.PutVerifyingKeys:input_type -> identity.VerifyingKeysPutRequest
-	28, // 47: identity.IdentityStateBackendService.SetVerifyingKeys:input_type -> identity.VerifyingKeysPutRequest
-	27, // 48: identity.IdentityStateBackendService.RemoveVerifyingKeys:input_type -> identity.VerifyingKeysGetRequest
-	27, // 49: identity.IdentityStateBackendService.DeleteVerifyingKeys:input_type -> identity.VerifyingKeysGetRequest
-	27, // 50: identity.IdentityStateBackendService.ContainsKeyVerifyingKeys:input_type -> identity.VerifyingKeysGetRequest
-	29, // 51: identity.IdentityStateBackendService.GetAllVerifyingKeys:input_type -> identity.VerifyingKeysGetAllRequest
-	30, // 52: identity.IdentityStateBackendService.KeySetVerifyingKeys:input_type -> identity.VerifyingKeysKeysRequest
-	31, // 53: identity.IdentityStateBackendService.SizeVerifyingKeys:input_type -> identity.VerifyingKeysSizeRequest
-	32, // 54: identity.IdentityStateBackendService.ClearVerifyingKeys:input_type -> identity.VerifyingKeysClearRequest
-	28, // 55: identity.IdentityStateBackendService.PutIfAbsentVerifyingKeys:input_type -> identity.VerifyingKeysPutRequest
-	58, // 56: identity.IdentityStateBackendService.WatchVerifyingKeys:input_type -> google.protobuf.Empty
-	37, // 57: identity.IdentityStateBackendService.QueryVerifyingKeys:input_type -> identity.VerifyingKeysQueryRequest
-	37, // 58: identity.IdentityStateBackendService.WatchQueryVerifyingKeys:input_type -> identity.VerifyingKeysQueryRequest
-	39, // 59: identity.IdentityStateInternalBackendService.GetExternalJwks:input_type -> identity.ExternalJwksGetRequest
-	40, // 60: identity.IdentityStateInternalBackendService.PutExternalJwks:input_type -> identity.ExternalJwksPutRequest
-	40, // 61: identity.IdentityStateInternalBackendService.SetExternalJwks:input_type -> identity.ExternalJwksPutRequest
-	39, // 62: identity.IdentityStateInternalBackendService.RemoveExternalJwks:input_type -> identity.ExternalJwksGetRequest
-	39, // 63: identity.IdentityStateInternalBackendService.DeleteExternalJwks:input_type -> identity.ExternalJwksGetRequest
-	39, // 64: identity.IdentityStateInternalBackendService.ContainsKeyExternalJwks:input_type -> identity.ExternalJwksGetRequest
-	41, // 65: identity.IdentityStateInternalBackendService.GetAllExternalJwks:input_type -> identity.ExternalJwksGetAllRequest
-	42, // 66: identity.IdentityStateInternalBackendService.KeySetExternalJwks:input_type -> identity.ExternalJwksKeysRequest
-	43, // 67: identity.IdentityStateInternalBackendService.SizeExternalJwks:input_type -> identity.ExternalJwksSizeRequest
-	44, // 68: identity.IdentityStateInternalBackendService.ClearExternalJwks:input_type -> identity.ExternalJwksClearRequest
-	40, // 69: identity.IdentityStateInternalBackendService.PutIfAbsentExternalJwks:input_type -> identity.ExternalJwksPutRequest
-	58, // 70: identity.IdentityStateInternalBackendService.WatchExternalJwks:input_type -> google.protobuf.Empty
-	49, // 71: identity.IdentityStateInternalBackendService.QueryExternalJwks:input_type -> identity.ExternalJwksQueryRequest
-	49, // 72: identity.IdentityStateInternalBackendService.WatchQueryExternalJwks:input_type -> identity.ExternalJwksQueryRequest
-	10, // 73: identity.IdentityService.ListProviders:output_type -> identity.ListProvidersResponse
-	13, // 74: identity.IdentityService.Authorize:output_type -> identity.AuthorizeResponse
-	15, // 75: identity.IdentityService.Callback:output_type -> identity.CallbackResponse
-	17, // 76: identity.IdentityService.RefreshToken:output_type -> identity.RefreshTokenResponse
-	21, // 77: identity.IdentityService.ExchangeToken:output_type -> identity.ExchangeTokenResponse
-	19, // 78: identity.IdentityService.Logout:output_type -> identity.LogoutResponse
-	57, // 79: identity.IdentityStateBackendService.GetEntitlementsPolicy:output_type -> opa.OpaPolicy
-	57, // 80: identity.IdentityStateBackendService.SetEntitlementsPolicy:output_type -> opa.OpaPolicy
-	57, // 81: identity.IdentityStateBackendService.WatchEntitlementsPolicy:output_type -> opa.OpaPolicy
-	6,  // 82: identity.IdentityStateBackendService.GetEntitlementConfig:output_type -> identity.EntitlementConfig
-	6,  // 83: identity.IdentityStateBackendService.SetEntitlementConfig:output_type -> identity.EntitlementConfig
-	6,  // 84: identity.IdentityStateBackendService.WatchEntitlementConfig:output_type -> identity.EntitlementConfig
-	33, // 85: identity.IdentityStateBackendService.GetVerifyingKeys:output_type -> identity.VerifyingKeysValueResponse
-	33, // 86: identity.IdentityStateBackendService.PutVerifyingKeys:output_type -> identity.VerifyingKeysValueResponse
-	51, // 87: identity.IdentityStateBackendService.SetVerifyingKeys:output_type -> identity.MapEmpty
-	33, // 88: identity.IdentityStateBackendService.RemoveVerifyingKeys:output_type -> identity.VerifyingKeysValueResponse
-	51, // 89: identity.IdentityStateBackendService.DeleteVerifyingKeys:output_type -> identity.MapEmpty
-	33, // 90: identity.IdentityStateBackendService.ContainsKeyVerifyingKeys:output_type -> identity.VerifyingKeysValueResponse
-	34, // 91: identity.IdentityStateBackendService.GetAllVerifyingKeys:output_type -> identity.VerifyingKeysEntriesResponse
-	35, // 92: identity.IdentityStateBackendService.KeySetVerifyingKeys:output_type -> identity.VerifyingKeysKeysResponse
-	36, // 93: identity.IdentityStateBackendService.SizeVerifyingKeys:output_type -> identity.VerifyingKeysSizeResponse
-	51, // 94: identity.IdentityStateBackendService.ClearVerifyingKeys:output_type -> identity.MapEmpty
-	33, // 95: identity.IdentityStateBackendService.PutIfAbsentVerifyingKeys:output_type -> identity.VerifyingKeysValueResponse
-	34, // 96: identity.IdentityStateBackendService.WatchVerifyingKeys:output_type -> identity.VerifyingKeysEntriesResponse
-	38, // 97: identity.IdentityStateBackendService.QueryVerifyingKeys:output_type -> identity.VerifyingKeysQueryResponse
-	38, // 98: identity.IdentityStateBackendService.WatchQueryVerifyingKeys:output_type -> identity.VerifyingKeysQueryResponse
-	45, // 99: identity.IdentityStateInternalBackendService.GetExternalJwks:output_type -> identity.ExternalJwksValueResponse
-	45, // 100: identity.IdentityStateInternalBackendService.PutExternalJwks:output_type -> identity.ExternalJwksValueResponse
-	51, // 101: identity.IdentityStateInternalBackendService.SetExternalJwks:output_type -> identity.MapEmpty
-	45, // 102: identity.IdentityStateInternalBackendService.RemoveExternalJwks:output_type -> identity.ExternalJwksValueResponse
-	51, // 103: identity.IdentityStateInternalBackendService.DeleteExternalJwks:output_type -> identity.MapEmpty
-	45, // 104: identity.IdentityStateInternalBackendService.ContainsKeyExternalJwks:output_type -> identity.ExternalJwksValueResponse
-	46, // 105: identity.IdentityStateInternalBackendService.GetAllExternalJwks:output_type -> identity.ExternalJwksEntriesResponse
-	47, // 106: identity.IdentityStateInternalBackendService.KeySetExternalJwks:output_type -> identity.ExternalJwksKeysResponse
-	48, // 107: identity.IdentityStateInternalBackendService.SizeExternalJwks:output_type -> identity.ExternalJwksSizeResponse
-	51, // 108: identity.IdentityStateInternalBackendService.ClearExternalJwks:output_type -> identity.MapEmpty
-	45, // 109: identity.IdentityStateInternalBackendService.PutIfAbsentExternalJwks:output_type -> identity.ExternalJwksValueResponse
-	46, // 110: identity.IdentityStateInternalBackendService.WatchExternalJwks:output_type -> identity.ExternalJwksEntriesResponse
-	50, // 111: identity.IdentityStateInternalBackendService.QueryExternalJwks:output_type -> identity.ExternalJwksQueryResponse
-	50, // 112: identity.IdentityStateInternalBackendService.WatchQueryExternalJwks:output_type -> identity.ExternalJwksQueryResponse
-	73, // [73:113] is the sub-list for method output_type
-	33, // [33:73] is the sub-list for method input_type
-	33, // [33:33] is the sub-list for extension type_name
-	33, // [33:33] is the sub-list for extension extendee
-	0,  // [0:33] is the sub-list for field type_name
+	3,  // 12: identity.IdentityConfigState.config:type_name -> identity.Config
+	0,  // 13: identity.Predicate.op:type_name -> identity.ComparisonOp
+	23, // 14: identity.Predicate.value:type_name -> identity.QueryValue
+	23, // 15: identity.Predicate.values:type_name -> identity.QueryValue
+	2,  // 16: identity.PredicateGroup.op:type_name -> identity.LogicalOp
+	24, // 17: identity.PredicateGroup.predicates:type_name -> identity.Predicate
+	25, // 18: identity.PredicateGroup.groups:type_name -> identity.PredicateGroup
+	1,  // 19: identity.SortField.direction:type_name -> identity.SortDirection
+	25, // 20: identity.CollectionQuery.where:type_name -> identity.PredicateGroup
+	26, // 21: identity.CollectionQuery.order_by:type_name -> identity.SortField
+	57, // 22: identity.VerifyingKeysPutRequest.value:type_name -> jwk.Jwk
+	57, // 23: identity.VerifyingKeysValueResponse.value:type_name -> jwk.Jwk
+	53, // 24: identity.VerifyingKeysEntriesResponse.entries:type_name -> identity.VerifyingKeysEntriesResponse.EntriesEntry
+	27, // 25: identity.VerifyingKeysQueryRequest.query:type_name -> identity.CollectionQuery
+	57, // 26: identity.VerifyingKeysQueryResponse.results:type_name -> jwk.Jwk
+	9,  // 27: identity.ExternalJwksPutRequest.value:type_name -> identity.ExternalJwk
+	9,  // 28: identity.ExternalJwksValueResponse.value:type_name -> identity.ExternalJwk
+	54, // 29: identity.ExternalJwksEntriesResponse.entries:type_name -> identity.ExternalJwksEntriesResponse.EntriesEntry
+	27, // 30: identity.ExternalJwksQueryRequest.query:type_name -> identity.CollectionQuery
+	9,  // 31: identity.ExternalJwksQueryResponse.results:type_name -> identity.ExternalJwk
+	57, // 32: identity.VerifyingKeysEntriesResponse.EntriesEntry.value:type_name -> jwk.Jwk
+	9,  // 33: identity.ExternalJwksEntriesResponse.EntriesEntry.value:type_name -> identity.ExternalJwk
+	59, // 34: identity.IdentityService.ListProviders:input_type -> google.protobuf.Empty
+	12, // 35: identity.IdentityService.Authorize:input_type -> identity.AuthorizeRequest
+	14, // 36: identity.IdentityService.Callback:input_type -> identity.CallbackRequest
+	16, // 37: identity.IdentityService.RefreshToken:input_type -> identity.RefreshTokenRequest
+	20, // 38: identity.IdentityService.ExchangeToken:input_type -> identity.ExchangeTokenRequest
+	18, // 39: identity.IdentityService.Logout:input_type -> identity.LogoutRequest
+	59, // 40: identity.IdentityStateBackendService.GetEntitlementsPolicy:input_type -> google.protobuf.Empty
+	58, // 41: identity.IdentityStateBackendService.SetEntitlementsPolicy:input_type -> opa.OpaPolicy
+	59, // 42: identity.IdentityStateBackendService.WatchEntitlementsPolicy:input_type -> google.protobuf.Empty
+	59, // 43: identity.IdentityStateBackendService.GetEntitlementConfig:input_type -> google.protobuf.Empty
+	6,  // 44: identity.IdentityStateBackendService.SetEntitlementConfig:input_type -> identity.EntitlementConfig
+	59, // 45: identity.IdentityStateBackendService.WatchEntitlementConfig:input_type -> google.protobuf.Empty
+	28, // 46: identity.IdentityStateBackendService.GetVerifyingKeys:input_type -> identity.VerifyingKeysGetRequest
+	29, // 47: identity.IdentityStateBackendService.PutVerifyingKeys:input_type -> identity.VerifyingKeysPutRequest
+	29, // 48: identity.IdentityStateBackendService.SetVerifyingKeys:input_type -> identity.VerifyingKeysPutRequest
+	28, // 49: identity.IdentityStateBackendService.RemoveVerifyingKeys:input_type -> identity.VerifyingKeysGetRequest
+	28, // 50: identity.IdentityStateBackendService.DeleteVerifyingKeys:input_type -> identity.VerifyingKeysGetRequest
+	28, // 51: identity.IdentityStateBackendService.ContainsKeyVerifyingKeys:input_type -> identity.VerifyingKeysGetRequest
+	30, // 52: identity.IdentityStateBackendService.GetAllVerifyingKeys:input_type -> identity.VerifyingKeysGetAllRequest
+	31, // 53: identity.IdentityStateBackendService.KeySetVerifyingKeys:input_type -> identity.VerifyingKeysKeysRequest
+	32, // 54: identity.IdentityStateBackendService.SizeVerifyingKeys:input_type -> identity.VerifyingKeysSizeRequest
+	33, // 55: identity.IdentityStateBackendService.ClearVerifyingKeys:input_type -> identity.VerifyingKeysClearRequest
+	29, // 56: identity.IdentityStateBackendService.PutIfAbsentVerifyingKeys:input_type -> identity.VerifyingKeysPutRequest
+	59, // 57: identity.IdentityStateBackendService.WatchVerifyingKeys:input_type -> google.protobuf.Empty
+	38, // 58: identity.IdentityStateBackendService.QueryVerifyingKeys:input_type -> identity.VerifyingKeysQueryRequest
+	38, // 59: identity.IdentityStateBackendService.WatchQueryVerifyingKeys:input_type -> identity.VerifyingKeysQueryRequest
+	40, // 60: identity.IdentityStateInternalBackendService.GetExternalJwks:input_type -> identity.ExternalJwksGetRequest
+	41, // 61: identity.IdentityStateInternalBackendService.PutExternalJwks:input_type -> identity.ExternalJwksPutRequest
+	41, // 62: identity.IdentityStateInternalBackendService.SetExternalJwks:input_type -> identity.ExternalJwksPutRequest
+	40, // 63: identity.IdentityStateInternalBackendService.RemoveExternalJwks:input_type -> identity.ExternalJwksGetRequest
+	40, // 64: identity.IdentityStateInternalBackendService.DeleteExternalJwks:input_type -> identity.ExternalJwksGetRequest
+	40, // 65: identity.IdentityStateInternalBackendService.ContainsKeyExternalJwks:input_type -> identity.ExternalJwksGetRequest
+	42, // 66: identity.IdentityStateInternalBackendService.GetAllExternalJwks:input_type -> identity.ExternalJwksGetAllRequest
+	43, // 67: identity.IdentityStateInternalBackendService.KeySetExternalJwks:input_type -> identity.ExternalJwksKeysRequest
+	44, // 68: identity.IdentityStateInternalBackendService.SizeExternalJwks:input_type -> identity.ExternalJwksSizeRequest
+	45, // 69: identity.IdentityStateInternalBackendService.ClearExternalJwks:input_type -> identity.ExternalJwksClearRequest
+	41, // 70: identity.IdentityStateInternalBackendService.PutIfAbsentExternalJwks:input_type -> identity.ExternalJwksPutRequest
+	59, // 71: identity.IdentityStateInternalBackendService.WatchExternalJwks:input_type -> google.protobuf.Empty
+	50, // 72: identity.IdentityStateInternalBackendService.QueryExternalJwks:input_type -> identity.ExternalJwksQueryRequest
+	50, // 73: identity.IdentityStateInternalBackendService.WatchQueryExternalJwks:input_type -> identity.ExternalJwksQueryRequest
+	59, // 74: identity.IdentityConfigStateBackendService.GetConfig:input_type -> google.protobuf.Empty
+	3,  // 75: identity.IdentityConfigStateBackendService.SetConfig:input_type -> identity.Config
+	59, // 76: identity.IdentityConfigStateBackendService.WatchConfig:input_type -> google.protobuf.Empty
+	10, // 77: identity.IdentityService.ListProviders:output_type -> identity.ListProvidersResponse
+	13, // 78: identity.IdentityService.Authorize:output_type -> identity.AuthorizeResponse
+	15, // 79: identity.IdentityService.Callback:output_type -> identity.CallbackResponse
+	17, // 80: identity.IdentityService.RefreshToken:output_type -> identity.RefreshTokenResponse
+	21, // 81: identity.IdentityService.ExchangeToken:output_type -> identity.ExchangeTokenResponse
+	19, // 82: identity.IdentityService.Logout:output_type -> identity.LogoutResponse
+	58, // 83: identity.IdentityStateBackendService.GetEntitlementsPolicy:output_type -> opa.OpaPolicy
+	58, // 84: identity.IdentityStateBackendService.SetEntitlementsPolicy:output_type -> opa.OpaPolicy
+	58, // 85: identity.IdentityStateBackendService.WatchEntitlementsPolicy:output_type -> opa.OpaPolicy
+	6,  // 86: identity.IdentityStateBackendService.GetEntitlementConfig:output_type -> identity.EntitlementConfig
+	6,  // 87: identity.IdentityStateBackendService.SetEntitlementConfig:output_type -> identity.EntitlementConfig
+	6,  // 88: identity.IdentityStateBackendService.WatchEntitlementConfig:output_type -> identity.EntitlementConfig
+	34, // 89: identity.IdentityStateBackendService.GetVerifyingKeys:output_type -> identity.VerifyingKeysValueResponse
+	34, // 90: identity.IdentityStateBackendService.PutVerifyingKeys:output_type -> identity.VerifyingKeysValueResponse
+	52, // 91: identity.IdentityStateBackendService.SetVerifyingKeys:output_type -> identity.MapEmpty
+	34, // 92: identity.IdentityStateBackendService.RemoveVerifyingKeys:output_type -> identity.VerifyingKeysValueResponse
+	52, // 93: identity.IdentityStateBackendService.DeleteVerifyingKeys:output_type -> identity.MapEmpty
+	34, // 94: identity.IdentityStateBackendService.ContainsKeyVerifyingKeys:output_type -> identity.VerifyingKeysValueResponse
+	35, // 95: identity.IdentityStateBackendService.GetAllVerifyingKeys:output_type -> identity.VerifyingKeysEntriesResponse
+	36, // 96: identity.IdentityStateBackendService.KeySetVerifyingKeys:output_type -> identity.VerifyingKeysKeysResponse
+	37, // 97: identity.IdentityStateBackendService.SizeVerifyingKeys:output_type -> identity.VerifyingKeysSizeResponse
+	52, // 98: identity.IdentityStateBackendService.ClearVerifyingKeys:output_type -> identity.MapEmpty
+	34, // 99: identity.IdentityStateBackendService.PutIfAbsentVerifyingKeys:output_type -> identity.VerifyingKeysValueResponse
+	35, // 100: identity.IdentityStateBackendService.WatchVerifyingKeys:output_type -> identity.VerifyingKeysEntriesResponse
+	39, // 101: identity.IdentityStateBackendService.QueryVerifyingKeys:output_type -> identity.VerifyingKeysQueryResponse
+	39, // 102: identity.IdentityStateBackendService.WatchQueryVerifyingKeys:output_type -> identity.VerifyingKeysQueryResponse
+	46, // 103: identity.IdentityStateInternalBackendService.GetExternalJwks:output_type -> identity.ExternalJwksValueResponse
+	46, // 104: identity.IdentityStateInternalBackendService.PutExternalJwks:output_type -> identity.ExternalJwksValueResponse
+	52, // 105: identity.IdentityStateInternalBackendService.SetExternalJwks:output_type -> identity.MapEmpty
+	46, // 106: identity.IdentityStateInternalBackendService.RemoveExternalJwks:output_type -> identity.ExternalJwksValueResponse
+	52, // 107: identity.IdentityStateInternalBackendService.DeleteExternalJwks:output_type -> identity.MapEmpty
+	46, // 108: identity.IdentityStateInternalBackendService.ContainsKeyExternalJwks:output_type -> identity.ExternalJwksValueResponse
+	47, // 109: identity.IdentityStateInternalBackendService.GetAllExternalJwks:output_type -> identity.ExternalJwksEntriesResponse
+	48, // 110: identity.IdentityStateInternalBackendService.KeySetExternalJwks:output_type -> identity.ExternalJwksKeysResponse
+	49, // 111: identity.IdentityStateInternalBackendService.SizeExternalJwks:output_type -> identity.ExternalJwksSizeResponse
+	52, // 112: identity.IdentityStateInternalBackendService.ClearExternalJwks:output_type -> identity.MapEmpty
+	46, // 113: identity.IdentityStateInternalBackendService.PutIfAbsentExternalJwks:output_type -> identity.ExternalJwksValueResponse
+	47, // 114: identity.IdentityStateInternalBackendService.WatchExternalJwks:output_type -> identity.ExternalJwksEntriesResponse
+	51, // 115: identity.IdentityStateInternalBackendService.QueryExternalJwks:output_type -> identity.ExternalJwksQueryResponse
+	51, // 116: identity.IdentityStateInternalBackendService.WatchQueryExternalJwks:output_type -> identity.ExternalJwksQueryResponse
+	3,  // 117: identity.IdentityConfigStateBackendService.GetConfig:output_type -> identity.Config
+	3,  // 118: identity.IdentityConfigStateBackendService.SetConfig:output_type -> identity.Config
+	3,  // 119: identity.IdentityConfigStateBackendService.WatchConfig:output_type -> identity.Config
+	77, // [77:120] is the sub-list for method output_type
+	34, // [34:77] is the sub-list for method input_type
+	34, // [34:34] is the sub-list for extension type_name
+	34, // [34:34] is the sub-list for extension extendee
+	0,  // [0:34] is the sub-list for field type_name
 }
 
 func init() { file_services_identity_proto_init() }
@@ -3387,7 +3447,7 @@ func file_services_identity_proto_init() {
 	if File_services_identity_proto != nil {
 		return
 	}
-	file_services_identity_proto_msgTypes[19].OneofWrappers = []any{
+	file_services_identity_proto_msgTypes[20].OneofWrappers = []any{
 		(*QueryValue_StringValue)(nil),
 		(*QueryValue_IntValue)(nil),
 		(*QueryValue_DoubleValue)(nil),
@@ -3399,9 +3459,9 @@ func file_services_identity_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_services_identity_proto_rawDesc), len(file_services_identity_proto_rawDesc)),
 			NumEnums:      3,
-			NumMessages:   51,
+			NumMessages:   52,
 			NumExtensions: 0,
-			NumServices:   3,
+			NumServices:   4,
 		},
 		GoTypes:           file_services_identity_proto_goTypes,
 		DependencyIndexes: file_services_identity_proto_depIdxs,

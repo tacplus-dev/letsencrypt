@@ -33489,11 +33489,6 @@ func ValidateBootstrapConfig(m *BootstrapConfig) error {
 		}
 	}
 
-	// Validate Members (assert_max_items: 32)
-	if len(m.Members) > 32 {
-		return protoerrors.NewErrMissingInvalidData(nil, "field Members exceeds max items of 32, got: %d", len(m.Members))
-	}
-
 	// Validate Members (assert_required)
 	if len(m.Members) == 0 {
 		return protoerrors.NewErrMissingInvalidData(nil, "field Members is required")
@@ -33506,6 +33501,11 @@ func ValidateBootstrapConfig(m *BootstrapConfig) error {
 				return protoerrors.NewErrMissingInvalidData(err, "field Members listen address validation failed")
 			}
 		}
+	}
+
+	// Validate Members (assert_max_items: 32)
+	if len(m.Members) > 32 {
+		return protoerrors.NewErrMissingInvalidData(nil, "field Members exceeds max items of 32, got: %d", len(m.Members))
 	}
 
 	// Validate NodeCount (assert_gt: 0)
@@ -38320,4 +38320,720 @@ func MergeInstancesQueryResponse(dst, src *InstancesQueryResponse) {
 	if dst.TotalCount == 0 {
 		dst.TotalCount = src.TotalCount
 	}
+}
+
+// ConfigLlmTypeDescriptor returns a JSON description of Config for LLM-assisted construction.
+// The description includes field names, types, comments, constraints, defaults,
+// nested message structures, and enum values — everything an LLM needs to
+// construct a valid instance of this type.
+func ConfigLlmTypeDescriptor() string {
+	return `{
+  "name": "Config",
+  "package": "kernel",
+  "description": "Config is the frontend configuration for BackendDB.\n Unlike BootstrapConfig (read once at boot), Config can be reloaded at any time.",
+  "fields": [
+    {
+      "name": "trusted_cas",
+      "type": "message",
+      "description": "trusted_cas lists the trusted CA certificates for TLS verification.",
+      "repeated": true,
+      "message": {
+        "name": "X509Cert",
+        "package": "x509",
+        "description": "ProtoCert represents an X.509 certificate.\n The certificate is stored as a base64-encoded PEM block.\n Use NewProtoCert() in Go with DER-encoded certificate bytes to create.",
+        "fields": [
+          {
+            "name": "id",
+            "type": "string",
+            "description": "Id is a unique identifier for the certificate"
+          },
+          {
+            "name": "base64",
+            "type": "string",
+            "description": "Base64 contains the base64url-encoded PEM certificate block",
+            "required": true,
+            "constraints": [
+              "must be base64 encoded"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "rate_limit",
+      "type": "message",
+      "description": "rate_limit configures rate limiting for unary read RPCs to detect polling.",
+      "message": {
+        "name": "RateLimitConfig",
+        "package": "kernel",
+        "description": "RateLimitConfig configures rate limiting for unary read RPCs to detect polling.\n Two categories are tracked independently:\n - polling_rate: unary RPCs that have streaming alternatives (Watch/Subscribe)\n - unary_rate: unary read RPCs without streaming alternatives",
+        "fields": [
+          {
+            "name": "polling_rate",
+            "type": "double",
+            "description": "Max req/s per peer per method for unary RPCs that have streaming alternatives.\n These RPCs should use Watch/Subscribe instead of polling. A low limit\n nudges clients toward streaming while still allowing occasional one-off reads.",
+            "default": 2
+          },
+          {
+            "name": "unary_rate",
+            "type": "double",
+            "description": "Max req/s per peer per method for unary read RPCs without streaming alternatives.\n Higher than polling_rate since these RPCs have no streaming alternative.",
+            "default": 10
+          }
+        ]
+      }
+    },
+    {
+      "name": "configs",
+      "type": "message",
+      "description": "configs holds per-frontend-service configurations. On each config load,\n each entry is written to the corresponding ConfigHolder boundary map.",
+      "message": {
+        "name": "ConfigHolder",
+        "package": "config_holder",
+        "description": "ConfigHolder wraps all frontend service configs for YAML loading by kernel.\n Field IDs must match the (spec.frontend_config) id annotation on each Config message.",
+        "fields": [
+          {
+            "name": "sentinel_config",
+            "type": "message",
+            "message": {
+              "name": "Config",
+              "package": "sentinel",
+              "fields": []
+            }
+          },
+          {
+            "name": "identity_config",
+            "type": "message",
+            "message": {
+              "name": "Config",
+              "package": "identity",
+              "fields": [
+                {
+                  "name": "oauth",
+                  "type": "message",
+                  "description": "oauth configures OAuth2 authentication providers and settings.",
+                  "message": {
+                    "name": "OAuthConfig",
+                    "package": "identity",
+                    "description": "OAuthConfig configures OAuth2 authentication.",
+                    "fields": [
+                      {
+                        "name": "enable",
+                        "type": "bool",
+                        "description": "enable enables or disables OAuth2 authentication."
+                      },
+                      {
+                        "name": "scopes",
+                        "type": "string",
+                        "description": "scopes are the default OAuth2 scopes requested from all providers.\n If empty, defaults to [\"openid\", \"profile\", \"email\"].",
+                        "repeated": true
+                      },
+                      {
+                        "name": "providers",
+                        "type": "message",
+                        "description": "providers is the list of OAuth2 identity provider configurations.",
+                        "repeated": true,
+                        "message": {
+                          "name": "ProviderConfig",
+                          "package": "identity",
+                          "description": "ProviderConfig configures a single OAuth2 identity provider.",
+                          "fields": [
+                            {
+                              "name": "enable",
+                              "type": "bool",
+                              "description": "enable enables or disables this provider."
+                            },
+                            {
+                              "name": "name",
+                              "type": "string",
+                              "description": "name is a human-friendly label (e.g. \"Google\", \"Okta\", \"Microsoft\").",
+                              "constraints": [
+                                "minimum length: 1"
+                              ]
+                            },
+                            {
+                              "name": "domains",
+                              "type": "string",
+                              "description": "domains maps email domains to this provider. When a user's email domain\n matches, they are routed to this IDP automatically.",
+                              "repeated": true
+                            },
+                            {
+                              "name": "issuer",
+                              "type": "string",
+                              "description": "issuer is the OpenID Connect issuer URL.\n Used for .well-known/openid-configuration auto-discovery.",
+                              "required": true,
+                              "constraints": [
+                                "must be a valid URL (scheme: URL_SCHEME_HTTPS)"
+                              ]
+                            },
+                            {
+                              "name": "client_id",
+                              "type": "string",
+                              "description": "client_id is the OAuth2 client identifier.",
+                              "required": true,
+                              "constraints": [
+                                "minimum length: 1"
+                              ]
+                            },
+                            {
+                              "name": "client_secret",
+                              "type": "string",
+                              "description": "client_secret is the OAuth2 client secret.",
+                              "required": true,
+                              "constraints": [
+                                "minimum length: 1"
+                              ]
+                            },
+                            {
+                              "name": "authorization_endpoint",
+                              "type": "string",
+                              "description": "authorization_endpoint overrides the auto-discovered authorization URL.",
+                              "constraints": [
+                                "must be a valid URL (scheme: URL_SCHEME_HTTPS)"
+                              ]
+                            },
+                            {
+                              "name": "token_endpoint",
+                              "type": "string",
+                              "description": "token_endpoint overrides the auto-discovered token URL.",
+                              "constraints": [
+                                "must be a valid URL (scheme: URL_SCHEME_HTTPS)"
+                              ]
+                            },
+                            {
+                              "name": "end_session_endpoint",
+                              "type": "string",
+                              "description": "end_session_endpoint overrides the auto-discovered logout URL.",
+                              "constraints": [
+                                "must be a valid URL (scheme: URL_SCHEME_HTTPS)"
+                              ]
+                            },
+                            {
+                              "name": "scopes",
+                              "type": "string",
+                              "description": "scopes overrides the default scopes for this provider.",
+                              "repeated": true
+                            },
+                            {
+                              "name": "audience",
+                              "type": "string",
+                              "description": "audience overrides the default audience for tokens from this provider.",
+                              "constraints": [
+                                "minimum length: 1"
+                              ]
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "name": "audience",
+                        "type": "string",
+                        "description": "audience is the default audience claim for issued tokens.\n Individual providers can override this.",
+                        "default": "identity",
+                        "constraints": [
+                          "minimum length: 1"
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "access_token_lifetime_seconds",
+                  "type": "int64",
+                  "description": "access_token_lifetime_seconds is the lifetime of short-lived access tokens.\n Default: 900 (15 minutes).",
+                  "default": 900,
+                  "constraints": [
+                    "duration constraint: DURATION_TYPE_POSITIVE"
+                  ]
+                },
+                {
+                  "name": "refresh_token_lifetime_seconds",
+                  "type": "int64",
+                  "description": "refresh_token_lifetime_seconds is the lifetime of refresh tokens.\n Default: 86400 (24 hours).",
+                  "default": 86400,
+                  "constraints": [
+                    "duration constraint: DURATION_TYPE_POSITIVE"
+                  ]
+                },
+                {
+                  "name": "key_lifetime_seconds",
+                  "type": "int64",
+                  "description": "key_lifetime_seconds controls how long each instance's signing key is used.\n On rotation the instance generates a new key pair, publishes the new JWK\n to kernel (consumers receive it immediately via Watch), and starts\n signing with the new key. The old JWK remains in verifying_keys until\n all tokens signed by it have expired (access_token_lifetime_seconds).\n Minimum: 3600 (1 hour). Default: 86400 (24 hours).",
+                  "default": 86400,
+                  "constraints": [
+                    "duration constraint: DURATION_TYPE_POSITIVE",
+                    "minimum value: 3600"
+                  ]
+                },
+                {
+                  "name": "nonce_expire_seconds",
+                  "type": "int64",
+                  "description": "nonce_expire_seconds is how long OAuth2 nonces/state remain valid.\n Nonces prevent replay attacks in the authorization code flow.\n Minimum: 1 second. Default: 300 (5 minutes).",
+                  "default": 300,
+                  "constraints": [
+                    "duration constraint: DURATION_TYPE_POSITIVE",
+                    "minimum value: 1"
+                  ]
+                },
+                {
+                  "name": "issuer",
+                  "type": "string",
+                  "description": "issuer is the issuer claim (iss) for tokens minted by this service.\n Must match the public-facing URL of Identity.",
+                  "required": true,
+                  "constraints": [
+                    "must be a valid URL (scheme: URL_SCHEME_HTTPS)"
+                  ]
+                },
+                {
+                  "name": "jwk_refetch_interval_seconds",
+                  "type": "int64",
+                  "description": "jwk_refetch_interval_seconds is the minimum interval between JWKS fetches\n from the same external IDP. Prevents excessive outbound requests.\n Default: 300 (5 minutes).",
+                  "default": 300,
+                  "constraints": [
+                    "duration constraint: DURATION_TYPE_POSITIVE"
+                  ]
+                },
+                {
+                  "name": "entitlements_policy",
+                  "type": "string",
+                  "description": "entitlements_policy is a Rego policy evaluated at token exchange time.\n Input: {claims: {\u003cflattened IDP claims\u003e}}\n Expected output: data.entitlements.main → {profiles: [string]}\n Zero profiles = denied. Profile names must match identity_profiles ids."
+                },
+                {
+                  "name": "entitlement_mappings",
+                  "type": "message",
+                  "description": "entitlement_mappings maps credentials to service identities (S2S only).",
+                  "repeated": true,
+                  "message": {
+                    "name": "ServiceEntitlementMapping",
+                    "package": "entitlement",
+                    "description": "ServiceEntitlementMapping maps a credential to a service identity.\n Used by TokenExchanger (static config) to resolve\n which service a CredPair or cloud credential represents.\n Entitlements for S2S are derived from proto definitions — no entitlements_id needed.",
+                    "fields": [
+                      {
+                        "name": "credential_id",
+                        "type": "string",
+                        "description": "credential_id is the unique identifier for the authentication credential.\n For CredPairs this is the public_key.kid. For cloud credentials, the\n cloud credential ID (e.g. IAM role ARN).",
+                        "required": true,
+                        "constraints": [
+                          "maximum length: 512"
+                        ]
+                      },
+                      {
+                        "name": "service",
+                        "type": "string",
+                        "description": "service is the logical service identity this credential maps to.\n Becomes the \"sub\" claim in S2S tokens.",
+                        "required": true,
+                        "constraints": [
+                          "maximum length: 128"
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "identity_profiles",
+                  "type": "message",
+                  "description": "identity_profiles defines named sets of entitlements for user authorization.\n OPA entitlements_policy returns profile names; identity resolves those names\n to concrete entitlements at token exchange time.",
+                  "repeated": true,
+                  "message": {
+                    "name": "IdentityProfile",
+                    "package": "entitlement",
+                    "description": "IdentityProfile defines a named set of entitlements for user authorization.\n OPA entitlements_policy returns zero or more profile names; identity resolves\n those names to concrete ServiceEntitlements at token exchange time.",
+                    "fields": [
+                      {
+                        "name": "id",
+                        "type": "string",
+                        "description": "id is the profile name (e.g. \"user\", \"admin\", \"reader\").\n Referenced by OPA policy output.",
+                        "required": true,
+                        "constraints": [
+                          "maximum length: 128"
+                        ]
+                      },
+                      {
+                        "name": "entitlements",
+                        "type": "message",
+                        "description": "entitlements is the set of services and RPCs this profile grants access to.",
+                        "required": true,
+                        "repeated": true,
+                        "message": {
+                          "name": "ServiceEntitlement",
+                          "package": "entitlement",
+                          "description": "ServiceEntitlement defines what a caller is allowed to do on a target service.\n The service_name becomes the \"aud\" claim in access tokens.\n Every permitted RPC must be listed — there is no wildcard/default-allow.",
+                          "fields": [
+                            {
+                              "name": "service_name",
+                              "type": "string",
+                              "description": "service_name is the target service (matches spec.service_frontend value).",
+                              "required": true,
+                              "constraints": [
+                                "maximum length: 128"
+                              ]
+                            },
+                            {
+                              "name": "allowed_rpcs",
+                              "type": "string",
+                              "description": "allowed_rpcs lists the RPC methods permitted on the target service.\n Format: \"MethodName\" (unqualified). Must not be empty.",
+                              "required": true,
+                              "repeated": true
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "gateway_config",
+            "type": "message",
+            "message": {
+              "name": "Config",
+              "package": "gateway",
+              "fields": [
+                {
+                  "name": "health_poll_interval_seconds",
+                  "type": "int64",
+                  "description": "How often to refresh health state (seconds). Default 5.",
+                  "default": 5
+                },
+                {
+                  "name": "enable_tcp",
+                  "type": "bool",
+                  "description": "Enable TCP listener for HTTP/1.1, HTTP/2, and gRPC. Default true.",
+                  "default": true
+                },
+                {
+                  "name": "enable_quic",
+                  "type": "bool",
+                  "description": "Enable QUIC/UDP listener for HTTP/3. Default true.",
+                  "default": true
+                }
+              ]
+            }
+          },
+          {
+            "name": "letsencrypt_config",
+            "type": "message",
+            "message": {
+              "name": "Config",
+              "package": "letsencrypt",
+              "fields": [
+                {
+                  "name": "fqdn",
+                  "type": "string",
+                  "description": "fqdn is the fully qualified domain name to obtain a Let's Encrypt\n certificate for (e.g., \"api.example.com\").",
+                  "required": true
+                },
+                {
+                  "name": "lets_encrypt_email",
+                  "type": "string",
+                  "description": "lets_encrypt_email is the email address for Let's Encrypt account\n registration and certificate expiration notifications.\n If empty, letsencrypt will use \"admin@\u003cfqdn\u003e\"."
+                },
+                {
+                  "name": "http_listen",
+                  "type": "string",
+                  "description": "http_listen is the address to bind the HTTP server for ACME HTTP-01\n challenge responses. Must be reachable on port 80 from the internet.\n Default: \":80\".",
+                  "default": ":80"
+                },
+                {
+                  "name": "renewal_check_interval_seconds",
+                  "type": "int64",
+                  "description": "renewal_check_interval_seconds is how often to check if the certificate\n needs renewal (seconds). Default: 3600 (1 hour).",
+                  "default": 3600
+                }
+              ]
+            }
+          },
+          {
+            "name": "policy_config",
+            "type": "message",
+            "message": {
+              "name": "Config",
+              "package": "policy",
+              "description": "Policy reads all auth config (OPA policies, identity profiles) from\n IdentityState via Watch (RO). No config duplication needed.",
+              "fields": []
+            }
+          },
+          {
+            "name": "policysim_config",
+            "type": "message",
+            "message": {
+              "name": "Config",
+              "package": "policysim",
+              "description": "PolicySim reads all auth config (OPA policies, identity profiles) from\n IdentityState via Watch (RO). No config duplication needed.",
+              "fields": []
+            }
+          },
+          {
+            "name": "mcp_config",
+            "type": "message",
+            "message": {
+              "name": "Config",
+              "package": "mcp_assist",
+              "description": "Config is the service-level configuration for the MCP assist service.",
+              "fields": [
+                {
+                  "name": "anthropic_api_key",
+                  "type": "string",
+                  "description": "anthropic_api_key is the API key for calling the Anthropic Claude API.",
+                  "required": true
+                },
+                {
+                  "name": "model",
+                  "type": "string",
+                  "description": "model is the Claude model to use (e.g. \"claude-sonnet-4-20250514\").\n Default: \"claude-sonnet-4-20250514\".",
+                  "default": "claude-sonnet-4-20250514"
+                },
+                {
+                  "name": "max_retries",
+                  "type": "int32",
+                  "description": "max_retries is the maximum number of validation retry attempts\n before giving up on constructing the type. Default: 3.",
+                  "default": 3,
+                  "constraints": [
+                    "must be \u003e= 1",
+                    "must be \u003c= 10"
+                  ]
+                },
+                {
+                  "name": "session_ttl_seconds",
+                  "type": "int64",
+                  "description": "session_ttl_seconds is how long idle sessions are kept before expiry.\n Default: 3600 (1 hour).",
+                  "default": 3600,
+                  "constraints": [
+                    "duration constraint: DURATION_TYPE_POSITIVE"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "security",
+      "type": "message",
+      "description": "security is the security configuration for token validation and authorization.",
+      "message": {
+        "name": "SecurityConfig",
+        "package": "kernel",
+        "description": "SecurityConfig defines the security policy for the kernel cluster.\n All tokens must have: sub, aud matching audience, and a kid matching a known key.\n Tokens are validated using keys from the JwkVerifyingKeysView.",
+        "fields": [
+          {
+            "name": "audience",
+            "type": "string",
+            "description": "audience is the expected \"aud\" claim in tokens. Tokens whose aud\n does not match are rejected.",
+            "default": "kernel"
+          },
+          {
+            "name": "token_ttl_seconds",
+            "type": "int64",
+            "description": "token_ttl_seconds is the maximum allowed token lifetime.\n Tokens with exp - iat \u003e token_ttl_seconds are rejected.\n Default: 3600 (1 hour). 0 = no limit.",
+            "default": 3600
+          }
+        ]
+      }
+    },
+    {
+      "name": "token_exchanger",
+      "type": "message",
+      "description": "token_exchanger configures the token exchange service.",
+      "required": true,
+      "message": {
+        "name": "TokenExchangerConfig",
+        "package": "kernel",
+        "description": "TokenExchangerConfig configures the built-in token exchange service.\n The exchanger validates incoming tokens signed by a CredPair or\n existing refresh tokens, and issues short-lived access tokens\n for backend (kernel) communication.",
+        "fields": [
+          {
+            "name": "refresh_audience",
+            "type": "string",
+            "description": "refresh_audience is the expected \"aud\" claim in refresh tokens.",
+            "default": "refresh"
+          },
+          {
+            "name": "key_rotation_interval_seconds",
+            "type": "int64",
+            "description": "key_rotation_interval_seconds is how often the exchanger rotates\n its own signing keys. Default: 24 hours.",
+            "default": 86400
+          },
+          {
+            "name": "default_token_expiry_seconds",
+            "type": "int64",
+            "description": "default_token_expiry_seconds is the default lifetime for issued\n access tokens when the request does not specify an expiry. Default: 1 hour.",
+            "default": 3600
+          }
+        ]
+      }
+    },
+    {
+      "name": "cred_pairs",
+      "type": "message",
+      "description": "cred_pairs hold public keys for the CredPair token exchange flow.\n Identity mapping (kid → service) is in entitlement_mappings.",
+      "repeated": true,
+      "message": {
+        "name": "CredPair",
+        "package": "jwk",
+        "description": "CredPair holds a public key for the CredPair token exchange flow.\n A service holding the matching private key mints a throwaway JWT\n (kid + signature only), exchanges it via TokenExchanger for a refresh\n token, then exchanges the refresh token for access tokens.\n\n Identity mapping (kid → service name) is handled separately by\n ServiceEntitlementMapping. The private key lives only in the client's\n config (backendclient.proto), never on the server.",
+        "fields": [
+          {
+            "name": "public_key",
+            "type": "message",
+            "description": "The public key for signature verification.\n kid (public_key.kid) is used as the collection key and as the\n credential_id in ServiceEntitlementMapping.",
+            "required": true,
+            "message": {
+              "name": "Jwk",
+              "package": "jwk",
+              "description": "Jwk represents a JSON Web Key as defined in RFC 7517.\n It contains the public key parameters for RSA (e, n), EC (crv, x, y), or OKP (crv, x) keys.\n JWK is used for key distribution and verification in JSON-based protocols like JWT.",
+              "fields": [
+                {
+                  "name": "kty",
+                  "type": "enum",
+                  "description": "Kty is the key type parameter (RSA, EC, or OKP)",
+                  "enum_values": [
+                    {
+                      "name": "KEY_TYPE_RSA",
+                      "number": 1,
+                      "description": "KeyTypeRsa represents an RSA key type"
+                    },
+                    {
+                      "name": "KEY_TYPE_EC",
+                      "number": 2,
+                      "description": "KeyTypeEc represents an Elliptic Curve key type"
+                    },
+                    {
+                      "name": "KEY_TYPE_OKP",
+                      "number": 3,
+                      "description": "KeyTypeOkp represents an Octet Key Pair (EdDSA) key type"
+                    }
+                  ]
+                },
+                {
+                  "name": "alg",
+                  "type": "string",
+                  "description": "Alg is the algorithm intended for use with the key (e.g., \"RS384\", \"ES256\", \"EdDSA\")",
+                  "required": true,
+                  "constraints": [
+                    "minimum length: 1"
+                  ]
+                },
+                {
+                  "name": "kid",
+                  "type": "string",
+                  "description": "Kid is the key ID used to match keys with signatures",
+                  "required": true,
+                  "constraints": [
+                    "minimum length: 1"
+                  ]
+                },
+                {
+                  "name": "use",
+                  "type": "enum",
+                  "description": "Use indicates the intended use of the key (sig for signatures, enc for encryption)",
+                  "enum_values": [
+                    {
+                      "name": "JWK_USE_TYPE_SIG",
+                      "number": 1,
+                      "description": "JwkUseTypeSig indicates the key is used for digital signatures"
+                    },
+                    {
+                      "name": "JWK_USE_TYPE_ENC",
+                      "number": 2,
+                      "description": "JwkUseTypeEnc indicates the key is used for encryption"
+                    }
+                  ]
+                },
+                {
+                  "name": "e",
+                  "type": "string",
+                  "description": "E is the RSA public exponent (base64url encoded without padding)",
+                  "constraints": [
+                    "must be base64 encoded"
+                  ]
+                },
+                {
+                  "name": "n",
+                  "type": "string",
+                  "description": "N is the RSA modulus (base64url encoded without padding)",
+                  "constraints": [
+                    "must be base64 encoded"
+                  ]
+                },
+                {
+                  "name": "crv",
+                  "type": "string",
+                  "description": "Crv is the elliptic curve name (e.g., P-256, P-384, P-521, Ed25519)"
+                },
+                {
+                  "name": "x",
+                  "type": "string",
+                  "description": "X is the x coordinate for EC keys or the public key for OKP (base64url encoded without padding)",
+                  "constraints": [
+                    "must be base64 encoded"
+                  ]
+                },
+                {
+                  "name": "y",
+                  "type": "string",
+                  "description": "Y is the y coordinate for EC keys (base64url encoded without padding, not used for OKP)",
+                  "constraints": [
+                    "must be base64 encoded"
+                  ]
+                },
+                {
+                  "name": "exp",
+                  "type": "int64",
+                  "description": "Exp is the expiration in epoch seconds. This is not part of the JWK spec as the spec does\n not specify how to handle public key expiration."
+                },
+                {
+                  "name": "created",
+                  "type": "int64",
+                  "description": "Created is the Unix epoch timestamp (seconds) when the key was created (optional).\n If set, valid range: 1735689600 (2025-01-01) to 8045740800 (2225-01-01)",
+                  "constraints": [
+                    "must be \u003e= 1735689600",
+                    "must be \u003c= 8045740800"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "entitlement_mappings",
+      "type": "message (recursive reference: entitlement.ServiceEntitlementMapping)",
+      "description": "entitlement_mappings maps credential IDs (kid) to service identities.\n TokenExchanger uses these to resolve which service a CredPair represents.",
+      "repeated": true
+    },
+    {
+      "name": "service_entitlements",
+      "type": "message",
+      "description": "service_entitlements holds named entitlement definitions loaded from\n proto/security/*.json at config build time. Used for S2S entitlements\n (derived from proto descriptors) and U2S entitlements (expandWildcard).",
+      "repeated": true,
+      "message": {
+        "name": "ServiceEntitlements",
+        "package": "entitlement",
+        "description": "ServiceEntitlements is a named collection of entitlements, typically one per\n microservice or logical role (e.g. \"sentinel-admin\", \"full-admin\").\n Defined as JSON files in proto/security/ and loaded into service configs\n at config build time.",
+        "fields": [
+          {
+            "name": "id",
+            "type": "string",
+            "description": "id identifies this entitlement set (e.g. \"sentinel-admin\", \"snoopy-reader\").\n Matches the JSON filename in proto/security/.",
+            "required": true,
+            "constraints": [
+              "maximum length: 128"
+            ]
+          },
+          {
+            "name": "entitlements",
+            "type": "message (recursive reference: entitlement.ServiceEntitlement)",
+            "description": "entitlements is the set of services and RPCs this collection grants access to.",
+            "required": true,
+            "repeated": true
+          }
+        ]
+      }
+    }
+  ]
+}`
 }

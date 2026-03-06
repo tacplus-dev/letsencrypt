@@ -184,3 +184,28 @@ service BackendService {
   // The server sends an updated Jwks message whenever the key set changes.
   rpc WatchJwks(google.protobuf.Empty) returns (stream jwk.Jwks);
 }
+
+// ============================================================================
+// ServiceConfigState — shared runtime config for all frontend services
+// ============================================================================
+
+// ServiceConfigState delivers runtime configuration (OPA policy, TLS, logging)
+// to all frontend services. The backend writes the config; frontends subscribe
+// via OnChange to receive updates.
+message ServiceConfigState {
+
+  Config config = 1;
+}
+
+// ============================================================================
+// Auto-generated Backend Service (tacplus)
+// ============================================================================
+
+service ServiceConfigStateBackendService {
+	// Singleton: Config
+	rpc GetConfig(google.protobuf.Empty) returns (Config);
+	rpc SetConfig(Config) returns (Config);
+	rpc WatchConfig(google.protobuf.Empty) returns (stream Config);
+}
+
+message MapEmpty {}

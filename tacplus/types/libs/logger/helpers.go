@@ -621,3 +621,112 @@ func MergeLoggerConfig(dst, src *LoggerConfig) {
 		dst.DisableStacktrace = src.DisableStacktrace
 	}
 }
+
+// LoggerConfigLlmTypeDescriptor returns a JSON description of LoggerConfig for LLM-assisted construction.
+// The description includes field names, types, comments, constraints, defaults,
+// nested message structures, and enum values — everything an LLM needs to
+// construct a valid instance of this type.
+func LoggerConfigLlmTypeDescriptor() string {
+	return `{
+  "name": "LoggerConfig",
+  "package": "logger",
+  "description": "LoggerConfig represents the configuration for a logger instance.\n It controls the output format, verbosity level, and formatting options.\n\n Example usage:\n   - Development mode with console output and pretty printing for local debugging\n   - Production mode with JSON output and no pretty printing for log aggregation",
+  "fields": [
+    {
+      "name": "name",
+      "type": "string",
+      "description": "Name is the logger name/component identifier",
+      "constraints": [
+        "maximum length: 128"
+      ]
+    },
+    {
+      "name": "format",
+      "type": "enum",
+      "description": "Format determines the output format for log messages (JSON or console)\n Default: FORMAT_JSON in production, FORMAT_CONSOLE in development",
+      "enum_values": [
+        {
+          "name": "FORMAT_JSON",
+          "number": 1,
+          "description": "FORMAT_JSON outputs logs as JSON objects, ideal for structured logging and log aggregation systems"
+        },
+        {
+          "name": "FORMAT_CONSOLE",
+          "number": 2,
+          "description": "FORMAT_CONSOLE outputs logs in a human-readable console format, ideal for development and debugging"
+        }
+      ]
+    },
+    {
+      "name": "level",
+      "type": "enum",
+      "description": "Level sets the minimum severity level for log messages to be output\n Messages below this level will be filtered out\n Default: LEVEL_INFO in production, LEVEL_DEBUG in development",
+      "enum_values": [
+        {
+          "name": "LEVEL_TRACE",
+          "number": 1,
+          "description": "LEVEL_TRACE is the most verbose log level, used for detailed debugging information"
+        },
+        {
+          "name": "LEVEL_DEBUG",
+          "number": 2,
+          "description": "LEVEL_DEBUG is used for debugging information, less verbose than trace"
+        },
+        {
+          "name": "LEVEL_INFO",
+          "number": 3,
+          "description": "LEVEL_INFO is used for informational messages about normal operations"
+        },
+        {
+          "name": "LEVEL_WARN",
+          "number": 4,
+          "description": "LEVEL_WARN is used for warning messages about potentially problematic situations"
+        },
+        {
+          "name": "LEVEL_ERROR",
+          "number": 5,
+          "description": "LEVEL_ERROR is used for error messages about failures and problems"
+        }
+      ]
+    },
+    {
+      "name": "development",
+      "type": "bool",
+      "description": "Development enables development mode which:\n   - Uses console format by default\n   - Enables stack traces for warnings and errors\n   - Uses more human-readable timestamps\n Default: false (production mode)"
+    },
+    {
+      "name": "pretty_print",
+      "type": "bool",
+      "description": "PrettyPrint enables pretty-printed output for JSON format\n This makes JSON logs more readable but increases output size\n Should be disabled in production for performance\n Default: false"
+    },
+    {
+      "name": "output_paths",
+      "type": "string",
+      "description": "OutputPaths is a list of file paths or URLs to write logs to\n Use \"stdout\" or \"stderr\" for console output\n Example: [\"stdout\", \"/var/log/app.log\"]",
+      "repeated": true,
+      "constraints": [
+        "must be a valid file path (type: PATH_ANY)"
+      ]
+    },
+    {
+      "name": "error_output_paths",
+      "type": "string",
+      "description": "ErrorOutputPaths is a list of file paths or URLs to write error logs to\n Use \"stderr\" for console error output\n Example: [\"stderr\", \"/var/log/app-errors.log\"]",
+      "repeated": true,
+      "constraints": [
+        "must be a valid file path (type: PATH_ANY)"
+      ]
+    },
+    {
+      "name": "disable_caller",
+      "type": "bool",
+      "description": "DisableCaller disables automatic inclusion of caller information (file:line) in log entries\n Default: false (caller information is included)"
+    },
+    {
+      "name": "disable_stacktrace",
+      "type": "bool",
+      "description": "DisableStacktrace disables automatic stacktraces for error-level and above log entries\n Default: false (stacktraces are included for errors)"
+    }
+  ]
+}`
+}

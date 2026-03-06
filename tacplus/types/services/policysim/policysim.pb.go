@@ -18,6 +18,7 @@ import (
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -361,11 +362,93 @@ func (x *EvaluatePolicyResponse) GetErrors() []string {
 	return nil
 }
 
+// PolicysimConfigState is the backend state boundary for policysim service configuration.
+// Auto-injected by tacplus from (spec.frontend_config) annotation.
+type PolicysimConfigState struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Config        *Config                `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PolicysimConfigState) Reset() {
+	*x = PolicysimConfigState{}
+	mi := &file_services_policysim_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PolicysimConfigState) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PolicysimConfigState) ProtoMessage() {}
+
+func (x *PolicysimConfigState) ProtoReflect() protoreflect.Message {
+	mi := &file_services_policysim_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PolicysimConfigState.ProtoReflect.Descriptor instead.
+func (*PolicysimConfigState) Descriptor() ([]byte, []int) {
+	return file_services_policysim_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *PolicysimConfigState) GetConfig() *Config {
+	if x != nil {
+		return x.Config
+	}
+	return nil
+}
+
+type MapEmpty struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MapEmpty) Reset() {
+	*x = MapEmpty{}
+	mi := &file_services_policysim_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MapEmpty) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MapEmpty) ProtoMessage() {}
+
+func (x *MapEmpty) ProtoReflect() protoreflect.Message {
+	mi := &file_services_policysim_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MapEmpty.ProtoReflect.Descriptor instead.
+func (*MapEmpty) Descriptor() ([]byte, []int) {
+	return file_services_policysim_proto_rawDescGZIP(), []int{7}
+}
+
 var File_services_policysim_proto protoreflect.FileDescriptor
 
 const file_services_policysim_proto_rawDesc = "" +
 	"\n" +
-	"\x18services/policysim.proto\x12\tpolicysim\x1a\x0flibs/spec.proto\x1a\x1cgoogle/api/annotations.proto\"\x1b\n" +
+	"\x18services/policysim.proto\x12\tpolicysim\x1a\x0flibs/spec.proto\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\"\x1b\n" +
 	"\x06Config:\x11Ҩ\x1d\r\n" +
 	"\tpolicysim\x10\v\"J\n" +
 	"\x1bSimulateEntitlementsRequest\x12+\n" +
@@ -391,10 +474,18 @@ const file_services_policysim_proto_rawDesc = "" +
 	"\vresult_json\x18\x01 \x01(\tR\n" +
 	"resultJson\x12\x18\n" +
 	"\aallowed\x18\x02 \x01(\bR\aallowed\x12\x16\n" +
-	"\x06errors\x18\x03 \x03(\tR\x06errors2\xbd\x02\n" +
+	"\x06errors\x18\x03 \x03(\tR\x06errors\"i\n" +
+	"\x14PolicysimConfigState\x123\n" +
+	"\x06config\x18\x01 \x01(\v2\x11.policysim.ConfigB\b\xe0\xb5\x18\x02\xe0\xb6\x18\x01R\x06config:\x1c\x9a\xa8\x1d\x14PolicysimConfigState\xa0\xa8\x1d\x02\"\n" +
+	"\n" +
+	"\bMapEmpty2\xbd\x02\n" +
 	"\x10PolicySimService\x12\x9b\x01\n" +
 	"\x14SimulateEntitlements\x12&.policysim.SimulateEntitlementsRequest\x1a'.policysim.SimulateEntitlementsResponse\"2\x82\xd3\xe4\x93\x02,:\x01*\"'/api/policysim/v1/simulate-entitlements\x12|\n" +
-	"\x0eEvaluatePolicy\x12 .policysim.EvaluatePolicyRequest\x1a!.policysim.EvaluatePolicyResponse\"%\x82\xd3\xe4\x93\x02\x1f:\x01*\"\x1a/api/policysim/v1/evaluate\x1a\r\xa2\x97\"\tpolicysimB^Z\\gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/policysimb\x06proto3"
+	"\x0eEvaluatePolicy\x12 .policysim.EvaluatePolicyRequest\x1a!.policysim.EvaluatePolicyResponse\"%\x82\xd3\xe4\x93\x02\x1f:\x01*\"\x1a/api/policysim/v1/evaluate\x1a\r\xa2\x97\"\tpolicysim2\xcb\x01\n" +
+	"\"PolicysimConfigStateBackendService\x126\n" +
+	"\tGetConfig\x12\x16.google.protobuf.Empty\x1a\x11.policysim.Config\x121\n" +
+	"\tSetConfig\x12\x11.policysim.Config\x1a\x11.policysim.Config\x12:\n" +
+	"\vWatchConfig\x12\x16.google.protobuf.Empty\x1a\x11.policysim.Config0\x01B^Z\\gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/policysimb\x06proto3"
 
 var (
 	file_services_policysim_proto_rawDescOnce sync.Once
@@ -408,7 +499,7 @@ func file_services_policysim_proto_rawDescGZIP() []byte {
 	return file_services_policysim_proto_rawDescData
 }
 
-var file_services_policysim_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_services_policysim_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_services_policysim_proto_goTypes = []any{
 	(*Config)(nil),                       // 0: policysim.Config
 	(*SimulateEntitlementsRequest)(nil),  // 1: policysim.SimulateEntitlementsRequest
@@ -416,18 +507,28 @@ var file_services_policysim_proto_goTypes = []any{
 	(*SimulatedServiceEntitlement)(nil),  // 3: policysim.SimulatedServiceEntitlement
 	(*EvaluatePolicyRequest)(nil),        // 4: policysim.EvaluatePolicyRequest
 	(*EvaluatePolicyResponse)(nil),       // 5: policysim.EvaluatePolicyResponse
+	(*PolicysimConfigState)(nil),         // 6: policysim.PolicysimConfigState
+	(*MapEmpty)(nil),                     // 7: policysim.MapEmpty
+	(*emptypb.Empty)(nil),                // 8: google.protobuf.Empty
 }
 var file_services_policysim_proto_depIdxs = []int32{
 	3, // 0: policysim.SimulateEntitlementsResponse.entitlements:type_name -> policysim.SimulatedServiceEntitlement
-	1, // 1: policysim.PolicySimService.SimulateEntitlements:input_type -> policysim.SimulateEntitlementsRequest
-	4, // 2: policysim.PolicySimService.EvaluatePolicy:input_type -> policysim.EvaluatePolicyRequest
-	2, // 3: policysim.PolicySimService.SimulateEntitlements:output_type -> policysim.SimulateEntitlementsResponse
-	5, // 4: policysim.PolicySimService.EvaluatePolicy:output_type -> policysim.EvaluatePolicyResponse
-	3, // [3:5] is the sub-list for method output_type
-	1, // [1:3] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	0, // 1: policysim.PolicysimConfigState.config:type_name -> policysim.Config
+	1, // 2: policysim.PolicySimService.SimulateEntitlements:input_type -> policysim.SimulateEntitlementsRequest
+	4, // 3: policysim.PolicySimService.EvaluatePolicy:input_type -> policysim.EvaluatePolicyRequest
+	8, // 4: policysim.PolicysimConfigStateBackendService.GetConfig:input_type -> google.protobuf.Empty
+	0, // 5: policysim.PolicysimConfigStateBackendService.SetConfig:input_type -> policysim.Config
+	8, // 6: policysim.PolicysimConfigStateBackendService.WatchConfig:input_type -> google.protobuf.Empty
+	2, // 7: policysim.PolicySimService.SimulateEntitlements:output_type -> policysim.SimulateEntitlementsResponse
+	5, // 8: policysim.PolicySimService.EvaluatePolicy:output_type -> policysim.EvaluatePolicyResponse
+	0, // 9: policysim.PolicysimConfigStateBackendService.GetConfig:output_type -> policysim.Config
+	0, // 10: policysim.PolicysimConfigStateBackendService.SetConfig:output_type -> policysim.Config
+	0, // 11: policysim.PolicysimConfigStateBackendService.WatchConfig:output_type -> policysim.Config
+	7, // [7:12] is the sub-list for method output_type
+	2, // [2:7] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_services_policysim_proto_init() }
@@ -441,9 +542,9 @@ func file_services_policysim_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_services_policysim_proto_rawDesc), len(file_services_policysim_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   8,
 			NumExtensions: 0,
-			NumServices:   1,
+			NumServices:   2,
 		},
 		GoTypes:           file_services_policysim_proto_goTypes,
 		DependencyIndexes: file_services_policysim_proto_depIdxs,

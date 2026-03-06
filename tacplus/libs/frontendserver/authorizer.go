@@ -153,7 +153,7 @@ func (a *authorizer) Authorize(ctx context.Context, fullMethod string, req any) 
 		return protoerrors.NewErrPermissionDenied(nil, "invalid entitlements format")
 	}
 	for _, e := range entList {
-		if s, ok := e.(string); ok && s == methodName {
+		if s, ok := e.(string); ok && (s == methodName || s == "*") {
 			return nil
 		}
 	}

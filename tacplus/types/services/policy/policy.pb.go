@@ -372,6 +372,88 @@ func (x *GetPoliciesResponse) GetEntitlementsPolicy() *opa.OpaPolicy {
 	return nil
 }
 
+// PolicyConfigState is the backend state boundary for policy service configuration.
+// Auto-injected by tacplus from (spec.frontend_config) annotation.
+type PolicyConfigState struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Config        *Config                `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PolicyConfigState) Reset() {
+	*x = PolicyConfigState{}
+	mi := &file_services_policy_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PolicyConfigState) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PolicyConfigState) ProtoMessage() {}
+
+func (x *PolicyConfigState) ProtoReflect() protoreflect.Message {
+	mi := &file_services_policy_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PolicyConfigState.ProtoReflect.Descriptor instead.
+func (*PolicyConfigState) Descriptor() ([]byte, []int) {
+	return file_services_policy_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *PolicyConfigState) GetConfig() *Config {
+	if x != nil {
+		return x.Config
+	}
+	return nil
+}
+
+type MapEmpty struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MapEmpty) Reset() {
+	*x = MapEmpty{}
+	mi := &file_services_policy_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MapEmpty) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MapEmpty) ProtoMessage() {}
+
+func (x *MapEmpty) ProtoReflect() protoreflect.Message {
+	mi := &file_services_policy_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MapEmpty.ProtoReflect.Descriptor instead.
+func (*MapEmpty) Descriptor() ([]byte, []int) {
+	return file_services_policy_proto_rawDescGZIP(), []int{8}
+}
+
 var File_services_policy_proto protoreflect.FileDescriptor
 
 const file_services_policy_proto_rawDesc = "" +
@@ -395,12 +477,20 @@ const file_services_policy_proto_rawDesc = "" +
 	"\fservice_name\x18\x01 \x01(\tR\vserviceName\x12\x12\n" +
 	"\x04rpcs\x18\x02 \x03(\tR\x04rpcs\"V\n" +
 	"\x13GetPoliciesResponse\x12?\n" +
-	"\x13entitlements_policy\x18\x01 \x01(\v2\x0e.opa.OpaPolicyR\x12entitlementsPolicy2\xe1\x02\n" +
+	"\x13entitlements_policy\x18\x01 \x01(\v2\x0e.opa.OpaPolicyR\x12entitlementsPolicy\"`\n" +
+	"\x11PolicyConfigState\x120\n" +
+	"\x06config\x18\x01 \x01(\v2\x0e.policy.ConfigB\b\xe0\xb5\x18\x02\xe0\xb6\x18\x01R\x06config:\x19\x9a\xa8\x1d\x11PolicyConfigState\xa0\xa8\x1d\x02\"\n" +
+	"\n" +
+	"\bMapEmpty2\xe1\x02\n" +
 	"\rPolicyService\x12c\n" +
 	"\rGetApiCatalog\x12\x16.google.protobuf.Empty\x1a\x1a.policy.ApiCatalogResponse\"\x1e\x82\xd3\xe4\x93\x02\x18\x12\x16/api/policy/v1/catalog\x12z\n" +
 	"\x0fGetEntitlements\x12\x1e.policy.GetEntitlementsRequest\x1a\x1f.policy.GetEntitlementsResponse\"&\x82\xd3\xe4\x93\x02 :\x01*\"\x1b/api/policy/v1/entitlements\x12c\n" +
 	"\vGetPolicies\x12\x16.google.protobuf.Empty\x1a\x1b.policy.GetPoliciesResponse\"\x1f\x82\xd3\xe4\x93\x02\x19\x12\x17/api/policy/v1/policies\x1a\n" +
-	"\xa2\x97\"\x06policyB[ZYgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/policyb\x06proto3"
+	"\xa2\x97\"\x06policy2\xbc\x01\n" +
+	"\x1fPolicyConfigStateBackendService\x123\n" +
+	"\tGetConfig\x12\x16.google.protobuf.Empty\x1a\x0e.policy.Config\x12+\n" +
+	"\tSetConfig\x12\x0e.policy.Config\x1a\x0e.policy.Config\x127\n" +
+	"\vWatchConfig\x12\x16.google.protobuf.Empty\x1a\x0e.policy.Config0\x01B[ZYgitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/policyb\x06proto3"
 
 var (
 	file_services_policy_proto_rawDescOnce sync.Once
@@ -414,7 +504,7 @@ func file_services_policy_proto_rawDescGZIP() []byte {
 	return file_services_policy_proto_rawDescData
 }
 
-var file_services_policy_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_services_policy_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_services_policy_proto_goTypes = []any{
 	(*Config)(nil),                  // 0: policy.Config
 	(*ApiCatalogResponse)(nil),      // 1: policy.ApiCatalogResponse
@@ -423,24 +513,33 @@ var file_services_policy_proto_goTypes = []any{
 	(*GetEntitlementsResponse)(nil), // 4: policy.GetEntitlementsResponse
 	(*ServiceEntitlementInfo)(nil),  // 5: policy.ServiceEntitlementInfo
 	(*GetPoliciesResponse)(nil),     // 6: policy.GetPoliciesResponse
-	(*opa.OpaPolicy)(nil),           // 7: opa.OpaPolicy
-	(*emptypb.Empty)(nil),           // 8: google.protobuf.Empty
+	(*PolicyConfigState)(nil),       // 7: policy.PolicyConfigState
+	(*MapEmpty)(nil),                // 8: policy.MapEmpty
+	(*opa.OpaPolicy)(nil),           // 9: opa.OpaPolicy
+	(*emptypb.Empty)(nil),           // 10: google.protobuf.Empty
 }
 var file_services_policy_proto_depIdxs = []int32{
-	2, // 0: policy.ApiCatalogResponse.services:type_name -> policy.ApiCatalogEntry
-	5, // 1: policy.GetEntitlementsResponse.entitlements:type_name -> policy.ServiceEntitlementInfo
-	7, // 2: policy.GetPoliciesResponse.entitlements_policy:type_name -> opa.OpaPolicy
-	8, // 3: policy.PolicyService.GetApiCatalog:input_type -> google.protobuf.Empty
-	3, // 4: policy.PolicyService.GetEntitlements:input_type -> policy.GetEntitlementsRequest
-	8, // 5: policy.PolicyService.GetPolicies:input_type -> google.protobuf.Empty
-	1, // 6: policy.PolicyService.GetApiCatalog:output_type -> policy.ApiCatalogResponse
-	4, // 7: policy.PolicyService.GetEntitlements:output_type -> policy.GetEntitlementsResponse
-	6, // 8: policy.PolicyService.GetPolicies:output_type -> policy.GetPoliciesResponse
-	6, // [6:9] is the sub-list for method output_type
-	3, // [3:6] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	2,  // 0: policy.ApiCatalogResponse.services:type_name -> policy.ApiCatalogEntry
+	5,  // 1: policy.GetEntitlementsResponse.entitlements:type_name -> policy.ServiceEntitlementInfo
+	9,  // 2: policy.GetPoliciesResponse.entitlements_policy:type_name -> opa.OpaPolicy
+	0,  // 3: policy.PolicyConfigState.config:type_name -> policy.Config
+	10, // 4: policy.PolicyService.GetApiCatalog:input_type -> google.protobuf.Empty
+	3,  // 5: policy.PolicyService.GetEntitlements:input_type -> policy.GetEntitlementsRequest
+	10, // 6: policy.PolicyService.GetPolicies:input_type -> google.protobuf.Empty
+	10, // 7: policy.PolicyConfigStateBackendService.GetConfig:input_type -> google.protobuf.Empty
+	0,  // 8: policy.PolicyConfigStateBackendService.SetConfig:input_type -> policy.Config
+	10, // 9: policy.PolicyConfigStateBackendService.WatchConfig:input_type -> google.protobuf.Empty
+	1,  // 10: policy.PolicyService.GetApiCatalog:output_type -> policy.ApiCatalogResponse
+	4,  // 11: policy.PolicyService.GetEntitlements:output_type -> policy.GetEntitlementsResponse
+	6,  // 12: policy.PolicyService.GetPolicies:output_type -> policy.GetPoliciesResponse
+	0,  // 13: policy.PolicyConfigStateBackendService.GetConfig:output_type -> policy.Config
+	0,  // 14: policy.PolicyConfigStateBackendService.SetConfig:output_type -> policy.Config
+	0,  // 15: policy.PolicyConfigStateBackendService.WatchConfig:output_type -> policy.Config
+	10, // [10:16] is the sub-list for method output_type
+	4,  // [4:10] is the sub-list for method input_type
+	4,  // [4:4] is the sub-list for extension type_name
+	4,  // [4:4] is the sub-list for extension extendee
+	0,  // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_services_policy_proto_init() }
@@ -454,9 +553,9 @@ func file_services_policy_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_services_policy_proto_rawDesc), len(file_services_policy_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   9,
 			NumExtensions: 0,
-			NumServices:   1,
+			NumServices:   2,
 		},
 		GoTypes:           file_services_policy_proto_goTypes,
 		DependencyIndexes: file_services_policy_proto_depIdxs,

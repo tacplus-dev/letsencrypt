@@ -942,6 +942,256 @@ func GetPoliciesResponseToTOML(v *GetPoliciesResponse) ([]byte, error) {
 	return toml.Marshal(obj)
 }
 
+// PolicyConfigStateJSON represents PolicyConfigState in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type policyconfigstateJSON struct {
+	Config json.RawMessage `json:"config,omitempty"`
+}
+
+// PolicyConfigStateToJSON converts PolicyConfigState to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func PolicyConfigStateToJSON(v *PolicyConfigState) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "policyconfigstate is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := policyconfigstateJSON{
+		Config: func() json.RawMessage {
+			if v.Config == nil {
+				return nil
+			}
+			data, _ := ConfigToJSON(v.Config)
+			return data
+		}(),
+	}
+	return json.Marshal(helper)
+}
+
+// PolicyConfigStateFromBytes creates PolicyConfigState from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func PolicyConfigStateFromBytes(data []byte) (*PolicyConfigState, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := PolicyConfigStateFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := PolicyConfigStateFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := PolicyConfigStateFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &PolicyConfigState{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse PolicyConfigState: unsupported format or invalid data")
+}
+
+// PolicyConfigStateFromJSON creates PolicyConfigState from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func PolicyConfigStateFromJSON(data []byte) (*PolicyConfigState, error) {
+	// Unmarshal into helper struct with string enums
+	var raw policyconfigstateJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &PolicyConfigState{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &PolicyConfigState{}
+	// Parse message field: Config
+	if len(raw.Config) > 0 {
+		parsed, err := ConfigFromJSON(raw.Config)
+		if err == nil {
+			result.Config = parsed
+		}
+	}
+	return result, nil
+}
+
+// PolicyConfigStateToYAML converts PolicyConfigState to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func PolicyConfigStateToYAML(v *PolicyConfigState) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "policyconfigstate is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := PolicyConfigStateToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// PolicyConfigStateToTOML converts PolicyConfigState to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func PolicyConfigStateToTOML(v *PolicyConfigState) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "policyconfigstate is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := PolicyConfigStateToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
+// MapEmptyJSON represents MapEmpty in external JSON format (with string enums)
+// MARKER: JSON helper struct generated from serial.go
+type mapemptyJSON struct {
+}
+
+// MapEmptyToJSON converts MapEmpty to JSON bytes.
+// Uses custom JSON helper for friendly enum strings and proper int64 handling.
+func MapEmptyToJSON(v *MapEmpty) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "mapempty is nil")
+	}
+	// Convert to JSON helper struct with string enums
+	helper := mapemptyJSON{}
+	return json.Marshal(helper)
+}
+
+// MapEmptyFromBytes creates MapEmpty from bytes, auto-detecting the format.
+// Supports JSON, YAML, TOML, and binary protobuf formats.
+func MapEmptyFromBytes(data []byte) (*MapEmpty, error) {
+	// Trim leading whitespace to check format
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "empty data")
+	}
+	// Try JSON first (most common, starts with { or [)
+	if trimmed[0] == '{' || trimmed[0] == '[' {
+		if result, err := MapEmptyFromJSON(data); err == nil {
+			return result, nil
+		}
+	}
+	// Try TOML (try before YAML since YAML is more permissive)
+	var tomlObj any
+	if err := toml.Unmarshal(data, &tomlObj); err == nil {
+		// Convert TOML to JSON, then parse
+		jsonData, err := json.Marshal(tomlObj)
+		if err == nil {
+			if result, err := MapEmptyFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try YAML
+	var yamlObj any
+	if err := yaml.Unmarshal(data, &yamlObj); err == nil {
+		// Convert YAML to JSON, then parse
+		jsonData, err := json.Marshal(yamlObj)
+		if err == nil {
+			if result, err := MapEmptyFromJSON(jsonData); err == nil {
+				return result, nil
+			}
+		}
+	}
+	// Try binary protobuf
+	v := &MapEmpty{}
+	if err := proto.Unmarshal(data, v); err == nil {
+		return v, nil
+	}
+	return nil, protoerrors.NewErrMissingInvalidData(nil, "failed to parse MapEmpty: unsupported format or invalid data")
+}
+
+// MapEmptyFromJSON creates MapEmpty from JSON bytes.
+// Uses standard encoding/json and custom enum parsers for external JSON compatibility.
+func MapEmptyFromJSON(data []byte) (*MapEmpty, error) {
+	// Unmarshal into helper struct with string enums
+	var raw mapemptyJSON
+	if err := json.Unmarshal(data, &raw); err != nil {
+		// Fall back to protojson which handles proto3 JSON conventions
+		// (string-encoded int64/uint64, standard enum names, etc.)
+		v := &MapEmpty{}
+		if pErr := protojson.Unmarshal(data, v); pErr != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	// Build result with parsed enums
+	result := &MapEmpty{}
+	return result, nil
+}
+
+// MapEmptyToYAML converts MapEmpty to YAML bytes.
+// Converts to JSON first, then to YAML for proper protobuf handling.
+func MapEmptyToYAML(v *MapEmpty) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "mapempty is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := MapEmptyToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to YAML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return yaml.Marshal(obj)
+}
+
+// MapEmptyToTOML converts MapEmpty to TOML bytes.
+// Converts to JSON first, then to TOML for proper protobuf handling.
+func MapEmptyToTOML(v *MapEmpty) ([]byte, error) {
+	if v == nil {
+		return nil, protoerrors.NewErrMissingInvalidData(nil, "mapempty is nil")
+	}
+	// Convert to JSON first
+	jsonData, err := MapEmptyToJSON(v)
+	if err != nil {
+		return nil, err
+	}
+	// Convert JSON to TOML
+	var obj any
+	if err := json.Unmarshal(jsonData, &obj); err != nil {
+		return nil, err
+	}
+	return toml.Marshal(obj)
+}
+
 // ============================================================
 // Environment Variable Helpers
 // ============================================================
@@ -1091,6 +1341,46 @@ func GetPoliciesResponseFromEnvVar(env map[string]string) (*GetPoliciesResponse,
 	return result, nil
 }
 
+// PolicyConfigStateToEnvVar converts PolicyConfigState to environment variable key-value pairs.
+func PolicyConfigStateToEnvVar(v *PolicyConfigState) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	if v.Config != nil {
+		for k, val := range ConfigToEnvVar(v.Config) {
+			result[k] = val
+		}
+	}
+	return result
+}
+
+// PolicyConfigStateFromEnvVar creates PolicyConfigState from environment variable key-value pairs.
+func PolicyConfigStateFromEnvVar(env map[string]string) (*PolicyConfigState, error) {
+	result := &PolicyConfigState{}
+	if sub, err := ConfigFromEnvVar(env); err != nil {
+		return nil, err
+	} else if sub != nil {
+		result.Config = sub
+	}
+	return result, nil
+}
+
+// MapEmptyToEnvVar converts MapEmpty to environment variable key-value pairs.
+func MapEmptyToEnvVar(v *MapEmpty) map[string]string {
+	if v == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	return result
+}
+
+// MapEmptyFromEnvVar creates MapEmpty from environment variable key-value pairs.
+func MapEmptyFromEnvVar(env map[string]string) (*MapEmpty, error) {
+	result := &MapEmpty{}
+	return result, nil
+}
+
 // ============================================================
 // Validation Helpers
 // ============================================================
@@ -1193,6 +1483,27 @@ func ValidateGetPoliciesResponse(m *GetPoliciesResponse) error {
 	return nil
 }
 
+// ValidatePolicyConfigState validates all fields in PolicyConfigState according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidatePolicyConfigState(m *PolicyConfigState) error {
+	if m == nil {
+		return nil
+	}
+
+	return nil
+}
+
+// ValidateMapEmpty validates all fields in MapEmpty according to their annotations.
+// Returns a BlueErr if validation fails, or nil if all validations pass.
+func ValidateMapEmpty(m *MapEmpty) error {
+	if m == nil {
+		return nil
+	}
+
+	// No field validations defined
+	return nil
+}
+
 // ============================================================
 // Capacity Constants (for utilization monitoring)
 // ============================================================
@@ -1268,5 +1579,15 @@ func MergeServiceEntitlementInfo(dst, src *ServiceEntitlementInfo) {
 func MergeGetPoliciesResponse(dst, src *GetPoliciesResponse) {
 	if dst.EntitlementsPolicy == nil {
 		dst.EntitlementsPolicy = src.EntitlementsPolicy
+	}
+}
+
+// ============================================================
+// Merge: PolicyConfigState
+// ============================================================
+// MergePolicyConfigState fills zero-valued fields in dst from src.
+func MergePolicyConfigState(dst, src *PolicyConfigState) {
+	if dst.Config == nil {
+		dst.Config = src.Config
 	}
 }
