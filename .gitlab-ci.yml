@@ -26,10 +26,16 @@ build:
     - apk add --no-cache git
     - *setup-netrc
   script:
-    - go build -trimpath -ldflags="-s -w" -o bin/letsencrypt .
+    - |
+      for target in linux/amd64 linux/arm64; do
+        GOOS="${target%/*}"
+        GOARCH="${target#*/}"
+        echo "Building letsencrypt for ${GOOS}/${GOARCH}..."
+        GOOS="$GOOS" GOARCH="$GOARCH" go build -trimpath -ldflags="-s -w" -o "bin/letsencrypt-${GOARCH}" .
+      done
   artifacts:
     paths:
-      - bin/letsencrypt
+      - bin/letsencrypt-*
     expire_in: 1 hour
 
 package:
@@ -44,10 +50,12 @@ package:
   before_script:
     - *parse-version
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+    - docker buildx create --use --name multiarch --driver docker-container
   script:
     - |
       IMAGE="$CI_REGISTRY_IMAGE/letsencrypt-${MAJOR}-${MINOR}"
-      docker build -t "${IMAGE}:${PATCH}" .
-      docker tag "${IMAGE}:${PATCH}" "${IMAGE}:latest"
-      docker push "${IMAGE}:${PATCH}"
-      docker push "${IMAGE}:latest"
+      docker buildx build \
+        --platform linux/amd64,linux/arm64 \
+        -t "${IMAGE}:${PATCH}" \
+        -t "${IMAGE}:latest" \
+        --push .
