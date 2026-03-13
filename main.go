@@ -9,11 +9,9 @@ import (
 	"syscall"
 
 	letsencrypt "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/internal"
-	"gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/libs/logger"
-	"gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/libs/servicemanager"
+	"gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/sm"
 	serviceconfig_pb "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/serviceconfig"
 	letsencrypt_pb "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/letsencrypt"
-	"gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/wrappers/backends"
 	"go.uber.org/zap"
 )
 
@@ -24,7 +22,6 @@ func main() {
 }
 
 func run() error {
-	// 1. Load serviceconfig.
 	configPath := resolveConfigPath()
 	if configPath == "" {
 		return fmt.Errorf("no config: use --config flag or set SERVICE_CONFIG env var")
@@ -35,50 +32,28 @@ func run() error {
 		return fmt.Errorf("reading config %s: %w", configPath, err)
 	}
 
-	cfg, err := serviceconfig_pb.ConfigFromBytes(data)
-	if err != nil {
-		return fmt.Errorf("parsing config %s: %w", configPath, err)
-	}
-
-	bsCfg, err := serviceconfig_pb.BootstrapConfigFromBytes(data)
-	if err != nil {
-		return fmt.Errorf("parsing bootstrap config %s: %w", configPath, err)
-	}
-
-	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT)
-	defer stop()
-
-	// 2. Install logger.
-	if cfg.Logger != nil {
-		if _, err := logger.InstallFromConfig(cfg.Logger); err != nil {
-			return fmt.Errorf("logger: %w", err)
-		}
-	}
-
-	// 3. Parse typed config.
-	letsencryptCfg, err := letsencrypt_pb.ConfigFromBytes(data)
+	cfg, err := letsencrypt_pb.ConfigFromBytes(data)
 	if err != nil {
 		return fmt.Errorf("parsing letsencrypt config %s: %w", configPath, err)
 	}
 
-	// 4. Connect to kernel via ServiceManager.
-	sc, err := servicemanager.NewServiceManager(ctx, bsCfg)
+	// Validate serviceconfig parses (ensures file is well-formed).
+	if _, err := serviceconfig_pb.ConfigFromBytes(data); err != nil {
+		return fmt.Errorf("parsing serviceconfig %s: %w", configPath, err)
+	}
+
+	s, err := sm.New()
 	if err != nil {
 		return fmt.Errorf("servicemanager: %w", err)
 	}
-	defer sc.Close()
+	defer s.Close()
 
-	// 5. Create backend clients.
-	bc, err := backends.NewBackends(ctx, sc)
-	if err != nil {
-		return fmt.Errorf("backends: %w", err)
-	}
-	defer bc.Close()
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT)
+	defer stop()
 
-	// 6. Run the cert manager.
-	zap.L().Info("Starting letsencrypt", zap.String("fqdn", letsencryptCfg.Fqdn))
+	zap.L().Info("Starting letsencrypt", zap.String("fqdn", cfg.Fqdn))
 
-	cm, err := letsencrypt.NewCertManager(letsencryptCfg, bc)
+	cm, err := letsencrypt.NewCertManager(cfg, s)
 	if err != nil {
 		return fmt.Errorf("cert manager: %w", err)
 	}

@@ -14,7 +14,7 @@ import (
 	key_pb "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/key"
 	x509_pb "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/x509"
 	letsencrypt_pb "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/letsencrypt"
-	"gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/wrappers/backends"
+	"gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/sm"
 	"go.uber.org/zap"
 )
 
@@ -22,14 +22,14 @@ import (
 // storing the resulting X509CertPair in kernel for gateway to consume.
 type CertManager struct {
 	cfg     *letsencrypt_pb.Config
-	backend *backends.Backends
+	sm      *sm.ServiceManager
 	storage *Storage
 }
 
-func NewCertManager(cfg *letsencrypt_pb.Config, bc *backends.Backends) (*CertManager, error) {
+func NewCertManager(cfg *letsencrypt_pb.Config, s *sm.ServiceManager) (*CertManager, error) {
 	return &CertManager{
 		cfg:     cfg,
-		backend: bc,
+		sm:      s,
 		storage: NewStorage(),
 	}, nil
 }
@@ -139,7 +139,7 @@ func (cm *CertManager) extractAndStore(ctx context.Context, magic *certmagic.Con
 		Fqdn:            cm.cfg.Fqdn,
 	}
 
-	if _, err := cm.backend.Services().LetsEncryptState().CertData().Set(ctx, certData); err != nil {
+	if _, err := cm.sm.BackendClients().Services().LetsEncryptState().CertData().Set(ctx, certData); err != nil {
 		return fmt.Errorf("writing to kernel: %w", err)
 	}
 
@@ -153,7 +153,7 @@ func (cm *CertManager) extractAndStore(ctx context.Context, magic *certmagic.Con
 // restoreState loads CertMagic state from kernel and restores it into the
 // in-memory storage, so CertMagic doesn't re-provision on restart.
 func (cm *CertManager) restoreState(ctx context.Context) error {
-	data, err := cm.backend.Services().LetsEncryptState().CertData().Fetch(ctx)
+	data, err := cm.sm.BackendClients().Services().LetsEncryptState().CertData().Fetch(ctx)
 	if err != nil {
 		return err
 	}
