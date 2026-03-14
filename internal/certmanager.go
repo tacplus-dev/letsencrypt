@@ -56,7 +56,7 @@ func (cm *CertManager) Run(ctx context.Context) error {
 	magic := certmagic.NewDefault()
 
 	// Start HTTP server for ACME HTTP-01 challenges.
-	httpAddr := cm.cfg.HttpListen
+	httpAddr := fmt.Sprintf("%s:%d", cm.cfg.HttpListener.Host, cm.cfg.HttpListener.Port)
 	httpServer := &http.Server{
 		Addr:    httpAddr,
 		Handler: certmagic.DefaultACME.HTTPChallengeHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
