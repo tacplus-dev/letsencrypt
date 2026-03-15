@@ -139,7 +139,7 @@ func (cm *CertManager) extractAndStore(ctx context.Context, magic *certmagic.Con
 		Fqdn:            cm.cfg.Fqdn,
 	}
 
-	if _, err := cm.sm.BackendClients().Services().LetsEncryptState().CertData().Set(ctx, certData); err != nil {
+	if _, err := cm.sm.StateClients().Services().LetsEncryptState().CertData().Set(ctx, certData); err != nil {
 		return fmt.Errorf("writing to kernel: %w", err)
 	}
 
@@ -153,7 +153,7 @@ func (cm *CertManager) extractAndStore(ctx context.Context, magic *certmagic.Con
 // restoreState loads CertMagic state from kernel and restores it into the
 // in-memory storage, so CertMagic doesn't re-provision on restart.
 func (cm *CertManager) restoreState(ctx context.Context) error {
-	data, err := cm.sm.BackendClients().Services().LetsEncryptState().CertData().Fetch(ctx)
+	data, err := cm.sm.StateClients().Services().LetsEncryptState().CertData().Fetch(ctx)
 	if err != nil {
 		return err
 	}
