@@ -7,7 +7,6 @@ variables:
   GONOSUMCHECK: "gitlab.com/secondstarcavalier/*"
   CGO_ENABLED: "0"
   TACPLUS_IMAGE: "${CI_REGISTRY}/secondstarcavalier/controlplane/services/tacplus/tacplus-1-1:latest"
-  PROTO_REPO: https://gitlab.com/secondstarcavalier/controlplane/services/proto.git
 
 .parse-version: &parse-version
   - |
@@ -33,8 +32,7 @@ build:
     GOCACHE: "$CI_PROJECT_DIR/.go-cache/build"
   before_script:
     - *setup-netrc
-    - git clone --depth 1 "$PROTO_REPO" /tmp/proto
-    - tacplus build --src /tmp/proto
+    - tacplus build --no-container
   script:
     - |
       for target in linux/amd64 linux/arm64; do
