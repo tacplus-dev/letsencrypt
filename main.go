@@ -10,7 +10,6 @@ import (
 
 	letsencrypt "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/internal"
 	"gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/sm"
-	serviceconfig_pb "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/serviceconfig"
 	letsencrypt_pb "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/letsencrypt"
 	"go.uber.org/zap"
 )
@@ -35,11 +34,6 @@ func run() error {
 	cfg, err := letsencrypt_pb.ConfigFromBytes(data)
 	if err != nil {
 		return fmt.Errorf("parsing letsencrypt config %s: %w", configPath, err)
-	}
-
-	// Validate serviceconfig parses (ensures file is well-formed).
-	if _, err := serviceconfig_pb.ConfigFromBytes(data); err != nil {
-		return fmt.Errorf("parsing serviceconfig %s: %w", configPath, err)
 	}
 
 	s, err := sm.New()

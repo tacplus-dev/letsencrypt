@@ -1,4 +1,4 @@
 language: go
 pkg: gitlab.com/secondstarcavalier/controlplane/services/letsencrypt
-backends:
+states:
   - services/letsencrypt.LetsEncryptState:rw
