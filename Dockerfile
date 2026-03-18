@@ -6,8 +6,8 @@ RUN apk add --no-cache ca-certificates tzdata && \
 WORKDIR /app
 
 ARG TARGETARCH
-COPY bin/letsencrypt-${TARGETARCH} /app/letsencrypt
+COPY bin/letsencrypt-${TARGETARCH} /usr/bin/letsencrypt
 
 USER letsencrypt
 
-ENTRYPOINT ["/app/letsencrypt"]
+ENTRYPOINT ["letsencrypt"]
