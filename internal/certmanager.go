@@ -14,7 +14,7 @@ import (
 	key_pb "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/key"
 	x509_pb "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/libs/x509"
 	letsencrypt_pb "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/letsencrypt"
-	"gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/sm"
+	"gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/s2sm"
 	"go.uber.org/zap"
 )
 

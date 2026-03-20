@@ -9,7 +9,7 @@ import (
 	"syscall"
 
 	letsencrypt "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/internal"
-	"gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/sm"
+	"gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/s2sm"
 	letsencrypt_pb "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/letsencrypt"
 	"go.uber.org/zap"
 )
