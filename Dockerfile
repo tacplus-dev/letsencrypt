@@ -18,8 +18,7 @@ LABEL org.opencontainers.image.created="${BUILD_DATE}" \
 RUN apk add --no-cache ca-certificates tzdata \
     && addgroup -S letsencrypt && adduser -S letsencrypt -G letsencrypt
 
-ARG TARGETARCH
-COPY bin/letsencrypt-${TARGETARCH} /usr/local/bin/letsencrypt
+COPY bin/letsencrypt /usr/local/bin/letsencrypt
 RUN chmod +x /usr/local/bin/letsencrypt
 
 USER letsencrypt

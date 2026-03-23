@@ -2,3 +2,8 @@ language: go
 pkg: gitlab.com/secondstarcavalier/controlplane/services/letsencrypt
 states:
   - services/letsencrypt.LetsEncryptState:rw
+post-gen:
+  - cmd: sh
+    args: [-c, "CGO_ENABLED=0 go build -trimpath -ldflags=\"-s -w\" -o bin/letsencrypt ."]
+container:
+  image: registry.gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/letsencrypt

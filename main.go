@@ -45,9 +45,14 @@ func run() error {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT)
 	defer stop()
 
-	zap.L().Info("Starting letsencrypt", zap.String("fqdn", cfg.Fqdn))
+	fqdn := cfg.GetFqdn()
+	if fqdn == "" {
+		return fmt.Errorf("letsencrypt config has empty fqdn — set fqdn in config")
+	}
 
-	cm, err := letsencrypt.NewCertManager(cfg, s)
+	zap.L().Info("Starting letsencrypt", zap.String("fqdn", fqdn))
+
+	cm, err := letsencrypt.NewCertManager(cfg, s, fqdn)
 	if err != nil {
 		return fmt.Errorf("cert manager: %w", err)
 	}

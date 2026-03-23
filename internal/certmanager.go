@@ -19,17 +19,19 @@ import (
 )
 
 // CertManager handles Let's Encrypt certificate provisioning and renewal,
-// storing the resulting X509CertPair in kernel for gateway to consume.
+// storing the resulting X509CertChain in kernel for gateway to consume.
 type CertManager struct {
 	cfg     *letsencrypt_pb.Config
 	sm      *sm.ServiceManager
+	fqdn    string
 	storage *Storage
 }
 
-func NewCertManager(cfg *letsencrypt_pb.Config, s *sm.ServiceManager) (*CertManager, error) {
+func NewCertManager(cfg *letsencrypt_pb.Config, s *sm.ServiceManager, fqdn string) (*CertManager, error) {
 	return &CertManager{
 		cfg:     cfg,
 		sm:      s,
+		fqdn:    fqdn,
 		storage: NewStorage(),
 	}, nil
 }
@@ -49,7 +51,7 @@ func (cm *CertManager) Run(ctx context.Context) error {
 
 	email := cm.cfg.LetsEncryptEmail
 	if email == "" {
-		email = "admin@" + cm.cfg.Fqdn
+		email = "admin@" + cm.fqdn
 	}
 	certmagic.DefaultACME.Email = email
 
@@ -78,8 +80,8 @@ func (cm *CertManager) Run(ctx context.Context) error {
 	}()
 
 	// Provision certificate.
-	zap.L().Info("Requesting certificate", zap.String("fqdn", cm.cfg.Fqdn), zap.String("email", email))
-	if err := magic.ManageSync(ctx, []string{cm.cfg.Fqdn}); err != nil {
+	zap.L().Info("Requesting certificate", zap.String("fqdn", cm.fqdn), zap.String("email", email))
+	if err := magic.ManageSync(ctx, []string{cm.fqdn}); err != nil {
 		return fmt.Errorf("certmagic ManageSync: %w", err)
 	}
 	zap.L().Info("Certificate provisioned successfully")
@@ -110,19 +112,19 @@ func (cm *CertManager) Run(ctx context.Context) error {
 }
 
 // extractAndStore extracts the current certificate from CertMagic and writes
-// the X509CertPair + CertMagic state to kernel.
+// the X509CertChain + CertMagic state to kernel.
 func (cm *CertManager) extractAndStore(ctx context.Context, magic *certmagic.Config) error {
 	// Get the certificate from CertMagic.
-	cert, err := magic.CacheManagedCertificate(ctx, cm.cfg.Fqdn)
+	cert, err := magic.CacheManagedCertificate(ctx, cm.fqdn)
 	if err != nil {
 		return fmt.Errorf("getting cached certificate: %w", err)
 	}
 
 	if len(cert.Certificate.Certificate) == 0 {
-		return fmt.Errorf("no certificate data for %s", cm.cfg.Fqdn)
+		return fmt.Errorf("no certificate data for %s", cm.fqdn)
 	}
 
-	// Build X509CertPair proto from tls.Certificate.
+	// Build X509CertChain proto from tls.Certificate.
 	certPair, err := tlsCertToProto(&cert.Certificate)
 	if err != nil {
 		return fmt.Errorf("converting certificate: %w", err)
@@ -136,7 +138,7 @@ func (cm *CertManager) extractAndStore(ctx context.Context, magic *certmagic.Con
 		TlsCert:         certPair,
 		CertmagicState:  certmagicState,
 		LastRenewed:     time.Now().Unix(),
-		Fqdn:            cm.cfg.Fqdn,
+		Fqdn:            cm.fqdn,
 	}
 
 	if _, err := cm.sm.StateClients().Services().LetsEncryptState().CertData().Set(ctx, certData); err != nil {
@@ -144,7 +146,7 @@ func (cm *CertManager) extractAndStore(ctx context.Context, magic *certmagic.Con
 	}
 
 	zap.L().Info("Certificate stored in kernel",
-		zap.String("fqdn", cm.cfg.Fqdn),
+		zap.String("fqdn", cm.fqdn),
 		zap.Time("expires", cert.Leaf.NotAfter))
 
 	return nil
@@ -168,18 +170,23 @@ func (cm *CertManager) restoreState(ctx context.Context) error {
 	return nil
 }
 
-// tlsCertToProto converts a tls.Certificate to an x509.X509CertPair proto.
-func tlsCertToProto(cert *crtls.Certificate) (*x509_pb.X509CertPair, error) {
-	// Encode the leaf certificate to PEM then base64.
+// tlsCertToProto converts a tls.Certificate to an x509.X509CertChain proto.
+func tlsCertToProto(cert *crtls.Certificate) (*x509_pb.X509CertChain, error) {
 	if len(cert.Certificate) == 0 {
 		return nil, fmt.Errorf("no certificate data")
 	}
 
-	certPEM := pem.EncodeToMemory(&pem.Block{
-		Type:  "CERTIFICATE",
-		Bytes: cert.Certificate[0],
-	})
-	certB64 := base64.StdEncoding.EncodeToString(certPEM)
+	// Build the certificate chain (leaf + intermediates).
+	chain := make([]*x509_pb.X509Cert, len(cert.Certificate))
+	for i, derBytes := range cert.Certificate {
+		certPEM := pem.EncodeToMemory(&pem.Block{
+			Type:  "CERTIFICATE",
+			Bytes: derBytes,
+		})
+		chain[i] = &x509_pb.X509Cert{
+			Base64: base64.StdEncoding.EncodeToString(certPEM),
+		}
+	}
 
 	// Encode the private key as PKCS8.
 	keyBytes, err := x509.MarshalPKCS8PrivateKey(cert.PrivateKey)
@@ -187,14 +194,11 @@ func tlsCertToProto(cert *crtls.Certificate) (*x509_pb.X509CertPair, error) {
 		return nil, fmt.Errorf("marshaling private key: %w", err)
 	}
 	keyPEM := pem.EncodeToMemory(&pem.Block{Type: "PRIVATE KEY", Bytes: keyBytes})
-	keyB64 := base64.StdEncoding.EncodeToString(keyPEM)
 
-	return &x509_pb.X509CertPair{
+	return &x509_pb.X509CertChain{
+		Chain: chain,
 		Key: &key_pb.Key{
-			Base64: keyB64,
-		},
-		Cert: &x509_pb.X509Cert{
-			Base64: certB64,
+			Base64: base64.StdEncoding.EncodeToString(keyPEM),
 		},
 	}, nil
 }

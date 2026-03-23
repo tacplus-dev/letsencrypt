@@ -6,7 +6,7 @@ variables:
   GOPRIVATE: "gitlab.com/secondstarcavalier/*"
   GONOSUMCHECK: "gitlab.com/secondstarcavalier/*"
   CGO_ENABLED: "0"
-  TACPLUS_IMAGE: "${CI_REGISTRY}/secondstarcavalier/controlplane/services/tacplus/tacplus-1-1:latest"
+  TACPLUS_IMAGE: "${CI_REGISTRY}/secondstarcavalier/controlplane/utils/tacplus/tacplus-1-1:latest"
 
 .parse-version: &parse-version
   - |
