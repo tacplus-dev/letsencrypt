@@ -15,7 +15,10 @@ LABEL org.opencontainers.image.created="${BUILD_DATE}" \
       org.opencontainers.image.title="LetsEncrypt" \
       org.opencontainers.image.description="ACME certificate management service for Cavalier control plane"
 
+ARG TARGETARCH
 RUN apk add --no-cache ca-certificates tzdata \
+    && wget -qO- "https://github.com/fullstorydev/grpcurl/releases/download/v1.9.3/grpcurl_1.9.3_linux_${TARGETARCH}.tar.gz" \
+      | tar -xz -C /usr/local/bin grpcurl \
     && addgroup -S letsencrypt && adduser -S letsencrypt -G letsencrypt
 
 COPY bin/letsencrypt /usr/local/bin/letsencrypt
