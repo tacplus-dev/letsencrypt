@@ -32,7 +32,7 @@ build:
     GOCACHE: "$CI_PROJECT_DIR/.go-cache/build"
   before_script:
     - *setup-netrc
-    - tacplus build --no-container
+    - tacplus build --no-container --skip-post
   script:
     - |
       for target in linux/amd64 linux/arm64; do
