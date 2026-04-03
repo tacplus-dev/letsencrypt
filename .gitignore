@@ -19,3 +19,6 @@ tacplus/
 
 # Windows
 Thumbs.db
+
+# Claude Code
+.claude/
