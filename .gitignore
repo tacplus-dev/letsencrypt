@@ -1,5 +1,6 @@
 # Binary
 /genesis
+bin/
 *.exe
 *.dylib
 *.so
