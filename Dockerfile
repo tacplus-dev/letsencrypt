@@ -22,7 +22,7 @@ RUN case "${TARGETARCH}" in amd64) GRPCURL_ARCH=x86_64;; *) GRPCURL_ARCH=${TARGE
       | tar -xz -C /usr/local/bin grpcurl \
     && addgroup -S letsencrypt && adduser -S letsencrypt -G letsencrypt
 
-COPY bin/letsencrypt-${TARGETARCH} /usr/local/bin/letsencrypt
+COPY bin/letsencrypt /usr/local/bin/letsencrypt
 RUN chmod +x /usr/local/bin/letsencrypt
 
 USER letsencrypt
