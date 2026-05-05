@@ -1,6 +1,16 @@
 # Local development builds only — not used in CI/CD.
 
-src_flag := if path_exists("../../proto") == "true" { "--src ../../proto" } else { "" }
+proto-sync:
+  #!/usr/bin/env bash
+  set -euo pipefail
+  if [ -L proto ]; then
+    : # symlink — user-managed, skip sync
+  elif [ -d proto ]; then
+    git -C proto fetch --quiet
+    git -C proto reset --hard --quiet origin/HEAD
+  else
+    git clone --quiet https://gitlab.com/secondstarcavalier/controlplane/proto.git proto
+  fi
 
-default:
-  tacplus build {{src_flag}}
+default: proto-sync
+  tacplus build --src proto
