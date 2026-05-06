@@ -9,7 +9,7 @@ proto-sync:
     git -C proto fetch --quiet
     git -C proto reset --hard --quiet origin/HEAD
   else
-    git clone --quiet https://gitlab.com/secondstarcavalier/controlplane/proto.git proto
+    git clone --quiet https://gitlab.com/secondstarcavalier/schematic/platform/cavalier.git proto
   fi
 
 default: proto-sync

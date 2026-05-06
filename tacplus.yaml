@@ -5,4 +5,4 @@ post-gen:
   - cmd: sh
     args: [-c, "CGO_ENABLED=0 go build -trimpath -ldflags=\"-s -w\" -o bin/letsencrypt ."]
 container:
-  image: registry.gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/letsencrypt
+  image: registry.gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/letsencrypt

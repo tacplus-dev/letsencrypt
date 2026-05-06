@@ -8,9 +8,9 @@ import (
 	"os/signal"
 	"syscall"
 
-	letsencrypt "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/internal"
-	"gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/s2sm"
-	letsencrypt_pb "gitlab.com/secondstarcavalier/controlplane/services/letsencrypt/tacplus/types/services/letsencrypt"
+	letsencrypt "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/internal"
+	"gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/tacplus/s2sm"
+	letsencrypt_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/tacplus/types/services/letsencrypt"
 	"go.uber.org/zap"
 )
 

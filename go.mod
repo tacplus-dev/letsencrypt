@@ -1,4 +1,4 @@
-module gitlab.com/secondstarcavalier/controlplane/services/letsencrypt
+module gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt
 
 go 1.25.5
 
