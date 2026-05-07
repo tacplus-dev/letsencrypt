@@ -1,7 +1,7 @@
 # LetsEncrypt Release Image
 # Layers the letsencrypt binary onto a minimal Alpine base.
 
-FROM registry.gitlab.com/secondstarcavalier/schematic/containers/cavalier-alpine:latest
+FROM registry.gitlab.com/secondstarcavalier/schematic/containers/alpine/schematic-alpine-1-2:latest
 
 ARG BUILD_DATE
 ARG VCS_REF
