@@ -11,7 +11,7 @@ compute-image:
     - V="${CI_COMMIT_TAG#v}"
     - MAJOR="$(echo "$V" | cut -d. -f1)"
     - MINOR="$(echo "$V" | cut -d. -f2)"
-    - echo "TACPLUS_IMAGE=${CI_REGISTRY}/secondstarcavalier/controlplane/utils/tacplus/tacplus-${MAJOR}-${MINOR}:latest" > tacplus.env
+    - echo "TACPLUS_IMAGE=${CI_REGISTRY}/secondstarcavalier/schematic/utils/tacplus/tacplus-${MAJOR}-${MINOR}:latest" > tacplus.env
   artifacts:
     reports:
       dotenv: tacplus.env
