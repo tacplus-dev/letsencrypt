@@ -47,7 +47,7 @@ variables:
     GOCACHE: "$CI_PROJECT_DIR/.go-cache/build"
   before_script:
     - *setup-netrc
-    - tacplus build --no-container --skip-post
+    - tacplus build --skip-post
   script:
     - go build -trimpath -ldflags="-s -w" -o bin/letsencrypt .
   artifacts:
@@ -111,3 +111,31 @@ manifest:
       docker manifest push "${IMAGE}:${PATCH}"
       docker manifest create "${IMAGE}:latest" "${IMAGE}:${PATCH}-amd64" "${IMAGE}:${PATCH}-arm64"
       docker manifest push "${IMAGE}:latest"
+
+# ---------------------------------------------------------------------------
+# Proto validation: fires when proto CI fans out on new proto tag.
+# ---------------------------------------------------------------------------
+compute-validate-image:
+  stage: .pre
+  image: alpine:latest
+  rules:
+    - if: $PROTO_VALIDATE == "true"
+  script:
+    - V="${PROTO_VERSION#v}"
+    - MAJOR="$(echo "$V" | cut -d. -f1)"
+    - MINOR="$(echo "$V" | cut -d. -f2)"
+    - echo "TACPLUS_IMAGE=${CI_REGISTRY}/secondstarcavalier/schematic/tacplus/tacplus-${MAJOR}-${MINOR}:latest" > tacplus.env
+  artifacts:
+    reports:
+      dotenv: tacplus.env
+
+proto-validate:
+  stage: build
+  image: $TACPLUS_IMAGE
+  needs: [compute-validate-image]
+  rules:
+    - if: $PROTO_VALIDATE == "true"
+  before_script:
+    - *setup-netrc
+  script:
+    - tacplus build --skip-post --tag $PROTO_VERSION
