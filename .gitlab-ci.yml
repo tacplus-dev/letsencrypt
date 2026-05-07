@@ -1,6 +1,7 @@
 stages:
   - build
   - package
+  - manifest
 
 compute-image:
   stage: .pre
@@ -31,7 +32,7 @@ variables:
 .setup-netrc: &setup-netrc
   - printf "machine gitlab.com\nlogin gitlab-ci-token\npassword %s\n" "$CI_JOB_TOKEN" > ~/.netrc
 
-build:
+.build-arch:
   stage: build
   image: $TACPLUS_IMAGE
   needs: [compute-image]
@@ -48,36 +49,65 @@ build:
     - *setup-netrc
     - tacplus build --no-container --skip-post
   script:
-    - |
-      for target in linux/amd64 linux/arm64; do
-        GOOS="${target%/*}"
-        GOARCH="${target#*/}"
-        echo "Building letsencrypt for ${GOOS}/${GOARCH}..."
-        GOOS="$GOOS" GOARCH="$GOARCH" go build -trimpath -ldflags="-s -w" -o "bin/letsencrypt-${GOARCH}" .
-      done
+    - go build -trimpath -ldflags="-s -w" -o bin/letsencrypt .
   artifacts:
     paths:
-      - bin/letsencrypt-*
+      - bin/letsencrypt
     expire_in: 1 hour
 
-package:
+build-amd64:
+  extends: .build-arch
+
+build-arm64:
+  extends: .build-arch
+  tags:
+    - saas-linux-large-arm64
+
+.package-arch:
   stage: package
   image: docker:latest
   services:
     - docker:dind
-  needs:
-    - build
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
   before_script:
     - *parse-version
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
-    - docker buildx create --use --name multiarch --driver docker-container
   script:
     - |
       IMAGE="$CI_REGISTRY_IMAGE/letsencrypt-${MAJOR}-${MINOR}"
-      docker buildx build \
-        --platform linux/amd64,linux/arm64 \
-        -t "${IMAGE}:${PATCH}" \
-        -t "${IMAGE}:latest" \
-        --push .
+      docker build -t "${IMAGE}:${PATCH}-${ARCH}" .
+      docker push "${IMAGE}:${PATCH}-${ARCH}"
+
+package-amd64:
+  extends: .package-arch
+  needs: [build-amd64]
+  variables:
+    ARCH: amd64
+
+package-arm64:
+  extends: .package-arch
+  needs: [build-arm64]
+  tags:
+    - saas-linux-large-arm64
+  variables:
+    ARCH: arm64
+
+manifest:
+  stage: manifest
+  image: docker:latest
+  services:
+    - docker:dind
+  needs: [package-amd64, package-arm64]
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
+  before_script:
+    - *parse-version
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+  script:
+    - |
+      IMAGE="$CI_REGISTRY_IMAGE/letsencrypt-${MAJOR}-${MINOR}"
+      docker manifest create "${IMAGE}:${PATCH}" "${IMAGE}:${PATCH}-amd64" "${IMAGE}:${PATCH}-arm64"
+      docker manifest push "${IMAGE}:${PATCH}"
+      docker manifest create "${IMAGE}:latest" "${IMAGE}:${PATCH}-amd64" "${IMAGE}:${PATCH}-arm64"
+      docker manifest push "${IMAGE}:latest"
