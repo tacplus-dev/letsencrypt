@@ -1,5 +1,5 @@
 language: go
-pkg: com.gitlab.secondstarcavalier.controlplane.services.letsencrypt
+pkg: com.gitlab.secondstarcavalier.controlplane.cavalier.services.letsencrypt
 output-dir: tacplus
 post-gen:
   - cmd: sh
