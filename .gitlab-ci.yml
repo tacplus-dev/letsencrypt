@@ -7,12 +7,14 @@ compute-image:
   stage: .pre
   image: alpine:latest
   rules:
-    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-dev)?$/
   script:
     - V="${CI_COMMIT_TAG#v}"
+    - if [[ "$V" == *-dev ]]; then DEV_SUFFIX="-dev"; V="${V%-dev}"; else DEV_SUFFIX=""; fi
     - MAJOR="$(echo "$V" | cut -d. -f1)"
     - MINOR="$(echo "$V" | cut -d. -f2)"
     - echo "TACPLUS_IMAGE=${CI_REGISTRY}/secondstarcavalier/schematic/tacplus/tacplus-${MAJOR}-${MINOR}:latest" > tacplus.env
+    - echo "DEV_SUFFIX=${DEV_SUFFIX}" >> tacplus.env
   artifacts:
     reports:
       dotenv: tacplus.env
@@ -25,6 +27,7 @@ variables:
 .parse-version: &parse-version
   - |
     V="${CI_COMMIT_TAG#v}"
+    if [[ "$V" == *-dev ]]; then DEV_SUFFIX="-dev"; V="${V%-dev}"; else DEV_SUFFIX=""; fi
     MAJOR="$(echo "$V" | cut -d. -f1)"
     MINOR="$(echo "$V" | cut -d. -f2)"
     PATCH="$(echo "$V" | cut -d. -f3)"
@@ -37,7 +40,7 @@ variables:
   image: $TACPLUS_IMAGE
   needs: [compute-image]
   rules:
-    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-dev)?$/
   cache:
     key: go-modules
     paths:
@@ -69,15 +72,15 @@ build-arm64:
   services:
     - docker:dind
   rules:
-    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-dev)?$/
   before_script:
     - *parse-version
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
   script:
     - |
       IMAGE="$CI_REGISTRY_IMAGE/letsencrypt-${MAJOR}-${MINOR}"
-      docker build -t "${IMAGE}:${PATCH}-${ARCH}" .
-      docker push "${IMAGE}:${PATCH}-${ARCH}"
+      docker build -t "${IMAGE}:${PATCH}${DEV_SUFFIX}-${ARCH}" .
+      docker push "${IMAGE}:${PATCH}${DEV_SUFFIX}-${ARCH}"
 
 package-amd64:
   extends: .package-arch
@@ -100,17 +103,17 @@ manifest:
     - docker:dind
   needs: [package-amd64, package-arm64]
   rules:
-    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-dev)?$/
   before_script:
     - *parse-version
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
   script:
     - |
       IMAGE="$CI_REGISTRY_IMAGE/letsencrypt-${MAJOR}-${MINOR}"
-      docker manifest create "${IMAGE}:${PATCH}" "${IMAGE}:${PATCH}-amd64" "${IMAGE}:${PATCH}-arm64"
-      docker manifest push "${IMAGE}:${PATCH}"
-      docker manifest create "${IMAGE}:latest" "${IMAGE}:${PATCH}-amd64" "${IMAGE}:${PATCH}-arm64"
-      docker manifest push "${IMAGE}:latest"
+      docker manifest create "${IMAGE}:${PATCH}${DEV_SUFFIX}" "${IMAGE}:${PATCH}${DEV_SUFFIX}-amd64" "${IMAGE}:${PATCH}${DEV_SUFFIX}-arm64"
+      docker manifest push "${IMAGE}:${PATCH}${DEV_SUFFIX}"
+      docker manifest create "${IMAGE}:latest${DEV_SUFFIX}" "${IMAGE}:${PATCH}${DEV_SUFFIX}-amd64" "${IMAGE}:${PATCH}${DEV_SUFFIX}-arm64"
+      docker manifest push "${IMAGE}:latest${DEV_SUFFIX}"
 
 # ---------------------------------------------------------------------------
 # Proto validation: fires when proto CI fans out on new proto tag.
