@@ -114,6 +114,8 @@ manifest:
       docker manifest push "${IMAGE}:${PATCH}${DEV_SUFFIX}"
       docker manifest create "${IMAGE}:latest${DEV_SUFFIX}" "${IMAGE}:${PATCH}${DEV_SUFFIX}-amd64" "${IMAGE}:${PATCH}${DEV_SUFFIX}-arm64"
       docker manifest push "${IMAGE}:latest${DEV_SUFFIX}"
+      docker manifest create "${IMAGE}:v${MAJOR}.${MINOR}.${PATCH}${DEV_SUFFIX}" "${IMAGE}:${PATCH}${DEV_SUFFIX}-amd64" "${IMAGE}:${PATCH}${DEV_SUFFIX}-arm64"
+      docker manifest push "${IMAGE}:v${MAJOR}.${MINOR}.${PATCH}${DEV_SUFFIX}"
 
 # ---------------------------------------------------------------------------
 # Proto validation: fires when proto CI fans out on new proto tag.
