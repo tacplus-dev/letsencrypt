@@ -21,6 +21,14 @@ func main() {
 }
 
 func run() error {
+	// Initialize the global zap logger so zap.L() calls in certmanager.go produce output.
+	logger, err := zap.NewProduction()
+	if err != nil {
+		return fmt.Errorf("init logger: %w", err)
+	}
+	zap.ReplaceGlobals(logger)
+	defer logger.Sync() //nolint:errcheck
+
 	configPath := resolveConfigPath()
 	if configPath == "" {
 		return fmt.Errorf("no config: use --config flag or set SERVICE_CONFIG env var")

@@ -7,12 +7,12 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"fmt"
-	"net/http"
 	"time"
 
 	"github.com/caddyserver/certmagic"
 	key_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/tacplus/types/libs/key"
 	x509_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/tacplus/types/libs/x509"
+	kernel_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/tacplus/types/services/kernel"
 	letsencrypt_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/tacplus/types/services/letsencrypt"
 	"gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/tacplus/s2sm"
 	"go.uber.org/zap"
@@ -55,29 +55,13 @@ func (cm *CertManager) Run(ctx context.Context) error {
 	}
 	certmagic.DefaultACME.Email = email
 
+	// AltHTTPPort tells certmagic's httpSolver to bind this port for ACME HTTP-01
+	// challenges instead of the default port 80. The k8s LoadBalancer routes
+	// external port 80 → pod port AltHTTPPort, allowing a non-root container to
+	// participate in HTTP-01 validation.
+	certmagic.DefaultACME.AltHTTPPort = int(cm.cfg.HttpListener.Port)
+
 	magic := certmagic.NewDefault()
-
-	// Start HTTP server for ACME HTTP-01 challenges.
-	httpAddr := fmt.Sprintf("%s:%d", cm.cfg.HttpListener.Host, cm.cfg.HttpListener.Port)
-	httpServer := &http.Server{
-		Addr:    httpAddr,
-		Handler: certmagic.DefaultACME.HTTPChallengeHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			http.NotFound(w, r)
-		})),
-	}
-
-	go func() {
-		zap.L().Info("Starting HTTP challenge server", zap.String("addr", httpAddr))
-		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			zap.L().Error("HTTP challenge server failed", zap.Error(err))
-		}
-	}()
-
-	defer func() {
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-		httpServer.Shutdown(shutdownCtx)
-	}()
 
 	// Provision certificate.
 	zap.L().Info("Requesting certificate", zap.String("fqdn", cm.fqdn), zap.String("email", email))
@@ -142,7 +126,20 @@ func (cm *CertManager) extractAndStore(ctx context.Context, magic *certmagic.Con
 	}
 
 	if _, err := cm.sm.StateClients().Services().LetsEncryptState().CertData().Set(ctx, certData); err != nil {
-		return fmt.Errorf("writing to kernel: %w", err)
+		return fmt.Errorf("writing to kernel LetsEncryptState: %w", err)
+	}
+
+	// Also write into GatewayTlsState.AcmeCerts so the gateway's WatchAllCerts
+	// fires with the newly obtained certificate (AllCerts = ConfigCerts ∪ AcmeCerts).
+	gatewayTlsCert := &kernel_pb.GatewayTlsCert{
+		Domain:    cm.fqdn,
+		CertChain: certPair,
+	}
+	if _, err := cm.sm.StateClients().Services().GatewayTlsState().StateStub().PutAcmeCerts(ctx, &kernel_pb.AcmeCertsPutRequest{
+		Key:   cm.fqdn,
+		Value: gatewayTlsCert,
+	}); err != nil {
+		return fmt.Errorf("writing to kernel GatewayTlsState: %w", err)
 	}
 
 	zap.L().Info("Certificate stored in kernel",
@@ -184,7 +181,7 @@ func tlsCertToProto(cert *crtls.Certificate) (*x509_pb.X509CertChain, error) {
 			Bytes: derBytes,
 		})
 		chain[i] = &x509_pb.X509Cert{
-			Base64: base64.StdEncoding.EncodeToString(certPEM),
+			Base64: base64.RawURLEncoding.EncodeToString(certPEM),
 		}
 	}
 
@@ -198,7 +195,7 @@ func tlsCertToProto(cert *crtls.Certificate) (*x509_pb.X509CertChain, error) {
 	return &x509_pb.X509CertChain{
 		Chain: chain,
 		Key: &key_pb.Key{
-			Base64: base64.StdEncoding.EncodeToString(keyPEM),
+			Base64: base64.RawURLEncoding.EncodeToString(keyPEM),
 		},
 	}, nil
 }
