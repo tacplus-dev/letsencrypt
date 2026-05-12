@@ -58,6 +58,8 @@ variables:
 
 build-arm64:
   extends: .build-arch
+  tags:
+    - saas-linux-large-arm64
 
 .package-arch:
   stage: package
@@ -78,6 +80,8 @@ build-arm64:
 
 package-arm64:
   extends: .package-arch
+  tags:
+    - saas-linux-large-arm64
   needs: [build-arm64]
   variables:
     ARCH: arm64
