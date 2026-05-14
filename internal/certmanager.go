@@ -7,6 +7,8 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"fmt"
+	"io"
+	"net/http"
 	"time"
 
 	"github.com/caddyserver/certmagic"
@@ -167,15 +169,59 @@ func (cm *CertManager) restoreState(ctx context.Context) error {
 	return nil
 }
 
+// fetchIntermediates attempts to fetch any missing intermediate CA certs from
+// the AIA (Authority Information Access) extension of each cert in the chain.
+// This ensures the gateway serves the full chain even if CertMagic only stored
+// the leaf cert (which can happen with some ACME configurations).
+func fetchIntermediates(derChain [][]byte) [][]byte {
+	seen := make(map[string]bool)
+	for _, d := range derChain {
+		seen[string(d)] = true
+	}
+	result := make([][]byte, len(derChain))
+	copy(result, derChain)
+
+	for _, derBytes := range derChain {
+		parsed, err := x509.ParseCertificate(derBytes)
+		if err != nil {
+			continue
+		}
+		for _, url := range parsed.IssuingCertificateURL {
+			resp, err := http.Get(url) //nolint:noctx
+			if err != nil {
+				zap.L().Warn("Failed to fetch intermediate cert", zap.String("url", url), zap.Error(err))
+				continue
+			}
+			body, err := io.ReadAll(resp.Body)
+			resp.Body.Close()
+			if err != nil {
+				continue
+			}
+			// The AIA issuer URL returns DER-encoded cert.
+			if _, err := x509.ParseCertificate(body); err == nil {
+				if !seen[string(body)] {
+					seen[string(body)] = true
+					result = append(result, body)
+					zap.L().Info("Fetched intermediate cert from AIA", zap.String("url", url))
+				}
+			}
+		}
+	}
+	return result
+}
+
 // tlsCertToProto converts a tls.Certificate to an x509.X509CertChain proto.
 func tlsCertToProto(cert *crtls.Certificate) (*x509_pb.X509CertChain, error) {
 	if len(cert.Certificate) == 0 {
 		return nil, fmt.Errorf("no certificate data")
 	}
 
+	// Ensure the chain includes all intermediate CAs (fetch from AIA if missing).
+	derChain := fetchIntermediates(cert.Certificate)
+
 	// Build the certificate chain (leaf + intermediates).
-	chain := make([]*x509_pb.X509Cert, len(cert.Certificate))
-	for i, derBytes := range cert.Certificate {
+	chain := make([]*x509_pb.X509Cert, len(derChain))
+	for i, derBytes := range derChain {
 		certPEM := pem.EncodeToMemory(&pem.Block{
 			Type:  "CERTIFICATE",
 			Bytes: derBytes,
