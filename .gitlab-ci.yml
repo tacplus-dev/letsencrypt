@@ -73,16 +73,11 @@ build-arm64:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+-[a-zA-Z0-9_][a-zA-Z0-9_.-]*\.\d+$/
   before_script:
     - *parse-version
-    # Merge group credentials (DOCKER_AUTH_CONFIG, cross-project read) with the CI
-    # job token (push access) into ~/.docker/config.json so docker build can pull
-    # schematic base images and docker push can write to the project registry.
-    - mkdir -p ~/.docker
-    # Pre-pull the schematic base image using group read credentials (DOCKER_AUTH_CONFIG).
-    # Then switch to the CI job token for build+push so the push credential is unambiguous.
-    - '[ -n "$DOCKER_AUTH_CONFIG" ] && echo "$DOCKER_AUTH_CONFIG" > ~/.docker/config.json || true'
-    - docker pull "$(awk '/^FROM/{print $2; exit}' Dockerfile)"
-    - echo '{"auths":{}}' > ~/.docker/config.json
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY" 
+    # Pre-pull the schematic base image while DOCKER_AUTH_CONFIG (group read) is active,
+    # then switch to the CI job token for push.
+    - docker pull "$(awk '/^FROM/{print $2; exit}' Dockerfile)" || true
+    - unset DOCKER_AUTH_CONFIG
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
   script:
     - |
       IMAGE="$CI_REGISTRY_IMAGE/letsencrypt-${MAJOR}-${MINOR}"
@@ -94,7 +89,7 @@ build-arm64:
 package-arm64:
   extends: .package-arch
   tags:
-    - br.aarch64
+    - saas-linux-large-arm64
   needs: [build-arm64]
   variables:
     ARCH: arm64
@@ -106,17 +101,14 @@ manifest:
   services:
     - docker:dind
   tags:
-    - br.aarch64
+    - saas-linux-large-arm64
   needs: [package-arm64]
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+-[a-zA-Z0-9_][a-zA-Z0-9_.-]*\.\d+$/
   before_script:
     - *parse-version
-    # Merge group credentials (DOCKER_AUTH_CONFIG, cross-project read) with the CI
-    # job token (push access) into ~/.docker/config.json so docker build can pull
-    # schematic base images and docker push can write to the project registry.
-    - mkdir -p ~/.docker
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY" 
+    - unset DOCKER_AUTH_CONFIG
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
   script:
     - |
       IMAGE="$CI_REGISTRY_IMAGE/letsencrypt-${MAJOR}-${MINOR}"
