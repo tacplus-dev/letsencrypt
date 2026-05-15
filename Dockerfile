@@ -15,11 +15,6 @@ LABEL org.opencontainers.image.created="${BUILD_DATE}" \
       org.opencontainers.image.title="LetsEncrypt" \
       org.opencontainers.image.description="ACME certificate management service for Cavalier control plane"
 
-RUN addgroup -S letsencrypt && adduser -S letsencrypt -G letsencrypt
-
 COPY bin/letsencrypt /usr/local/bin/letsencrypt
-RUN chmod +x /usr/local/bin/letsencrypt
-
-USER letsencrypt
 
 ENTRYPOINT ["letsencrypt"]
