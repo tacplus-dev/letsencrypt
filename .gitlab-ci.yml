@@ -61,7 +61,7 @@ variables:
 build-arm64:
   extends: .build-arch
   tags:
-    - br.aarch64
+    - schematic-aarch64
 
 .package-arch:
   stage: package
@@ -89,7 +89,7 @@ build-arm64:
 package-arm64:
   extends: .package-arch
   tags:
-    - saas-linux-large-arm64
+    - schematic-aarch64
   needs: [build-arm64]
   variables:
     ARCH: arm64
@@ -101,7 +101,7 @@ manifest:
   services:
     - docker:dind
   tags:
-    - saas-linux-large-arm64
+    - schematic-aarch64
   needs: [package-arm64]
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+-[a-zA-Z0-9_][a-zA-Z0-9_.-]*\.\d+$/
