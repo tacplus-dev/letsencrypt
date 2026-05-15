@@ -83,7 +83,11 @@ build-arm64:
   script:
     - |
       IMAGE="$CI_REGISTRY_IMAGE/letsencrypt-${MAJOR}-${MINOR}"
-      docker build -t "${IMAGE}:${CI_COMMIT_TAG}-${ARCH}" .
+      docker pull "${IMAGE}:${CI_COMMIT_TAG}-${ARCH}" || true
+      docker build --platform "linux/${ARCH}" \
+        --cache-from "${IMAGE}:${CI_COMMIT_TAG}-${ARCH}" \
+        -t "${IMAGE}:${CI_COMMIT_TAG}-${ARCH}" \
+        .
       docker push "${IMAGE}:${CI_COMMIT_TAG}-${ARCH}"
 
 package-arm64:
