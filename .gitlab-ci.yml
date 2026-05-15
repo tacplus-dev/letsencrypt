@@ -19,6 +19,7 @@ compute-image:
       dotenv: tacplus.env
 
 variables:
+  DOCKER_TLS_CERTDIR: ""
   GOPRIVATE: "gitlab.com/secondstarcavalier/*"
   GONOSUMCHECK: "gitlab.com/secondstarcavalier/*"
   CGO_ENABLED: "0"
