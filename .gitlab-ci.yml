@@ -79,7 +79,7 @@ build-arm64:
     - mkdir -p ~/.docker
     - '[ -n "$DOCKER_AUTH_CONFIG" ] && echo "$DOCKER_AUTH_CONFIG" > ~/.docker/config.json || true'
     - unset DOCKER_AUTH_CONFIG
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY_IMAGE"
   script:
     - |
       IMAGE="$CI_REGISTRY_IMAGE/letsencrypt-${MAJOR}-${MINOR}"
@@ -115,7 +115,7 @@ manifest:
     - mkdir -p ~/.docker
     - '[ -n "$DOCKER_AUTH_CONFIG" ] && echo "$DOCKER_AUTH_CONFIG" > ~/.docker/config.json || true'
     - unset DOCKER_AUTH_CONFIG
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY_IMAGE"
   script:
     - |
       IMAGE="$CI_REGISTRY_IMAGE/letsencrypt-${MAJOR}-${MINOR}"
