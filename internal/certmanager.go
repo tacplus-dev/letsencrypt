@@ -187,14 +187,16 @@ func fetchIntermediates(derChain [][]byte) [][]byte {
 			continue
 		}
 		for _, url := range parsed.IssuingCertificateURL {
-			resp, err := http.Get(url) //nolint:noctx
-			if err != nil {
-				zap.L().Warn("Failed to fetch intermediate cert", zap.String("url", url), zap.Error(err))
-				continue
-			}
-			body, err := io.ReadAll(resp.Body)
-			resp.Body.Close()
-			if err != nil {
+			body, fetchErr := func() ([]byte, error) {
+				resp, err := http.Get(url) //nolint:noctx
+				if err != nil {
+					return nil, err
+				}
+				defer resp.Body.Close()
+				return io.ReadAll(resp.Body)
+			}()
+			if fetchErr != nil {
+				zap.L().Warn("Failed to fetch intermediate cert", zap.String("url", url), zap.Error(fetchErr))
 				continue
 			}
 			// The AIA issuer URL returns DER-encoded cert.
