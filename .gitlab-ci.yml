@@ -9,11 +9,33 @@ compute-image:
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+-[a-zA-Z0-9_][a-zA-Z0-9_.-]*\.\d+$/
   script:
-    - V="${CI_COMMIT_TAG#v}"
-    - DOTPART="${V%%-*}"
-    - MAJOR="$(echo "$DOTPART" | cut -d. -f1)"
-    - MINOR="$(echo "$DOTPART" | cut -d. -f2)"
-    - echo "TACPLUS_IMAGE=${CI_REGISTRY}/secondstarcavalier/schematic/tacplus/tacplus-${MAJOR}-${MINOR}:latest" > tacplus.env
+    - apk add --no-cache curl jq
+    - |
+      # Read pinned tacplus version from tacplus.yaml (required).
+      # Format: "MAJOR.MINOR.PATCH" where PATCH is a number or "x" (resolve latest).
+      TACPLUS_VER=$(grep '^tacplus-version:' tacplus.yaml | awk '{print $2}' | tr -d '"')
+      if [ -z "$TACPLUS_VER" ]; then
+        echo "ERROR: tacplus-version not set in tacplus.yaml" >&2; exit 1
+      fi
+      MAJOR="$(echo "$TACPLUS_VER" | cut -d. -f1)"
+      MINOR="$(echo "$TACPLUS_VER" | cut -d. -f2)"
+      PATCH="$(echo "$TACPLUS_VER" | cut -d. -f3)"
+      REPO="secondstarcavalier/schematic/utils/tacplus/tacplus-${MAJOR}-${MINOR}"
+      if [ "$PATCH" = "x" ]; then
+        # Query registry for the highest numeric patch tag.
+        TOKEN=$(curl -sf "https://${CI_REGISTRY}/jwt/auth?service=container_registry&scope=repository:${REPO}:pull" \
+          -u "${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD}" | jq -r .token)
+        PATCH=$(curl -sf -H "Authorization: Bearer $TOKEN" \
+          "https://${CI_REGISTRY}/v2/${REPO}/tags/list" \
+          | jq -r '.tags[]' | grep -xE '[0-9]+' | sort -n | tail -1)
+        if [ -z "$PATCH" ]; then
+          echo "ERROR: no patch tags found for tacplus ${MAJOR}.${MINOR} in registry" >&2; exit 1
+        fi
+        echo "Resolved tacplus ${MAJOR}.${MINOR}.x -> ${MAJOR}.${MINOR}.${PATCH}"
+      fi
+      IMAGE="${CI_REGISTRY}/${REPO}:${PATCH}"
+      echo "TACPLUS_IMAGE=${IMAGE}" > tacplus.env
+      echo "Using tacplus image: ${IMAGE}"
   artifacts:
     reports:
       dotenv: tacplus.env
@@ -124,11 +146,27 @@ compute-validate-image:
   rules:
     - if: $PROTO_VALIDATE == "true"
   script:
-    - V="${PROTO_VERSION#v}"
-    - DOTPART="${V%%-*}"
-    - MAJOR="$(echo "$DOTPART" | cut -d. -f1)"
-    - MINOR="$(echo "$DOTPART" | cut -d. -f2)"
-    - echo "TACPLUS_IMAGE=${CI_REGISTRY}/secondstarcavalier/schematic/tacplus/tacplus-${MAJOR}-${MINOR}:latest" > tacplus.env
+    - apk add --no-cache curl jq
+    - |
+      TACPLUS_VER=$(grep '^tacplus-version:' tacplus.yaml | awk '{print $2}' | tr -d '"')
+      if [ -z "$TACPLUS_VER" ]; then
+        echo "ERROR: tacplus-version not set in tacplus.yaml" >&2; exit 1
+      fi
+      MAJOR="$(echo "$TACPLUS_VER" | cut -d. -f1)"
+      MINOR="$(echo "$TACPLUS_VER" | cut -d. -f2)"
+      PATCH="$(echo "$TACPLUS_VER" | cut -d. -f3)"
+      REPO="secondstarcavalier/schematic/utils/tacplus/tacplus-${MAJOR}-${MINOR}"
+      if [ "$PATCH" = "x" ]; then
+        TOKEN=$(curl -sf "https://${CI_REGISTRY}/jwt/auth?service=container_registry&scope=repository:${REPO}:pull" \
+          -u "${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD}" | jq -r .token)
+        PATCH=$(curl -sf -H "Authorization: Bearer $TOKEN" \
+          "https://${CI_REGISTRY}/v2/${REPO}/tags/list" \
+          | jq -r '.tags[]' | grep -xE '[0-9]+' | sort -n | tail -1)
+        if [ -z "$PATCH" ]; then
+          echo "ERROR: no patch tags found for tacplus ${MAJOR}.${MINOR} in registry" >&2; exit 1
+        fi
+      fi
+      echo "TACPLUS_IMAGE=${CI_REGISTRY}/${REPO}:${PATCH}" > tacplus.env
   artifacts:
     reports:
       dotenv: tacplus.env
