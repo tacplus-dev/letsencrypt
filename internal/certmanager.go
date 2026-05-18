@@ -14,7 +14,6 @@ import (
 	"github.com/caddyserver/certmagic"
 	key_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/tacplus/types/libs/key"
 	x509_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/tacplus/types/libs/x509"
-	kernel_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/tacplus/types/services/kernel"
 	letsencrypt_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/tacplus/types/services/letsencrypt"
 	"gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/tacplus/s2sm"
 	"go.uber.org/zap"
@@ -23,18 +22,18 @@ import (
 // CertManager handles Let's Encrypt certificate provisioning and renewal,
 // storing the resulting X509CertChain in kernel for gateway to consume.
 type CertManager struct {
-	cfg     *letsencrypt_pb.Config
-	sm      *sm.ServiceManager
-	fqdn    string
-	storage *Storage
+	cfg      *letsencrypt_pb.Config
+	sm       *sm.ServiceManager
+	hostnames []string
+	storage  *Storage
 }
 
-func NewCertManager(cfg *letsencrypt_pb.Config, s *sm.ServiceManager, fqdn string) (*CertManager, error) {
+func NewCertManager(cfg *letsencrypt_pb.Config, s *sm.ServiceManager, hostnames []string) (*CertManager, error) {
 	return &CertManager{
-		cfg:     cfg,
-		sm:      s,
-		fqdn:    fqdn,
-		storage: NewStorage(),
+		cfg:      cfg,
+		sm:       s,
+		hostnames: hostnames,
+		storage:  NewStorage(),
 	}, nil
 }
 
@@ -53,7 +52,7 @@ func (cm *CertManager) Run(ctx context.Context) error {
 
 	email := cm.cfg.LetsEncryptEmail
 	if email == "" {
-		email = "admin@" + cm.fqdn
+		email = "admin@" + cm.hostnames[0]
 	}
 	certmagic.DefaultACME.Email = email
 
@@ -65,9 +64,9 @@ func (cm *CertManager) Run(ctx context.Context) error {
 
 	magic := certmagic.NewDefault()
 
-	// Provision certificate.
-	zap.L().Info("Requesting certificate", zap.String("fqdn", cm.fqdn), zap.String("email", email))
-	if err := magic.ManageSync(ctx, []string{cm.fqdn}); err != nil {
+	// Provision certificate covering all configured hostnames as SANs.
+	zap.L().Info("Requesting certificate", zap.Strings("hostnames", cm.hostnames), zap.String("email", email))
+	if err := magic.ManageSync(ctx, cm.hostnames); err != nil {
 		return fmt.Errorf("certmagic ManageSync: %w", err)
 	}
 	zap.L().Info("Certificate provisioned successfully")
@@ -100,14 +99,16 @@ func (cm *CertManager) Run(ctx context.Context) error {
 // extractAndStore extracts the current certificate from CertMagic and writes
 // the X509CertChain + CertMagic state to kernel.
 func (cm *CertManager) extractAndStore(ctx context.Context, magic *certmagic.Config) error {
-	// Get the certificate from CertMagic.
-	cert, err := magic.CacheManagedCertificate(ctx, cm.fqdn)
+	// Get the certificate from CertMagic using the primary hostname.
+	// CertMagic provisions a single multi-SAN cert for all managed hostnames;
+	// fetching by the primary hostname returns the cert covering all of them.
+	cert, err := magic.CacheManagedCertificate(ctx, cm.hostnames[0])
 	if err != nil {
 		return fmt.Errorf("getting cached certificate: %w", err)
 	}
 
 	if len(cert.Certificate.Certificate) == 0 {
-		return fmt.Errorf("no certificate data for %s", cm.fqdn)
+		return fmt.Errorf("no certificate data for %s", cm.hostnames[0])
 	}
 
 	// Build X509CertChain proto from tls.Certificate.
@@ -119,33 +120,20 @@ func (cm *CertManager) extractAndStore(ctx context.Context, magic *certmagic.Con
 	// Build CertMagic state snapshot.
 	certmagicState := cm.storage.ToProto()
 
-	// Write to kernel.
+	// Write to kernel. Gateway subscribes RO to LetsEncryptState to obtain the cert.
 	certData := &letsencrypt_pb.LetsEncryptCertData{
-		TlsCert:         certPair,
-		CertmagicState:  certmagicState,
-		LastRenewed:     time.Now().Unix(),
-		Fqdn:            cm.fqdn,
+		TlsCert:        certPair,
+		CertmagicState: certmagicState,
+		LastRenewed:    time.Now().Unix(),
+		Hostnames:      cm.hostnames,
 	}
 
 	if _, err := cm.sm.StateClients().Services().LetsEncryptState().CertData().Set(ctx, certData); err != nil {
 		return fmt.Errorf("writing to kernel LetsEncryptState: %w", err)
 	}
 
-	// Also write into GatewayTlsState.AcmeCerts so the gateway's WatchAllCerts
-	// fires with the newly obtained certificate (AllCerts = ConfigCerts ∪ AcmeCerts).
-	gatewayTlsCert := &kernel_pb.GatewayTlsCert{
-		Domain:    cm.fqdn,
-		CertChain: certPair,
-	}
-	if _, err := cm.sm.StateClients().Services().GatewayTlsState().StateStub().PutAcmeCerts(ctx, &kernel_pb.AcmeCertsPutRequest{
-		Key:   cm.fqdn,
-		Value: gatewayTlsCert,
-	}); err != nil {
-		return fmt.Errorf("writing to kernel GatewayTlsState: %w", err)
-	}
-
 	zap.L().Info("Certificate stored in kernel",
-		zap.String("fqdn", cm.fqdn),
+		zap.Strings("hostnames", cm.hostnames),
 		zap.Time("expires", cert.Leaf.NotAfter))
 
 	return nil
@@ -164,7 +152,7 @@ func (cm *CertManager) restoreState(ctx context.Context) error {
 
 	cm.storage.FromProto(data.CertmagicState)
 	zap.L().Info("Restored CertMagic state from kernel",
-		zap.String("fqdn", data.Fqdn),
+		zap.Strings("hostnames", data.Hostnames),
 		zap.Time("last_renewed", time.Unix(data.LastRenewed, 0)))
 	return nil
 }
