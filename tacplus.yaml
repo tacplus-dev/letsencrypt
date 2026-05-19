@@ -1,4 +1,4 @@
-tacplus-version: "1.2.x"
+tacplus-version: "1.2.40"
 language: go
 pkg: com.gitlab.secondstarcavalier.controlplane.cavalier.services.letsencrypt
 output-dir: tacplus
