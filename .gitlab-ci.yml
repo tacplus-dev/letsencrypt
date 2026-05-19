@@ -22,21 +22,15 @@ compute-image:
       PATCH="$(echo "$TACPLUS_VER" | cut -d. -f3)"
       REPO="secondstarcavalier/schematic/tacplus/tacplus-${MAJOR}-${MINOR}"
       if [ "$PATCH" = "x" ]; then
-        # Use CAVALIER_CI_TOKEN (group access token) for registry JWT auth.
-        REPO="secondstarcavalier/schematic/tacplus/tacplus-${MAJOR}-${MINOR}"
-        echo "DEBUG: CAVALIER_CI_TOKEN set=$([ -n "${CAVALIER_CI_TOKEN:-}" ] && echo yes || echo NO)"
-        JWT_RESP=$(curl -s \
+        TOKEN=$(curl -s \
           "https://gitlab.com/jwt/auth?service=container_registry&scope=repository:${REPO}:pull" \
-          -u "oauth2:${CAVALIER_CI_TOKEN:-}")
-        echo "DEBUG: JWT response: $JWT_RESP"
-        TOKEN=$(echo "$JWT_RESP" | jq -r '.token // empty')
+          -u "${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD}" | jq -r '.token // empty')
         if [ -z "$TOKEN" ]; then
           echo "ERROR: failed to obtain registry JWT token for tacplus ${MAJOR}.${MINOR}" >&2; exit 1
         fi
-        TAGS_RESP=$(curl -s -H "Authorization: Bearer $TOKEN" \
-          "https://${CI_REGISTRY}/v2/${REPO}/tags/list")
-        echo "DEBUG: tags response: $TAGS_RESP"
-        PATCH=$(echo "$TAGS_RESP" | jq -r '.tags[]' | grep -xE '[0-9]+' | sort -n | tail -1)
+        PATCH=$(curl -sf -H "Authorization: Bearer $TOKEN" \
+          "https://${CI_REGISTRY}/v2/${REPO}/tags/list" \
+          | jq -r '.tags[]' | grep -xE '[0-9]+' | sort -n | tail -1)
         if [ -z "$PATCH" ]; then
           echo "ERROR: no patch tags found for tacplus ${MAJOR}.${MINOR} in registry" >&2; exit 1
         fi
