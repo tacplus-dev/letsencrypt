@@ -23,7 +23,7 @@ compute-image:
       REPO="secondstarcavalier/schematic/tacplus/tacplus-${MAJOR}-${MINOR}"
       if [ "$PATCH" = "x" ]; then
         # Query registry for the highest numeric patch tag.
-        TOKEN=$(curl -sf "https://${CI_REGISTRY}/jwt/auth?service=container_registry&scope=repository:${REPO}:pull" \
+        TOKEN=$(curl -sf "https://gitlab.com/jwt/auth?service=container_registry&scope=repository:${REPO}:pull" \
           -u "${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD}" | jq -r .token)
         PATCH=$(curl -sf -H "Authorization: Bearer $TOKEN" \
           "https://${CI_REGISTRY}/v2/${REPO}/tags/list" \
@@ -157,7 +157,7 @@ compute-validate-image:
       PATCH="$(echo "$TACPLUS_VER" | cut -d. -f3)"
       REPO="secondstarcavalier/schematic/tacplus/tacplus-${MAJOR}-${MINOR}"
       if [ "$PATCH" = "x" ]; then
-        TOKEN=$(curl -sf "https://${CI_REGISTRY}/jwt/auth?service=container_registry&scope=repository:${REPO}:pull" \
+        TOKEN=$(curl -sf "https://gitlab.com/jwt/auth?service=container_registry&scope=repository:${REPO}:pull" \
           -u "${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD}" | jq -r .token)
         PATCH=$(curl -sf -H "Authorization: Bearer $TOKEN" \
           "https://${CI_REGISTRY}/v2/${REPO}/tags/list" \
