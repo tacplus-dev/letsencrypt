@@ -22,17 +22,20 @@ compute-image:
       PATCH="$(echo "$TACPLUS_VER" | cut -d. -f3)"
       REPO="secondstarcavalier/schematic/tacplus/tacplus-${MAJOR}-${MINOR}"
       if [ "$PATCH" = "x" ]; then
-        TOKEN=$(curl -s \
-          "https://gitlab.com/jwt/auth?service=container_registry&scope=repository:${REPO}:pull" \
-          -u "${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD}" | jq -r '.token // empty')
-        if [ -z "$TOKEN" ]; then
-          echo "ERROR: failed to obtain registry JWT token for tacplus ${MAJOR}.${MINOR}" >&2; exit 1
+        # Resolve latest patch via GitLab API using CI_JOB_TOKEN (cross-project access).
+        TACPLUS_PROJECT="secondstarcavalier%2Fcontrolplane%2Fschematic%2Ftacplus"
+        REPOS_RESP=$(curl -s -H "JOB-TOKEN: $CI_JOB_TOKEN" \
+          "https://gitlab.com/api/v4/projects/${TACPLUS_PROJECT}/registry/repositories?per_page=20" || true)
+        REGISTRY_ID=$(echo "$REPOS_RESP" | jq -r --arg n "tacplus-${MAJOR}-${MINOR}" \
+          '.[] | select(.name == $n) | .id' 2>/dev/null || true)
+        if [ -z "$REGISTRY_ID" ]; then
+          echo "ERROR: could not find tacplus-${MAJOR}-${MINOR} registry repo. API: $REPOS_RESP" >&2; exit 1
         fi
-        PATCH=$(curl -sf -H "Authorization: Bearer $TOKEN" \
-          "https://${CI_REGISTRY}/v2/${REPO}/tags/list" \
-          | jq -r '.tags[]' | grep -xE '[0-9]+' | sort -n | tail -1)
+        PATCH=$(curl -s -H "JOB-TOKEN: $CI_JOB_TOKEN" \
+          "https://gitlab.com/api/v4/projects/${TACPLUS_PROJECT}/registry/repositories/${REGISTRY_ID}/tags?per_page=100" \
+          | jq -r '.[].name' | grep -xE '[0-9]+' | sort -n | tail -1 || true)
         if [ -z "$PATCH" ]; then
-          echo "ERROR: no patch tags found for tacplus ${MAJOR}.${MINOR} in registry" >&2; exit 1
+          echo "ERROR: no patch tags found for tacplus ${MAJOR}.${MINOR}" >&2; exit 1
         fi
         echo "Resolved tacplus ${MAJOR}.${MINOR}.x -> ${MAJOR}.${MINOR}.${PATCH}"
       fi
