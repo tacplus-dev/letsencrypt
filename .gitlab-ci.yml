@@ -24,7 +24,7 @@ compute-image:
       if [ "$PATCH" = "x" ]; then
         # Use CAVALIER_CI_TOKEN (group access token) for registry JWT auth.
         REPO="secondstarcavalier/schematic/tacplus/tacplus-${MAJOR}-${MINOR}"
-        TOKEN=$(curl -sf \
+        TOKEN=$(curl -s \
           "https://gitlab.com/jwt/auth?service=container_registry&scope=repository:${REPO}:pull" \
           -u "oauth2:${CAVALIER_CI_TOKEN}" | jq -r '.token // empty')
         if [ -z "$TOKEN" ]; then
@@ -163,7 +163,7 @@ compute-validate-image:
       REPO="secondstarcavalier/schematic/tacplus/tacplus-${MAJOR}-${MINOR}"
       if [ "$PATCH" = "x" ]; then
         REPO="secondstarcavalier/schematic/tacplus/tacplus-${MAJOR}-${MINOR}"
-        TOKEN=$(curl -sf \
+        TOKEN=$(curl -s \
           "https://gitlab.com/jwt/auth?service=container_registry&scope=repository:${REPO}:pull" \
           -u "oauth2:${CAVALIER_CI_TOKEN}" | jq -r '.token // empty')
         if [ -z "$TOKEN" ]; then
