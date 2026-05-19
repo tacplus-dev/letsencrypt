@@ -22,13 +22,13 @@ compute-image:
       PATCH="$(echo "$TACPLUS_VER" | cut -d. -f3)"
       REPO="secondstarcavalier/schematic/tacplus/tacplus-${MAJOR}-${MINOR}"
       if [ "$PATCH" = "x" ]; then
-        # Query GitLab API for the highest numeric container tag.
-        TACPLUS_PROJECT="secondstarcavalier%2Fcontrolplane%2Fschematic%2Ftacplus"
-        REPO_ID=$(curl -sf -H "PRIVATE-TOKEN: $CAVALIER_CI_TOKEN" \
-          "https://gitlab.com/api/v4/projects/${TACPLUS_PROJECT}/registry/repositories" \
+        # Use CI job token (allowlisted on schematic/tacplus) to query container registry via GitLab API.
+        TACPLUS_PROJECT_ID="81965435"
+        REPO_ID=$(curl -sf -H "JOB-TOKEN: $CI_JOB_TOKEN" \
+          "https://gitlab.com/api/v4/projects/${TACPLUS_PROJECT_ID}/registry/repositories" \
           | jq -r ".[] | select(.path | endswith(\"tacplus-${MAJOR}-${MINOR}\")) | .id")
-        PATCH=$(curl -sf -H "PRIVATE-TOKEN: $CAVALIER_CI_TOKEN" \
-          "https://gitlab.com/api/v4/projects/${TACPLUS_PROJECT}/registry/repositories/${REPO_ID}/tags?per_page=100" \
+        PATCH=$(curl -sf -H "JOB-TOKEN: $CI_JOB_TOKEN" \
+          "https://gitlab.com/api/v4/projects/${TACPLUS_PROJECT_ID}/registry/repositories/${REPO_ID}/tags?per_page=100" \
           | jq -r '.[].name' | grep -xE '[0-9]+' | sort -n | tail -1)
         if [ -z "$PATCH" ]; then
           echo "ERROR: no patch tags found for tacplus ${MAJOR}.${MINOR} in registry" >&2; exit 1
@@ -159,12 +159,12 @@ compute-validate-image:
       PATCH="$(echo "$TACPLUS_VER" | cut -d. -f3)"
       REPO="secondstarcavalier/schematic/tacplus/tacplus-${MAJOR}-${MINOR}"
       if [ "$PATCH" = "x" ]; then
-        TACPLUS_PROJECT="secondstarcavalier%2Fcontrolplane%2Fschematic%2Ftacplus"
-        REPO_ID=$(curl -sf -H "PRIVATE-TOKEN: $CAVALIER_CI_TOKEN" \
-          "https://gitlab.com/api/v4/projects/${TACPLUS_PROJECT}/registry/repositories" \
+        TACPLUS_PROJECT_ID="81965435"
+        REPO_ID=$(curl -sf -H "JOB-TOKEN: $CI_JOB_TOKEN" \
+          "https://gitlab.com/api/v4/projects/${TACPLUS_PROJECT_ID}/registry/repositories" \
           | jq -r ".[] | select(.path | endswith(\"tacplus-${MAJOR}-${MINOR}\")) | .id")
-        PATCH=$(curl -sf -H "PRIVATE-TOKEN: $CAVALIER_CI_TOKEN" \
-          "https://gitlab.com/api/v4/projects/${TACPLUS_PROJECT}/registry/repositories/${REPO_ID}/tags?per_page=100" \
+        PATCH=$(curl -sf -H "JOB-TOKEN: $CI_JOB_TOKEN" \
+          "https://gitlab.com/api/v4/projects/${TACPLUS_PROJECT_ID}/registry/repositories/${REPO_ID}/tags?per_page=100" \
           | jq -r '.[].name' | grep -xE '[0-9]+' | sort -n | tail -1)
         if [ -z "$PATCH" ]; then
           echo "ERROR: no patch tags found for tacplus ${MAJOR}.${MINOR} in registry" >&2; exit 1
