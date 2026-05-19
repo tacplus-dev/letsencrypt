@@ -9,37 +9,15 @@ compute-image:
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+-[a-zA-Z0-9_][a-zA-Z0-9_.-]*\.\d+$/
   script:
-    - apk add --no-cache curl jq
     - |
-      # Read pinned tacplus version from tacplus.yaml (required).
-      # Format: "MAJOR.MINOR.PATCH" where PATCH is a number or "x" (resolve latest).
       TACPLUS_VER=$(grep '^tacplus-version:' tacplus.yaml | awk '{print $2}' | tr -d '"')
       if [ -z "$TACPLUS_VER" ]; then
         echo "ERROR: tacplus-version not set in tacplus.yaml" >&2; exit 1
       fi
       MAJOR="$(echo "$TACPLUS_VER" | cut -d. -f1)"
       MINOR="$(echo "$TACPLUS_VER" | cut -d. -f2)"
-      PATCH="$(echo "$TACPLUS_VER" | cut -d. -f3)"
       REPO="secondstarcavalier/schematic/tacplus/tacplus-${MAJOR}-${MINOR}"
-      if [ "$PATCH" = "x" ]; then
-        # Resolve latest patch via GitLab API using CI_JOB_TOKEN (cross-project access).
-        TACPLUS_PROJECT="secondstarcavalier%2Fcontrolplane%2Fschematic%2Ftacplus"
-        REPOS_RESP=$(curl -s -H "JOB-TOKEN: $CI_JOB_TOKEN" \
-          "https://gitlab.com/api/v4/projects/${TACPLUS_PROJECT}/registry/repositories?per_page=20" || true)
-        REGISTRY_ID=$(echo "$REPOS_RESP" | jq -r --arg n "tacplus-${MAJOR}-${MINOR}" \
-          '.[] | select(.name == $n) | .id' 2>/dev/null || true)
-        if [ -z "$REGISTRY_ID" ]; then
-          echo "ERROR: could not find tacplus-${MAJOR}-${MINOR} registry repo. API: $REPOS_RESP" >&2; exit 1
-        fi
-        PATCH=$(curl -s -H "JOB-TOKEN: $CI_JOB_TOKEN" \
-          "https://gitlab.com/api/v4/projects/${TACPLUS_PROJECT}/registry/repositories/${REGISTRY_ID}/tags?per_page=100" \
-          | jq -r '.[].name' | grep -xE '[0-9]+' | sort -n | tail -1 || true)
-        if [ -z "$PATCH" ]; then
-          echo "ERROR: no patch tags found for tacplus ${MAJOR}.${MINOR}" >&2; exit 1
-        fi
-        echo "Resolved tacplus ${MAJOR}.${MINOR}.x -> ${MAJOR}.${MINOR}.${PATCH}"
-      fi
-      IMAGE="${CI_REGISTRY}/${REPO}:${PATCH}"
+      IMAGE="${CI_REGISTRY}/${REPO}:latest"
       echo "TACPLUS_IMAGE=${IMAGE}" > tacplus.env
       echo "Using tacplus image: ${IMAGE}"
   artifacts:
@@ -152,7 +130,6 @@ compute-validate-image:
   rules:
     - if: $PROTO_VALIDATE == "true"
   script:
-    - apk add --no-cache curl jq
     - |
       TACPLUS_VER=$(grep '^tacplus-version:' tacplus.yaml | awk '{print $2}' | tr -d '"')
       if [ -z "$TACPLUS_VER" ]; then
@@ -160,29 +137,9 @@ compute-validate-image:
       fi
       MAJOR="$(echo "$TACPLUS_VER" | cut -d. -f1)"
       MINOR="$(echo "$TACPLUS_VER" | cut -d. -f2)"
-      PATCH="$(echo "$TACPLUS_VER" | cut -d. -f3)"
       REPO="secondstarcavalier/schematic/tacplus/tacplus-${MAJOR}-${MINOR}"
-      if [ "$PATCH" = "x" ]; then
-        # Use CAVALIER_CI_TOKEN (group access token) for registry JWT auth.
-        REPO="secondstarcavalier/schematic/tacplus/tacplus-${MAJOR}-${MINOR}"
-        echo "DEBUG: CAVALIER_CI_TOKEN set=$([ -n "${CAVALIER_CI_TOKEN:-}" ] && echo yes || echo NO)"
-        JWT_RESP=$(curl -s \
-          "https://gitlab.com/jwt/auth?service=container_registry&scope=repository:${REPO}:pull" \
-          -u "oauth2:${CAVALIER_CI_TOKEN:-}")
-        echo "DEBUG: JWT response: $JWT_RESP"
-        TOKEN=$(echo "$JWT_RESP" | jq -r '.token // empty')
-        if [ -z "$TOKEN" ]; then
-          echo "ERROR: failed to obtain registry JWT token for tacplus ${MAJOR}.${MINOR}" >&2; exit 1
-        fi
-        TAGS_RESP=$(curl -s -H "Authorization: Bearer $TOKEN" \
-          "https://${CI_REGISTRY}/v2/${REPO}/tags/list")
-        echo "DEBUG: tags response: $TAGS_RESP"
-        PATCH=$(echo "$TAGS_RESP" | jq -r '.tags[]' | grep -xE '[0-9]+' | sort -n | tail -1)
-        if [ -z "$PATCH" ]; then
-          echo "ERROR: no patch tags found for tacplus ${MAJOR}.${MINOR} in registry" >&2; exit 1
-        fi
-        fi
-      echo "TACPLUS_IMAGE=${CI_REGISTRY}/${REPO}:${PATCH}" > tacplus.env
+      echo "TACPLUS_IMAGE=${CI_REGISTRY}/${REPO}:latest" > tacplus.env
+      echo "Using tacplus image: ${CI_REGISTRY}/${REPO}:latest" 
   artifacts:
     reports:
       dotenv: tacplus.env
