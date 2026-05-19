@@ -20,7 +20,7 @@ compute-image:
       MAJOR="$(echo "$TACPLUS_VER" | cut -d. -f1)"
       MINOR="$(echo "$TACPLUS_VER" | cut -d. -f2)"
       PATCH="$(echo "$TACPLUS_VER" | cut -d. -f3)"
-      REPO="secondstarcavalier/schematic/utils/tacplus/tacplus-${MAJOR}-${MINOR}"
+      REPO="secondstarcavalier/schematic/tacplus/tacplus-${MAJOR}-${MINOR}"
       if [ "$PATCH" = "x" ]; then
         # Query registry for the highest numeric patch tag.
         TOKEN=$(curl -sf "https://${CI_REGISTRY}/jwt/auth?service=container_registry&scope=repository:${REPO}:pull" \
@@ -155,7 +155,7 @@ compute-validate-image:
       MAJOR="$(echo "$TACPLUS_VER" | cut -d. -f1)"
       MINOR="$(echo "$TACPLUS_VER" | cut -d. -f2)"
       PATCH="$(echo "$TACPLUS_VER" | cut -d. -f3)"
-      REPO="secondstarcavalier/schematic/utils/tacplus/tacplus-${MAJOR}-${MINOR}"
+      REPO="secondstarcavalier/schematic/tacplus/tacplus-${MAJOR}-${MINOR}"
       if [ "$PATCH" = "x" ]; then
         TOKEN=$(curl -sf "https://${CI_REGISTRY}/jwt/auth?service=container_registry&scope=repository:${REPO}:pull" \
           -u "${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD}" | jq -r .token)
