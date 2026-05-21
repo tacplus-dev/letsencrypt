@@ -2,8 +2,3 @@ tacplus-version: "1.2.x"
 language: go
 pkg: com.gitlab.secondstarcavalier.controlplane.cavalier.services.letsencrypt
 output-dir: tacplus
-post-gen:
-  - cmd: sh
-    args: [-c, "CGO_ENABLED=0 go build -trimpath -ldflags=\"-s -w\" -o bin/letsencrypt ."]
-container:
-  image: registry.gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/letsencrypt
