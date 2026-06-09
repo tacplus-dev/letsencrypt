@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/caddyserver/certmagic"
-	letsencrypt_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/tacplus/types/services/letsencrypt"
+	letsencrypt_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/types/services/letsencrypt"
 )
 
 // Storage implements certmagic.Storage backed by an in-memory tree.
