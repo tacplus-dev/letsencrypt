@@ -2,9 +2,11 @@ package internal
 
 import (
 	"context"
+	"crypto/sha256"
 	crtls "crypto/tls"
 	"crypto/x509"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/pem"
 	"fmt"
 	"io"
@@ -12,28 +14,28 @@ import (
 	"time"
 
 	"github.com/caddyserver/certmagic"
+	"gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/s2sm"
 	key_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/types/libs/key"
 	x509_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/types/libs/x509"
 	letsencrypt_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/types/services/letsencrypt"
-	"gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/s2sm"
 	"go.uber.org/zap"
 )
 
 // CertManager handles Let's Encrypt certificate provisioning and renewal,
 // storing the resulting X509CertChain in kernel for gateway to consume.
 type CertManager struct {
-	cfg      *letsencrypt_pb.Config
-	sm       *sm.ServiceManager
+	cfg       *letsencrypt_pb.Config
+	sm        *sm.ServiceManager
 	hostnames []string
-	storage  *Storage
+	storage   *Storage
 }
 
 func NewCertManager(cfg *letsencrypt_pb.Config, s *sm.ServiceManager, hostnames []string) (*CertManager, error) {
 	return &CertManager{
-		cfg:      cfg,
-		sm:       s,
+		cfg:       cfg,
+		sm:        s,
 		hostnames: hostnames,
-		storage:  NewStorage(),
+		storage:   NewStorage(),
 	}, nil
 }
 
@@ -209,6 +211,18 @@ func tlsCertToProto(cert *crtls.Certificate) (*x509_pb.X509CertChain, error) {
 	// Ensure the chain includes all intermediate CAs (fetch from AIA if missing).
 	derChain := fetchIntermediates(cert.Certificate)
 
+	// Encode the private key as PKCS8.
+	keyBytes, err := x509.MarshalPKCS8PrivateKey(cert.PrivateKey)
+	if err != nil {
+		return nil, fmt.Errorf("marshaling private key: %w", err)
+	}
+	keyPEM := pem.EncodeToMemory(&pem.Block{Type: "PRIVATE KEY", Bytes: keyBytes})
+	keyID := stableID("le-key", keyBytes)
+	created := time.Now().Unix()
+	if leaf, err := x509.ParseCertificate(cert.Certificate[0]); err == nil {
+		created = leaf.NotBefore.Unix()
+	}
+
 	// Build the certificate chain (leaf + intermediates).
 	chain := make([]*x509_pb.X509Cert, len(derChain))
 	for i, derBytes := range derChain {
@@ -216,22 +230,28 @@ func tlsCertToProto(cert *crtls.Certificate) (*x509_pb.X509CertChain, error) {
 			Type:  "CERTIFICATE",
 			Bytes: derBytes,
 		})
+		certID := stableID("le-cert", derBytes)
+		if i == 0 {
+			certID = keyID
+		}
 		chain[i] = &x509_pb.X509Cert{
+			Id:     certID,
 			Base64: base64.RawURLEncoding.EncodeToString(certPEM),
 		}
 	}
 
-	// Encode the private key as PKCS8.
-	keyBytes, err := x509.MarshalPKCS8PrivateKey(cert.PrivateKey)
-	if err != nil {
-		return nil, fmt.Errorf("marshaling private key: %w", err)
-	}
-	keyPEM := pem.EncodeToMemory(&pem.Block{Type: "PRIVATE KEY", Bytes: keyBytes})
-
 	return &x509_pb.X509CertChain{
+		Id:    stableID("le-chain", derChain[0]),
 		Chain: chain,
 		Key: &key_pb.Key{
-			Base64: base64.RawURLEncoding.EncodeToString(keyPEM),
+			Id:      keyID,
+			Base64:  base64.RawURLEncoding.EncodeToString(keyPEM),
+			Created: created,
 		},
 	}, nil
+}
+
+func stableID(prefix string, data []byte) string {
+	sum := sha256.Sum256(data)
+	return prefix + "-" + hex.EncodeToString(sum[:16])
 }
