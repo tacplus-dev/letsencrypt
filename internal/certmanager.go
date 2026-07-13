@@ -15,8 +15,8 @@ import (
 
 	"github.com/caddyserver/certmagic"
 	"gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/s2sm"
-	key_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/types/libs/key"
-	x509_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/types/libs/x509"
+	key_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/types/sys/key"
+	x509_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/types/sys/x509"
 	letsencrypt_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/types/services/letsencrypt"
 	"go.uber.org/zap"
 )
