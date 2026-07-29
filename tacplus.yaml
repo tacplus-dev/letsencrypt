@@ -1,4 +1,4 @@
-tacplus-version: "1.2.x"
 language: go
 pkg: com.gitlab.secondstarcavalier.schematic.platform.services.letsencrypt
 output-dir: model
+src: https://gitlab.com/secondstarcavalier/schematic/platform/proto-base.git
