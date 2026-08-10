@@ -13,7 +13,7 @@ LABEL org.opencontainers.image.created="${BUILD_DATE}" \
       org.opencontainers.image.revision="${VCS_REF}" \
       org.opencontainers.image.vendor="Second Star Cavalier LLC" \
       org.opencontainers.image.title="LetsEncrypt" \
-      org.opencontainers.image.description="ACME certificate management service for Cavalier control plane"
+      org.opencontainers.image.description="ACME certificate management service for Schematic control plane"
 
 COPY bin/letsencrypt /usr/local/bin/letsencrypt
 
