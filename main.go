@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	letsencrypt "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/internal"
+	loggerchassis "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/chassis/logger"
 	"gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/s2sm"
 	letsencrypt_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/types/services/letsencrypt"
 	"go.uber.org/zap"
@@ -21,8 +22,15 @@ func main() {
 }
 
 func run() error {
-	// Initialize the global zap logger so zap.L() calls in certmanager.go produce output.
-	logger, err := zap.NewProduction()
+	// Initialize the global logger so zap.L() calls in certmanager.go produce output.
+	//
+	// Through the chassis, not straight from zap: the chassis wraps the sink in a
+	// redactor, so a credential cannot reach the log through a structured FIELD.
+	// This service holds the ACME account key and issues certificates, so its
+	// error paths carry exactly the material that must never be logged. Same
+	// bypass kmaker had, found by the same sweep — both are hand-written rather
+	// than generated, which is how they missed the fleet-wide move to the chassis.
+	logger, err := loggerchassis.InstallFromConfig(nil)
 	if err != nil {
 		return fmt.Errorf("init logger: %w", err)
 	}
