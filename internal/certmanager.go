@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/caddyserver/certmagic"
@@ -21,6 +22,14 @@ import (
 	"go.uber.org/zap"
 )
 
+// certDataStore is the part of the tacplus-generated LetsEncryptState CertData
+// wrapper this package uses. The generated *CertDataWrapper satisfies it as-is;
+// the interface exists only so tests can substitute a fake kernel.
+type certDataStore interface {
+	Fetch(ctx context.Context) (*letsencrypt_pb.LetsEncryptCertData, error)
+	Set(ctx context.Context, v *letsencrypt_pb.LetsEncryptCertData) (*letsencrypt_pb.LetsEncryptCertData, error)
+}
+
 // CertManager handles Let's Encrypt certificate provisioning and renewal,
 // storing the resulting X509CertChain in kernel for gateway to consume.
 type CertManager struct {
@@ -28,6 +37,12 @@ type CertManager struct {
 	sm        *sm.ServiceManager
 	hostnames []string
 	storage   *Storage
+	certData  certDataStore
+
+	// mu guards lastCertData, which the account-store hook reads from a
+	// certmagic goroutine while Run writes it.
+	mu           sync.Mutex
+	lastCertData *letsencrypt_pb.LetsEncryptCertData
 }
 
 func NewCertManager(cfg *letsencrypt_pb.Config, s *sm.ServiceManager, hostnames []string) (*CertManager, error) {
@@ -36,6 +51,7 @@ func NewCertManager(cfg *letsencrypt_pb.Config, s *sm.ServiceManager, hostnames 
 		sm:        s,
 		hostnames: hostnames,
 		storage:   NewStorage(),
+		certData:  s.StateClients().Services().LetsEncryptState().CertData(),
 	}, nil
 }
 
@@ -51,6 +67,11 @@ func (cm *CertManager) Run(ctx context.Context) error {
 	certmagic.DefaultACME.Agreed = true
 	certmagic.DefaultACME.CA = certmagic.LetsEncryptProductionCA
 	certmagic.Default.Storage = cm.storage
+	// Push the ACME account to kernel the moment certmagic registers it. Waiting
+	// for ManageSync to finish means a crash during issuance loses the account,
+	// and the next boot registers another one — Let's Encrypt allows only 10 new
+	// registrations per 3 hours per IP, which a crash-loop exhausts.
+	cm.storage.SetAccountStoreHook(cm.persistAccount)
 	// Port 443 belongs to the gateway, not this pod, so TLS-ALPN-01 (which
 	// must answer the challenge over TLS on 443) can never succeed here —
 	// HTTP-01 is the only challenge type that fits this deployment.
@@ -134,9 +155,10 @@ func (cm *CertManager) extractAndStore(ctx context.Context, magic *certmagic.Con
 		Hostnames:      cm.hostnames,
 	}
 
-	if _, err := cm.sm.StateClients().Services().LetsEncryptState().CertData().Set(ctx, certData); err != nil {
+	if _, err := cm.certData.Set(ctx, certData); err != nil {
 		return fmt.Errorf("writing to kernel LetsEncryptState: %w", err)
 	}
+	cm.setLastCertData(certData)
 
 	zap.L().Info("Certificate stored in kernel",
 		zap.Strings("hostnames", cm.hostnames),
@@ -148,7 +170,7 @@ func (cm *CertManager) extractAndStore(ctx context.Context, magic *certmagic.Con
 // restoreState loads CertMagic state from kernel and restores it into the
 // in-memory storage, so CertMagic doesn't re-provision on restart.
 func (cm *CertManager) restoreState(ctx context.Context) error {
-	data, err := cm.sm.StateClients().Services().LetsEncryptState().CertData().Fetch(ctx)
+	data, err := cm.certData.Fetch(ctx)
 	if err != nil {
 		return err
 	}
@@ -156,10 +178,56 @@ func (cm *CertManager) restoreState(ctx context.Context) error {
 		return nil
 	}
 
+	cm.setLastCertData(data)
 	cm.storage.FromProto(data.CertmagicState)
 	zap.L().Info("Restored CertMagic state from kernel",
 		zap.Strings("hostnames", data.Hostnames),
 		zap.Time("last_renewed", time.Unix(data.LastRenewed, 0)))
+	return nil
+}
+
+func (cm *CertManager) setLastCertData(data *letsencrypt_pb.LetsEncryptCertData) {
+	cm.mu.Lock()
+	defer cm.mu.Unlock()
+	cm.lastCertData = data
+}
+
+// persistAccount is the Storage account-store hook: it flushes the CertMagic
+// tree to kernel as soon as a complete ACME account lands in it, so a crash
+// before issuance finishes does not throw the account away. Called from a
+// certmagic goroutine; a failure here must not fail the storage write, because
+// issuance can still succeed and extractAndStore will persist the account then.
+func (cm *CertManager) persistAccount(ctx context.Context, key string) {
+	if err := cm.flushCertMagicState(ctx); err != nil {
+		zap.L().Warn("Failed to persist ACME account to kernel; a crash before issuance completes will lose it",
+			zap.String("storage_key", key), zap.Error(err))
+		return
+	}
+	zap.L().Info("ACME account persisted to kernel", zap.String("storage_key", key))
+}
+
+// flushCertMagicState writes the current CertMagic tree to kernel, carrying over
+// the certificate fields from the CertData already there. Set replaces the whole
+// message and the gateway serves TlsCert out of it, so a flush that dropped
+// those fields would take the live certificate away from the gateway.
+func (cm *CertManager) flushCertMagicState(ctx context.Context) error {
+	certData := &letsencrypt_pb.LetsEncryptCertData{
+		CertmagicState: cm.storage.ToProto(),
+		Hostnames:      cm.hostnames,
+	}
+
+	cm.mu.Lock()
+	last := cm.lastCertData
+	cm.mu.Unlock()
+	if last != nil {
+		certData.TlsCert = last.TlsCert
+		certData.LastRenewed = last.LastRenewed
+	}
+
+	if _, err := cm.certData.Set(ctx, certData); err != nil {
+		return fmt.Errorf("writing to kernel LetsEncryptState: %w", err)
+	}
+	cm.setLastCertData(certData)
 	return nil
 }
 

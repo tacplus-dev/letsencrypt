@@ -18,6 +18,11 @@ import (
 type Storage struct {
 	mu   sync.Mutex
 	root *letsencrypt_pb.CertMagicState
+
+	// onAccountStore, when set, is invoked right after a Store call leaves a
+	// complete ACME account (registration + private key) in the tree. It runs
+	// with the mutex released so the callback may call ToProto.
+	onAccountStore func(ctx context.Context, key string)
 }
 
 func NewStorage() *Storage {
@@ -27,6 +32,18 @@ func NewStorage() *Storage {
 			Children: make(map[string]*letsencrypt_pb.CertMagicState),
 		},
 	}
+}
+
+// SetAccountStoreHook registers fn to run whenever certmagic finishes writing
+// an ACME account into this tree. Certificate issuance can take minutes and can
+// crash partway; the account registered just before that crash is only durable
+// if it is pushed out of this in-memory tree at once, so the hook exists to do
+// that without waiting for issuance to complete. Must be called before the
+// storage is handed to certmagic.
+func (s *Storage) SetAccountStoreHook(fn func(ctx context.Context, key string)) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.onAccountStore = fn
 }
 
 // ToProto returns a deep copy of the storage tree for persistence.
@@ -45,18 +62,36 @@ func (s *Storage) FromProto(state *letsencrypt_pb.CertMagicState) {
 	}
 }
 
-func (s *Storage) Store(_ context.Context, key string, value []byte) error {
+func (s *Storage) Store(ctx context.Context, key string, value []byte) error {
+	hook, err := s.store(key, value)
+	if err != nil {
+		return err
+	}
+	if hook != nil {
+		hook(ctx, key)
+	}
+	return nil
+}
+
+// store writes the value and reports the account hook to run, if this write
+// completed an ACME account. The hook is returned rather than called so it runs
+// after the mutex is released.
+func (s *Storage) store(key string, value []byte) (func(context.Context, string), error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.ensurePath(key)
 	node := s.getNode(key)
 	if node == nil {
-		return fmt.Errorf("failed to store key: %s", key)
+		return nil, fmt.Errorf("failed to store key: %s", key)
 	}
 	node.Value = value
 	node.ModTime = time.Now().Unix()
 	node.IsDir = false
-	return nil
+
+	if s.onAccountStore != nil && isACMEAccountKey(key) && s.accountCompleteLocked(key) {
+		return s.onAccountStore, nil
+	}
+	return nil, nil
 }
 
 func (s *Storage) Load(_ context.Context, key string) ([]byte, error) {
@@ -119,6 +154,49 @@ func (s *Storage) Stat(_ context.Context, key string) (certmagic.KeyInfo, error)
 // Lock and Unlock are no-ops — letsencrypt runs as a single instance.
 func (s *Storage) Lock(_ context.Context, _ string) error   { return nil }
 func (s *Storage) Unlock(_ context.Context, _ string) error { return nil }
+
+// isACMEAccountKey reports whether key is one of the two files certmagic writes
+// for an ACME account. ACMEIssuer.saveAccount stores them as
+//
+//	acme/<ca>/users/<email>/<username>.json   (registration)
+//	acme/<ca>/users/<email>/<username>.key    (account private key)
+//
+// The basename is derived from the email address, not fixed, so the extension is
+// what identifies each file. Everything else certmagic writes lives under
+// acme/<ca>/challenge_tokens or certificates/, and must not trigger a flush.
+func isACMEAccountKey(key string) bool {
+	parts := strings.Split(strings.TrimPrefix(key, "/"), "/")
+	if len(parts) != 5 || parts[0] != prefixACME || parts[2] != acmeUsersDir {
+		return false
+	}
+	ext := path.Ext(parts[4])
+	return ext == acmeAccountRegExt || ext == acmeAccountKeyExt
+}
+
+// accountCompleteLocked reports whether the account directory holding key now
+// contains both the registration and the private key. saveAccount writes them
+// one at a time, and an account missing either file is useless on restore
+// (certmagic's loadAccount treats it as absent and registers a new account), so
+// a flush of only the first half would persist nothing of value.
+func (s *Storage) accountCompleteLocked(key string) bool {
+	dir := s.getNode(path.Dir(strings.TrimPrefix(key, "/")))
+	if dir == nil || !dir.IsDir {
+		return false
+	}
+	var haveReg, haveKey bool
+	for name, child := range dir.Children {
+		if child == nil || child.IsDir || len(child.Value) == 0 {
+			continue
+		}
+		switch path.Ext(name) {
+		case acmeAccountRegExt:
+			haveReg = true
+		case acmeAccountKeyExt:
+			haveKey = true
+		}
+	}
+	return haveReg && haveKey
+}
 
 // getNode traverses the tree to find the node at the given path.
 func (s *Storage) getNode(key string) *letsencrypt_pb.CertMagicState {
@@ -210,5 +288,14 @@ func cloneTree(src *letsencrypt_pb.CertMagicState) *letsencrypt_pb.CertMagicStat
 	}
 	return dst
 }
+
+// Storage key components certmagic uses for ACME account data. These mirror
+// certmagic's own unexported prefixACME and storageKeyUsersPrefix.
+const (
+	prefixACME        = "acme"
+	acmeUsersDir      = "users"
+	acmeAccountRegExt = ".json"
+	acmeAccountKeyExt = ".key"
+)
 
 var _ certmagic.Storage = (*Storage)(nil)
