@@ -51,6 +51,10 @@ func (cm *CertManager) Run(ctx context.Context) error {
 	certmagic.DefaultACME.Agreed = true
 	certmagic.DefaultACME.CA = certmagic.LetsEncryptProductionCA
 	certmagic.Default.Storage = cm.storage
+	// Port 443 belongs to the gateway, not this pod, so TLS-ALPN-01 (which
+	// must answer the challenge over TLS on 443) can never succeed here —
+	// HTTP-01 is the only challenge type that fits this deployment.
+	certmagic.DefaultACME.DisableTLSALPNChallenge = true
 
 	email := cm.cfg.LetsEncryptEmail
 	if email == "" {
