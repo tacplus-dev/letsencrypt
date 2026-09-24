@@ -53,12 +53,19 @@ func (s *Storage) ToProto() *letsencrypt_pb.CertMagicState {
 	return cloneTree(s.root)
 }
 
-// FromProto restores the storage tree from a proto snapshot.
+// FromProto restores the storage tree from a proto snapshot. The root is forced
+// back to a directory: on first-ever enablement kernel returns the generated
+// default, an empty but non-nil CertMagicState with IsDir false, and a
+// non-directory root makes getNode fail for every key.
 func (s *Storage) FromProto(state *letsencrypt_pb.CertMagicState) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if state != nil {
 		s.root = cloneTree(state)
+		s.root.IsDir = true
+		if s.root.Children == nil {
+			s.root.Children = make(map[string]*letsencrypt_pb.CertMagicState)
+		}
 	}
 }
 
