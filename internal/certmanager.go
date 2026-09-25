@@ -92,18 +92,35 @@ func (cm *CertManager) Run(ctx context.Context) error {
 	magic := certmagic.NewDefault()
 
 	// Provision certificate covering all configured hostnames as SANs.
+	//
+	// ManageAsync, not ManageSync: ManageSync returns the first ACME error, and
+	// that error used to propagate out of Run into main's log.Fatalf. The process
+	// exited, k8s restarted the pod, and the fresh process issued a brand new ACME
+	// order — so every restart burned one of Let's Encrypt's 5 failed
+	// authorizations per hour per identifier and threw away certmagic's backoff.
+	// ManageAsync hands the obtain to certmagic's own retry machinery (exponential
+	// backoff, up to about 30 days; see async.go retryIntervals) and returns before
+	// the certificate exists, which makes a failed attempt a logged condition
+	// rather than a fatal one. Only ctx cancellation ends Run from here on.
 	zap.L().Info("Requesting certificate", zap.Strings("hostnames", cm.hostnames), zap.String("email", email))
-	if err := magic.ManageSync(ctx, cm.hostnames); err != nil {
-		return fmt.Errorf("certmagic ManageSync: %w", err)
+	if err := magic.ManageAsync(ctx, cm.hostnames); err != nil {
+		// ManageAsync only returns errors raised before any ACME transaction
+		// started — a misconfiguration or unreadable storage, not a failed obtain.
+		// Nothing is queued to retry in that case, so it stays fatal: it costs no
+		// rate-limit budget and needs an operator, not a backoff.
+		return fmt.Errorf("certmagic ManageAsync: %w", err)
 	}
-	zap.L().Info("Certificate provisioned successfully")
 
-	// Extract and store the certificate.
+	// The certificate is not ready yet — ManageAsync returns while the obtain is
+	// still running in the background — so this first extract is expected to fail
+	// on a cold start. Log it and fall through to the renewal check loop, which
+	// retries the extract every interval and picks the certificate up whenever
+	// certmagic lands it.
 	if err := cm.extractAndStore(ctx, magic); err != nil {
-		return fmt.Errorf("storing certificate: %w", err)
+		zap.L().Info("Certificate not available yet; waiting for certmagic to obtain it", zap.Error(err))
 	}
 
-	// Renewal loop — CertMagic handles renewal internally via ManageSync,
+	// Renewal loop — CertMagic obtains and renews in the background,
 	// but we need to periodically re-extract and push to kernel.
 	interval := time.Duration(cm.cfg.RenewalCheckIntervalSeconds) * time.Second
 	ticker := time.NewTicker(interval)
