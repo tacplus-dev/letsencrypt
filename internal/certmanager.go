@@ -89,7 +89,47 @@ func (cm *CertManager) Run(ctx context.Context) error {
 	// participate in HTTP-01 validation.
 	certmagic.DefaultACME.AltHTTPPort = int(cm.cfg.HttpListener.Port)
 
+	// certmagic emits cert_obtained the moment an obtain or a renewal lands in its
+	// storage, and cached_managed_cert whenever a managed certificate is loaded
+	// into its in-memory cache (which is also how the restore-from-kernel path on
+	// boot surfaces a certificate that was already obtained). Those events are the
+	// only in-process signal that a certificate now exists: ManageAsync returns
+	// before the obtain runs, so without them the first extract after a cold-start
+	// obtain is the renewal ticker's, up to RenewalCheckIntervalSeconds later. That
+	// is an hour of the gateway serving the fallback cluster-CA cert, and an hour in
+	// which a pod restart throws the obtained certificate away and has to open
+	// another ACME order — 5 duplicate certificates per week per identifier is all
+	// Let's Encrypt allows.
+	//
+	// The hook only signals; the loop below does the extract. It must not extract
+	// inline for two reasons:
+	//   - certmagic calls OnEvent synchronously from inside the obtain path (see
+	//     its doc comment on Config.OnEvent), and an extract is a gRPC round trip
+	//     to kernel, which would stall issuance for as long as it is in flight.
+	//   - extractAndStore calls CacheManagedCertificate, which itself emits
+	//     cached_managed_cert on the calling goroutine, so a hook that extracted
+	//     directly would recurse without bound.
+	//
+	// Set on certmagic.Default rather than on magic: the default certificate cache
+	// builds a fresh NewDefault() config to renew with (see NewDefault's
+	// GetConfigForCert), so a hook set only on magic would never see a renewal's
+	// cert_obtained.
+	certChanged := make(chan struct{}, 1)
+	certmagic.Default.OnEvent = certMagicEventHook(certChanged)
+
 	magic := certmagic.NewDefault()
+
+	// extract wraps extractAndStore to drop the cached_managed_cert signal that its
+	// own CacheManagedCertificate call leaves in certChanged. Without that, every
+	// extract would schedule the next one and the loop would spin.
+	extract := func() error {
+		err := cm.extractAndStore(ctx, magic)
+		select {
+		case <-certChanged:
+		default:
+		}
+		return err
+	}
 
 	// Provision certificate covering all configured hostnames as SANs.
 	//
@@ -113,10 +153,9 @@ func (cm *CertManager) Run(ctx context.Context) error {
 
 	// The certificate is not ready yet — ManageAsync returns while the obtain is
 	// still running in the background — so this first extract is expected to fail
-	// on a cold start. Log it and fall through to the renewal check loop, which
-	// retries the extract every interval and picks the certificate up whenever
-	// certmagic lands it.
-	if err := cm.extractAndStore(ctx, magic); err != nil {
+	// on a cold start. Log it and fall through to the loop below, which extracts as
+	// soon as certmagic reports a certificate and again on every renewal check.
+	if err := extract(); err != nil {
 		zap.L().Info("Certificate not available yet; waiting for certmagic to obtain it", zap.Error(err))
 	}
 
@@ -132,11 +171,41 @@ func (cm *CertManager) Run(ctx context.Context) error {
 		case <-ctx.Done():
 			zap.L().Info("Shutting down letsencrypt")
 			return nil
+		case <-certChanged:
+			// certmagic just obtained, renewed or cached a certificate. Kept
+			// separate from the ticker case so a transient kernel failure here is a
+			// warning, not an error: the ticker below re-extracts regardless.
+			if err := extract(); err != nil {
+				zap.L().Warn("Certificate event fired but the certificate could not be stored; the renewal check will retry", zap.Error(err))
+			}
 		case <-ticker.C:
-			if err := cm.extractAndStore(ctx, magic); err != nil {
+			// Belt and braces behind the event hook: certmagic drops an event if
+			// nothing is listening at that instant, and this loop is not listening
+			// while it is extracting.
+			if err := extract(); err != nil {
 				zap.L().Error("Failed to store renewed certificate", zap.Error(err))
 			}
 		}
+	}
+}
+
+// certMagicEventHook returns a certmagic Config.OnEvent callback that pokes
+// changed whenever an event means a certificate may now be available in
+// certmagic's storage. The send is non-blocking: certmagic calls OnEvent
+// synchronously, and a full channel already means an extract is pending. It
+// never returns an error, because certmagic reads a non-nil return as advice to
+// abort the event (see Config.OnEvent's doc comment) and neither event here is
+// abortable or a reason to abort.
+func certMagicEventHook(changed chan<- struct{}) func(context.Context, string, map[string]any) error {
+	return func(_ context.Context, event string, _ map[string]any) error {
+		switch event {
+		case "cert_obtained", "cached_managed_cert":
+			select {
+			case changed <- struct{}{}:
+			default:
+			}
+		}
+		return nil
 	}
 }
 

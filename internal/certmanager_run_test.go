@@ -59,7 +59,7 @@ func (acmeRateLimitError) Error() string {
 // with only ctx cancellation ending Run.
 func TestRunSurvivesFailedACMEAttempt(t *testing.T) {
 	issuer := newFailingIssuer()
-	installFailingIssuer(t, issuer)
+	installTestIssuer(t, issuer)
 
 	fake := &fakeCertData{}
 	cm := &CertManager{
@@ -119,15 +119,17 @@ func TestRunSurvivesFailedACMEAttempt(t *testing.T) {
 	}
 }
 
-// installFailingIssuer points certmagic's package-level defaults at issuer and
+// installTestIssuer points certmagic's package-level defaults at issuer and
 // restores them when the test finishes. Run mutates these same globals, so the
 // save/restore has to cover everything it touches.
-func installFailingIssuer(t *testing.T, issuer certmagic.Issuer) {
+func installTestIssuer(t *testing.T, issuer certmagic.Issuer) {
 	t.Helper()
 	prevIssuers, prevStorage := certmagic.Default.Issuers, certmagic.Default.Storage
+	prevOnEvent := certmagic.Default.OnEvent
 	prevACME := certmagic.DefaultACME
 	t.Cleanup(func() {
 		certmagic.Default.Issuers, certmagic.Default.Storage = prevIssuers, prevStorage
+		certmagic.Default.OnEvent = prevOnEvent
 		certmagic.DefaultACME = prevACME
 	})
 	certmagic.Default.Issuers = []certmagic.Issuer{issuer}
