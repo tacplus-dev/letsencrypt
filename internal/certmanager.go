@@ -16,9 +16,9 @@ import (
 
 	"github.com/caddyserver/certmagic"
 	"gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/s2sm"
+	letsencrypt_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/types/services/letsencrypt"
 	key_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/types/sys/key"
 	x509_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/types/sys/x509"
-	letsencrypt_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/types/services/letsencrypt"
 	"go.uber.org/zap"
 )
 
@@ -30,14 +30,25 @@ type certDataStore interface {
 	Set(ctx context.Context, v *letsencrypt_pb.LetsEncryptCertData) (*letsencrypt_pb.LetsEncryptCertData, error)
 }
 
-// CertManager handles Let's Encrypt certificate provisioning and renewal,
-// storing the resulting X509CertChain in kernel for gateway to consume.
+// CertManager handles Let's Encrypt certificate provisioning and renewal, storing
+// the resulting X509CertChain in the LetsEncryptCert stratum record (the durable
+// copy) and mirroring it into kernel for gateway to consume.
 type CertManager struct {
 	cfg       *letsencrypt_pb.Config
 	sm        *sm.ServiceManager
 	hostnames []string
 	storage   *Storage
 	certData  certDataStore
+
+	// certRecord is the DURABLE copy — the LetsEncryptCert stratum record. certData
+	// above is its live mirror in kernel, which the gateway watches and which holds
+	// nothing durably (decisions/
+	// kernel-no-durability-user-data-to-stratum-2026-09-25.md). Every write goes
+	// here first and to certData second.
+	certRecord certRecordStore
+	// certSetID keys the record: the digest of the sorted hostname list. Computed
+	// once, because every read and every write uses it.
+	certSetID string
 
 	// mu guards lastCertData, which the account-store hook reads from a
 	// certmagic goroutine while Run writes it.
@@ -46,19 +57,29 @@ type CertManager struct {
 }
 
 func NewCertManager(cfg *letsencrypt_pb.Config, s *sm.ServiceManager, hostnames []string) (*CertManager, error) {
+	id := certSetID(hostnames)
 	return &CertManager{
 		cfg:       cfg,
 		sm:        s,
 		hostnames: hostnames,
 		storage:   NewStorage(),
 		certData:  s.StateClients().Services().LetsEncryptState().CertData(),
+		certRecord: &recordStore{
+			records:   s.Grpc().Clients().Vservices().RecordMapClient(),
+			publish:   s.CreateLetsencryptLetsEncryptCertBusStreamPublisher(),
+			certSetID: id,
+		},
+		certSetID: id,
 	}, nil
 }
 
 // Run starts the ACME HTTP challenge server, provisions/renews the certificate,
 // and writes the result to kernel. Blocks until ctx is cancelled.
 func (cm *CertManager) Run(ctx context.Context) error {
-	// Restore CertMagic state from kernel if available.
+	// Restore from the DURABLE copy in stratum, falling back to the kernel mirror.
+	// A usable certificate found here is what makes a cold start skip ACME
+	// entirely: the certificate lands in certmagic's storage before ManageAsync is
+	// called below, so certmagic has nothing to obtain.
 	if err := cm.restoreState(ctx); err != nil {
 		zap.L().Warn("Failed to restore CertMagic state, starting fresh", zap.Error(err))
 	}
@@ -241,21 +262,84 @@ func (cm *CertManager) extractAndStore(ctx context.Context, magic *certmagic.Con
 		Hostnames:      cm.hostnames,
 	}
 
-	if _, err := cm.certData.Set(ctx, certData); err != nil {
-		return fmt.Errorf("writing to kernel LetsEncryptState: %w", err)
+	if err := cm.store(ctx, certData); err != nil {
+		return err
 	}
-	cm.setLastCertData(certData)
 
-	zap.L().Info("Certificate stored in kernel",
+	zap.L().Info("Certificate stored",
 		zap.Strings("hostnames", cm.hostnames),
+		zap.String("cert_set_id", cm.certSetID),
 		zap.Time("expires", cert.Leaf.NotAfter))
 
 	return nil
 }
 
-// restoreState loads CertMagic state from kernel and restores it into the
-// in-memory storage, so CertMagic doesn't re-provision on restart.
+// store writes certData to stratum FIRST and to kernel SECOND, and stops at the
+// first failure.
+//
+// The order is the design, not a preference: kernel holds nothing durably, so a
+// kernel write that landed while the record write failed would leave a mirror with
+// no durable copy behind it — and the next start, reading stratum, would obtain a
+// fresh certificate while the gateway was still serving the one kernel remembers.
+// Failing here instead leaves both stores on their previous contents and reports
+// the error to Run's caller, where the certChanged case warns and the renewal
+// ticker retries. That is this service's existing convention for a failed store
+// (see Run's loop) and the same posture ManageAsync's backoff takes: a retryable
+// condition is logged and retried, never fatal and never silently skipped.
+func (cm *CertManager) store(ctx context.Context, certData *letsencrypt_pb.LetsEncryptCertData) error {
+	if err := cm.certRecord.Publish(ctx, cm.certRecordFromCertData(certData)); err != nil {
+		return fmt.Errorf("writing LetsEncryptCert stratum record: %w", err)
+	}
+	if _, err := cm.certData.Set(ctx, certData); err != nil {
+		return fmt.Errorf("writing to kernel LetsEncryptState: %w", err)
+	}
+	cm.setLastCertData(certData)
+	return nil
+}
+
+// restoreState loads the CertMagic tree into the in-memory storage so CertMagic
+// does not re-provision on restart, and repopulates the kernel mirror from it.
+//
+// STRATUM IS THE SOURCE. The record is the durable copy; the kernel mirror holds
+// nothing across a full kernel restart and is read only as a fallback for the one
+// case the record cannot cover — a mirror written by a build that predates the
+// record. Restoring the tree is what carries the ACME ACCOUNT across a restart,
+// so it happens whether or not the certificate in it is still usable: an expired
+// certificate should cost a renewal, never a second ACME registration.
 func (cm *CertManager) restoreState(ctx context.Context) error {
+	rec, recErr := cm.certRecord.Fetch(ctx)
+	if recErr != nil {
+		zap.L().Warn("Failed to read LetsEncryptCert stratum record; falling back to the kernel mirror",
+			zap.String("cert_set_id", cm.certSetID), zap.Error(recErr))
+	}
+	if rec != nil && rec.GetCertmagicState() != nil {
+		usable, err := recordUsable(rec, time.Now())
+		if err != nil {
+			zap.L().Warn("LetsEncryptCert record holds a certificate that will not parse; treating it as absent",
+				zap.String("cert_set_id", cm.certSetID), zap.Error(err))
+		}
+		cm.storage.FromProto(rec.GetCertmagicState())
+		certData := &letsencrypt_pb.LetsEncryptCertData{
+			TlsCert:        rec.GetTlsCert(),
+			CertmagicState: rec.GetCertmagicState(),
+			LastRenewed:    rec.GetIssuedAt(),
+			Hostnames:      rec.GetHostnames(),
+		}
+		// Mirror straight into kernel, NOT through store: the record this came from
+		// is already the durable copy, and republishing it would be a write with
+		// nothing to say.
+		if _, err := cm.certData.Set(ctx, certData); err != nil {
+			return fmt.Errorf("mirroring LetsEncryptCert record into kernel LetsEncryptState: %w", err)
+		}
+		cm.setLastCertData(certData)
+		zap.L().Info("Restored from LetsEncryptCert stratum record",
+			zap.String("cert_set_id", cm.certSetID),
+			zap.Strings("hostnames", rec.GetHostnames()),
+			zap.Bool("certificate_usable", usable),
+			zap.Time("expires", time.Unix(rec.GetExpiresAt(), 0)))
+		return nil
+	}
+
 	data, err := cm.certData.Fetch(ctx)
 	if err != nil {
 		return err
@@ -266,7 +350,7 @@ func (cm *CertManager) restoreState(ctx context.Context) error {
 
 	cm.setLastCertData(data)
 	cm.storage.FromProto(data.CertmagicState)
-	zap.L().Info("Restored CertMagic state from kernel",
+	zap.L().Info("No LetsEncryptCert record; restored CertMagic state from the kernel mirror",
 		zap.Strings("hostnames", data.Hostnames),
 		zap.Time("last_renewed", time.Unix(data.LastRenewed, 0)))
 	return nil
@@ -283,19 +367,27 @@ func (cm *CertManager) setLastCertData(data *letsencrypt_pb.LetsEncryptCertData)
 // before issuance finishes does not throw the account away. Called from a
 // certmagic goroutine; a failure here must not fail the storage write, because
 // issuance can still succeed and extractAndStore will persist the account then.
+// "Persist" now means the stratum record, with kernel written after it as the
+// mirror — kernel is not a durability layer.
 func (cm *CertManager) persistAccount(ctx context.Context, key string) {
 	if err := cm.flushCertMagicState(ctx); err != nil {
-		zap.L().Warn("Failed to persist ACME account to kernel; a crash before issuance completes will lose it",
+		zap.L().Warn("Failed to persist ACME account; a crash before issuance completes will lose it",
 			zap.String("storage_key", key), zap.Error(err))
 		return
 	}
-	zap.L().Info("ACME account persisted to kernel", zap.String("storage_key", key))
+	zap.L().Info("ACME account persisted to the LetsEncryptCert record", zap.String("storage_key", key))
 }
 
-// flushCertMagicState writes the current CertMagic tree to kernel, carrying over
-// the certificate fields from the CertData already there. Set replaces the whole
-// message and the gateway serves TlsCert out of it, so a flush that dropped
-// those fields would take the live certificate away from the gateway.
+// flushCertMagicState writes the current CertMagic tree to stratum and then to
+// kernel, carrying over the certificate fields from the CertData already there.
+// Set replaces the whole message and the gateway serves TlsCert out of it, so a
+// flush that dropped those fields would take the live certificate away from the
+// gateway.
+//
+// This is the path that makes the ACME ACCOUNT durable, and it is why the record's
+// tls_cert is not required: on a first-ever start the account exists minutes before
+// any certificate does, and it has to reach stratum then rather than at the end of
+// issuance.
 func (cm *CertManager) flushCertMagicState(ctx context.Context) error {
 	certData := &letsencrypt_pb.LetsEncryptCertData{
 		CertmagicState: cm.storage.ToProto(),
@@ -310,11 +402,7 @@ func (cm *CertManager) flushCertMagicState(ctx context.Context) error {
 		certData.LastRenewed = last.LastRenewed
 	}
 
-	if _, err := cm.certData.Set(ctx, certData); err != nil {
-		return fmt.Errorf("writing to kernel LetsEncryptState: %w", err)
-	}
-	cm.setLastCertData(certData)
-	return nil
+	return cm.store(ctx, certData)
 }
 
 // fetchIntermediates attempts to fetch any missing intermediate CA certs from

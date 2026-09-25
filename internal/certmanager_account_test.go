@@ -18,6 +18,9 @@ type fakeCertData struct {
 	stored  []*letsencrypt_pb.LetsEncryptCertData
 	current *letsencrypt_pb.LetsEncryptCertData
 	setErr  error
+	// order, when set, is the shared write-order log this fake and the fake stratum
+	// record both append to. It is what makes "stratum before kernel" assertable.
+	order *orderLog
 }
 
 func (f *fakeCertData) Fetch(context.Context) (*letsencrypt_pb.LetsEncryptCertData, error) {
@@ -32,6 +35,7 @@ func (f *fakeCertData) Set(_ context.Context, v *letsencrypt_pb.LetsEncryptCertD
 	if f.setErr != nil {
 		return nil, f.setErr
 	}
+	f.order.note("kernel")
 	prev := f.current
 	f.current = v
 	f.stored = append(f.stored, v)
@@ -51,10 +55,12 @@ func newTestCertManager(t *testing.T) (*CertManager, *fakeCertData) {
 	t.Helper()
 	fake := &fakeCertData{}
 	cm := &CertManager{
-		cfg:       &letsencrypt_pb.Config{},
-		hostnames: []string{"api.example.test"},
-		storage:   NewStorage(),
-		certData:  fake,
+		cfg:        &letsencrypt_pb.Config{},
+		hostnames:  []string{"api.example.test"},
+		storage:    NewStorage(),
+		certData:   fake,
+		certRecord: &fakeCertRecord{},
+		certSetID:  certSetID([]string{"api.example.test"}),
 	}
 	cm.storage.SetAccountStoreHook(cm.persistAccount)
 	return cm, fake

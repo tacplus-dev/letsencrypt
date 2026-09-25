@@ -102,9 +102,11 @@ func TestCertificateReachesKernelOnObtainNotOnTick(t *testing.T) {
 			HttpListener:                &host_pb.Host{Host: "127.0.0.1", Port: 0},
 			RenewalCheckIntervalSeconds: 3600,
 		},
-		hostnames: []string{hostname},
-		storage:   NewStorage(),
-		certData:  fake,
+		hostnames:  []string{hostname},
+		storage:    NewStorage(),
+		certData:   fake,
+		certRecord: &fakeCertRecord{},
+		certSetID:  certSetID([]string{hostname}),
 	}
 	cm.storage.SetAccountStoreHook(cm.persistAccount)
 
