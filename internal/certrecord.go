@@ -11,10 +11,10 @@ import (
 	"time"
 
 	"github.com/caddyserver/certmagic"
-	query_gc "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/s2sm/grpc/clients/vservices/query"
-	letsencrypt_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/types/services/letsencrypt"
-	x509_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/types/sys/x509"
-	query_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/types/vservices/query"
+	query_gc "gitlab.com/seabeam/schematic/platform/services/letsencrypt/model/s2sm/grpc/clients/vservices/query"
+	letsencrypt_pb "gitlab.com/seabeam/schematic/platform/services/letsencrypt/model/types/services/letsencrypt"
+	x509_pb "gitlab.com/seabeam/schematic/platform/services/letsencrypt/model/types/sys/x509"
+	query_pb "gitlab.com/seabeam/schematic/platform/services/letsencrypt/model/types/vservices/query"
 	"go.uber.org/zap"
 )
 

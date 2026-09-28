@@ -16,7 +16,7 @@ compute-image:
       fi
       MAJOR="$(echo "$TACPLUS_VER" | cut -d. -f1)"
       MINOR="$(echo "$TACPLUS_VER" | cut -d. -f2)"
-      REPO="secondstarcavalier/schematic/tacplus/tacplus-${MAJOR}-${MINOR}"
+      REPO="seabeam/schematic/tacplus/tacplus-${MAJOR}-${MINOR}"
       IMAGE="${CI_REGISTRY}/${REPO}:latest"
       echo "TACPLUS_IMAGE=${IMAGE}" > tacplus.env
       echo "Using tacplus image: ${IMAGE}"
@@ -26,8 +26,8 @@ compute-image:
 
 variables:
   DOCKER_TLS_CERTDIR: ""
-  GOPRIVATE: "gitlab.com/secondstarcavalier/*"
-  GONOSUMCHECK: "gitlab.com/secondstarcavalier/*"
+  GOPRIVATE: "gitlab.com/seabeam/*"
+  GONOSUMCHECK: "gitlab.com/seabeam/*"
   CGO_ENABLED: "0"
 
 .parse-version: &parse-version
@@ -137,7 +137,7 @@ compute-validate-image:
       fi
       MAJOR="$(echo "$TACPLUS_VER" | cut -d. -f1)"
       MINOR="$(echo "$TACPLUS_VER" | cut -d. -f2)"
-      REPO="secondstarcavalier/schematic/tacplus/tacplus-${MAJOR}-${MINOR}"
+      REPO="seabeam/schematic/tacplus/tacplus-${MAJOR}-${MINOR}"
       echo "TACPLUS_IMAGE=${CI_REGISTRY}/${REPO}:latest" > tacplus.env
       echo "Using tacplus image: ${CI_REGISTRY}/${REPO}:latest" 
   artifacts:

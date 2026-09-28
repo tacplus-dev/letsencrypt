@@ -15,10 +15,10 @@ import (
 	"time"
 
 	"github.com/caddyserver/certmagic"
-	"gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/s2sm"
-	letsencrypt_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/types/services/letsencrypt"
-	key_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/types/sys/key"
-	x509_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/types/sys/x509"
+	"gitlab.com/seabeam/schematic/platform/services/letsencrypt/model/s2sm"
+	letsencrypt_pb "gitlab.com/seabeam/schematic/platform/services/letsencrypt/model/types/services/letsencrypt"
+	key_pb "gitlab.com/seabeam/schematic/platform/services/letsencrypt/model/types/sys/key"
+	x509_pb "gitlab.com/seabeam/schematic/platform/services/letsencrypt/model/types/sys/x509"
 	"go.uber.org/zap"
 )
 

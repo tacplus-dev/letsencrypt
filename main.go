@@ -8,10 +8,10 @@ import (
 	"os/signal"
 	"syscall"
 
-	letsencrypt "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/internal"
-	loggerchassis "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/chassis/logger"
-	"gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/s2sm"
-	letsencrypt_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/types/services/letsencrypt"
+	letsencrypt "gitlab.com/seabeam/schematic/platform/services/letsencrypt/internal"
+	loggerchassis "gitlab.com/seabeam/schematic/platform/services/letsencrypt/model/chassis/logger"
+	"gitlab.com/seabeam/schematic/platform/services/letsencrypt/model/s2sm"
+	letsencrypt_pb "gitlab.com/seabeam/schematic/platform/services/letsencrypt/model/types/services/letsencrypt"
 	"go.uber.org/zap"
 )
 

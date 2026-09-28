@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	letsencrypt_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/types/services/letsencrypt"
+	letsencrypt_pb "gitlab.com/seabeam/schematic/platform/services/letsencrypt/model/types/services/letsencrypt"
 )
 
 // TestFromProtoEmptyDefaultKeepsRootDirectory covers first-ever enablement: kernel

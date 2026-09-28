@@ -14,8 +14,8 @@ import (
 	"time"
 
 	"github.com/caddyserver/certmagic"
-	letsencrypt_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/types/services/letsencrypt"
-	host_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/types/sys/host"
+	letsencrypt_pb "gitlab.com/seabeam/schematic/platform/services/letsencrypt/model/types/services/letsencrypt"
+	host_pb "gitlab.com/seabeam/schematic/platform/services/letsencrypt/model/types/sys/host"
 )
 
 // signingIssuer stands in for the ACME CA and succeeds, signing whatever CSR

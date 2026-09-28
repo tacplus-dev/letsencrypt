@@ -19,10 +19,10 @@ import (
 	"time"
 
 	"github.com/caddyserver/certmagic"
-	letsencrypt_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/types/services/letsencrypt"
-	host_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/types/sys/host"
-	key_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/types/sys/key"
-	x509_pb "gitlab.com/secondstarcavalier/schematic/platform/services/letsencrypt/model/types/sys/x509"
+	letsencrypt_pb "gitlab.com/seabeam/schematic/platform/services/letsencrypt/model/types/services/letsencrypt"
+	host_pb "gitlab.com/seabeam/schematic/platform/services/letsencrypt/model/types/sys/host"
+	key_pb "gitlab.com/seabeam/schematic/platform/services/letsencrypt/model/types/sys/key"
+	x509_pb "gitlab.com/seabeam/schematic/platform/services/letsencrypt/model/types/sys/x509"
 )
 
 // orderLog records the SEQUENCE of durable writes across both stores. The stratum
