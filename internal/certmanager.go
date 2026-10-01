@@ -152,7 +152,8 @@ func (cm *CertManager) Run(ctx context.Context) error {
 		return err
 	}
 
-	// Provision certificate covering all configured hostnames as SANs.
+	// Provision certificates for the configured hostnames. certmagic obtains one
+	// single-name certificate per hostname, not one multi-SAN certificate.
 	//
 	// ManageAsync, not ManageSync: ManageSync returns the first ACME error, and
 	// that error used to propagate out of Run into main's log.Fatalf. The process
@@ -234,8 +235,8 @@ func certMagicEventHook(changed chan<- struct{}) func(context.Context, string, m
 // the X509CertChain + CertMagic state to kernel.
 func (cm *CertManager) extractAndStore(ctx context.Context, magic *certmagic.Config) error {
 	// Get the certificate from CertMagic using the primary hostname.
-	// CertMagic provisions a single multi-SAN cert for all managed hostnames;
-	// fetching by the primary hostname returns the cert covering all of them.
+	// CertMagic provisions one single-name cert per managed hostname, so this
+	// returns hostnames[0]'s cert only; it does not cover any other hostname.
 	cert, err := magic.CacheManagedCertificate(ctx, cm.hostnames[0])
 	if err != nil {
 		return fmt.Errorf("getting cached certificate: %w", err)
