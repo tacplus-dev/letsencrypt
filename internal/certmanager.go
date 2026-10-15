@@ -237,6 +237,7 @@ func (cm *CertManager) extractAndStore(ctx context.Context, magic *certmagic.Con
 	// Get the certificate from CertMagic using the primary hostname.
 	// CertMagic provisions one single-name cert per managed hostname, so this
 	// returns hostnames[0]'s cert only; it does not cover any other hostname.
+	// The others go into Certs below.
 	cert, err := magic.CacheManagedCertificate(ctx, cm.hostnames[0])
 	if err != nil {
 		return fmt.Errorf("getting cached certificate: %w", err)
@@ -252,6 +253,25 @@ func (cm *CertManager) extractAndStore(ctx context.Context, magic *certmagic.Con
 		return fmt.Errorf("converting certificate: %w", err)
 	}
 
+	// Every hostname's own certificate, which the gateway serves by SNI. Without
+	// these the gateway served hostnames[0]'s certificate for every name. A name
+	// certmagic has not obtained yet is left out; its cert_obtained event triggers
+	// the extract that adds it.
+	certs := []*letsencrypt_pb.NamedCert{{Hostname: cm.hostnames[0], TlsCert: certPair}}
+	for _, hostname := range cm.hostnames[1:] {
+		named, err := magic.CacheManagedCertificate(ctx, hostname)
+		if err != nil || len(named.Certificate.Certificate) == 0 {
+			zap.L().Info("Certificate not available yet; leaving it out of cert_data",
+				zap.String("hostname", hostname), zap.Error(err))
+			continue
+		}
+		chain, err := tlsCertToProto(&named.Certificate)
+		if err != nil {
+			return fmt.Errorf("converting certificate for %s: %w", hostname, err)
+		}
+		certs = append(certs, &letsencrypt_pb.NamedCert{Hostname: hostname, TlsCert: chain})
+	}
+
 	// Build CertMagic state snapshot.
 	certmagicState := cm.storage.ToProto()
 
@@ -261,14 +281,20 @@ func (cm *CertManager) extractAndStore(ctx context.Context, magic *certmagic.Con
 		CertmagicState: certmagicState,
 		LastRenewed:    time.Now().Unix(),
 		Hostnames:      cm.hostnames,
+		Certs:          certs,
 	}
 
 	if err := cm.store(ctx, certData); err != nil {
 		return err
 	}
 
+	stored := make([]string, len(certs))
+	for i, c := range certs {
+		stored[i] = c.Hostname
+	}
 	zap.L().Info("Certificate stored",
 		zap.Strings("hostnames", cm.hostnames),
+		zap.Strings("sni_certs", stored),
 		zap.String("cert_set_id", cm.certSetID),
 		zap.Time("expires", cert.Leaf.NotAfter))
 
@@ -381,7 +407,7 @@ func (cm *CertManager) persistAccount(ctx context.Context, key string) {
 
 // flushCertMagicState writes the current CertMagic tree to stratum and then to
 // kernel, carrying over the certificate fields from the CertData already there.
-// Set replaces the whole message and the gateway serves TlsCert out of it, so a
+// Set replaces the whole message and the gateway serves TlsCert and Certs out of it, so a
 // flush that dropped those fields would take the live certificate away from the
 // gateway.
 //
@@ -400,6 +426,7 @@ func (cm *CertManager) flushCertMagicState(ctx context.Context) error {
 	cm.mu.Unlock()
 	if last != nil {
 		certData.TlsCert = last.TlsCert
+		certData.Certs = last.Certs
 		certData.LastRenewed = last.LastRenewed
 	}
 

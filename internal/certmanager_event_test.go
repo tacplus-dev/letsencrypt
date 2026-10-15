@@ -143,6 +143,64 @@ func TestCertificateReachesKernelOnObtainNotOnTick(t *testing.T) {
 	}
 }
 
+// DEFECT #10: with two hostnames configured, certmagic obtained both
+// single-name certificates but only hostnames[0]'s reached kernel, so the
+// gateway had no certificate to answer the second name's SNI with. Every
+// hostname's own certificate has to reach kernel in Certs.
+func TestEveryHostnameCertificateReachesKernel(t *testing.T) {
+	installTestIssuer(t, newSigningIssuer(t))
+
+	run := time.Now().UnixNano()
+	hostnames := []string{
+		fmt.Sprintf("console-%d.example.test", run),
+		fmt.Sprintf("app-%d.example.test", run),
+	}
+	fake := &fakeCertData{}
+	cm := &CertManager{
+		cfg: &letsencrypt_pb.Config{
+			LetsEncryptEmail:            "admin@example.test",
+			HttpListener:                &host_pb.Host{Host: "127.0.0.1", Port: 0},
+			RenewalCheckIntervalSeconds: 3600,
+		},
+		hostnames:  hostnames,
+		storage:    NewStorage(),
+		certData:   fake,
+		certRecord: &fakeCertRecord{},
+		certSetID:  certSetID(hostnames),
+	}
+	cm.storage.SetAccountStoreHook(cm.persistAccount)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go func() { _ = cm.Run(ctx) }()
+
+	deadline := time.Now().Add(15 * time.Second)
+	for time.Now().Before(deadline) {
+		for _, w := range fake.writes() {
+			got := map[string]string{}
+			for _, c := range w.Certs {
+				if len(c.GetTlsCert().GetChain()) > 0 && c.GetTlsCert().GetKey() != nil {
+					leaf, err := parseLeaf(c.GetTlsCert())
+					if err != nil {
+						t.Fatalf("named cert for %s does not parse: %v", c.Hostname, err)
+					}
+					got[c.Hostname] = leaf.DNSNames[0]
+				}
+			}
+			if len(got) == len(hostnames) {
+				for _, h := range hostnames {
+					if got[h] != h {
+						t.Errorf("Certs[%s] holds the certificate for %q", h, got[h])
+					}
+				}
+				return
+			}
+		}
+		time.Sleep(25 * time.Millisecond)
+	}
+	t.Fatalf("no write carried a certificate for each of %v", hostnames)
+}
+
 // The hook must not hand certmagic an error: certmagic reads a non-nil OnEvent
 // return as advice to abort the event, and a kernel write that failed is not a
 // reason to abort issuance.

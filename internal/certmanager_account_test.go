@@ -151,6 +151,7 @@ func TestAccountFlushPreservesExistingCert(t *testing.T) {
 		CertmagicState: NewStorage().ToProto(),
 		LastRenewed:    1234,
 		Hostnames:      []string{"api.example.test"},
+		Certs:          []*letsencrypt_pb.NamedCert{{Hostname: "api.example.test"}},
 	}
 	fake.current = existing
 	if err := cm.restoreState(ctx); err != nil {
@@ -165,6 +166,9 @@ func TestAccountFlushPreservesExistingCert(t *testing.T) {
 	}
 	if writes[0].TlsCert != existing.TlsCert {
 		t.Error("flush dropped the certificate already in kernel")
+	}
+	if len(writes[0].Certs) != 1 || writes[0].Certs[0] != existing.Certs[0] {
+		t.Error("flush dropped the per-hostname certificates already in kernel")
 	}
 	if writes[0].LastRenewed != existing.LastRenewed {
 		t.Errorf("flush dropped LastRenewed: got %d", writes[0].LastRenewed)
