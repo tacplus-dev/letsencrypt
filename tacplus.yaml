@@ -3,4 +3,4 @@ pkg: com.gitlab.seabeam.schematic.platform.services.letsencrypt
 output-dir: model
 src: https://gitlab.com/seabeam/schematic/platform/proto.git
 header: |
-  Copyright (c) 2026 SeaBeam LLC. All rights reserved.
+  Copyright (c) 2026 Seabeam LLC. All rights reserved.
