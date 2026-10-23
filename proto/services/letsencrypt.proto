@@ -1,0 +1,280 @@
+// Copyright (c) 2026 Seabeam LLC. All rights reserved.
+
+syntax = "proto3";
+
+package letsencrypt;
+
+import "sys/spec.proto";
+import "sys/host.proto";
+import "sys/x509.proto";
+
+option (spec.service) = {};
+option (spec.state_imports) = {source: "kernel.Identity"};
+
+// letsencrypt reads back its OWN durable record. The grant half is
+// LetsEncryptCert's s2s_read below; neither half works alone, so the pair is the
+// only way to say "the certificate I wrote last boot is the certificate I load
+// this boot" without letsencrypt holding durable state of its own.
+option (spec.record_read) = {record: "letsencrypt.LetsEncryptCert"};
+
+// ============================================================================
+// Config
+// ============================================================================
+
+message Config {
+  option (spec.grpc_config) = {service_name: "letsencrypt"};
+
+  // The topic tacplus SYNTHESIZES from LetsEncryptCert's (spec.record)
+  // (letsencrypt.LetsEncryptCertBus.stream) — this service's durable write path.
+  // A record has no write RPC: it reaches stratum on stratum's own subscription
+  // to this topic, so publishing here IS writing the record. Same shape as
+  // mailbox's: no method_s2s, because the producer surface is declared on the
+  // record itself (s2s: ["letsencrypt"]) and the generator folds it in —
+  // restating it could only drift.
+  option (spec.event_publish) = {
+    topic_ref: "letsencrypt.LetsEncryptCertBus.stream"
+  };
+
+  // lets_encrypt_email is the email address for Let's Encrypt account
+  // registration and certificate expiration notifications.
+  // If empty, letsencrypt will use "admin@<fqdn>".
+  // NOTES: needs email assertion
+  string lets_encrypt_email = 1;
+
+  // http_listener is the bind address for the HTTP server used for ACME HTTP-01
+  // challenge responses. IN-CLUSTER ONLY: the gateway owns the edge's port 80
+  // and proxies /.well-known/acme-challenge/* here, so this listener needs no
+  // externally-exposed Service of its own — only a ClusterIP the gateway can
+  // reach. Default port 80.
+  host.Host http_listener = 2 [(spec.default_host) = {host: "0.0.0.0", port: 80}];
+
+  // renewal_check_interval_seconds is how often to check if the certificate
+  // needs renewal (seconds). Default: 3600 (1 hour).
+  int64 renewal_check_interval_seconds = 3 [(spec.default_int) = 3600];
+
+  // hostnames is the list of domain names to include as SANs on the
+  // Let's Encrypt certificate (e.g. ["api.schematic.io", "console.schematic.io"]).
+  // All hostnames must resolve to the gateway's external address, which is what
+  // answers on port 80 for HTTP-01 challenge validation.
+  repeated string hostnames = 4 [(spec.assert_required) = true, (spec.assert_max_size) = 16];
+}
+
+// ============================================================================
+// State (stored in kernel)
+// ============================================================================
+
+// LetsEncryptState holds the Let's Encrypt certificate and CertMagic storage
+// state. Owned by the letsencrypt service (RW). Gateway subscribes RO to
+// obtain the TLS certificate for its public-facing HTTPS listener.
+message LetsEncryptState {
+  option (spec.service_state) = {label: ["kernel"], export: true};
+
+  // cert_data is the singleton holding the current certificate and
+  // CertMagic internal state. Written atomically on each renewal.
+  //
+  // MEMORY ONLY. It carried (spec.persistence) until 2026-09-25; kernel no
+  // longer does durability at all (decisions/
+  // kernel-no-durability-user-data-to-stratum-2026-09-25.md), and tacplus now
+  // refuses the flag on a kernel-labelled state root. The durable copy is the
+  // LetsEncryptCert record below, and this field is its LIVE MIRROR: written
+  // after the record on every obtain and renewal, repopulated from the record
+  // on start. A total kernel restart empties it and the next letsencrypt start
+  // fills it again from stratum without an ACME call.
+  LetsEncryptCertData cert_data = 1;
+}
+
+// LetsEncryptCertData holds the Let's Encrypt certificate, CertMagic state,
+// and metadata. Written as a single atomic unit on each certificate
+// issuance or renewal.
+message LetsEncryptCertData {
+  // tls_cert is the current Let's Encrypt certificate chain and private key.
+  // Gateway watches this to serve HTTPS traffic.
+  x509.X509CertChain tls_cert = 1;
+
+  // certmagic_state is the serialized CertMagic storage tree. Contains
+  // ACME account data, certificate metadata, and cached certificates.
+  // LetsEncrypt reads this on startup to restore state without re-provisioning.
+  CertMagicState certmagic_state = 2 [(spec.assert_required) = true];
+
+  // last_renewed is the Unix epoch timestamp (seconds) of the last
+  // successful certificate renewal.
+  int64 last_renewed = 3;
+
+  // hostnames are the domain names the certificate was issued for.
+  repeated string hostnames = 4 [(spec.assert_max_size) = 64];
+
+  // certs holds each hostname's OWN certificate. certmagic issues one
+  // single-name certificate per entry in Config.hostnames, never a multi-SAN
+  // one, so serving more than one public name takes one certificate per name;
+  // the gateway selects among them by SNI. tls_cert above stays hostnames[0]'s
+  // certificate and is what the gateway serves when SNI is absent or names no
+  // entry here. A name whose certificate is not yet obtained is simply absent.
+  repeated NamedCert certs = 5 [(spec.assert_max_size) = 16];
+}
+
+// NamedCert is one hostname's single-name certificate.
+message NamedCert {
+  string hostname = 1 [(spec.assert_required) = true, (spec.assert_max_size) = 253];
+  x509.X509CertChain tls_cert = 2 [(spec.assert_required) = true];
+}
+
+// CertMagicState is the serialized storage tree used by CertMagic.
+// This mirrors the certmagic.Storage interface — each node is either
+// a directory (with children) or a file (with value bytes).
+message CertMagicState {
+  bool is_dir = 1;
+  bytes value = 2;
+  int64 mod_time = 3;
+  map<string, CertMagicState> children = 4 [(spec.assert_max_size) = 256];
+}
+
+// ============================================================================
+// LetsEncryptCert — the DURABLE copy (stratum record)
+// ============================================================================
+
+// LetsEncryptCert is the cluster's Let's Encrypt certificate set, held durably
+// by stratum. It is the ONLY durable copy: LetsEncryptState above is a live
+// in-memory mirror of it, kept for the gateway's benefit, and kernel is not a
+// durability layer (decisions/
+// kernel-no-durability-user-data-to-stratum-2026-09-25.md item 4).
+//
+// The write order is the whole design: obtain or renew -> write THIS record ->
+// write LetsEncryptState.cert_data. A crash between the two costs nothing but a
+// stale mirror, which the next start rebuilds from here. The reverse order would
+// make a mirror that outlives its own durable copy, which is the shape the
+// kernel-persistence experiment had.
+//
+// ONE ROW PER HOSTNAME SET, not one row per issuance: certmagic manages a single
+// multi-SAN certificate for Config.hostnames, so a renewal REPLACES this row
+// rather than appending beside it (hence MUTABILITY_CRUD, the default). The
+// record is not an issuance log and must not become one — the previous
+// certificate is of no use to anyone once the new one is live.
+//
+// THE ACME ACCOUNT TRAVELS WITH IT. certmagic_state below is the whole storage
+// tree, account registration and account key included, so the account is durable
+// for exactly as long as the certificate it issued is. Splitting the account into
+// a record of its own would let the two get out of step, and an account that
+// outlives nothing is one more ACME registration against Let's Encrypt's 10 new
+// registrations per 3 hours per IP.
+message LetsEncryptCert {
+  option (spec.record) = {
+    // Keyed by the hostname SET, not by a singleton constant: the certificate is
+    // only the right certificate for the names it covers. If Config.hostnames
+    // changes, the key changes, the read on start misses, and the service obtains
+    // a certificate for the new names — where a fixed key would have found the
+    // old row, seen an unexpired certificate, and served names it does not cover.
+    // The service derives it as a stable digest of the sorted hostname list; see
+    // internal/certrecord.go's certSetID.
+    key: "cert_set_id"
+    owner: "spiffe_id"
+
+    // PRODUCER surface: letsencrypt is the only writer. Nothing else has any
+    // business asserting what the cluster's certificate is.
+    s2s: {auth_services: ["letsencrypt"]}
+
+    // CONSUMER surface: stratum, the record store, and nobody else. The gateway
+    // does NOT read here — it keeps watching LetsEncryptState in kernel,
+    // unchanged, which is the decision's explicit instruction.
+    s2s_subscribe: {auth_services: ["stratum"]}
+
+    // STORED-ROW READ: letsencrypt reads its own row back on start. Paired with
+    // the file-level (spec.record_read) above.
+    s2s_read: {auth_services: ["letsencrypt"]}
+
+    // LIFECYCLE. idle_seconds 7776000 — ninety days, one certificate lifetime.
+    // This is the platform default's opposite case: the row is read about once
+    // per pod start and written about once per renewal, so on the one-day default
+    // it would be evicted between every pair of touches and reloaded from disk
+    // on each start. Nothing is lost either way — eviction is cache maintenance —
+    // but a row this small (one certificate chain and one storage tree) and this
+    // rarely written is exactly the "long-lived, config-shaped data" spec.proto's
+    // residency comment says carries a long idle_seconds.
+    //
+    // deleted_max_age_seconds 2592000 — thirty days, the platform default
+    // (parser.DefaultResidencyDeletedMaxAgeSeconds), and INERT here: this record
+    // declares no (spec.deleted_flag), because a certificate set is replaced and
+    // never deleted. It is stated rather than omitted so a type that later gains
+    // the marker does not also have to gain a number.
+    residency: {idle_seconds: 7776000 deleted_max_age_seconds: 2592000}
+  };
+
+  // cert_set_id identifies the hostname set this certificate covers — a stable
+  // digest of the sorted, comma-joined Config.hostnames list. Derived, never
+  // configured: two pods reading the same config must compute the same key.
+  string cert_set_id = 1 [
+    (spec.indexed) = true,
+    (spec.assert_required) = true,
+    (spec.assert_min_size) = 1,
+    (spec.assert_max_size) = 128
+  ];
+
+  // tls_cert is the certificate chain and private key, in the SAME type
+  // LetsEncryptCertData.tls_cert holds, so the mirror write is a field copy and
+  // not a conversion.
+  //
+  // NOT assert_required, for the same reason LetsEncryptCertData.tls_cert stopped
+  // being required in 7ba5060: the FIRST write of this row happens before any
+  // certificate exists. certmagic registers the ACME account minutes before
+  // issuance completes, and that account has to become durable at once — Let's
+  // Encrypt allows 10 new registrations per 3 hours per IP, which a crash-loop
+  // that re-registers on every boot exhausts. So the account flush writes this
+  // row with certmagic_state and no tls_cert, and the obtain fills it in. A row
+  // with no tls_cert means "the account is durable, the certificate is not yet".
+  x509.X509CertChain tls_cert = 2;
+
+  // certmagic_state is the serialized CertMagic storage tree — ACME account,
+  // certificate metadata and cached certificates. Restoring it is what lets a
+  // start with a valid certificate skip ACME entirely.
+  CertMagicState certmagic_state = 3 [(spec.assert_required) = true];
+
+  // hostnames are the names the certificate was issued for, in the sorted order
+  // cert_set_id was computed over. Carried as well as digested because a digest
+  // cannot be read by a human debugging which certificate is live.
+  repeated string hostnames = 4 [
+    (spec.assert_required) = true,
+    (spec.assert_max_size) = 16
+  ];
+
+  // issued_at is the leaf certificate's NotBefore, Unix seconds.
+  //
+  // issued_at/expires_at are DERIVED from the leaf in tls_cert, which is the
+  // authority on both and is what the start-up expiry check actually parses.
+  // They are carried anyway, for the one thing a parse cannot serve: answering
+  // "when does the cluster's certificate expire" from the query plane without
+  // pulling and decoding a certificate chain per row. x509.X509CertChain carries
+  // neither timestamp itself (it is chain + key + id and nothing else), so there
+  // is no field here duplicating one there.
+  int64 issued_at = 5 [(spec.assert_ge) = 0];
+
+  // expires_at is the leaf certificate's NotAfter, Unix seconds. See issued_at.
+  int64 expires_at = 6 [
+    (spec.assert_ge) = 0,
+    (spec.query_field) = {op: QUERY_OP_RANGE}
+  ];
+
+  // NO (spec.store_epoch) FIELD, deliberately. The store's last-write clock has
+  // exactly one consumer — residency.deleted_max_age_seconds measures a delete
+  // from it — and this record declares no (spec.deleted_flag), so there is
+  // nothing here for that clock to measure. It is also not free to carry: the Go
+  // generator refuses a record that declares one and is published over a topic
+  // ("the stamp is generated on unary requests only; a streamed write would need
+  // a per-item stamp the wrapper does not render"), and a record's only write
+  // path IS its topic. issued_at/expires_at above are the certificate's clocks
+  // and are what anything asking about this row's age wants anyway.
+
+  // spiffe_id is the record's owner — letsencrypt's own workload identity, the
+  // only writer this record has.
+  string spiffe_id = 7 [
+    (spec.identity_spiffe_subject) = true,
+    (spec.assert_max_size) = 1024,
+    (spec.query_field) = {op: QUERY_OP_EQ}
+  ];
+
+  // namespace is the row's owning namespace — the generated tenant backstop.
+  // A cluster's TLS certificate is platform data, so this is root ("/") in
+  // practice; the annotation is mandatory on every record regardless.
+  string namespace = 8 [
+    (spec.store_namespace) = true,
+    (spec.assert_max_size) = 256
+  ];
+}
