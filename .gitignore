@@ -24,3 +24,6 @@ Thumbs.db
 # Claude Code
 .claude/
 proto
+target/
+*/target/
+*.log

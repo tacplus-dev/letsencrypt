@@ -1,6 +1,8 @@
 language: go
+# pkg kept as copied so the hand-written code keeps compiling; moves with the packages later.
 pkg: com.gitlab.seabeam.schematic.platform.services.letsencrypt
 output-dir: model
-src: https://gitlab.com/seabeam/schematic/platform/proto.git
+src: proto
 header: |
-  Copyright (c) 2026 Seabeam LLC. All rights reserved.
+  Copyright (c) 2026 Jody Scott
+  SPDX-License-Identifier: Apache-2.0
