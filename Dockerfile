@@ -21,4 +21,10 @@ LABEL org.opencontainers.image.created="${BUILD_DATE}" \
 RUN apk add --no-cache ca-certificates
 COPY bin/letsencrypt /usr/local/bin/letsencrypt
 
-ENTRYPOINT ["letsencrypt"]
+# Every service runs under the launcher (github.com/tacplus-dev/launcher): PID 1
+# that forwards signals, propagates the exit code, and kills a deadlocked child
+# on gRPC health. The fleet's image pipeline puts the binary beside the Dockerfile.
+ARG TARGETARCH
+COPY launcher-linux-${TARGETARCH} /usr/local/bin/launcher
+ENV LAUNCH_CMD="letsencrypt" HEALTH_PORT=8443
+ENTRYPOINT ["launcher"]
