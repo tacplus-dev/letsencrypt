@@ -15,7 +15,6 @@ import (
 	letsencrypt_pb "gitlab.com/seabeam/schematic/platform/services/letsencrypt/model/types/services/letsencrypt"
 	x509_pb "gitlab.com/seabeam/schematic/platform/services/letsencrypt/model/types/sys/x509"
 	query_pb "gitlab.com/seabeam/schematic/platform/services/letsencrypt/model/types/vservices/query"
-	"go.uber.org/zap"
 )
 
 // certRecordStore is the stratum LetsEncryptCert record, as this package uses it:
@@ -44,34 +43,22 @@ type recordStore struct {
 	certSetID string
 }
 
-// Fetch runs the record plane's three-call read lifecycle — open a query over the
-// key, pull its single page, close the query — and returns the row.
-//
-// The query is closed on every path, success included: a standing query left open
-// is a predicate stratum keeps evaluating for a caller that has gone away.
+// Fetch reads the row through the record plane's DIRECT read: filter in, rows
+// out, no result set — nothing a connection failover between two calls could
+// lose, which is what left a cold start without its certificate and ordering
+// a new one.
 func (r *recordStore) Fetch(ctx context.Context) (*letsencrypt_pb.LetsEncryptCert, error) {
-	handle, err := r.records.CreateLetsEncryptCertQuery(ctx, &query_pb.OpenLetsEncryptCertQueryRequest{
-		Filter: &query_pb.LetsEncryptCertFilter{CertSetId: &r.certSetID},
-	})
-	if err != nil {
-		return nil, fmt.Errorf("opening LetsEncryptCert query: %w", err)
-	}
-	defer func() {
-		if _, delErr := r.records.DeleteLetsEncryptCertQuery(ctx, &query_pb.QueryHandle{QueryId: handle.GetQueryId()}); delErr != nil {
-			zap.L().Warn("Failed to close LetsEncryptCert query", zap.Error(delErr))
-		}
-	}()
-
-	// PageSize 2, not 1: the key is unique, so a second row would mean the plane
+	// Limit 2, not 1: the key is unique, so a second row would mean the plane
 	// returned a row for a different hostname set and the read cannot be trusted.
 	// Asking for one row could not tell the difference.
-	rows, _, _, err := r.records.ListLetsEncryptCertPage(ctx, &query_pb.PullLetsEncryptCertRequest{
-		QueryId:  handle.GetQueryId(),
-		PageSize: 2,
+	resp, err := r.records.GetLetsEncryptCertRows(ctx, &query_pb.GetLetsEncryptCertRowsRequest{
+		Filter: &query_pb.LetsEncryptCertFilter{CertSetId: &r.certSetID},
+		Limit:  2,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("reading LetsEncryptCert rows: %w", err)
 	}
+	rows := resp.GetItems()
 	switch len(rows) {
 	case 0:
 		return nil, nil
