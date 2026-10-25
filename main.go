@@ -10,9 +10,15 @@ import (
 
 	letsencrypt "gitlab.com/seabeam/schematic/platform/services/letsencrypt/internal"
 	loggerchassis "gitlab.com/seabeam/schematic/platform/services/letsencrypt/model/chassis/logger"
+	"gitlab.com/seabeam/schematic/platform/services/letsencrypt/model/chassis/servicemanager"
 	"gitlab.com/seabeam/schematic/platform/services/letsencrypt/model/s2sm"
+	letsencrypt_fe "gitlab.com/seabeam/schematic/platform/services/letsencrypt/model/s2sm/grpc/servers/services/letsencrypt"
 	letsencrypt_pb "gitlab.com/seabeam/schematic/platform/services/letsencrypt/model/types/services/letsencrypt"
+	healthreport_pb "gitlab.com/seabeam/schematic/platform/services/letsencrypt/model/types/sys/healthreport"
 	"go.uber.org/zap"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func main() {
@@ -73,23 +79,66 @@ func run() error {
 		return fmt.Errorf("cert manager: %w", err)
 	}
 
-	// letsencrypt builds the ServiceManager with New() but never calls its Run(),
-	// because it drives its own CertManager lifecycle below. The SM sets the
-	// health status to NOT_SERVING in New() and flips it to SERVING inside Run(),
-	// so without this call the plaintext health listener on 8444 would stay
-	// NOT_SERVING forever and k8s startup probes would fail indefinitely — the
-	// same defect gateway hit ("service unhealthy (responded with NOT_SERVING)",
-	// observed 114 times) and fixed the same way.
-	//
-	// SetServing drives the SAME handle that serves 8444. Do not substitute a
-	// locally-created health reporter: that is a different health service from
-	// the one k8s probes, and it silently does nothing.
-	//
-	// Placed here because bootstrap is complete — config, identity, state clients
-	// and the cert manager are all constructed — and cm.Run is about to serve.
-	s.SetServing(true)
+	// Run under the ServiceManager like every service: it serves the gRPC
+	// listener with TLS (health included, which the launcher probes on 8443
+	// and kills the child without), flips readiness to SERVING, and returns on
+	// shutdown. The CertManager is this service's whole job, so it runs beside
+	// it, started here and stopped by the handler's Shutdown; it dies loudly if
+	// it fails, since a letsencrypt that is up but not managing certificates is
+	// worse than one that restarts.
+	h := &handler{stop: stop}
+	go func() {
+		if err := cm.Run(ctx); err != nil && ctx.Err() == nil {
+			zap.L().Error("cert manager failed", zap.Error(err))
+			s.Close()
+			os.Exit(1)
+		}
+	}()
+	return s.Run(h)
+}
 
-	return cm.Run(ctx)
+// handler is the generated Handler: this service hosts no RPC of its own
+// (its state roots are kernel's), so it is health and shutdown.
+type handler struct{ stop context.CancelFunc }
+
+func (h *handler) LetsEncryptStateGrpcImpl() letsencrypt_fe.LetsEncryptStateServiceHandler {
+	return notHostedState{}
+}
+func (h *handler) LetsEncryptStateConfig(*letsencrypt_pb.Config) error { return nil }
+func (h *handler) LetsencryptConfigStateGrpcImpl() letsencrypt_fe.LetsencryptConfigStateServiceHandler {
+	return notHostedConfigState{}
+}
+func (h *handler) LetsencryptConfigStateConfig(*letsencrypt_pb.Config) error { return nil }
+func (h *handler) Shutdown(context.Context)                                  { h.stop() }
+func (h *handler) CheckHealth() healthreport_pb.InstanceStatus {
+	return healthreport_pb.InstanceStatus_INSTANCE_STATUS_HEALTHY
+}
+func (h *handler) RegisterAdditionalServices(grpc.ServiceRegistrar) {}
+
+var errNotHosted = status.Error(codes.Unimplemented, "letsencrypt's state is served by the config store (kernel), not by letsencrypt")
+
+type notHostedState struct{}
+
+func (notHostedState) GetCertData(context.Context, *servicemanager.Caller) (*letsencrypt_pb.LetsEncryptCertData, error) {
+	return nil, errNotHosted
+}
+func (notHostedState) SetCertData(context.Context, *servicemanager.Caller, *letsencrypt_pb.LetsEncryptCertData) (*letsencrypt_pb.LetsEncryptCertData, error) {
+	return nil, errNotHosted
+}
+func (notHostedState) WatchCertData(*servicemanager.Caller, grpc.ServerStreamingServer[letsencrypt_pb.LetsEncryptCertData]) error {
+	return errNotHosted
+}
+
+type notHostedConfigState struct{}
+
+func (notHostedConfigState) GetConfig(context.Context, *servicemanager.Caller) (*letsencrypt_pb.Config, error) {
+	return nil, errNotHosted
+}
+func (notHostedConfigState) SetConfig(context.Context, *servicemanager.Caller, *letsencrypt_pb.Config) (*letsencrypt_pb.Config, error) {
+	return nil, errNotHosted
+}
+func (notHostedConfigState) WatchConfig(*servicemanager.Caller, grpc.ServerStreamingServer[letsencrypt_pb.Config]) error {
+	return errNotHosted
 }
 
 func resolveConfigPath() string {
