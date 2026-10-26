@@ -16,6 +16,7 @@ import (
 
 	"github.com/caddyserver/certmagic"
 	"gitlab.com/seabeam/schematic/platform/services/letsencrypt/model/s2sm"
+	lets_encrypt_state "gitlab.com/seabeam/schematic/platform/services/letsencrypt/model/s2sm/state/services/lets_encrypt_state"
 	letsencrypt_pb "gitlab.com/seabeam/schematic/platform/services/letsencrypt/model/types/services/letsencrypt"
 	key_pb "gitlab.com/seabeam/schematic/platform/services/letsencrypt/model/types/sys/key"
 	x509_pb "gitlab.com/seabeam/schematic/platform/services/letsencrypt/model/types/sys/x509"
@@ -30,6 +31,13 @@ type certDataStore interface {
 	Set(ctx context.Context, v *letsencrypt_pb.LetsEncryptCertData) (*letsencrypt_pb.LetsEncryptCertData, error)
 }
 
+// mirrorWatch is the part of the generated LetsEncryptState client that reports
+// the lifecycle of its Watch on the kernel mirror. The generated *StateClient
+// satisfies it; the interface exists so tests can play a kernel restart.
+type mirrorWatch interface {
+	SetWatchStatusListener(func(lets_encrypt_state.WatchStatus))
+}
+
 // CertManager handles Let's Encrypt certificate provisioning and renewal, storing
 // the resulting X509CertChain in the LetsEncryptCert stratum record (the durable
 // copy) and mirroring it into kernel for gateway to consume.
@@ -39,6 +47,15 @@ type CertManager struct {
 	hostnames []string
 	storage   *Storage
 	certData  certDataStore
+	// mirror reports the kernel Watch's lifecycle. Kernel holds the mirror in
+	// memory only: a kernel restart empties it, the gateway (which watches the
+	// same state) falls back to the cluster-CA certificate, and until this
+	// change nothing put the certificate back before the renewal ticker, up to
+	// RenewalCheckIntervalSeconds later. The Watch stream breaking and coming
+	// back is the one signal this service gets that the kernel it mirrors into
+	// may be a new one, so Run re-mirrors on every reconnect. nil in tests that
+	// do not exercise it.
+	mirror mirrorWatch
 
 	// certRecord is the DURABLE copy — the LetsEncryptCert stratum record. certData
 	// above is its live mirror in kernel, which the gateway watches and which holds
@@ -64,6 +81,7 @@ func NewCertManager(cfg *letsencrypt_pb.Config, s *sm.ServiceManager, hostnames 
 		hostnames: hostnames,
 		storage:   NewStorage(),
 		certData:  s.StateClients().Services().LetsEncryptState().CertData(),
+		mirror:    s.StateClients().Services().LetsEncryptState(),
 		certRecord: &recordStore{
 			records:   s.Grpc().Clients().Vservices().RecordMapClient(),
 			publish:   s.CreateLetsencryptLetsEncryptCertBusStreamPublisher(),
@@ -187,6 +205,15 @@ func (cm *CertManager) Run(ctx context.Context) error {
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 
+	// The kernel Watch coming back after a break: the kernel may be a new one
+	// with an empty mirror. The listener only signals (it runs on the Watch
+	// goroutine); the loop re-mirrors. Buffered by one so a reconnect during a
+	// re-mirror is not lost and a storm of them collapses into one.
+	mirrorReconnected := make(chan struct{}, 1)
+	if cm.mirror != nil {
+		cm.mirror.SetWatchStatusListener(watchReconnectSignal(mirrorReconnected))
+	}
+
 	zap.L().Info("Entering renewal check loop", zap.Duration("interval", interval))
 	for {
 		select {
@@ -207,8 +234,56 @@ func (cm *CertManager) Run(ctx context.Context) error {
 			if err := extract(); err != nil {
 				zap.L().Error("Failed to store renewed certificate", zap.Error(err))
 			}
+		case <-mirrorReconnected:
+			if err := cm.remirror(ctx); err != nil {
+				zap.L().Warn("Kernel Watch reconnected but the certificate could not be re-mirrored; the renewal check will retry", zap.Error(err))
+			}
 		}
 	}
+}
+
+// watchReconnectSignal returns a WatchStatus listener that pokes reconnected
+// each time the CertData Watch becomes healthy again after it was retrying.
+// The first healthy status after start is not a reconnect: the boot path has
+// just mirrored. Statuses arrive from the one Watch goroutine, in order.
+func watchReconnectSignal(reconnected chan<- struct{}) func(lets_encrypt_state.WatchStatus) {
+	broken := false
+	return func(st lets_encrypt_state.WatchStatus) {
+		if st.WatchName != "WatchCertData" {
+			return
+		}
+		if !st.Healthy() {
+			broken = true
+			return
+		}
+		if !broken {
+			return
+		}
+		broken = false
+		select {
+		case reconnected <- struct{}{}:
+		default:
+		}
+	}
+}
+
+// remirror writes the last certificate this process stored back into the kernel
+// mirror. Not through store: the stratum record already holds it, and this is
+// the mirror catching up with a kernel that may have forgotten it. Nothing to
+// re-mirror before the first certificate is a no-op, not an error.
+func (cm *CertManager) remirror(ctx context.Context) error {
+	cm.mu.Lock()
+	data := cm.lastCertData
+	cm.mu.Unlock()
+	if data == nil {
+		return nil
+	}
+	if _, err := cm.certData.Set(ctx, data); err != nil {
+		return fmt.Errorf("re-mirroring certificate into kernel LetsEncryptState: %w", err)
+	}
+	zap.L().Info("Kernel Watch reconnected; re-mirrored the certificate",
+		zap.Strings("hostnames", data.Hostnames), zap.String("cert_set_id", cm.certSetID))
+	return nil
 }
 
 // certMagicEventHook returns a certmagic Config.OnEvent callback that pokes
