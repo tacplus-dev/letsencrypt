@@ -24,7 +24,8 @@ for certificate storage.
 ## Build
 
 ```bash
-just        # generate + compile
+just gates     # generate, check go.mod/go.sum tidy, gofmt, build, vet, test
+just generate  # regenerate model/ (never committed) with the tacplus.yaml floor
 ```
 
 ## Proto
