@@ -1,6 +1,6 @@
 # The compiler line this repository builds with: the looper runs that line's
 # latest patch (tacplus-dev/tacplus#161).
-tacplus: "2.4"
+tacplus: "2.5"
 language: go
 # pkg kept as copied so the hand-written code keeps compiling; moves with the packages later.
 pkg: com.gitlab.seabeam.schematic.platform.services.letsencrypt
